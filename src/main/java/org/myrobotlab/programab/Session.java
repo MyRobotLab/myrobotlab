@@ -171,7 +171,7 @@ public class Session {
       String xml = String.format("<template>%s</template>", returnText);
       Template template = XmlParser.parseTemplate(xml);
 
-      OobProcessor handler = OobProcessor.getInstance(programab);
+      OobProcessor handler = programab.getOobProcessor();
       handler.process(template.oob, true); // block by default
 
       List<Mrl> mrl = template.oob != null ? template.oob.mrl : null;

@@ -114,7 +114,6 @@ public class ApiHandler implements Handler<RoutingContext> {
       // client
       // if (session) {
       // TODO - show all headers including client id
-      
       String id = String.format("vertx-%s", service.getName());
       String uuid = UUID.randomUUID().toString();
       String verb = request.method().name().toLowerCase();

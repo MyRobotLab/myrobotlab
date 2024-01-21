@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * AudioFile - This service can be used to play an audio file such as an mp3.
  * 
  * TODO - publishPeak interface
- * FIXME - no more temporal member variables - all from config !
+ *
  */
 public class AudioFile extends Service<AudioFileConfig> implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;

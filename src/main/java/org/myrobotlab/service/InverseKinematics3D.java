@@ -247,8 +247,6 @@ public class InverseKinematics3D extends Service<ServiceConfig> implements IKJoi
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
     invoke("publishJointAngles", angleMap);
-
-    
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -294,7 +292,8 @@ public class InverseKinematics3D extends Service<ServiceConfig> implements IKJoi
     LoggingFactory.init("info");
 
     String arm = "myArm";
-    Runtime.start("python", "Python");
+    Runtime.createAndStart("python", "Python");
+    Runtime.createAndStart("gui", "SwingGui");
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");

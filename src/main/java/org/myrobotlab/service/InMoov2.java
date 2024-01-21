@@ -55,8 +55,7 @@ import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, 
-JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public class Heartbeat {
     public long count = 0;
@@ -125,7 +124,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
 
   static String speechRecognizer = "WebkitSpeechRecognition";
 
-  protected static final Set<String> stateDefaults = new TreeSet<>();
 
   /**
    * This method will load a python file into the python interpreter.
@@ -137,7 +135,7 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
   @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
     File f = new File(file);
-    // FIXME cannot be casting to Python
+    // FIXME cannot be casting to Python ! Py4j would break
     Python p = (Python) Runtime.getService("python");
     log.info("Loading  Python file {}", f.getAbsolutePath());
     if (p == null) {
@@ -171,11 +169,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
    * number of times waited in boot state
    */
   protected int bootCount = 0;
-
-  /**
-   * the config that was processed before booting, if there was one.
-   */
-  protected String bootedConfigx = null;
 
   protected transient ProgramAB chatBot;
 
@@ -238,7 +231,9 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
    * one centralized place. Not the same as configuration, as this definition is
    * owned by what the user needs vs configuration is what the service needs and
    * understands. Python, ProgramAB and the InMoov2 service can all normalize
-   * their data here with one way or two way bindings
+   * their data here with one way or two way bindings.  A competing data source
+   * would be ProgramAB predicates.  Advantage of this is it could be used by 
+   * any service and can preserve type.  I don't know what is preferred
    */
   protected Map<String, Object> memory = new TreeMap<>();
 
@@ -247,8 +242,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
   protected boolean mute = false;
 
   protected transient OpenCV opencv;
-
-  protected List<String> peersStartedx = new ArrayList<>();
 
   protected transient Python python;
 
@@ -361,6 +354,10 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
       // if the processor
 
       // TODO - make Py4j without zombies and more robust
+      /**
+       * Py4j is not ready for primetime yet
+       * <pre>
+       
       Py4j py4j = (Py4j) startPeer("py4j");
       if (!py4j.isReady()) {
         log.warn("{} not ready....", getPeerName("py4j"));
@@ -368,6 +365,9 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
       }
       String code = FileIO.toString(getResourceDir() + fs + "InMoov2.py");
       py4j.exec(code);
+
+      </pre>
+      */
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -385,12 +385,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
       }
 
       if (config.startupSound) {
-        // BAD WAY : reference to type, npe prone
-        // && getPeer("audioPlayer") != null
-        // ((AudioFile)
-        // getPeer("audioPlayer")).playBlocking(FileIO.gluePaths(getResourceDir(),
-        // "/system/sounds/startupsound.mp3"));
-        // THE RIGHT WAY
         String startupsound = FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3");
         invoke("publishPlayAudioFile", startupsound);
       }
@@ -401,41 +395,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
           send(si.getFullName(), "setAutoDisable", true);
         }
       }
-
-      // FIXME - find good way of running an animation "through" a state
-      // if (config.neoPixelBootGreen) {
-      // invoke("publishPlayAnimation", config.bootAnimation);
-      // }
-
-      // TODO - all reports could be done here or minimally
-      // report gathering
-
-      // FIXME - important to do invoke & fsm needs to be consistent order
-
-      // if speaking then turn off animation
-
-      // publish all the errors
-
-      // switch off animations
-
-      // start heartbeat
-      // say starting heartbeat - apply config starts heartbeat
-
-      // say finished booting
-
-      // FIXME - important to do invoke & fsm needs to be consistent order
-
-      // if speaking then turn off animation
-
-      // publish all the errors
-
-      // switch off animations
-
-      // if (getPeer("mouth") != null) {
-      // AbstractSpeechSynthesis<SpeechSynthesisConfig> mouth =
-      // (AbstractSpeechSynthesis)getPeer("mouth");
-      // mouth.setMute(wasMute);
-      // }
       hasBooted = true;
     } catch (Exception e) {
       hasBooted = false;
@@ -667,7 +626,8 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
 
   /**
    * Single place for InMoov2 service to execute arbitrary code - needed
-   * initially to set "global" vars in python
+   * initially to set "global" vars in python.
+   * FIXME - should just publishPython !
    * 
    * @param pythonCode
    * @return
@@ -1300,11 +1260,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
     }
   }
 
-  // use hearbeat to process errors
-  // public LogEntry publishError(LogEntry error) {
-  // processMessage("onError", error);
-  // return error;
-  // }
 
   /**
    * clear current errors
@@ -1373,6 +1328,10 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
     }
   }
 
+  /**
+   * initial callback for Pir sensor Default behavior will be: send fsm event
+   * onPirOn flash neopixel
+   */
   public void onPirOn() {
     isPirOn = true;
     processMessage("onPirOn");
@@ -1468,47 +1427,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
 
       processMessage("onStateChange", stateChange);
 
-      // // leaving random state
-      // if ("random".equals(lastState) && !"random".equals(state) &&
-      // isPeerStarted("random")) {
-      // Random random = (Random) getPeer("random");
-      // random.disable();
-      // }
-      //
-      // if ("wake".equals(lastState)) {
-      // invoke("publishStopAnimation");
-      // }
-      //
-      // if (config.systemEventStateChange) {
-      // systemEvent("ON STATE %s", state);
-      // }
-      //
-      // if (config.customSound && customSoundMap.containsKey(state)) {
-      // invoke("publishPlayAudioFile", customSoundMap.get(state));
-      // }
-
-      // TODO - only a few InMoov2 state defaults will be called here
-      // if (stateDefaults.contains(state)) {
-      // invoke(state);
-      // }
-
-      // FIXME add topic changes to AIML here !
-      // FIXME add clallbacks to inmmoov2 library
-
-      // put configurable filter here !
-
-      // state substitutions ?
-      // let python subscribe directly to fsm.publishStateChange
-
-      // if python && configured to do python inmoov2 library callbacks
-      // do a callback ... default NOOPs should be in library
-
-      // if
-      // invoke(state);
-      // depending on configuration ....
-      // call python ?
-      // fire fsm events ?
-      // do defaults ?
     } catch (Exception e) {
       error(e);
     }
@@ -1588,7 +1506,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
       // i think this is legacy wake word
       ear.lockOutAllGrammarExcept("power up");
     }
-
   }
 
   /**
@@ -1906,6 +1823,7 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
   public void releaseService() {
     try {
       disable();
+      heart.stop();
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -2326,7 +2244,6 @@ JoystickListener, LocaleProvider, IKJointAngleListener {
     // just for comparing config with current "default"
     // debugging only
     Runtime runtime = Runtime.getInstance();
-    runtime.saveDefault("inmoov2", getName(), "InMoov2", true);
 
     // if you hardcode subscriptions here - they should
     // be controlled/branched by config

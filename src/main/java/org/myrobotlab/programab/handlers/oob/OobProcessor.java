@@ -10,19 +10,12 @@ import org.myrobotlab.service.ProgramAB;
 
 public class OobProcessor {
 
-  private static OobProcessor instance;
   private transient ProgramAB programab;
+
   protected int maxBlockTime = 2000;
 
-  private OobProcessor() {
-  }
-
-  public static OobProcessor getInstance(ProgramAB programab) {
-    if (instance == null) {
-      instance = new OobProcessor();
-      instance.programab = programab;
-    }
-    return instance;
+  public OobProcessor(ProgramAB programab) {
+    this.programab = programab;
   }
 
   public Message toMsg(Mrl mrl) {
@@ -33,7 +26,7 @@ public class OobProcessor {
         data[i] = mrl.params.get(i).trim();
       }
     }
-    String service = mrl.service == null?null:mrl.service.trim();
+    String service = mrl.service == null ? null : mrl.service.trim();
     return Message.createMessage(programab.getName(), service, mrl.method.trim(), data);
   }
 

@@ -63,8 +63,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service<WebGuiConfig>
-    implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
+public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -497,8 +496,7 @@ public class WebGui extends Service<WebGuiConfig>
         } else if ((bodyData != null) && log.isDebugEnabled()) {
           logData = bodyData;
         }
-        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(),
-            request.getRequestURI(), logData, uuid);
+        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
       // important persistent connections will have associated routes ...
@@ -551,7 +549,6 @@ public class WebGui extends Service<WebGuiConfig>
           // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method,
           // msg.data);
           // msg.data = params;
-                    
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
           out.write(CodecUtils.toJson(ret).getBytes());
@@ -577,8 +574,7 @@ public class WebGui extends Service<WebGuiConfig>
           }
 
           if (msg.containsHop(getId())) {
-            log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender,
-                msg.name, msg.method);
+            log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
             return;
           }
 
@@ -1210,10 +1206,10 @@ public class WebGui extends Service<WebGuiConfig>
 
       
       Runtime.start("python", "Python");
-
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");
 
+    
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
       // Runtime.start("i01", "InMoov2");
@@ -1316,5 +1312,6 @@ public class WebGui extends Service<WebGuiConfig>
   @Override
   public void onReleased(String name) {
   }
+
 
 }
