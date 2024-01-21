@@ -778,9 +778,15 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
-  // FIXME - this isn't the callback for fsm - why is it needed here ?
+  /**
+   * Fire an event to the FSM, potentially this can cause a state change
+   * 
+   * @param event
+   */
   public void fire(String event) {
-    invoke("publishEvent", event);
+    // Should this be sent to chatbot too ?
+    // invoke("publishEvent", event);
+    fsm.fire(event);
   }
 
   public void fullSpeed() {
@@ -2283,16 +2289,13 @@ public class InMoov2 extends Service<InMoov2Config>
   @Override
   public void startService() {
     super.startService();
-    // FIXME - hardcoded peer no choice of type
+
+    // This is required the core of InMoov is
+    // a FSM ProgramAB and some form of Python/Jython
     fsm = (FiniteStateMachine) startPeer("fsm");
 
-    // a python processor is
-    // necessary for InMoov2 to properly
-    // function but this is not the place to start it
-    // it should be a peer definition too, it can be "python"
-    // it doesn't need to be i01.python to be a peer
-    // also should determine type Py4j or Python
-    // Runtime.start("python");
+    // A python process is required - should be defined as a peer
+    // of Type Python or Py4j
 
     // just for comparing config with current "default"
     // debugging only
