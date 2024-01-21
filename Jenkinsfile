@@ -131,7 +131,7 @@ pipeline {
             if (currentBuild.result == 'SUCCESS'){
                workyNoWorky = 'Worky !'
             }
-            discordSend description: workyNoWorky, footer: '', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: 'https://discord.com/api/webhooks/1015707773260005388/1i6svmKMHYKAFbTXBgen_4CClypYpeqg4WEBMFnc-46Vmf1TNWCxW-ASgDE7mDkkix3u'
+            discordSend description: workyNoWorky, footer: '', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: 'https://discord.com/api/webhooks/1198481287380467862/Vk4Rcd3Z_fJ9h6g5NNQASK1ipbO7TuwxPjY-XLf8uV_ALkOVIMgQBZ6F9gEwKizG9H8B'
          }
       }
 
