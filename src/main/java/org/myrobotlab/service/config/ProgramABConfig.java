@@ -6,20 +6,17 @@ import java.util.List;
 import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
-  
-  @Deprecated /* unused text filters */
-  public String[] textFilters;
-  
+
   /**
-   * a directory ProgramAB will scan for new bots
+   * a directory ProgramAB will scan for new bots on startup
    */
-  public String botDir;
+  public String botDir = "resource/ProgramAB/";
 
   /**
    * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
-  
+
   /**
    * current sessions bot name, it must match a botname that was scanned
    * currently with ProgramAB Alice, Dr.Who, Mr. Turing and Ency
@@ -39,13 +36,25 @@ public class ProgramABConfig extends ServiceConfig {
    * current sleep/wake value
    */
   public boolean sleep = false;
-  
+
   /**
-   * topic to start with, if null then topic will be loaded from predicates of 
-   * a new session if available, this means a config/{username}.predicates.txt 
+   * topic to start with, if null then topic will be loaded from predicates of
+   * a new session if available, this means a
+   * config/{currentUserName}.predicates.txt
    * will need to exist with a topic field
    */
-  public String startTopic = "unknown";
+  public String startTopic = null;
+
+  /**
+   * bot will prompt users if enabled trolling is true
+   * after maxConversationDelay has passed
+   */
+  public boolean enableTrolling = false;
+
+  /**
+   * Number of milliseconds before the robot starts talking on its own.
+   */
+  public int maxConversationDelay = 5000;
 
   @Override
   public Plan getDefault(Plan plan, String name) {

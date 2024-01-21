@@ -1,7 +1,7 @@
 <table>
     <tr>
         <td>
-            <label> </label>
+            <label></label>
         </td>
     </tr>
     <tr>
@@ -23,29 +23,58 @@
     </tr>
     <!------------------------ hand begin ------------------------------>
     <table ng-show="showPanel('camera')" class="inmoov-sub-panel table table-striped">
-    <tr>
-        <td>
-            <label>COLOR</label>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label>FPS</label>
-                <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init=""  placeholder="30"/>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Resolution</button>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Enable sync</button>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">RGB-Depth Alignment</button>
-        </td>
-    </tr>
+        <tr>
+            <td>
+                <label>COLOR</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>FPS</label>
+                <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" placeholder="30"/>
+                <button class="btn btn-info" ng-show="startedCamera" ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Resolution</button>
+                <button class="btn btn-info" ng-show="startedCamera" ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Enable sync</button>
+                <button class="btn btn-info" ng-show="startedCamera" ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">RGB-Depth Alignment</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button class="btn btn-default" ng-click="execScript('resource/OakD/startScripts/depthai_demo.py')">Apply and Restart</button>
+            </td>
+        </tr>
     </table>
-            <!------------------------ camera end ------------------------------>
-    <tr>
-        <td>
-            <button class="btn btn-default" 
-                ng-click="execScript('resource/OakD/startScripts/depthai_demo.py')">Apply and Restart</button>
-        </td>
-    </tr>
+    <!------------------------ camera end ------------------------------>
+    <br/>
+    <br/>
+    <table>
+        <tr>
+            <td>
+                <button class="btn btn-default" ng-click="">Recognize</button>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="">Stop Recognition</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <img ng-src="{{ image }}" alt="Base64 Image">                
+            </td>
+        </tr>
+        <tr>
+            <td>Recognized</td>
+            <td>{{classification.label}}</td>
+        </tr>
+        <tr>
+            <td>Confidence</td>
+            <td>{{classification.confidence}}</td>
+        </tr>
+        <tr>
+            <td>Timestamp</td>
+            <td>{{classification.ts}}</td>
+        </tr>
+        <tr>
+            <td>Latency</td>
+            <td>{{latency}} ms</td>
+        </tr>
+    </table>
 </table>

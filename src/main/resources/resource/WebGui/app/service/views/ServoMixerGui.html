@@ -27,7 +27,15 @@
           </button>
         </span>
 
-        <input class="form-control" type="text" ng-model="state.selectedGestureFile" name="gestureName" id="gestureName" ng-init="" placeholder="Gesture Name" />
+        <input
+          class="form-control"
+          type="text"
+          ng-model="state.selectedGestureFile"
+          name="gestureName"
+          id="gestureName"
+          ng-init=""
+          placeholder="Gesture Name"
+        />
         <button class="btn btn-default" ng-click="msg.addNewGestureFile(state.selectedGestureFile)">New</button>
         <button class="btn btn-default" ng-click="saveGesture()">Save</button>
         <button class="btn btn-default" ng-click="openGesture()">Open</button>
@@ -72,7 +80,9 @@
         </button>
         <input class="form-control fieldDelay" type="text" ng-model="sleep" ng-init="3" placeholder="sec" />
         <select ng-model="state.gestureIndex" class="form-control vertical-menu gestureList" size="8" title="actions">
-          <option ng-repeat="action in state.currentGesture.actions" value="{{$index}}" id="select-{{$index}}">{{action.name}} {{displayAction(action)}}</option>
+          <option ng-repeat="action in state.currentGesture.actions" value="{{$index}}" id="select-{{$index}}">
+            {{action.name}} {{displayAction(action)}}
+          </option>
         </select>
         <table>
           <tr>
@@ -88,7 +98,12 @@
                 <button class="btn btn-default" title="move down" ng-click="moveActionDown()">
                   <span class="glyphicon glyphicon-triangle-bottom"></span>
                 </button>
-                <button class="btn btn-default" title="remove action" ng-click="removeActionFromGesture()" title="remove">
+                <button
+                  class="btn btn-default"
+                  title="remove action"
+                  ng-click="removeActionFromGesture()"
+                  title="remove"
+                >
                   <span class="glyphicon glyphicon-remove red"></span>
                 </button>
               </span>

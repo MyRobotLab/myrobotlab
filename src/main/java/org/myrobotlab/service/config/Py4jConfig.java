@@ -4,7 +4,7 @@ public class Py4jConfig extends ServiceConfig {
 
   /**
    * root of python scripts - if not specified by user it will be
-   *  /data/Py4j/{serviceName}
+   * /data/Py4j/{serviceName}
    */
   public String scriptRootDir;
 
@@ -13,7 +13,6 @@ public class Py4jConfig extends ServiceConfig {
    * or invoke the system Python.
    */
   public boolean useBundledPython = true;
-  
   /**
    * Whether to start a new Python process with
    * stdin/stdout connected to the JVM or leave the

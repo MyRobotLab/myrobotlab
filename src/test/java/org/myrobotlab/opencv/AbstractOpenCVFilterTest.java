@@ -36,7 +36,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   public int numFrames = 0;
   private CloseableFrameConverter converter1 = new CloseableFrameConverter();
   private CloseableFrameConverter converter2 = new CloseableFrameConverter();
-  
+
   @Test
   public void testFilter() throws InterruptedException {
     List<OpenCVFilter> filters = createFilters();
@@ -44,18 +44,19 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     List<IplImage> inputs = createTestImages();
     numFrames = inputs.size();
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    
+
     for (OpenCVFilter filter : filters) {
       // Verify that the filters can be serialized!
       String json = CodecUtils.toJson(filter);
       assertNotNull(json);
       filter.setOpenCV(opencv);
     }
-    
+
     for (IplImage input : inputs) {
       frameIndex++;
       long now = System.currentTimeMillis();
-      // create the OpenCVData object that will run with this image through the pipeline.
+      // create the OpenCVData object that will run with this image through the
+      // pipeline.
       OpenCVData data = new OpenCVData(CVSERVICENAME, now, frameIndex, converter1.toFrame(input));
       for (OpenCVFilter filter : filters) {
         if (debug) {
@@ -86,7 +87,6 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
       Runtime.release("opencv");
       // other stuff that comes along with runtime to shutdown.
       Runtime.release("security");
-      // Runtime.releaseAll();
     }
     // clean up the other runtime stuffs
   }
@@ -105,7 +105,8 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     return images;
   }
 
-  private IplImage processTestImage(OpenCVFilter filter, OpenCVData data, IplImage input, int frameIndex) throws InterruptedException {
+  private IplImage processTestImage(OpenCVFilter filter, OpenCVData data, IplImage input, int frameIndex)
+      throws InterruptedException {
     filter.setData(data);
     // call process on the filter with the input image.
     long start = System.currentTimeMillis();
@@ -117,8 +118,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     filter.displayEnabled = true;
     // verify that processDisplay doesn't blow up!
     BufferedImage bi = filter.processDisplay();
-    
-    
+
     if (debug) {
       IplImage displayVal = converter2.toImage(bi);
       outputImage = filter.show(displayVal, "Filter " + filter.name + " Output Image " + frameIndex);

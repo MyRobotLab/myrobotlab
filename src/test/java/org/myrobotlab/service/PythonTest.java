@@ -3,13 +3,25 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Map;
 
+import org.junit.Before;
 import org.myrobotlab.framework.Service;
 import org.python.core.PyInteger;
 
 public class PythonTest extends AbstractServiceTest {
 
+  @Before /* before each test */
+  public void setUp() throws IOException {
+    // remove all services - also resets config name to DEFAULT effectively
+    Runtime.releaseAll(true, true);
+      // clean our config directory
+    Runtime.removeConfig("PythonTest");
+    // set our config
+    Runtime.setConfig("PythonTest");
+  }
+  
   @Override
   public Service createService() {
     return (Service) Runtime.start("python", "Python");

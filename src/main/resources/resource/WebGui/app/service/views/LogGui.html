@@ -81,7 +81,7 @@
       class="alert alert-danger"
 -->
     <tbody>
-        <tr ng-repeat="e in log | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
+        <tr ng-repeat="e in service.logs | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
             <td><small>{{e.ts}}</small></td>
             <td><small>[{{e.level}}]</small></td>
             <td><small>{{e.className.substring(e.className.lastIndexOf('.')+1)}}</small></td>

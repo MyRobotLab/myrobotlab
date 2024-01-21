@@ -1,99 +1,150 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.programab.Session;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.Utterance;
 import org.slf4j.Logger;
 
-/**
- * ProgramABTest - This is the unit test to validate that the ProgramAB service continues
- * to behave as expected.
- * 
- * It tests the behavior of some reference sets of aiml.
- * 
- * There are 2 AIML sets used in this unit test
- * lloyd and pikachu.
- * 
- * The lloyd aiml set is used to test most functionality, 
- * the pikachu aiml set is used to validate that japanese tokenization is working
- * 
- */
-public class ProgramABTest extends AbstractServiceTest {
+public class ProgramABTest {
 
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
-  
-  private String path = null;
-  private ProgramAB testService;
-  
-  // the botname and test username to use (for most of the test suite)
-  private String botname = "lloyd";
-  private String username = "testUser";
 
-  // The aiml sets will be modified in this test, to avoid the junit annotation makes sure this will
-  // be cleaned up after test execution. 
-  // watch for open file handles which will prevent these directories from being deleted.
-  @Rule
-  public TemporaryFolder testFolder = new TemporaryFolder();
-  // the location of the test bot folders containing the aiml an dother configs.
+  static protected final String PIKACHU = "pikachu";
+
+  static protected final String LLOYD = "lloyd";
+
   private String testResources = "src/test/resources/ProgramAB";
-  
-  public Service createService() {
-    
-    // let's do a file copy to the temp folder.
-    try {
-      FileUtils.copyDirectory(new File(testResources), testFolder.getRoot());
-      log.info("Using JUnit temp folder: {}", testFolder);
-    } catch (IOException e) {
-      log.error("create temp folder threw", e);
-      return null; 
-    }
-    
-    try {
-      // LoggingFactory.init("INFO");
-      log.info("Setting up the Program AB Service ########################################");
-      // Load the service under test
-      // a test robot
-      // TODO: this should probably be created by Runtime,
-      // OOB tags might not know what the service name is ?!
-      testService = (ProgramAB) Runtime.start(botname, "ProgramAB");
-      // Important, tell this service to use the test folder as it's path for loading bots.
-      testService.setPath(testFolder.getRoot().getAbsolutePath());
-      // start the service.
-      testService.startService();
-      // load the bot brain for the chat with the user
-      testService.startSession(username, botname);      
-    } catch (Exception e) {
-      log.error("createService threw", e);
-    }
-    return testService;
+
+  static private ProgramAB lloyd;
+
+  static private ProgramAB pikachu;
+
+  private String currentUserName = "testUser";
+
+  // This method runs once before any test method in the class
+  @BeforeClass
+  public static void setUpClass() {
+    System.out.println("BeforeClass - Runs once before any test method");
+    lloyd = (ProgramAB) Runtime.start(LLOYD, "ProgramAB");
+    pikachu = (ProgramAB) Runtime.start(PIKACHU, "ProgramAB");
+
+    // very first inits - all should work !
+    assertTrue("4+ standard", lloyd.getBots().size() >= 4);
+    // should require very little to start ! - this is a requirement !
+    Response response = lloyd.getResponse("Hi");
+
+    // expect Alice's aiml processed
+    assertTrue(response.msg.startsWith("Hi"));
+
+    Session session = lloyd.getSession();
+    assertEquals("default user should be human", "human", session.getUsername());
+    assertEquals("default currentBotName should be Alice", "Alice", session.getBotType());
+
   }
-    
+
+  // This method runs once after all test methods in the class have been
+  // executed
+  @AfterClass
+  public static void tearDownClass() {
+    Runtime.release(LLOYD);
+    Runtime.release(PIKACHU);
+  }
+
+  // This method runs before each test method
+  @Before
+  public void setUp() {
+    System.out.println("Before - Runs before each test method");
+    // Perform setup tasks specific to each test method
+
+    // add a couple test bots
+    List<File> bots = lloyd.scanForBots(testResources + "/bots");
+    assertTrue("2+ test bots", bots.size() >= 2);
+    assertTrue("6+ bots total", lloyd.getBots().size() >= 6);
+
+    pikachu.scanForBots(testResources + "/bots");
+
+    // validate newly created programab can by default start a session
+    Session session = lloyd.getSession();
+    assertNotNull(session);
+
+    lloyd.setBotType("lloyd");
+    assertEquals("lloyd", lloyd.getBotType());
+
+    // validate error is called when invalid bot type set
+
+    // load the bot brain for the chat with the user
+    lloyd.setSession(currentUserName, LLOYD);
+    assertEquals(currentUserName, lloyd.getUsername());
+    // clean out any aimlif the bot that might
+    // have been saved in a previous test run!
+    String aimlIFPath = testResources + "/bots/" + LLOYD + "/aimlif";
+    File aimlIFPathF = new File(aimlIFPath);
+    if (aimlIFPathF.isDirectory()) {
+      for (File f : aimlIFPathF.listFiles()) {
+        // if there's a file here.
+        log.info("Deleting pre-existing AIMLIF files : {}", f.getAbsolutePath());
+        f.delete();
+      }
+    }
+  }
+
+  @Test
+  public void testOnUtterance() throws Exception {
+
+    MockGateway gateway = (MockGateway) Runtime.start("gateway", "MockGateway");
+    lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
+    lloyd.addListener("publishUtterance", "mocker@mockId");
+
+    Utterance utterance = new Utterance();
+    utterance.username = "human";
+    utterance.text = "HELLO";
+    utterance.channelBotName = "Mr.Turing";
+
+    gateway.sendWithDelay("lloyd", "onUtterance", utterance);
+    Message msg = gateway.waitForMsg("mocker", "onUtterance", 50);
+    assertNotNull(msg);
+    assertTrue(((Utterance) msg.data[0]).text.startsWith("Hi"));
+  }
+
   public void addCategoryTest() throws IOException {
-    testService.addCategory("BOOG", "HOWDY");
-    Response resp = testService.getResponse(username, "BOOG");
+    lloyd.addCategory("BOOG", "HOWDY");
+    Response resp = lloyd.getResponse(currentUserName, "BOOG");
     assertTrue(resp.msg.equals("HOWDY"));
   }
 
-  public void listPatternsTest() {
-    ArrayList<String> res = testService.listPatterns(botname);
+  @Test
+  public void testAddCategoryTest() throws IOException {
+    lloyd.addCategory("ABCDEF", "ABCDEF");
+    // String currentUserName = lloyd.getUsername();
+    // currentUserName,
+    Response resp = lloyd.getResponse("ABCDEF");
+    assertTrue(resp.msg.equals("ABCDEF"));
+  }
+
+  @Test
+  public void testListPatterns() {
+    ArrayList<String> res = lloyd.listPatterns(LLOYD);
     assertTrue(res.size() > 0);
   }
 
@@ -102,118 +153,92 @@ public class ProgramABTest extends AbstractServiceTest {
   // stuff
   // @Test
   public void pannousTest() throws IOException {
-    Response resp = testService.getResponse(username, "SHOW ME INMOOV");
+    Response resp = lloyd.getResponse(currentUserName, "SHOW ME INMOOV");
     // System.out.println(resp);
     boolean contains = resp.msg.contains("http");
     assertTrue(contains);
   }
 
-  @Before
-  public void setUp() {
-    // TODO: set the location for the temp folder via :
-    // System.getProperty("java.io.tmpdir")
-    // LoggingFactory.init("INFO");
-    // testFolder.getRoot().getAbsolutePath()
-    try {
-      this.path = testFolder.getRoot().getAbsolutePath() + File.separator + "ProgramAB";
-      FileIO.copy(testResources, path);
-    } catch (IOException e) {
-      log.warn("Error extracting resources for test. {}", testResources);
-      Assert.assertNotNull(e);
-    }
-  }
-
-  public void sraixOOBTest() throws IOException {
-    // Response resp = testService.getResponse(username, "MRLSRAIX");
-    // System.out.println(resp);
-    // boolean contains = resp.msg.contains("foobar");
-    // assertTrue(contains);
-    Response resp = testService.getResponse(username, "OOBMRLSRAIX");
-    // System.out.println(resp);
+  @Test
+  public void testSraixOOB() throws IOException {
+    Response resp = lloyd.getResponse(currentUserName, "OOBMRLSRAIX");
     boolean contains = resp.msg.contains("You are talking to lloyd");
     assertTrue(contains);
   }
 
-  public void sraixTest() throws IOException {
+  @Test
+  public void testSraix() throws IOException {
     if (Runtime.hasInternet()) {
-      Response resp = testService.getResponse(username, "MRLSRAIX");
-      //Response resp = testService.getResponse(username, "Why is the sky blue?");
-      // System.out.println(resp);
-      // System.out.println(resp);
+      Response resp = lloyd.getResponse(currentUserName, "MRLSRAIX");
       boolean contains = resp.msg.contains("information");
       assertTrue(contains);
     }
   }
 
+  @Test
   public void testAddEntryToSetAndMaps() throws IOException {
     // TODO: This does NOT work yet!
-    Response resp = testService.getResponse(username, "Add Jabba to the starwarsnames set");
+    Response resp = lloyd.getResponse(currentUserName, "Add Jabba to the starwarsnames SET");
     assertEquals("Ok...", resp.msg);
-    resp = testService.getResponse(username, "Add jabba equals Jabba the Hut to the starwars map");
+    resp = lloyd.getResponse(currentUserName, "Add jabba equals Jabba the Hut to the starwars MAP");
     assertEquals("Ok...", resp.msg);
-    resp = testService.getResponse(username, "DO YOU LIKE Jabba?");
+    resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Jabba?");
     assertEquals("Jabba the Hut is awesome.", resp.msg);
     // TODO : re-enable this one?
     // now test creating a new set.
-    resp = testService.getResponse(username, "Add bourbon to the whiskey set");
+    resp = lloyd.getResponse(currentUserName, "Add bourbon to the whiskey SET");
     assertEquals("Ok...", resp.msg);
-    resp = testService.getResponse(username, "NEWSETTEST bourbon");
+    resp = lloyd.getResponse(currentUserName, "NEWSETTEST bourbon");
     // assertEquals("bourbon is a whiskey", resp.msg);
   }
 
   @Test
-  public void testJapanese() throws IOException, InterruptedException {
-    ProgramAB pikachu = (ProgramAB) Runtime.start("pikachu", "ProgramAB");
-    pikachu.setPath(path);
-    // pikachu the service.
-    pikachu.startService();
+  public void testJapanese() throws IOException {
+    pikachu.scanForBots(testResources + "/bots");
+    pikachu.setBotType("pikachu");
+    // setting Japanese locality
+    pikachu.setLocale("ja");
     // load the bot brain for the chat with the user
-    pikachu.startSession(path, username, "pikachu", new java.util.Locale("ja"));
+    pikachu.setSession(currentUserName, PIKACHU);
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
-    // Release the service we just created
-    pikachu.releaseService();
+    Runtime.release(PIKACHU);
   }
 
+  @Test
   public void testLearn() throws IOException {
-    // Response resp1 = testService.getResponse(session, "SET FOO BAR");
-    // System.out.println(resp1.msg);
-    Response resp = testService.getResponse(username, "LEARN AAA IS BBB");
-    // System.out.println(resp.msg);
-    resp = testService.getResponse(username, "WHAT IS AAA");
+    Response resp = lloyd.getResponse(currentUserName, "LEARN AAA IS BBB");
+    resp = lloyd.getResponse(currentUserName, "WHAT IS AAA");
     assertEquals("BBB", resp.msg);
   }
 
   @Test
   public void testMultiSession() throws IOException {
     ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
-    lloyd.setPath(path);
-    // pikachu the service.
-    lloyd.startService();
+    lloyd.setBotType("lloyd");
     // load the bot brain for the chat with the user
-    lloyd.startSession(path, "user1", "lloyd");
+    lloyd.setSession("user1", "lloyd");
     Response res = lloyd.getResponse("My name is Kevin");
     System.out.println(res);
-    lloyd.startSession(path, "user2", "lloyd");
+    lloyd.setSession("user2", "lloyd");
     res = lloyd.getResponse("My name is Grog");
     System.out.println(res);
-    lloyd.startSession(path, "user1", "lloyd");
+    lloyd.setSession("user1", "lloyd");
     Response respA = lloyd.getResponse("What is my name?");
     System.out.println(respA);
-    lloyd.startSession(path, "user2", "lloyd");
+    lloyd.setSession("user2", "lloyd");
     Response respB = lloyd.getResponse("What is my name?");
     System.out.println(respB);
-
-    assertEquals("Kevin", respA.msg);
-    assertEquals("Grog", respB.msg);
-
-    // release this service.
-    lloyd.releaseService();
-
+    lloyd.setSession(currentUserName, LLOYD);
+    assertEquals("Kevin.", respA.msg);
+    assertEquals("Grog.", respB.msg);
   }
 
+  @Test
   public void testOOBTags() throws Exception {
-    Response resp = testService.getResponse(username, "OOB TEST");
+
+    ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
+    Response resp = lloyd.getResponse(currentUserName, "OOB TEST");
     assertEquals("OOB Tag Test", resp.msg);
 
     // TODO figure a mock object that can wait on a callback to let us know the
@@ -221,164 +246,151 @@ public class ProgramABTest extends AbstractServiceTest {
     // wait up to 5 seconds for python service to start
     long maxWait = 6000;
     int i = 0;
-    Python python = (Python)Runtime.start("python", "Python");
-    while (Runtime.getService("python") == null) {
+
+    while (Runtime.getService("oobclock") == null) {
       Thread.sleep(100);
-      log.info("Waiting for python to start...");
+      log.info("waiting for oobclock to start...");
       i++;
       if (i > maxWait) {
-        Assert.assertFalse("Took too long to process OOB tag", i > maxWait);
+        Assert.assertFalse("took too long to process OOB tag", i > maxWait);
       }
     }
-    Assert.assertNotNull(Runtime.getService("python"));
-    
-    python.releaseService();
-
+    Assert.assertNotNull(Runtime.getService("oobclock"));
+    Runtime.release("oobclock");
   }
 
+  @Test
   public void testPredicates() {
     // test removing the predicate if it exists
-    testService.setPredicate(username, "name", "foo1");
-    String name = testService.getPredicate(username, "name");
+    lloyd.setPredicate(currentUserName, "name", "foo1");
+    String name = lloyd.getPredicate(currentUserName, "name");
     // validate it's set properly
     assertEquals("foo1", name);
-    testService.removePredicate(username, "name");
+    lloyd.removePredicate(currentUserName, "name");
     // validate the predicate doesn't exist
-    name = testService.getPredicate(username, "name");
+    name = lloyd.getPredicate(currentUserName, "name");
     // TODO: is this valid? one would expect it would return null.
     assertEquals("unknown", name);
     // set a predicate
-    testService.setPredicate(username, "name", "foo2");
-    name = testService.getPredicate(username, "name");
+    lloyd.setPredicate(currentUserName, "name", "foo2");
+    name = lloyd.getPredicate(currentUserName, "name");
     // validate it's set properly
     assertEquals("foo2", name);
   }
 
+  @Test
   public void testProgramAB() throws Exception {
     // a response
-    Response resp = testService.getResponse(username, "UNIT TEST PATTERN");
+    Response resp = lloyd.getResponse(currentUserName, "UNIT TEST PATTERN");
     // System.out.println(resp.msg);
     assertEquals("Unit Test Pattern Passed", resp.msg);
   }
 
+  @Test
   public void testSavePredicates() throws IOException {
     long uniqueVal = System.currentTimeMillis();
     String testValue = String.valueOf(uniqueVal);
-    Response resp = testService.getResponse(username, "SET FOO " + testValue);
+    Response resp = lloyd.getResponse(currentUserName, "SET FOO " + testValue);
     assertEquals(testValue, resp.msg);
-    testService.savePredicates();
-    testService.reloadSession(username, botname);
-    resp = testService.getResponse(username, "GET FOO");
+    lloyd.savePredicates();
+    lloyd.reloadSession(currentUserName, LLOYD);
+    resp = lloyd.getResponse(currentUserName, "GET FOO");
     assertEquals("FOO IS " + testValue, resp.msg);
   }
 
-  @Override
-  public void testService() throws Exception {
-    // run each of the test methods.
-    testProgramAB();
-    testOOBTags();
-    testSavePredicates();
-    testPredicates();
-    testLearn();
-    testSets();
-    testSetsAndMaps();
-    testAddEntryToSetAndMaps();
-    testTopicCategories();
-    umlautTest();
-    listPatternsTest();
-    // This following test is known to be busted..
-    // pannousTest();
-    addCategoryTest();
-    sraixOOBTest();
-    sraixTest(); // this should call out to wikipedia for info about Claude Shannon.
-    // on pannous bots
-    testUppercase();
-  }
-
+  @Test
   public void testUppercase() {
     // test a category where the aiml tag is uppercased.
-    Response resp = testService.getResponse(username, "UPPERCASE");
+    Response resp = lloyd.getResponse(currentUserName, "UPPERCASE");
     assertEquals("Passed", resp.msg);
   }
 
+  @Test
   public void testSets() throws IOException {
-    Response resp = testService.getResponse(username, "SETTEST CAT");
+    Response resp = lloyd.getResponse(currentUserName, "SETTEST CAT");
     assertEquals("An Animal.", resp.msg);
-    resp = testService.getResponse(username, "SETTEST MOUSE");
+    resp = lloyd.getResponse(currentUserName, "SETTEST MOUSE");
     assertEquals("An Animal.", resp.msg);
-    resp = testService.getResponse(username, "SETTEST DOG");
+    resp = lloyd.getResponse(currentUserName, "SETTEST DOG");
     // System.out.println(resp.msg);
     assertEquals("An Animal.", resp.msg);
   }
 
+  @Test
   public void testSetsAndMaps() throws IOException {
-    Response resp = testService.getResponse(username, "DO YOU LIKE Leah?");
+    Response resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Leah?");
     assertEquals("Princess Leia Organa is awesome.", resp.msg);
-    resp = testService.getResponse(username, "DO YOU LIKE Princess Leah?");
+    resp = lloyd.getResponse(currentUserName, "DO YOU LIKE Princess Leah?");
     assertEquals("Princess Leia Organa is awesome.", resp.msg);
   }
 
+  @Test
   public void testTopicCategories() throws IOException {
+    lloyd.removePredicate(currentUserName, "topic");
+    String topic = lloyd.getTopic();
+    assertEquals("unknown", topic);
     // Top level definition
-    Response resp = testService.getResponse(username, "TESTTOPICTEST");
+    Response resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TOPIC IS unknown", resp.msg);
-    resp = testService.getResponse(username, "SET TOPIC TEST");
-    resp = testService.getResponse(username, "TESTTOPICTEST");
+    resp = lloyd.getResponse(currentUserName, "SET TOPIC TEST");
+    resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TEST TOPIC RESPONSE", resp.msg);
     // maybe we can still fallback to non-topic responses.
-    resp = testService.getResponse(username, "HI");
+    resp = lloyd.getResponse(currentUserName, "HI");
     assertEquals("Hello user!", resp.msg);
     // TODO: how the heck do we unset a predicate from AIML?
-    testService.unsetPredicate(username, "topic");
-    resp = testService.getResponse(username, "TESTTOPICTEST");
+    lloyd.removePredicate(currentUserName, "topic");
+    resp = lloyd.getResponse(currentUserName, "TESTTOPICTEST");
     assertEquals("TOPIC IS unknown", resp.msg);
   }
 
-  public void umlautTest() throws IOException {
-    Response resp = testService.getResponse(username, "Lars Ümlaüt");
+  @Test
+  public void testUmlaut() throws IOException {
+    Response resp = lloyd.getResponse(currentUserName, "Lars Ümlaüt");
+    // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
 
   @Test
   public void testLocales() {
-    // have locales
-    ProgramAB pikachu = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
-    // lloyd.setPath(path);
-    pikachu.addBotsDir(path + File.separator + "bots");
-    pikachu.setCurrentBotName("pikachu");
-    Map<String, Locale> locales = pikachu.getLocales();
-    assertTrue(locales.size() > 0);
+    ProgramAB lloyd = (ProgramAB) Runtime.start("pikachu", "ProgramAB");
+    lloyd.addBots(testResources + "/" + "bots");
+    lloyd.setBotType("pikachu");
+    Map<String, Locale> locales = lloyd.getLocales();
     assertTrue(locales.containsKey("ja"));
     // release the service we created in this method.
     pikachu.releaseService();
   }
 
   @Test
-  public void testReload() {
-    // FIXME - TODO
-    // reload bot creates a new bot leaves old references :(
-    // verify reload
-    /*
-     * Preferably with default bot ProgramAB lloyd =
-     * (ProgramAB)Runtime.start("lloyd", "ProgramAB"); // did not work because
-     * lloyd is lame // lloyd.getResponse("my name is george"); Response
-     * response = lloyd.getResponse("what is my name?");
-     * 
-     * BotInfo botInfo = lloyd.getBotInfo(); Bot oldBot = botInfo.getBot();
-     * lloyd.reload(); Bot newBotInfo = botInfo.getBot();
-     * assertNotEquals(oldBot, newBotInfo);
-     * 
-     * response = lloyd.getResponse("what is my name?");
-     * assertTrue(response.msg.contains("george"));
-     */
+  public void testReload() throws IOException {
+    lloyd.getResponse("my name is george");
+    Response response = lloyd.getResponse("what is my name?");
+
+    BotInfo botInfo = lloyd.getBotInfo();
+
+    String newFile = botInfo.path.getAbsolutePath() + File.separator + "aiml" + File.separator + "newFileCategory.aiml";
+    String newFileCategory = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><aiml><category><pattern>RELOAD</pattern><template>I have reloaded</template></category></aiml>";
+    FileIO.toFile(newFile, newFileCategory);
+
+    lloyd.reload();
+
+    response = lloyd.getResponse("RELOAD");
+    assertTrue(response.msg.contains("I have reloaded"));
+
+    response = lloyd.getResponse("what is my name?");
+    assertTrue(response.msg.contains("george"));
+
+    // clean out file
+    new File(newFile).delete();
+
   }
 
   @Test
   public void testDefaultSession() throws IOException {
     // minimal startup - create the service get a response
     ProgramAB lloyd = (ProgramAB) Runtime.start("lloyd", "ProgramAB");
-    lloyd.setPath(path);
-    lloyd.setCurrentBotName("lloyd");
+    lloyd.setBotType("lloyd");
     assertTrue(lloyd.getBots().size() > 0);
     // test for a response
     Response response = lloyd.getResponse("Hello");
@@ -393,8 +405,8 @@ public class ProgramABTest extends AbstractServiceTest {
 
   // TODO - tests
   // ProgramAB starts - it should find its own bot info's
-  // set username = default
-  // set botname = what is available if NOT set
+  // set currentUserName = default
+  // set LLOYD = what is available if NOT set
   // getResponse() -> if current session doesn't exist - get bot
   // if current bot doesn't exist - attempt to activate it
   // test - absolute minimal setup and getResponse ... 2 lines ? 1?

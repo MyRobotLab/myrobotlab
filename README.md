@@ -286,4 +286,3 @@ Services returned from the Describe request have been registered.  By default th
 The response should be refactored so that the material returned is related to criterial requested. 
 For example, if only a list of services and their names are needed, that is all that is returned.  If a specific service's interfaces are requested, then that is only returned.
 Fill-UUID should be refactored out.
-

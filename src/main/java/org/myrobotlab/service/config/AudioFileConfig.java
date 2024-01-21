@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AudioFileConfig extends ServiceConfig {
-
+  
   public boolean mute = false;
   public String currentTrack = "default";
   public double volume = 1.0;

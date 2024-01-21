@@ -54,6 +54,11 @@
                 </button>
             </td>
 
+			<td>
+				       
+            autostart python 
+            <input type="checkbox" ng-model="service.config.autostartPython" ng-change="msg.autostartPython(service.config.autostartPython);msg.broadcastState()" title="automatically spawns a new python process next startup">
+			</td>		
         </tr>
     </table>
 </div>
@@ -95,7 +100,17 @@
         </button>
     </span>
     <br/>
-    <pre>{{log}}</pre>
+
+<table class="table table-hover table-striped">
+    <tbody>
+        <tr ng-repeat="e in logs track by $index">
+            <td><small>{{e}}</small></td>
+        </tr>
+    </tbody>
+</table>
+	
+
+	
 </div>
 
 <script type="text/ng-template" id="installPackage.html">
@@ -123,6 +138,7 @@
       <button class="btn btn-default" ng-click="cancel()">Cancel</button>
     </div>
 </script>
+
 
 <script type="text/ng-template" id="openScript.html">
     <div class="modal-header">

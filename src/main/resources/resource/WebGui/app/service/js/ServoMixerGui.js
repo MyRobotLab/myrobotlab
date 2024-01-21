@@ -175,8 +175,8 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       let hasSelected = false
       if ($scope.servos) {
         $scope.servos.forEach((servo) => {
-          if (mrl.getPanel(mrl.getShortName(servo.name)).selected){
-          // if (servo.selected) {
+          if (mrl.getPanel(mrl.getShortName(servo.name)).selected) {
+            // if (servo.selected) {
             moves[mrl.getShortName(servo.name)] = {
               position: servo.currentInputPos,
               speed: servo.speed,
@@ -253,13 +253,13 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
     }
 
     $scope.saveGesture = function () {
-          msg.send("saveGesture", $scope.state.selectedGestureFile)
+      msg.send("saveGesture", $scope.state.selectedGestureFile)
     }
 
     $scope.openGesture = function () {
       msg.send("openGesture", state.selectedGestureFile)
     }
-      
+
     $scope.addSleep = function (seconds) {
       let value = parseFloat(seconds)
 
@@ -268,7 +268,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         return
       }
       let index = parseInt($scope.state.gestureIndex) + 1
-        $scope.state.gestureIndex = index + ""
+      $scope.state.gestureIndex = index + ""
       msg.send("addSleepAction", seconds, index)
       msg.send("getGesture")
     }
@@ -310,11 +310,11 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       }
     }
 
-     $scope.selectAll = function() {
-      angular.forEach($scope.subPanels, function(key) {
+    $scope.selectAll = function () {
+      angular.forEach($scope.subPanels, function (key) {
         mrl.getPanel(key).selected = $scope.selectAllCheckbox
       })
-    }    
+    }
 
     $scope.speak = function () {
       speechPart = {

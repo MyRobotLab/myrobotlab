@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,17 @@ public class RuntimeTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(RuntimeTest.class);
 
-  @Before
-  public void setUp() {
-    // LoggingFactory.init("WARN");
+  
+  @Before /* before each test */
+  public void setUp() throws IOException {
+    // remove all services - also resets config name to DEFAULT effectively
+    Runtime.releaseAll(true, true);
+      // clean our config directory
+    Runtime.removeConfig("RuntimeTest");
+    // set our config
+    Runtime.setConfig("RuntimeTest");
   }
+
 
   @Test
   public void testGetExternalIPAddress() throws Exception {
@@ -57,14 +65,30 @@ public class RuntimeTest extends AbstractTest {
   @Test
   public void registerRemoteService() {
 
-    Registration registration = new Registration("remoteId", "clock", "Clock");
+    Registration registration = new Registration("remoteId", "clock1", "Clock");
     Runtime.register(registration);
 
-    Clock clock = (Clock) Runtime.getService("clock@remoteId");
-    Assert.assertNotNull(clock);
+    String[] services = Runtime.getServiceNames();
+    
+    boolean found = false;
+    for (String service: services) {
+      if (service.equals("clock1@remoteId")) {
+        found = true;
+      }
+    }
+    
+    if (!found) {
+      throw new RuntimeException("could not find clock1@remoteId");
+    }
+    
+    // FIXME - don't do this,
+    // this should be proxied or we should just send messages
+    
+//    Clock clock = (Clock) Runtime.getService("clock1@remoteId");
+//    Assert.assertNotNull(clock);
 
     // cleanup
-    Runtime.release("clock@remoteId");
+    Runtime.release("clock1@remoteId");
   }
 
   @Test

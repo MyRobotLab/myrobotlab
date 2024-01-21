@@ -1989,7 +1989,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     broadcastState();
     return Runtime.start(peer.name);
   }
-  
+
   @Override
   synchronized public void startPeers(String[] peerKeys) {
     

@@ -56,6 +56,8 @@
 #include <WebSocketsServer.h>
 #endif
 
+#define SERIAL_BUFFER_SIZE 256
+
 /***********************************************************************
  * GLOBAL VARIABLES
  * TODO - work on reducing globals and pass as parameters

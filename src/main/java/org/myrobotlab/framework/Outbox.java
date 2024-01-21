@@ -365,7 +365,7 @@ public class Outbox implements Runnable, Serializable {
    * Safe detach for single subscriber
    * 
    * @param service
-   *          the name of the listener to detach
+   *                the name of the listener to detach
    * 
    */
   synchronized public void detach(String service) {

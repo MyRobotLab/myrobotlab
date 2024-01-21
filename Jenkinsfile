@@ -11,6 +11,10 @@ pipeline {
    // agent { label params['agent-name'] }
    agent any
 
+   triggers {
+        cron('H 0 * * *')
+    }   
+
    parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
@@ -83,7 +87,7 @@ pipeline {
          steps {
             script {
                   sh '''
-                     mvn -Dfile.encoding=UTF-8 -Dversion=${VERSION} clean package jacoco:report -q
+                     mvn -Dfile.encoding=UTF-8 -Dbuild.number=${VERSION} clean package jacoco:report surefire-report:report -q
                   '''
             }
          }

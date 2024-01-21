@@ -55,7 +55,7 @@ public class InMoov2Config extends ServiceConfig {
    * fire events to the FSM. Checks battery level and sends a heartbeat flash on
    * publishHeartbeat and onHeartbeat at a regular interval
    */
-  public boolean heartbeat = false;
+  public boolean heartbeat = true;
 
   /**
    * flashes the neopixel every time a health check is preformed. green == good
@@ -253,7 +253,8 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.bots.add("resource/ProgramAB/tr-TR");
 
     Runtime runtime = Runtime.getInstance();
-    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
+    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR",
+        "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
     if (tag != null) {
       String[] tagparts = tag.split("-");
@@ -294,68 +295,126 @@ public class InMoov2Config extends ServiceConfig {
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
-    simulator.multiMapped.put(name + ".leftHand.index", new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
-    simulator.multiMapped.put(name + ".leftHand.majeure", new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });
-    simulator.multiMapped.put(name + ".leftHand.pinky", new String[] { name + ".leftHand.pinky", name + ".leftHand.pinky2", name + ".leftHand.pinky3" });
-    simulator.multiMapped.put(name + ".leftHand.ringFinger", new String[] { name + ".leftHand.ringFinger", name + ".leftHand.ringFinger2", name + ".leftHand.ringFinger3" });
-    simulator.multiMapped.put(name + ".leftHand.thumb", new String[] { name + ".leftHand.thumb1", name + ".leftHand.thumb2", name + ".leftHand.thumb3" });
+    simulator.multiMapped.put(name + ".leftHand.index",
+        new String[] { name + ".leftHand.index", name + ".leftHand.index2", name + ".leftHand.index3" });
+    simulator.multiMapped.put(name + ".leftHand.majeure",
+        new String[] { name + ".leftHand.majeure", name + ".leftHand.majeure2", name + ".leftHand.majeure3" });
+    simulator.multiMapped.put(name + ".leftHand.pinky",
+        new String[] { name + ".leftHand.pinky", name + ".leftHand.pinky2", name + ".leftHand.pinky3" });
+    simulator.multiMapped.put(name + ".leftHand.ringFinger",
+        new String[] { name + ".leftHand.ringFinger", name + ".leftHand.ringFinger2", name + ".leftHand.ringFinger3" });
+    simulator.multiMapped.put(name + ".leftHand.thumb",
+        new String[] { name + ".leftHand.thumb1", name + ".leftHand.thumb2", name + ".leftHand.thumb3" });
 
-    simulator.multiMapped.put(name + ".rightHand.index", new String[] { name + ".rightHand.index", name + ".rightHand.index2", name + ".rightHand.index3" });
-    simulator.multiMapped.put(name + ".rightHand.majeure", new String[] { name + ".rightHand.majeure", name + ".rightHand.majeure2", name + ".rightHand.majeure3" });
-    simulator.multiMapped.put(name + ".rightHand.pinky", new String[] { name + ".rightHand.pinky", name + ".rightHand.pinky2", name + ".rightHand.pinky3" });
-    simulator.multiMapped.put(name + ".rightHand.ringFinger", new String[] { name + ".rightHand.ringFinger", name + ".rightHand.ringFinger2", name + ".rightHand.ringFinger3" });
-    simulator.multiMapped.put(name + ".rightHand.thumb", new String[] { name + ".rightHand.thumb1", name + ".rightHand.thumb2", name + ".rightHand.thumb3" });
+    simulator.multiMapped.put(name + ".rightHand.index",
+        new String[] { name + ".rightHand.index", name + ".rightHand.index2", name + ".rightHand.index3" });
+    simulator.multiMapped.put(name + ".rightHand.majeure",
+        new String[] { name + ".rightHand.majeure", name + ".rightHand.majeure2", name + ".rightHand.majeure3" });
+    simulator.multiMapped.put(name + ".rightHand.pinky",
+        new String[] { name + ".rightHand.pinky", name + ".rightHand.pinky2", name + ".rightHand.pinky3" });
+    simulator.multiMapped.put(name + ".rightHand.ringFinger", new String[] { name + ".rightHand.ringFinger",
+        name + ".rightHand.ringFinger2", name + ".rightHand.ringFinger3" });
+    simulator.multiMapped.put(name + ".rightHand.thumb",
+        new String[] { name + ".rightHand.thumb1", name + ".rightHand.thumb2", name + ".rightHand.thumb3" });
 
     // simulator.nodes.put("camera", new UserData());
-    simulator.nodes.put(name + ".head.jaw", new UserDataConfig(new MapperLinear(0.0, 180.0, -5.0, 80.0, true, false), "x"));
-    simulator.nodes.put(name + ".head.neck", new UserDataConfig(new MapperLinear(0.0, 180.0, 20.0, -20.0, true, false), "x"));
+    simulator.nodes.put(name + ".head.jaw",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -5.0, 80.0, true, false), "x"));
+    simulator.nodes.put(name + ".head.neck",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 20.0, -20.0, true, false), "x"));
     simulator.nodes.put(name + ".head.rothead", new UserDataConfig(null, "y"));
-    simulator.nodes.put(name + ".head.rollNeck", new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -30.0, true, false), "z"));
-    simulator.nodes.put(name + ".head.eyeY", new UserDataConfig(new MapperLinear(0.0, 180.0, 40.0, 140.0, true, false), "x"));
-    simulator.nodes.put(name + ".head.eyeX", new UserDataConfig(new MapperLinear(0.0, 180.0, -10.0, 70.0, true, false), "y"));
-    simulator.nodes.put(name + ".torso.topStom", new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, 30.0, true, false), "z"));
-    simulator.nodes.put(name + ".torso.midStom", new UserDataConfig(new MapperLinear(0.0, 180.0, 50.0, 130.0, true, false), "y"));
-    simulator.nodes.put(name + ".torso.lowStom", new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, 30.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightArm.bicep", new UserDataConfig(new MapperLinear(0.0, 180.0, 0.0, -150.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftArm.bicep", new UserDataConfig(new MapperLinear(0.0, 180.0, 0.0, -150.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightArm.shoulder", new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -150.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftArm.shoulder", new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -150.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightArm.rotate", new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, -80.0, true, false), "y"));
-    simulator.nodes.put(name + ".leftArm.rotate", new UserDataConfig(new MapperLinear(0.0, 180.0, -80.0, 80.0, true, false), "y"));
-    simulator.nodes.put(name + ".rightArm.omoplate", new UserDataConfig(new MapperLinear(0.0, 180.0, 10.0, -180.0, true, false), "z"));
-    simulator.nodes.put(name + ".leftArm.omoplate", new UserDataConfig(new MapperLinear(0.0, 180.0, -10.0, 180.0, true, false), "z"));
-    simulator.nodes.put(name + ".rightHand.wrist", new UserDataConfig(new MapperLinear(0.0, 180.0, -20.0, 60.0, true, false), "y"));
-    simulator.nodes.put(name + ".leftHand.wrist", new UserDataConfig(new MapperLinear(0.0, 180.0, 20.0, -60.0, true, false), "y"));
-    simulator.nodes.put(name + ".leftHand.thumb1", new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, -100.0, true, false), "y"));
-    simulator.nodes.put(name + ".leftHand.thumb2", new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, 20.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.thumb3", new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, 20.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.index", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.index2", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.index3", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.majeure", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.majeure2", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.majeure3", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.ringFinger", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.ringFinger2", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.ringFinger3", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.pinky", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.pinky2", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".leftHand.pinky3", new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.thumb1", new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, 110.0, true, false), "y"));
-    simulator.nodes.put(name + ".rightHand.thumb2", new UserDataConfig(new MapperLinear(0.0, 180.0, -100.0, -150.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.thumb3", new UserDataConfig(new MapperLinear(0.0, 180.0, -100.0, -160.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.index", new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.index2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.index3", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.majeure", new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.majeure2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.majeure3", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.ringFinger", new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.ringFinger2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.ringFinger3", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.pinky", new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.pinky2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
-    simulator.nodes.put(name + ".rightHand.pinky3", new UserDataConfig(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".head.rollNeck",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -30.0, true, false), "z"));
+    simulator.nodes.put(name + ".head.eyeY",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 40.0, 140.0, true, false), "x"));
+    simulator.nodes.put(name + ".head.eyeX",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -10.0, 70.0, true, false), "y"));
+    simulator.nodes.put(name + ".torso.topStom",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, 30.0, true, false), "z"));
+    simulator.nodes.put(name + ".torso.midStom",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 50.0, 130.0, true, false), "y"));
+    simulator.nodes.put(name + ".torso.lowStom",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, 30.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightArm.bicep",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 0.0, -150.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftArm.bicep",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 0.0, -150.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightArm.shoulder",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -150.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftArm.shoulder",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, -150.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightArm.rotate",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, -80.0, true, false), "y"));
+    simulator.nodes.put(name + ".leftArm.rotate",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -80.0, 80.0, true, false), "y"));
+    simulator.nodes.put(name + ".rightArm.omoplate",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 10.0, -180.0, true, false), "z"));
+    simulator.nodes.put(name + ".leftArm.omoplate",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -10.0, 180.0, true, false), "z"));
+    simulator.nodes.put(name + ".rightHand.wrist",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -20.0, 60.0, true, false), "y"));
+    simulator.nodes.put(name + ".leftHand.wrist",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 20.0, -60.0, true, false), "y"));
+    simulator.nodes.put(name + ".leftHand.thumb1",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -30.0, -100.0, true, false), "y"));
+    simulator.nodes.put(name + ".leftHand.thumb2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, 20.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.thumb3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 80.0, 20.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.index",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.index2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.index3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.majeure",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.majeure2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.majeure3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.ringFinger",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.ringFinger2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.ringFinger3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.pinky",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.pinky2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".leftHand.pinky3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -110.0, -179.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.thumb1",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 30.0, 110.0, true, false), "y"));
+    simulator.nodes.put(name + ".rightHand.thumb2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -100.0, -150.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.thumb3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, -100.0, -160.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.index",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.index2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.index3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.majeure",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.majeure2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.majeure3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.ringFinger",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.ringFinger2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.ringFinger3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.pinky",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 65.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.pinky2",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
+    simulator.nodes.put(name + ".rightHand.pinky3",
+        new UserDataConfig(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
     simulator.cameraLookAt = name + ".torso.lowStom";
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
@@ -390,7 +449,8 @@ public class InMoov2Config extends ServiceConfig {
     random.enabled = false;
 
     // setup name references to different services
-    RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    RandomMessageConfig rm = new RandomMessageConfig(name, "setLeftArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0,
+        25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setLeftArmSpeed", rm);
 
     rm = new RandomMessageConfig(name, "setRightArmSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
@@ -402,16 +462,20 @@ public class InMoov2Config extends ServiceConfig {
     rm = new RandomMessageConfig(name, "moveRightArm", 3000, 8000, 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
     random.randomMessages.put(name + ".moveRightArm", rm);
 
-    rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setLeftHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0,
+        25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setLeftHandSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "setRightHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+    rm = new RandomMessageConfig(name, "setRightHandSpeed", 3000, 8000, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0,
+        25.0, 8.0, 25.0);
     random.randomMessages.put(name + ".setRightHandSpeed", rm);
 
-    rm = new RandomMessageConfig(name, "moveLeftHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveLeftHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
+        10.0, 60.0, 130.0, 175.0);
     random.randomMessages.put(name + ".moveLeftHand", rm);
 
-    rm = new RandomMessageConfig(name, "moveRightHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+    rm = new RandomMessageConfig(name, "moveRightHand", 3000, 8000, 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
+        10.0, 60.0, 130.0, 175.0);
     random.randomMessages.put(name + ".moveRightHand", rm);
 
     rm = new RandomMessageConfig(name, "setHeadSpeed", 3000, 8000, 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
@@ -532,12 +596,11 @@ public class InMoov2Config extends ServiceConfig {
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-    
+
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
     oakd.listeners.add(new Listener("publishClassification", name));
     oakd.getPeer("py4j").name = getPeerName("py4j");
 
-    
     webxr.listeners.add(new Listener("publishJointAngles", name));
 
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));

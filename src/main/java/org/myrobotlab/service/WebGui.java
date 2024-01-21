@@ -45,6 +45,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.WebGuiConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
@@ -89,7 +90,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       }
     }
   }
-  
+
   private final transient IncomingMsgQueue inMsgQueue = new IncomingMsgQueue();
 
   public static class Panel {
@@ -127,7 +128,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
    * needed to get the api key to select the appropriate api processor
    * 
    * @param uri
-   *          u
+   *            u
    * @return api key
    * 
    */
@@ -270,9 +271,9 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
    * String broadcast to specific client
    * 
    * @param uuid
-   *          u
+   *             u
    * @param str
-   *          s
+   *             s
    * 
    */
   public void broadcast(String uuid, String str) {
@@ -314,7 +315,9 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
         // cert.privateKey()).build();
 
         SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-        SslContext context = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).sslProvider(SslProvider.JDK)
+        SslContext context = SslContextBuilder
+            .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
+            .sslProvider(SslProvider.JDK)
             .clientAuth(ClientAuth.NONE).build();
 
         configBuilder.sslContext(context);
@@ -915,7 +918,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
    * remotely control UI
    * 
    * @param panel
-   *          - the panel which has been moved or resized
+   *              - the panel which has been moved or resized
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {
@@ -1102,7 +1105,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
    * Default (false) is to use the CDN
    *
    * @param useLocalResources
-   *          - true uses local resources fals uses cdn
+   *                          - true uses local resources fals uses cdn
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
@@ -1162,7 +1165,7 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
   public WebGuiConfig apply(WebGuiConfig c) {
     super.apply(c);
-    
+
     if (c.port != null && (port != null && c.port.intValue() != port.intValue())) {
       setPort(c.port);
     }
@@ -1178,8 +1181,10 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
-      
+      // Runtime.startConfig("dev");      
+      Runtime.main(new String[] { "--log-level", "info", "-s", "vertx", "Vertx", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-c", "dev" });
       boolean done = true;
       if (done) {
         return;
