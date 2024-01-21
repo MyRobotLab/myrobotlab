@@ -542,7 +542,8 @@ public class InMoov2Config extends ServiceConfig {
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
-    fsm.listeners.add(new Listener("publishStateChange", name));
+    // Needs upcoming pr
+    // fsm.listeners.add(new Listener("publishStateChange", name));
 
     return plan;
   }
