@@ -532,12 +532,11 @@ public class InMoov2Config extends ServiceConfig {
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-    
+
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
     oakd.listeners.add(new Listener("publishClassification", name));
     oakd.getPeer("py4j").name = getPeerName("py4j");
 
-    
     webxr.listeners.add(new Listener("publishJointAngles", name));
 
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
