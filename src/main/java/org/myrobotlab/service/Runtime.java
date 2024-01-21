@@ -73,6 +73,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -2770,6 +2771,21 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // fist and only time....
         runtime = this;
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
+
+        /**
+         * This is used to run through all the possible services and determine
+         * if they have any missing dependencies.  If they do not they become "installed".
+         * The installed flag makes the gui do a crossout when a service type is selected.
+         */
+        for (MetaData metaData : serviceData.getServiceTypes()) {
+          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
+          if (deps.size() == 0) {
+            metaData.installed = true;
+          } else {
+            warn("{} not installed", metaData.getSimpleName());
+          }
+        }
+        
       }
     }
 
