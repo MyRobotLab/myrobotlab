@@ -426,6 +426,10 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
 
   @Override
   public void startRanging() {
+    if (controller == null || !controller.isConnected()) {
+      info("controller must be attached and connected to range");      
+      return;
+    }
     isRanging = true;
     controller.ultrasonicSensorStartRanging(this);
   }
@@ -433,7 +437,9 @@ public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements
   @Override
   public void stopRanging() {
     isRanging = false;
-    controller.ultrasonicSensorStopRanging(this);
+    if (controller != null) {
+      controller.ultrasonicSensorStopRanging(this);
+    }
   }
 
   public static void main(String[] args) {

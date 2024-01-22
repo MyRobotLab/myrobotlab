@@ -188,7 +188,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
-    addDefaultPeerConfig(plan, name, "py4j", "Py4j", true);
+    addDefaultPeerConfig(plan, name, "py4j", "Py4j", false);
     addDefaultPeerConfig(plan, name, "random", "Random", false);
     addDefaultPeerConfig(plan, name, "right", "Arduino", false);
     addDefaultPeerConfig(plan, name, "rightArm", "InMoov2Arm", false);
