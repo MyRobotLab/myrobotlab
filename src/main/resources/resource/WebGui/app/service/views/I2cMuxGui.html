@@ -1,54 +1,48 @@
-<div class="row">
-  <div class="col-lg-12">
+<div class="col-md-6">
+    <div class="input-group">
+        <attach options="options"/>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">bus {{service.config.bus}}</button>
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in service.deviceBusList">
+                    <a href="" ng-click="setBus(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="btn-group" uib-dropdown>
+        <button type="button" class="btn btn-default">address {{service.config.address}}</button>
+        <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+            <span class="caret"></span>
+        </button>
+        <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+            <li ng-repeat="c in service.deviceAddressList">
+                <a href="" ng-click="setAddress(c)">{{c}}</a>
+            </li>
+        </ul>
+    </div>
 
-   <!-- simple dropdown -->
-  <div class="input-group">
-  
-   <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
-   </span>
-   
-  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">{{possibleController}}</li>
-      </ul>
-  </span>
-
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)">{{possibledeviceBus}}</li>
-      </ul>
-  </span>
-  
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-    <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
-    <ul uib-dropdown-menu>
-    <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
-    </ul>
-  </span>
-  
-  </div>
-  
-<div> 
-<br><p><b>Service map</b></p>
-<table>
-  <tr>
-    <th>Service</th>
-    <th>Bus</th>   
-    <th>Address</th>
-  </tr>
-  <tr ng-repeat="x in i2cDevices">
-    <td>{{ x.serviceName }}</td>
-    <td>{{ x.busAddress }}</td>
-    <td>{{ x.deviceAddress }}</td>
-  </tr>
-</table>
-
+    <button ng-show="!service.isAttached" type="button" class="btn btn-default" ng-click="attach()">attach</button>
+    <button ng-show="service.isAttached" type="button" class="btn btn-default" ng-click="detach()">detach</button>
+    
+    <br/><br/>
+    <p>
+        <b>Service map</b>
+    </p>
+    <table class="table table-striped">
+        <tr>
+            <th>Service</th>
+            <th>Bus</th>
+            <th>Address</th>
+        </tr>
+        <tr ng-repeat="x in i2cDevices">
+            <td>{{ x.serviceName }}</td>
+            <td>{{ x.busAddress }}</td>
+            <td>{{ x.deviceAddress }}</td>
+        </tr>
+    </table>
 </div>
-  
+</div>
