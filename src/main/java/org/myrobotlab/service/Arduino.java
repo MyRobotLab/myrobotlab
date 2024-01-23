@@ -1964,7 +1964,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
     if (!isConnected()) {
-      warn("arduino cannot move servo %s when not connected", move.name);
+      info("arduino cannot move servo %s when not connected", move.name);
       return;
     }
 
@@ -2002,6 +2002,8 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     }
     if (isConnected()) {
       msg.servoSetVelocity(id, speed);
+    } else {
+      info("arduino cannot move servo %s when not connected", servoSpeed.name);
     }
   }
 

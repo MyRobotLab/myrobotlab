@@ -31,6 +31,7 @@ import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
+import org.myrobotlab.programab.handlers.oob.OobProcessor;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
@@ -96,6 +97,8 @@ public class ProgramAB extends Service<ProgramABConfig>
   boolean peerSearch = true;
 
   transient SimpleLogPublisher logPublisher = null;
+  
+  final transient private OobProcessor oobProcessor;
 
   /**
    * Default constructor for the program ab service.
@@ -108,6 +111,7 @@ public class ProgramAB extends Service<ProgramABConfig>
    */
   public ProgramAB(String n, String id) {
     super(n, id);
+    oobProcessor = new OobProcessor(this);
   }
 
   public String getBotName(File file) {
@@ -1412,6 +1416,10 @@ public class ProgramAB extends Service<ProgramABConfig>
   
   public void setTopic(String topic) {    
     setPredicate(getCurrentUserName(), "topic", topic);
+  }
+
+  public OobProcessor getOobProcessor() {
+    return oobProcessor;
   }
 
 }
