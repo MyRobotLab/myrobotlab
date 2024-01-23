@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -16,8 +15,6 @@ import org.myrobotlab.service.config.I2cMuxConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
-
-import com.pi4j.io.i2c.I2CDevice;
 
 /**
  * 
@@ -76,7 +73,7 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
   public void attach(Attachable service) throws Exception {
 
     if (service == null) {
-      warn("cannot attacht to null");
+      warn("cannot attach to null");
       return;
     }
     
@@ -111,8 +108,8 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
   }
 
   @Deprecated /* use attach(String) */
-  public void attach(String controllerName, String deviceBus, String deviceAddress) {
-    attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
+  public void attach(String controller, String deviceBus, String deviceAddress) {
+    attach((I2CController) Runtime.getService(controller), deviceBus, deviceAddress);
   }
 
   @Override
@@ -136,16 +133,27 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
 
   @Override
   public void attachI2CController(I2CController controller) {
-
-    if (isAttached(controller))
+    if (controller == null) {
+      error("controller can not be null");
       return;
+    }
+
+    if (isAttached(controller)) {
+      log.info("controller {} is attached", controller.getName());
+      return;
+    }
 
     this.controller = controller;
     isAttached = true;
+    config.controller = controller.getName();
     // FIXME should use attach(string)
     controller.attachI2CControl(this);
     broadcastState();
     log.info("Attached {} device on bus: {} address {}", config.controller, config.bus, config.address);
+  }
+  
+  public void detach() {
+    detach(controller);
   }
 
   @Override
@@ -190,8 +198,8 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
 
   @Override
   public void detachI2CController(I2CController controller) {
-    controller.detachI2CControl(this);
     isAttached = false;
+    controller.detachI2CControl(this);
     broadcastState();
   }
 
@@ -240,6 +248,7 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
   @Override
   public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
     setMuxBus(busAddress);
+    // FIXME - sendBlocking or pub/sub to/from controller
     int bytesRead = controller.i2cRead(this, Integer.parseInt(config.bus), deviceAddress, buffer, size);
     log.debug("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
     return bytesRead;
@@ -250,6 +259,8 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
     setMuxBus(busAddress);
     String key = String.format("%d.%d", busAddress, deviceAddress);
     log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+    // FIXME - would be trivial to fix with a send(controller, Integer.parseInt(config.bus), deviceAddress, buffer, size)
+    // but the read would either need to be pubsub or sendblocking
     controller.i2cWrite(this, Integer.parseInt(config.bus), deviceAddress, buffer, size);
   }
 
@@ -276,7 +287,7 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
 
   @Override
   public boolean isAttached(Attachable instance) {
-    if (controller != null && controller.getName().equals(instance.getName())) {
+    if (controller != null && instance != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
     return false;
@@ -331,6 +342,19 @@ public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CCont
   @Override
   public void setDeviceBus(String deviceBus) {
     setBus(deviceBus);
+  }
+  
+  @Override
+  public I2cMuxConfig apply(I2cMuxConfig c) {
+    super.apply(c);
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return c;
   }
 
   /**

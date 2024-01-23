@@ -4,8 +4,8 @@ angular.module("mrlapp.service.I2cMuxGui", []).controller("I2cMuxGuiCtrl", ["$sc
     var msg = this.msg
 
     _self.selectController = function(controller) {
-        //$scope.service.config.controller = controller
-        $scope.service.config.controller = controller
+        msg.send("setController", controller)
+        msg.send("broadcastState")
         // get the pin list of the selected controller
         // msg.send("setPinArrayControl", controller)
         // msg.send("getPinList", controller)
@@ -23,10 +23,7 @@ angular.module("mrlapp.service.I2cMuxGui", []).controller("I2cMuxGuiCtrl", ["$sc
         $scope.service = service
         $scope.options.attachName = service.config.controller
 
-        // since attach broadcasts we'll get the pin list here
-        if ($scope?.service?.config?.controller) {
-            msg.send("getPinList", $scope.service.config.controller)
-        }
+        $scope.$apply()
     }
 
     this.onMsg = function(inMsg) {
@@ -43,25 +40,22 @@ angular.module("mrlapp.service.I2cMuxGui", []).controller("I2cMuxGuiCtrl", ["$sc
     }
 
     $scope.setAddress = function(address) {
-        msg.send('setAddress', address)
-        msg.send('broadcastState')
+        msg.send("setAddress", address)
+        msg.send("broadcastState")
     }
 
     $scope.setBus = function(bus) {
-        msg.send('setBus', bus)
-        msg.send('broadcastState')
+        msg.send("setBus", bus)
+        msg.send("broadcastState")
     }
-    
+
     $scope.attach = function() {
-        msg.send('setBus', $scope.service.config.bus)
-        msg.send('setAddress', $scope.service.config.address)
-        msg.send('attach', $scope.config.controller)
+        msg.send("attach", $scope.service.config.controller)
+        msg.send("broadcastState")
     }
 
     $scope.detach = function() {
-        if ($scope.service.config.controller) {
-            msg.send('detach', $scope.service.config.controller)
-        }
+        msg.send("detach")
     }
 
     $scope.setControllerName = function(name) {
