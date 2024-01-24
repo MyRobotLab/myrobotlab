@@ -4834,9 +4834,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       try {
         sc = CodecUtils.readServiceConfig(filename, configType);
       } catch (ConstructorException e) {
-        error("%s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
-      } catch (IOException e) {
-        error(e);
+        error("config %s invalid %s %s. Please remove it from the file.", name, filename, e.getCause().getMessage());
+      } catch (Exception e) {
+        error("config could not load %s file is invalid", filename);
       }
     }
     return sc;
