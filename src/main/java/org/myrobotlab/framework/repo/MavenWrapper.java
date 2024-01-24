@@ -1,5 +1,5 @@
 package org.myrobotlab.framework.repo;
-
+import org.myrobotlab.service.Runtime;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -311,6 +311,7 @@ public class MavenWrapper extends Repo implements Serializable {
       // repo.installEach(); <-- TODO - test
 
       log.info("done");
+      Runtime.shutdown();
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
