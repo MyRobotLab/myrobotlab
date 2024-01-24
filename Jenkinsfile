@@ -133,7 +133,7 @@ pipeline {
             }
 
             // Fetch the Discord webhook URL from the secure store
-            withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
+            withCredentials([string(credentialsId: 'jenkins-discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
                 // Use the secure webhook URL for sending the message
                 discordSend description: workyNoWorky, footer: '', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: DISCORD_WEBHOOK_URL
             }            
