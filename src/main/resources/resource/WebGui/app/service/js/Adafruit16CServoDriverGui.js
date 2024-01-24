@@ -30,6 +30,10 @@ angular.module('mrlapp.service.Adafruit16CServoDriverGui', []).controller('Adafr
     }
 
     $scope.attach = function() {
+        console.log($scope.controllerOptions)
+        if (!$scope.service.controllerName){
+            $scope.service.controllerName = $scope.controllerOptions.attachName
+        }
         msg.send('attach', $scope.service.controllerName, $scope.service.deviceBus, $scope.service.deviceAddress)
     }
 

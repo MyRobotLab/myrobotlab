@@ -38,7 +38,7 @@
             <th>Bus</th>
             <th>Address</th>
         </tr>
-        <tr ng-repeat="x in i2cDevices">
+        <tr ng-repeat="x in service.config.i2cDevices">
             <td>{{ x.serviceName }}</td>
             <td>{{ x.busAddress }}</td>
             <td>{{ x.deviceAddress }}</td>
