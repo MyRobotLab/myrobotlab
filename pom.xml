@@ -521,13 +521,13 @@
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-bullet</artifactId>
-      <version>3.3.2</version>
+      <version>3.3.2-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-bullet-native</artifactId>
-      <version>3.3.2</version>
+      <version>3.3.2-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -539,7 +539,7 @@
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-blender</artifactId>
-      <version>3.3.2</version>
+      <version>3.3.2-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
