@@ -68,17 +68,17 @@ public class InMoov2Config extends ServiceConfig {
    */
   public long heartbeatInterval = 3000;
 
-  public boolean loadAppsScripts = true;
+  public boolean loadAppsScripts = false;
 
   /**
    * loads all python gesture files in the gesture directory
    */
-  public boolean loadGestures = true;
+  public boolean loadGestures = false;
 
   /**
    * executes all scripts in the init directory on startup
    */
-  public boolean loadInitScripts = true;
+  public boolean loadInitScripts = false;
 
   /**
    * default to null - allow the OS to set it, unless explicilty set
@@ -546,7 +546,7 @@ public class InMoov2Config extends ServiceConfig {
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
     // Needs upcoming pr
-    // fsm.listeners.add(new Listener("publishStateChange", name));
+    fsm.listeners.add(new Listener("publishStateChange", name));
 
     return plan;
   }

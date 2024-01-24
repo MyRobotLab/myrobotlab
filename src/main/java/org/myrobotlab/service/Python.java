@@ -677,7 +677,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
   @Override
   public void onReleased(String serviceName) {
-    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(serviceName));
+    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(CodecUtils.getShortName(serviceName)));
     exec(registerScript, false);
   }
 
