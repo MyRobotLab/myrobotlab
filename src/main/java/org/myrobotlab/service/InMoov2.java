@@ -34,6 +34,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
@@ -1388,6 +1389,8 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
+   * publishStateChange
+   * 
    * The integration between the FiniteStateMachine (fsm) and the InMoov2
    * service and potentially other services (Python, ProgramAB) happens here.
    * 
@@ -1405,22 +1408,19 @@ public class InMoov2 extends Service<InMoov2Config>
    * 
    * Depending on config:
    * 
-   * 
    * @param stateChange
    * @return
    */
-  public FiniteStateMachine.StateChange onStateChange(FiniteStateMachine.StateChange stateChange) {
-    try {
-      log.info("onStateChange {}", stateChange);
+  public StateChange publishStateChange(StateChange stateChange) {
+    log.info("publishStateChange {}", stateChange);
+    
+    log.info("onStateChange {}", stateChange);
 
-      lastState = state;
-      state = stateChange.state;
+    lastState = state;
+    state = stateChange.state;
 
-      processMessage("onStateChange", stateChange);
-
-    } catch (Exception e) {
-      error(e);
-    }
+    processMessage("onStateChange", stateChange);
+    
     return stateChange;
   }
 
@@ -1583,7 +1583,8 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
-        fsm.fire("idle");
+        // idle event to be handled with the processor
+        processMessage("onIdle");
         stateLastIdleTime = System.currentTimeMillis();
       }
 
@@ -1628,7 +1629,7 @@ public class InMoov2 extends Service<InMoov2Config>
     processMessage("onHeartbeat", heartbeat);
     return heartbeat;
   }
-
+  
   /**
    * A more extensible interface point than publishEvent FIXME - create
    * interface for this

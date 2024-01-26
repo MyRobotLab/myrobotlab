@@ -522,6 +522,7 @@ public class InMoov2Config extends ServiceConfig {
     // listeners.add(new Listener("publishProcessMessage",
     // getPeerName("python"), "onPythonMessage"));
     listeners.add(new Listener("publishProcessMessage", "python", "onPythonMessage"));
+    
     listeners.add(new Listener("publishPython", "python"));
 
     // InMoov2 --to--> InMoov2
@@ -535,6 +536,8 @@ public class InMoov2Config extends ServiceConfig {
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+    
+    htmlFilter.listeners.add(new Listener("publishText", name));
 
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
     oakd.listeners.add(new Listener("publishClassification", name));
@@ -546,7 +549,7 @@ public class InMoov2Config extends ServiceConfig {
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
     // Needs upcoming pr
-    fsm.listeners.add(new Listener("publishStateChange", name));
+    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
 
     return plan;
   }
