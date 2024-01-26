@@ -468,8 +468,7 @@ public class InMoov2 extends Service<InMoov2Config>
        */
 
       // load the InMoov2.py and publish it for Python/Jython or Py4j to consume
-      String script = getResourceAsString("InMoov2.py");
-      invoke("publishPython", script);
+      execScript();
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -740,6 +739,14 @@ public class InMoov2 extends Service<InMoov2Config>
     }
     return python.evalAndWait(gesture);
   }
+  
+  /**
+   * Reload the InMoov2.py script
+   */
+  public void execScript() {
+    execScript("InMoov2.py");
+  }
+
 
   /**
    * FIXME - I think there was lots of confusion of executing resources or just
@@ -754,15 +761,9 @@ public class InMoov2 extends Service<InMoov2Config>
    *          execute a resource script
    * @return success or failure
    */
-  public boolean execScript(String someScriptName) {
-    try {
-      Python p = (Python) Runtime.start("python", "Python");
+  public void execScript(String someScriptName) {
       String script = getResourceAsString(someScriptName);
-      return p.exec(script, true);
-    } catch (Exception e) {
-      error("unable to execute script %s", someScriptName);
-      return false;
-    }
+      invoke("publishPython", script);
   }
 
   public void finishedGesture() {
@@ -1801,6 +1802,7 @@ public class InMoov2 extends Service<InMoov2Config>
       invoke("publishEvent", "STOPPED " + peerKey);
     }
   }
+  
 
   @Override
   public void releaseService() {
