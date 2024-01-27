@@ -13,8 +13,9 @@ public class Esp8266Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    */
   public Esp8266Meta() {
-    addDescription("This connector will scan all the files in a directory and production documents");
-    addCategory("ingest");
+    addDescription("ESP8266-01 service to communicate using WiFi and i2c");
+    addCategory("i2c", "control");
+    setSponsor("Mats");
   }
 
 }

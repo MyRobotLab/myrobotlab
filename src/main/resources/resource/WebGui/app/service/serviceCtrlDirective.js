@@ -71,7 +71,6 @@ angular
     "mrl",
     function (mrl) {
       //dynamic controller
-      console.error("WHAT THE HELL CHROME !")
       return {
         scope: {
           msg: "=msgmethods",
