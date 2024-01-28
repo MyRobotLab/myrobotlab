@@ -266,8 +266,6 @@ public class InMoov2Config extends ServiceConfig {
       }
     }
 
-    chatBot.currentUserName = "human";
-
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
 
     Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));

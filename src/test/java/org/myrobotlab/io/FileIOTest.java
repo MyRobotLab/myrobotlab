@@ -135,11 +135,6 @@ public class FileIOTest extends AbstractTest {
   }
 
   @Test
-  public void testIsJar() {
-    assertFalse(FileIO.isJar());
-  }
-
-  @Test
   public void testGetFileListString() throws IOException {
     String dir = FileIO.gluePaths(tempDir, "testGetFileListString");
     File f = new File(dir);

@@ -57,6 +57,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.config.ConfigUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.framework.interfaces.ConfigurableService;
@@ -474,22 +475,15 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    *         then it needs an instance of Runtime which is not available.
    * 
    */
-  @Deprecated /* this should not be static - remove it */
   static public String getResourceDir(String serviceType, String additionalPath) {
 
     // setting resource directory
-    String resourceDir = null;
+    String resource = ConfigUtils.getResourceRoot() + fs + serviceType;
 
-    // stupid solution to get past static problem
-    if (!"Runtime".equals(serviceType)) {
-      resourceDir = Runtime.getInstance().getConfig().resource + fs + serviceType;
-    } else {
-      resourceDir = "resource";
-    }
     if (additionalPath != null) {
-      resourceDir = FileIO.gluePaths(resourceDir, additionalPath);
+      resource = FileIO.gluePaths(resource, additionalPath);
     }
-    return resourceDir;
+    return resource;
   }
 
   /**
@@ -516,7 +510,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
 
   static public String getResourceRoot() {
-    return Runtime.getInstance().getConfig().resource;
+    return ConfigUtils.getResourceRoot();//Runtime.getInstance().getConfig().resource;
   }
 
   /**

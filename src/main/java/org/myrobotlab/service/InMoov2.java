@@ -890,13 +890,18 @@ public class InMoov2 extends Service<InMoov2Config>
     return null;
   }
 
+  /**
+   * getResponse from ProgramAB
+   * @param text
+   * @return
+   */
   public Response getResponse(String text) {
     ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
       Response response = chatBot.getResponse(text);
       return response;
     } else {
-      log.info("chatbot not ready");
+      log.warn("chatbot not ready");
     }
     return null;
   }
@@ -2043,6 +2048,13 @@ public class InMoov2 extends Service<InMoov2Config>
 
     // updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
     // return speechType;
+  }
+  
+  public void setTopic(String topic) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+      chatBot.setTopic(topic);
+    }
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {

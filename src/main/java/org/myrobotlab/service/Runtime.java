@@ -229,7 +229,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   /**
    * default parent path of configPath static !
    */
-  final static protected String ROOT_CONFIG_DIR = DATA_DIR + fs + "config";
+  public final static String ROOT_CONFIG_DIR = DATA_DIR + fs + "config";
 
   /**
    * number of services created by this runtime
@@ -926,6 +926,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
               Runtime.startConfig(options.config);
             } else if (startYml != null && startYml.config != null && startYml.enable) {
               Runtime.startConfig(startYml.config);
+            } else {
+              RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {
+              });
+              runtime.apply(rtConfig);
             }
           } catch (Exception e) {
             log.info("runtime will not be loading config");
@@ -5406,6 +5410,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     } catch (Exception e) {
       log.error("removeConfig threw", e);
     }
+  }
+
+  /**
+   * Method used to determine is runtime is running without starting it
+   * @return true if available
+   */
+  static public boolean isAvailable() {
+    return runtime != null && runtime.isRunning();
   }
 
 }
