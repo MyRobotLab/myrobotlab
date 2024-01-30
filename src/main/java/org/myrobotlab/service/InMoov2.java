@@ -1312,12 +1312,18 @@ public class InMoov2 extends Service<InMoov2Config>
    * onPirOn flash neopixel
    */
   public void onPirOn() {
+    log.info("onPirOn");
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash", "pir");
     String botState = chatBot.getPredicate("botState");
     if ("sleeping".equals(botState)) {
       invoke("publishEvent", "WAKE");
     }
+  }
+  
+  
+  public void onPirOff() {
+    log.info("onPirOff");
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
