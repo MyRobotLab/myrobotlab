@@ -1049,6 +1049,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * onPirOn flash neopixel
    */
   public void onPirOn() {
+    log.info("onPirOn");
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash", "pir");
     ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
@@ -1058,6 +1059,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         invoke("publishEvent", "WAKE");
       }
     }
+  }
+  
+  
+  public void onPirOff() {
+    log.info("onPirOff");
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
