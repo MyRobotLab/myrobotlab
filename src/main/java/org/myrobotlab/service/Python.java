@@ -739,8 +739,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   }
 
   /**
-   * Saves a script to the file system default will be in
-   * data/Py4j/{serviceName}/{scriptName}
+   * Saves a script to the file system 
    * 
    * @param scriptName
    * @param code
@@ -750,7 +749,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
       scriptName = scriptName + ".py";
     }
-    FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    // FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    FileIO.toFile(scriptName, code);
     info("saved file %s", scriptName);
   }
 
