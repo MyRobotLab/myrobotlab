@@ -1479,7 +1479,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return The latest build version in String form
    */
   public static String getLatestVersion() {
-    String latest = "http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/buildNumber";
+    String latest = "https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/lastSuccessfulBuild/buildNumber";
     byte[] b = Http.get(latest);
     String version = (b == null) ? "unknown" : "1.1." + new String(b);
     return version;
