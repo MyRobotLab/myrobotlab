@@ -739,14 +739,13 @@ public class InMoov2 extends Service<InMoov2Config>
     }
     return python.evalAndWait(gesture);
   }
-  
+
   /**
    * Reload the InMoov2.py script
    */
   public void execScript() {
     execScript("InMoov2.py");
   }
-
 
   /**
    * FIXME - I think there was lots of confusion of executing resources or just
@@ -762,8 +761,8 @@ public class InMoov2 extends Service<InMoov2Config>
    * @return success or failure
    */
   public void execScript(String someScriptName) {
-      String script = getResourceAsString(someScriptName);
-      invoke("publishPython", script);
+    String script = getResourceAsString(someScriptName);
+    invoke("publishPython", script);
   }
 
   public void finishedGesture() {
@@ -880,30 +879,23 @@ public class InMoov2 extends Service<InMoov2Config>
     return opencv;
   }
 
-  public Object getPredicate(String key) {
-    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
-    if (chatBot != null) {
-      return chatBot.getPredicate(key);
-    } else {
-      error("no chatBot available");
-    }
-    return null;
+  public String getPredicate(String key) {
+    return getPredicate(chatBot.getConfig().currentUserName, key);
+  }
+
+  public String getPredicate(String user, String key) {
+    return chatBot.getPredicate(user, key);
   }
 
   /**
    * getResponse from ProgramAB
+   * 
    * @param text
    * @return
    */
   public Response getResponse(String text) {
-    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
-    if (chatBot != null) {
-      Response response = chatBot.getResponse(text);
-      return response;
-    } else {
-      log.warn("chatbot not ready");
-    }
-    return null;
+    Response response = chatBot.getResponse(text);
+    return response;
   }
 
   public InMoov2Arm getRightArm() {
@@ -963,6 +955,22 @@ public class InMoov2 extends Service<InMoov2Config>
     sendToPeer("rightArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("leftArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
+  }
+
+  /**
+   * If there have been any errors
+   * 
+   * @return
+   */
+  public boolean hasErrors() {
+    return errors.size() > 0;
+  }
+
+  /**
+   * clear all errors
+   */
+  public void clearErrors() {
+    errors.clear();
   }
 
   public boolean isCameraOn() {
@@ -1306,12 +1314,9 @@ public class InMoov2 extends Service<InMoov2Config>
   public void onPirOn() {
     // FIXME flash on config.flashOnBoot
     invoke("publishFlash", "pir");
-    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
-    if (chatBot != null) {
-      String botState = chatBot.getPredicate("botState");
-      if ("sleeping".equals(botState)) {
-        invoke("publishEvent", "WAKE");
-      }
+    String botState = chatBot.getPredicate("botState");
+    if ("sleeping".equals(botState)) {
+      invoke("publishEvent", "WAKE");
     }
   }
 
@@ -1419,14 +1424,14 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public StateChange publishStateChange(StateChange stateChange) {
     log.info("publishStateChange {}", stateChange);
-    
+
     log.info("onStateChange {}", stateChange);
 
     lastState = state;
     state = stateChange.state;
 
     processMessage("onStateChange", stateChange);
-    
+
     return stateChange;
   }
 
@@ -1561,6 +1566,9 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
+   * FIXME - get rid of all functionality here - should all be controlled by
+   * behaviors
+   * 
    * A heartbeat that continues to check status, and fire events to the FSM.
    * Checks battery, flashes leds and processes all the configured checks in
    * onHeartbeat at a regular interval
@@ -1635,7 +1643,7 @@ public class InMoov2 extends Service<InMoov2Config>
     processMessage("onHeartbeat", heartbeat);
     return heartbeat;
   }
-  
+
   /**
    * A more extensible interface point than publishEvent FIXME - create
    * interface for this
@@ -1807,7 +1815,6 @@ public class InMoov2 extends Service<InMoov2Config>
       invoke("publishEvent", "STOPPED " + peerKey);
     }
   }
-  
 
   @Override
   public void releaseService() {
@@ -1984,15 +1991,10 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public Object setPredicate(String key, Object data) {
-    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
-    if (chatBot != null) {
-      if (data == null) {
-        chatBot.setPredicate(key, null); // "unknown" "null" other sillyness ?
-      } else {
-        chatBot.setPredicate(key, data.toString());
-      }
+    if (data == null) {
+      chatBot.setPredicate(key, null); // "unknown" "null" other sillyness ?
     } else {
-      error("no chatBot available");
+      chatBot.setPredicate(key, data.toString());
     }
     return data;
   }
@@ -2049,12 +2051,9 @@ public class InMoov2 extends Service<InMoov2Config>
     // updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
     // return speechType;
   }
-  
+
   public void setTopic(String topic) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
-    if (chatBot != null) {
-      chatBot.setTopic(topic);
-    }
+    chatBot.setTopic(topic);
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -2159,7 +2158,6 @@ public class InMoov2 extends Service<InMoov2Config>
   public ProgramAB startChatBot() {
 
     try {
-      chatBot = (ProgramAB) startPeer("chatBot");
 
       if (locale != null) {
         chatBot.setCurrentBotName(locale.getTag());
@@ -2308,6 +2306,15 @@ public class InMoov2 extends Service<InMoov2Config>
     // This is required the core of InMoov is
     // a FSM ProgramAB and some form of Python/Jython
     fsm = (FiniteStateMachine) startPeer("fsm");
+
+    // Chatbot is a required part of InMoov2
+    chatBot = (ProgramAB) startPeer("chatBot");
+    try {
+      chatBot.startSession();
+      chatBot.setPredicate("robot", getName());
+    } catch (IOException e) {
+      error(e);
+    }
 
     // A python process is required - should be defined as a peer
     // of Type Python or Py4j
