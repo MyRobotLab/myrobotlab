@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -118,7 +119,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       invoke("publishPlayingAction", action);
       invoke("publishPlayingActionIndex", i);
       switch (action.type) {
-        case "moveTo": {
+        case "moveTo":
           // process a move
           Map<String, Map<String, Object>> moves = (Map) action.value;
 
@@ -155,9 +156,9 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
               }
             }
           }
-        }
+
           break;
-        case "gesture": {
+        case "gesture":
 
           // save current place
           current.startIndex = i + 1; // Obiwan error prolly
@@ -179,15 +180,16 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
           // index reset
           i = -1;
           current = new PlayingGesture(gestureName, embedded, i);
-        }
+
           break;
-        case "sleep": {
+        case "sleep":
           sleep(Math.round((double) action.value * 1000));
-        }
           break;
-        case "speak": {
+        case "speak":
           speak((Map) action.value);
-        }
+          break;
+        case "msg":
+          invoke("publishProcessMessage", (Message) action.value);
           break;
         default: {
           error("do not know how to handle gesture part of type %s", action.type);
@@ -264,7 +266,8 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    * Explicitly saving a new gesture file. This will error if the file already
    * exists. The gesture part moves will be empty.
    * 
-   * @param name - gesture name
+   * @param name
+   *          - gesture name
    * @return
    */
   public String addNewGestureFile(String name) {
@@ -308,24 +311,23 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   };
 
   /**
-   * name attach "the best"
+   * attach(String) should always have the implementation
    */
   @Override
   public void attach(String name) {
-
-    // FIXME - check type in registry, describe, or query ... make sure Servo
-    // type..
-    // else return error - should be type checking
-    ServiceInterface si = Runtime.getService(name);
-    if (si != null & "Servo".equals(si.getSimpleName())) {
-      Servo servo = (Servo) Runtime.getService(name);
-      if (config.autoDisable) {
-        servo.setAutoDisable(true);
-      }
       allServos.add(name);
-    } else {
-      log.info("do not know how to attach {}", name);
-    }
+      // refresh subscribers
+      invoke("getServos");
+  }
+  
+  /**
+   * detach(String) should always have the implementation
+   */
+  @Override
+  public void detach(String name) {
+    allServos.remove(name);
+    // refresh subscribers
+    invoke("getServos");
   }
 
   /**
@@ -402,7 +404,23 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   public String getPosesDirectory() {
     return config.posesDir;
   }
+  
+  /**
+   * get a refreshed ordered list of servos
+   * @return
+   */
+  public Set<String> getServos() {
+    Set<String> servoQuery = new TreeSet<>();
+    for (ServiceInterface service : Runtime.getServices()) {
+      if (service instanceof ServoControl) {
+        servoQuery.add(service.getName());
+      }
+    }
+    allServos = servoQuery;
+    return servoQuery;
+  }
 
+  @Deprecated /* use getServos() */
   public List<ServoControl> listAllServos() {
     ArrayList<ServoControl> servos = new ArrayList<ServoControl>();
     for (ServiceInterface service : Runtime.getServices()) {
@@ -565,6 +583,17 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
 
   public String publishPlayingPose(String name) {
     return name;
+  }
+
+  /**
+   * Processing publishing point, where everything InMoov2 wants to be processed
+   * is turned into a message and published.
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishProcessMessage(Message msg) {
+    return msg;
   }
 
   public String publishStopPose(String name) {

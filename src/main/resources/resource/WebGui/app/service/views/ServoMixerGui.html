@@ -54,23 +54,43 @@
           </tr>
         </table>
       </td>
-      <td>
-        Actions
+      <td>Actions
         <br />
-        <button class="btn btn-default" ng-click="speak()" title="Add speech to gesture">
+          <table class="table table-striped">
+              <tr><td>
+        <button class="btn btn-default" ng-click="speak()" title="Add speech to gesture" style="width: 100%;text-align: left;">
           <span class="glyphicon glyphicon-plus"></span>
           mouth: {{service.config.mouth}} speak
-        </button>
+        </button><td>
         <input class="form-control servo-mixer-pose" type="text" ng-model="text" placeholder="text" />
+            </td>
+                  </tr>
         <!--
         Blocking
         <toggle class="miniBTN" title="Speak Blocking" ng-model="blocking" ng-change="" on="" off="" size="btn-lg" />
             -->
-        <button class="btn btn-default" ng-click="addSleep(sleep)" title="Add sleep in seconds to gesture">
+              <tr><td>
+        <button class="btn btn-default" ng-click="addSleep(sleep)" title="Add sleep in seconds to gesture" style="width: 100%;text-align: left;">
           <span class="glyphicon glyphicon-plus"></span>
           sleep
-        </button>
+        </button></td><td>
         <input class="form-control fieldDelay" type="text" ng-model="sleep" ng-init="3" placeholder="sec" />
+            </td>
+            </tr>
+
+<!--
+              <tr><td>
+        <button class="btn btn-default" ng-click="addSleep(sleep)" title="Add sleep in seconds to gesture" style="width: 100%;text-align: left;">
+          <span class="glyphicon glyphicon-plus"></span>
+          message
+        </button></td><td>
+        <input class="form-control servo-mixer-pose" type="textarea" ng-model="text" placeholder='{"method":"playFile","data"["laugh.mp3"]}' />
+            </td>
+            </tr>
+-->
+              
+          </table>
+          
         <select ng-model="state.gestureIndex" class="form-control vertical-menu gestureList" size="8" title="actions">
           <option ng-repeat="action in state.currentGesture.actions" value="{{$index}}" id="select-{{$index}}">{{action.name}} {{displayAction(action)}}</option>
         </select>
