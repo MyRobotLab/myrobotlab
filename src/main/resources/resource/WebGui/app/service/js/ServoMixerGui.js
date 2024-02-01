@@ -241,6 +241,14 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       msg.send("getGesture")
     }
 
+    $scope.addPython = function(methodName){
+      let index = parseInt($scope.state.gestureIndex) + 1
+        $scope.state.gestureIndex = index + ""
+      msg.send("addProcessingAction", methodName, index)
+      msg.send("getGesture")
+        
+    }
+
     $scope.playGesture = function (gesture) {
       if (gesture) {
         msg.send("playGesture", gesture)

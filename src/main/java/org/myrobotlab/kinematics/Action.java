@@ -57,4 +57,11 @@ public class Action {
     action.value = gestureName;
     return action;
   }
+
+  public static Action createProcessingAction(String methodName) {
+    Action action = new Action();
+    action.type = "process";
+    action.value = methodName;
+    return action;
+  }
 }

@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -28,6 +27,7 @@ import org.myrobotlab.kinematics.PoseMove;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.ServoMixerConfig;
+import org.myrobotlab.service.interfaces.Processor;
 import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -44,31 +44,6 @@ import org.slf4j.Logger;
  */
 public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLifeCycleListener, SelectListener {
 
-  public class PlayingGesture {
-    public String name;
-    public Gesture gesture;
-    public int startIndex = 0;
-
-    public PlayingGesture(String name, Gesture gesture) {
-      this(name, gesture, 0);
-    }
-
-    public PlayingGesture(String name, Gesture gesture, int index) {
-      this.name = name;
-      this.gesture = gesture;
-      this.startIndex = index;
-    }
-
-    public String toString() {
-      int actionCnt = 0;
-      if (gesture != null && gesture.actions != null) {
-        actionCnt = gesture.actions.size();
-      }
-      return String.format("name:%s actionCnt:%d index:%d", name, actionCnt, startIndex);
-    }
-
-  }
-
   /**
    * The Player plays a requested gesture, which is a sequence of Poses. Poses
    * can be positions, delays, or speech. It publishes when it starts a gesture
@@ -78,10 +53,10 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    *
    */
   public class Player implements Runnable {
-    protected String playingGesture = null;
-    protected boolean running = false;
     transient private ExecutorService executor;
+    protected String playingGesture = null;
     transient Deque<PlayingGesture> playStack = new ArrayDeque<>();
+    protected boolean running = false;
 
     // FIXME - add optional start index to start playing at a midpoint
     private void play() {
@@ -188,8 +163,17 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
         case "speak":
           speak((Map) action.value);
           break;
-        case "msg":
-          invoke("publishProcessMessage", (Message) action.value);
+        case "process":
+
+          if (config.processor != null) {
+            Processor processor = (Processor) Runtime.getService(config.processor);
+            String code = (String) action.value;
+            if (!processor.exec(code)) {
+              error("could not execute %s", code);
+            }
+          } else {
+            error("no processor");
+          }
           break;
         default: {
           error("do not know how to handle gesture part of type %s", action.type);
@@ -232,16 +216,102 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     }
   }
 
+  public class PlayingGesture {
+    public Gesture gesture;
+    public String name;
+    public int startIndex = 0;
+
+    public PlayingGesture(String name, Gesture gesture) {
+      this(name, gesture, 0);
+    }
+
+    public PlayingGesture(String name, Gesture gesture, int index) {
+      this.name = name;
+      this.gesture = gesture;
+      this.startIndex = index;
+    }
+
+    public String toString() {
+      int actionCnt = 0;
+      if (gesture != null && gesture.actions != null) {
+        actionCnt = gesture.actions.size();
+      }
+      return String.format("name:%s actionCnt:%d index:%d", name, actionCnt, startIndex);
+    }
+
+  }
+
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
   private static final long serialVersionUID = 1L;
+
+  public static void main(String[] args) throws Exception {
+
+    try {
+      Runtime.main(new String[] { "--id", "admin" });
+      LoggingFactory.init("INFO");
+
+      Runtime.start("i01.head.rothead", "Servo");
+      Runtime.start("i01.head.neck", "Servo");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      Python python = (Python) Runtime.start("python", "Python");
+      ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
+      // mixer.playGesture("");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      mixer.addNewGestureFile("test");
+      Gesture gesture = mixer.getGesture("test");
+      String gestureName = "aaa";
+      String servoName = "i01.head.rothead";
+      Double position = 90.0;
+      Double speed = null;
+
+      Map<String, Map<String, Object>> moves = new TreeMap<>();
+
+      Map<String, Object> poseMove1 = new TreeMap<>();
+      poseMove1.put("position", 90.0);
+
+      Map<String, Object> poseMove2 = new TreeMap<>();
+      poseMove2.put("position", 90);
+      poseMove2.put("speed", 35.0);
+
+      moves.put("i01.head.rothead", poseMove1);
+      moves.put("i01.head.neck", poseMove2);
+
+      mixer.openGesture(gestureName);
+      mixer.addMoveToAction(moves); // autofill delay from keyframe ?
+      mixer.saveGesture();
+
+      mixer.addNewGestureFile("test2");
+
+      // mixer.save(gestureName);
+      mixer.addGestureToAction("test");
+
+      mixer.saveGesture();
+
+      // mixer.setPose("test", )
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  // TODO selected servos
 
   /**
    * Set of servo names kept in sync with current registry
    */
   protected Set<String> allServos = new TreeSet<>();
 
-  // TODO selected servos
+  /**
+   * gesture name of the currentGesture
+   */
+  protected String currentEditGestureName = null;
 
   /**
    * current gesture being edited
@@ -253,13 +323,67 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    */
   final protected transient Player player = new Player();
 
-  /**
-   * gesture name of the currentGesture
-   */
-  protected String currentEditGestureName = null;
-
   public ServoMixer(String n, String id) {
     super(n, id);
+  }
+
+  public void addAction(Action action, Integer index) {
+    if (currentGesture == null) {
+      error("current gesture not set");
+      return;
+    }
+    if (index != null) {
+      if (currentGesture.actions.size() == 0) {
+        currentGesture.actions.add(action);
+      } else {
+        currentGesture.actions.add(index, action);
+      }
+    } else {
+      currentGesture.actions.add(action);
+    }
+  }
+
+  public void addGestureToAction(String gestureName) {
+    addGestureToAction(gestureName, null);
+  };
+
+  public void addGestureToAction(String gestureName, Integer index) {
+    addAction(Action.createGestureToAction(gestureName), index);
+  }
+
+  public void addMoveToAction(List<String> servos) {
+    addMoveToAction(servos, null);
+  }
+
+  /**
+   * list of servos to add to an action - they're current speed and input
+   * positions will be added at index
+   * 
+   * @param servos
+   * @param index
+   */
+  public void addMoveToAction(List<String> servos, Integer index) {
+    Map<String, Map<String, Object>> moves = new TreeMap<>();
+    for (String servoName : servos) {
+      ServoControl sc = (ServoControl) Runtime.getService(servoName);
+      Map<String, Object> posAndSpeed = new TreeMap<>();
+      if (sc == null) {
+        error("%s not a valid service name", servoName);
+        continue;
+      }
+      posAndSpeed.put("position", sc.getCurrentInputPos());
+      posAndSpeed.put("speed", sc.getSpeed());
+      moves.put(servoName, posAndSpeed);
+    }
+    addAction(Action.createMoveToAction(moves), index);
+  }
+
+  public void addMoveToAction(Map<String, Map<String, Object>> moves) {
+    addMoveToAction(moves, null);
+  }
+
+  public void addMoveToAction(Map<String, Map<String, Object>> moves, Integer index) {
+    addAction(Action.createMoveToAction(moves), index);
   }
 
   /**
@@ -294,10 +418,28 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     return filename;
   }
 
-  public void saveGesture(String name) {
-    // FIXME - warn if overwrite
-    // FIXME - don't warn if opened
-    saveGesture(name, currentGesture);
+  public void addProcessingAction(String methodName) {
+    addProcessingAction(methodName, null);
+  }
+
+  public void addProcessingAction(String methodName, Integer index) {
+    addAction(Action.createProcessingAction(methodName), index);
+  }
+
+  public void addSleepAction(double sleep) {
+    addSleepAction(sleep, null);
+  }
+
+  public void addSleepAction(double sleep, Integer index) {
+    addAction(Action.createSleepAction(sleep), index);
+  }
+
+  public void addSpeakAction(Map<String, Object> speechCommand) {
+    addSpeakAction(speechCommand, null);
+  }
+
+  public void addSpeakAction(Map<String, Object> speechCommand, Integer index) {
+    addAction(Action.createSpeakAction(speechCommand), index);
   }
 
   /**
@@ -308,24 +450,14 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     if (attachable instanceof Servo) {
       attachServo((Servo) attachable);
     }
-  };
+  }
 
   /**
    * attach(String) should always have the implementation
    */
   @Override
   public void attach(String name) {
-      allServos.add(name);
-      // refresh subscribers
-      invoke("getServos");
-  }
-  
-  /**
-   * detach(String) should always have the implementation
-   */
-  @Override
-  public void detach(String name) {
-    allServos.remove(name);
+    allServos.add(name);
     // refresh subscribers
     invoke("getServos");
   }
@@ -339,6 +471,20 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    */
   public void attachServo(Servo servo) {
     attach(servo.getName());
+  }
+
+  /**
+   * detach(String) should always have the implementation
+   */
+  @Override
+  public void detach(String name) {
+    allServos.remove(name);
+    // refresh subscribers
+    invoke("getServos");
+  }
+
+  public Gesture getGesture() {
+    return currentGesture;
   }
 
   public Gesture getGesture(String name) {
@@ -404,9 +550,10 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   public String getPosesDirectory() {
     return config.posesDir;
   }
-  
+
   /**
    * get a refreshed ordered list of servos
+   * 
    * @return
    */
   public Set<String> getServos() {
@@ -431,34 +578,61 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     return servos;
   }
 
-  public void step(int index) {
-    step(currentEditGestureName, index);
+  public void moveActionDown(int index) {
+    if (currentGesture == null) {
+      error("cannot move: gesture not set");
+      return;
+    }
+
+    List<Action> list = currentGesture.actions;
+
+    if (index >= 0 && index < list.size() - 1) {
+      Action action = list.remove(index);
+      list.add(index + 1, action);
+    } else {
+      error("index out of range or at the end of the list.");
+    }
+    invoke("getGesture");
   }
 
-  public void step(String gestureName, int index) {
-
-    if (gestureName == null) {
-      error("gesture name cannot be null");
-      return;
-    }
-
-    if (!gestureName.equals(currentEditGestureName)) {
-      // load gesture
-      getGesture(gestureName);
-    }
-
+  public void moveActionUp(int index) {
     if (currentGesture == null) {
-      error("gesture cannot be nulle");
+      error("cannot move gesture not set");
       return;
     }
 
-    player.processAction(new PlayingGesture(gestureName, currentGesture), index);
-    // step to next action
-    index++;
-    if (index < currentGesture.actions.size()) {
-      Action action = currentGesture.actions.get(index);
-      invoke("publishPlayingAction", action);
-      invoke("publishPlayingActionIndex", index);
+    List<Action> list = currentGesture.actions;
+
+    if (index > 0 && index < list.size()) {
+      Action action = list.remove(index);
+      list.add(index - 1, action);
+    } else {
+      error("index out of range or at the beginning of the list.");
+    }
+    invoke("getGesture");
+  }
+
+  private void moveTo(String servoName, Map<String, Object> move) {
+    ServoControl servo = (ServoControl) Runtime.getService(servoName);
+    if (servo == null) {
+      warn("servo (%s) cannot move to pose because it does not exist", servoName);
+      return;
+    }
+
+    Object speed = move.get("speed");
+    if (speed != null) {
+      if (speed instanceof Integer) {
+        servo.setSpeed((Integer) speed);
+      } else if (speed instanceof Double) {
+        servo.setSpeed((Double) speed);
+      }
+    }
+
+    Object position = move.get("position");
+    if (position instanceof Integer) {
+      servo.moveTo((Integer) position);
+    } else if (position instanceof Double) {
+      servo.moveTo((Double) position);
     }
   }
 
@@ -534,6 +708,24 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
   public void onStopped(String name) {
   }
 
+  public Gesture openGesture(String name) {
+    if (currentGesture != null) {
+      warn("replacing current gesture");
+      // prompt user return null etc.
+    }
+
+    Gesture gesture = getGesture(name);
+    if (gesture == null) {
+      // gesture not found make new
+      gesture = new Gesture();
+    }
+
+    currentEditGestureName = name;
+    currentGesture = gesture;
+
+    return currentGesture;
+  }
+
   public void playGesture(String name) {
     // Gesture gesture = (Gesture) broadcast("getGesture", name);
     invoke("getGesture", name);
@@ -585,17 +777,6 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     return name;
   }
 
-  /**
-   * Processing publishing point, where everything InMoov2 wants to be processed
-   * is turned into a message and published.
-   * 
-   * @param msg
-   * @return
-   */
-  public Message publishProcessMessage(Message msg) {
-    return msg;
-  }
-
   public String publishStopPose(String name) {
     return name;
   }
@@ -609,6 +790,23 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
    */
   public String publishText(String text) {
     return text;
+  }
+
+  public void removeActionFromGesture(int index) {
+    try {
+
+      Gesture gesture = getGesture();
+      if (gesture == null) {
+        error("gesture not set");
+        return;
+      }
+      if (gesture.actions.size() != 0 && index < gesture.actions.size()) {
+        gesture.actions.remove(index);
+      }
+
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void removeGesture(String name) {
@@ -632,62 +830,22 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     }
   }
 
-  public void moveActionUp(int index) {
-    if (currentGesture == null) {
-      error("cannot move gesture not set");
-      return;
-    }
-
-    List<Action> list = currentGesture.actions;
-
-    if (index > 0 && index < list.size()) {
-      Action action = list.remove(index);
-      list.add(index - 1, action);
-    } else {
-      error("index out of range or at the beginning of the list.");
-    }
-    invoke("getGesture");
-  }
-
-  public void moveActionDown(int index) {
-    if (currentGesture == null) {
-      error("cannot move: gesture not set");
-      return;
-    }
-
-    List<Action> list = currentGesture.actions;
-
-    if (index >= 0 && index < list.size() - 1) {
-      Action action = list.remove(index);
-      list.add(index + 1, action);
-    } else {
-      error("index out of range or at the end of the list.");
-    }
-    invoke("getGesture");
-  }
-
-  public void removeActionFromGesture(int index) {
-    try {
-
-      Gesture gesture = getGesture();
-      if (gesture == null) {
-        error("gesture not set");
-        return;
-      }
-      if (gesture.actions.size() != 0 && index < gesture.actions.size()) {
-        gesture.actions.remove(index);
-      }
-
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
   public void rest() {
     for (String servo : allServos) {
       Servo s = (Servo) Runtime.getService(servo);
       s.rest();
     }
+  }
+
+  public void saveGesture() {
+    // FIXME check if exists - ask overwrite
+    saveGesture(currentEditGestureName, currentGesture);
+  }
+
+  public void saveGesture(String name) {
+    // FIXME - warn if overwrite
+    // FIXME - don't warn if opened
+    saveGesture(name, currentGesture);
   }
 
   /**
@@ -767,224 +925,6 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
     broadcastState();
   }
 
-  @Override
-  public void startService() {
-    try {
-      new File(config.posesDir).mkdirs();
-      new File(config.gesturesDir).mkdirs();
-
-      Runtime.getInstance().attachServiceLifeCycleListener(getName());
-
-      List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
-      for (String sc : all) {
-        attach(sc);
-      }
-
-      File poseDirectory = new File(config.posesDir);
-      if (!poseDirectory.exists()) {
-        poseDirectory.mkdirs();
-      }
-      super.startService();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
-  /**
-   * stop the current running gesture
-   */
-  public void stop() {
-    player.stop();
-  }
-
-  @Override
-  public void stopService() {
-    super.stopService();
-    player.stop();
-  }
-
-  public static void main(String[] args) throws Exception {
-
-    try {
-      Runtime.main(new String[] { "--id", "admin" });
-      LoggingFactory.init("INFO");
-
-      Runtime.start("i01.head.rothead", "Servo");
-      Runtime.start("i01.head.neck", "Servo");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      Python python = (Python) Runtime.start("python", "Python");
-      ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
-      // mixer.playGesture("");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      mixer.addNewGestureFile("test");
-      Gesture gesture = mixer.getGesture("test");
-      String gestureName = "aaa";
-      String servoName = "i01.head.rothead";
-      Double position = 90.0;
-      Double speed = null;
-
-      Map<String, Map<String, Object>> moves = new TreeMap<>();
-
-      Map<String, Object> poseMove1 = new TreeMap<>();
-      poseMove1.put("position", 90.0);
-
-      Map<String, Object> poseMove2 = new TreeMap<>();
-      poseMove2.put("position", 90);
-      poseMove2.put("speed", 35.0);
-
-      moves.put("i01.head.rothead", poseMove1);
-      moves.put("i01.head.neck", poseMove2);
-
-      mixer.openGesture(gestureName);
-      mixer.addMoveToAction(moves); // autofill delay from keyframe ?
-      mixer.saveGesture();
-
-      mixer.addNewGestureFile("test2");
-
-      // mixer.save(gestureName);
-      mixer.addGestureToAction("test");
-
-      mixer.saveGesture();
-
-      // mixer.setPose("test", )
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  public void addGestureToAction(String gestureName) {
-    addGestureToAction(gestureName, null);
-  }
-
-  public void addGestureToAction(String gestureName, Integer index) {
-    addAction(Action.createGestureToAction(gestureName), index);
-  }
-
-  public void saveGesture() {
-    // FIXME check if exists - ask overwrite
-    saveGesture(currentEditGestureName, currentGesture);
-  }
-
-  public Gesture openGesture(String name) {
-    if (currentGesture != null) {
-      warn("replacing current gesture");
-      // prompt user return null etc.
-    }
-
-    Gesture gesture = getGesture(name);
-    if (gesture == null) {
-      // gesture not found make new
-      gesture = new Gesture();
-    }
-
-    currentEditGestureName = name;
-    currentGesture = gesture;
-
-    return currentGesture;
-  }
-
-  public void addSpeakAction(Map<String, Object> speechCommand) {
-    addSpeakAction(speechCommand, null);
-  }
-
-  public void addSpeakAction(Map<String, Object> speechCommand, Integer index) {
-    addAction(Action.createSpeakAction(speechCommand), index);
-  }
-
-  public void addMoveToAction(List<String> servos) {
-    addMoveToAction(servos, null);
-  }
-
-  /**
-   * list of servos to add to an action - they're current speed and input
-   * positions will be added at index
-   * 
-   * @param servos
-   * @param index
-   */
-  public void addMoveToAction(List<String> servos, Integer index) {
-    Map<String, Map<String, Object>> moves = new TreeMap<>();
-    for (String servoName : servos) {
-      ServoControl sc = (ServoControl) Runtime.getService(servoName);
-      Map<String, Object> posAndSpeed = new TreeMap<>();
-      if (sc == null) {
-        error("%s not a valid service name", servoName);
-        continue;
-      }
-      posAndSpeed.put("position", sc.getCurrentInputPos());
-      posAndSpeed.put("speed", sc.getSpeed());
-      moves.put(servoName, posAndSpeed);
-    }
-    addAction(Action.createMoveToAction(moves), index);
-  }
-
-  public void addMoveToAction(Map<String, Map<String, Object>> moves) {
-    addMoveToAction(moves, null);
-  }
-
-  public void addMoveToAction(Map<String, Map<String, Object>> moves, Integer index) {
-    addAction(Action.createMoveToAction(moves), index);
-  }
-
-  public void addAction(Action action, Integer index) {
-    if (currentGesture == null) {
-      error("current gesture not set");
-      return;
-    }
-    if (index != null) {
-      if (currentGesture.actions.size() == 0) {
-        currentGesture.actions.add(action);
-      } else {
-        currentGesture.actions.add(index, action);
-      }
-    } else {
-      currentGesture.actions.add(action);
-    }
-  }
-
-  public void addSleepAction(double sleep) {
-    addSleepAction(sleep, null);
-  }
-
-  public void addSleepAction(double sleep, Integer index) {
-    addAction(Action.createSleepAction(sleep), index);
-  }
-
-  public Gesture getGesture() {
-    return currentGesture;
-  }
-
-  private void moveTo(String servoName, Map<String, Object> move) {
-    ServoControl servo = (ServoControl) Runtime.getService(servoName);
-    if (servo == null) {
-      warn("servo (%s) cannot move to pose because it does not exist", servoName);
-      return;
-    }
-
-    Object speed = move.get("speed");
-    if (speed != null) {
-      if (speed instanceof Integer) {
-        servo.setSpeed((Integer) speed);
-      } else if (speed instanceof Double) {
-        servo.setSpeed((Double) speed);
-      }
-    }
-
-    Object position = move.get("position");
-    if (position instanceof Integer) {
-      servo.moveTo((Integer) position);
-    } else if (position instanceof Double) {
-      servo.moveTo((Double) position);
-    }
-  }
-
   private void speak(Map<String, Object> speechPart) {
     if (config.mouth == null) {
       warn("mouth configuration not set");
@@ -1009,6 +949,73 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       error(e);
     }
 
+  }
+
+  @Override
+  public void startService() {
+    try {
+      new File(config.posesDir).mkdirs();
+      new File(config.gesturesDir).mkdirs();
+
+      Runtime.getInstance().attachServiceLifeCycleListener(getName());
+
+      List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
+      for (String sc : all) {
+        attach(sc);
+      }
+
+      File poseDirectory = new File(config.posesDir);
+      if (!poseDirectory.exists()) {
+        poseDirectory.mkdirs();
+      }
+      super.startService();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public void step(int index) {
+    step(currentEditGestureName, index);
+  }
+
+  public void step(String gestureName, int index) {
+
+    if (gestureName == null) {
+      error("gesture name cannot be null");
+      return;
+    }
+
+    if (!gestureName.equals(currentEditGestureName)) {
+      // load gesture
+      getGesture(gestureName);
+    }
+
+    if (currentGesture == null) {
+      error("gesture cannot be nulle");
+      return;
+    }
+
+    player.processAction(new PlayingGesture(gestureName, currentGesture), index);
+    // step to next action
+    index++;
+    if (index < currentGesture.actions.size()) {
+      Action action = currentGesture.actions.get(index);
+      invoke("publishPlayingAction", action);
+      invoke("publishPlayingActionIndex", index);
+    }
+  }
+
+  /**
+   * stop the current running gesture
+   */
+  public void stop() {
+    player.stop();
+  }
+
+  @Override
+  public void stopService() {
+    super.stopService();
+    player.stop();
   }
 
 }

@@ -25,6 +25,7 @@ import org.myrobotlab.service.config.Py4jConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Executor;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.Processor;
 import org.slf4j.Logger;
 
 import py4j.GatewayServer;
@@ -54,7 +55,7 @@ import py4j.Py4JServerConnection;
  * 
  * @author GroG
  */
-public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, Gateway {
+public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, Gateway, Processor {
 
   /**
    * POJO class to tie all the data elements of a external python process
@@ -235,17 +236,19 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * 
    * @param code The Python code to execute in the interpreter.
    */
-  public void exec(String code) {
+  public boolean exec(String code) {
     log.info(String.format("exec %s", code));
     try {
       if (handler != null) {
         handler.exec(code);
+        return true;
       } else {
         error("handler is null");
       }
     } catch (Exception e) {
       error(e);
     }
+    return false;
   }
 
   private String getClientKey(Py4JServerConnection gatewayConnection) {
