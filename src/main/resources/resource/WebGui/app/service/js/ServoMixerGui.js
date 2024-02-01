@@ -17,6 +17,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       displayName: null,
     }
 
+    // FIXME - depricate this for $scope.service.allServos
     $scope.servos = []
     $scope.sliders = []
     // list of current pose files
@@ -125,45 +126,12 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
           }
           $scope.$apply()
           break
-        case "onListAllServos":
-          // servos sliders are either in "tracking" or "control" state
-          // "tracking" they are moving from callback position info published by servos
-          // "control" they are sending control messages to the servos
-          $scope.servos = data
-          for (var servo of $scope.servos) {
-            // dynamically build sliders
-            $scope.sliders[servo.name] = {
-              value: 0,
-              tracking: false,
-              options: {
-                id: servo.name,
-                floor: 0,
-                ceil: 180,
-                onStart: function (id) {
-                  console.info("ServoMixer.onStart")
-                },
-                onChange: function (id) {
-                  _self.onSliderChange(id)
-                },
-                /*
-                        onChange: function() {
-                            if (!this.tracking) {
-                                // if not tracking then control
-                                msg.sendTo(servo, 'moveToX', sliders[servo].value)
-                            }
-                        },*/
-                onEnd: function (id) {},
-              },
-            }
-            // dynamically add callback subscriptions
-            // these are "intermediate" subscriptions in that they
-            // don't send a subscribe down to service .. yet
-            // that must already be in place (and is in the case of Servo.publishServoEvent)
-            // FIXME .. servo.getName() == servo.getFullName() :( - needs to be done in framework
-            msg.subscribeTo(_self, servo.name + "@" + servo.id, "publishServoEvent")
-          }
+        case "onServos":
+          console.info('here')
+          $scope.service.allServos = data
           $scope.$apply()
           break
+              
         default:
           console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
           break
@@ -173,11 +141,11 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
     $scope.addMoveToAction = function () {
       let moves = {}
       let hasSelected = false
-      if ($scope.servos) {
-        $scope.servos.forEach((servo) => {
-          if (mrl.getPanel(mrl.getShortName(servo.name)).selected){
+      if ($scope.service.allServos) {
+        $scope.service.allServos.forEach((servo) => {
+          if (mrl.getPanel(mrl.getShortName(servo)).selected){
           // if (servo.selected) {
-            moves[mrl.getShortName(servo.name)] = {
+            moves[mrl.getShortName(servo)] = {
               position: servo.currentInputPos,
               speed: servo.speed,
             }
@@ -192,7 +160,7 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
         msg.send("getGesture")
         $scope.state.gestureIndex = parseInt($scope.state.gestureIndex) + 1 + ""
       } else {
-        mrl.send("error", "no selected servos")
+        msg.send("error", "no selected servos")
       }
     }
 
@@ -330,12 +298,12 @@ angular.module("mrlapp.service.ServoMixerGui", []).controller("ServoMixerGuiCtrl
       service.speedBar = !service.speedBar
     }
 
+    msg.subscribe("getServos")
     msg.subscribe("getGesture")
     msg.subscribe("getGestureFiles")
-    msg.subscribe("listAllServos")
     msg.subscribe("search")
 
-    msg.send("listAllServos")
+    msg.send("getServos")
     msg.send("getGestureFiles")
 
     msg.subscribe("publishPlayingAction")
