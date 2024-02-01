@@ -25,6 +25,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.Processor;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener {
+public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener, Processor {
   
   /**
    * this thread handles all callbacks to Python process all input and sets msg
