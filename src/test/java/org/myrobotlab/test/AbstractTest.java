@@ -90,7 +90,7 @@ public class AbstractTest {
     
     // setup runtime resource = src/main/resources/resource
     File runtimeYml = new File("data/conf/default/runtime.yml");
-    if (!runtimeYml.exists()) {
+//    if (!runtimeYml.exists()) {
       runtimeYml.getParentFile().mkdirs();
       RuntimeConfig rc = new RuntimeConfig();
       rc.resource = "src/main/resources/resource";
@@ -101,7 +101,7 @@ public class AbstractTest {
       fos.write(yml.getBytes());
       fos.close();
       
-    }
+//    }
 
     Platform.setVirtual(true);
 
