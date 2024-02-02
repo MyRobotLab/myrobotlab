@@ -89,7 +89,7 @@ public class AbstractTest {
   public static void setUpAbstractTest() throws Exception {
     
     // setup runtime resource = src/main/resources/resource
-    File runtimeYml = new File("data/conf/default/runtime.yml");
+    File runtimeYml = new File("data/config/default/runtime.yml");
 //    if (!runtimeYml.exists()) {
       runtimeYml.getParentFile().mkdirs();
       RuntimeConfig rc = new RuntimeConfig();
