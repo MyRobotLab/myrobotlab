@@ -91,6 +91,7 @@ public class AbstractTest {
     // setup runtime resource = src/main/resources/resource
     File runtimeYml = new File("data/conf/default/runtime.yml");
     if (!runtimeYml.exists()) {
+      runtimeYml.getParentFile().mkdirs();
       RuntimeConfig rc = new RuntimeConfig();
       rc.resource = "src/main/resources/resource";
       String yml = CodecUtils.toYaml(rc);
