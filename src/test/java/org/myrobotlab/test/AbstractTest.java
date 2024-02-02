@@ -1,5 +1,7 @@
 package org.myrobotlab.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,10 +15,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
 public class AbstractTest {
@@ -83,6 +87,20 @@ public class AbstractTest {
 
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
+    
+    // setup runtime resource = src/main/resources/resource
+    File runtimeYml = new File("data/conf/default/runtime.yml");
+    if (!runtimeYml.exists()) {
+      RuntimeConfig rc = new RuntimeConfig();
+      rc.resource = "src/main/resources/resource";
+      String yml = CodecUtils.toYaml(rc);
+      
+      FileOutputStream fos = null;
+      fos = new FileOutputStream(runtimeYml);
+      fos.write(yml.getBytes());
+      fos.close();
+      
+    }
 
     Platform.setVirtual(true);
 
