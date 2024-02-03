@@ -236,6 +236,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * 
    * @param code The Python code to execute in the interpreter.
    */
+  @Override
   public boolean exec(String code) {
     log.info(String.format("exec %s", code));
     try {
