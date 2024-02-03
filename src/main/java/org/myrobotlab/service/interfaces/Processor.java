@@ -3,6 +3,7 @@ package org.myrobotlab.service.interfaces;
 public interface Processor {
 
   /**
+   * A generalized processing interface currently serving both Python and Py4j.
    * 
    * FIXME - this should be refactored to return an Object
    * but I don't want to break anything for now
