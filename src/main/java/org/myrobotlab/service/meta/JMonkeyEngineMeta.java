@@ -38,8 +38,8 @@ public class JMonkeyEngineMeta extends MetaData {
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
     // audio dependencies
     addDependency("de.jarnbjo", "j-ogg-all", "1.0.0");
-    addDependency("org.lwjgl", "lwjgl-opengl", "3.2.3");
-    addDependency("org.lwjgl", "lwjgl-glfw", "3.2.3");
+    addDependency("org.lwjgl", "lwjgl-opengl", "3.3.3");
+    addDependency("org.lwjgl", "lwjgl-glfw", "3.3.3");
 
     addCategory("simulator");
 

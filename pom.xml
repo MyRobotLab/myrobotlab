@@ -551,13 +551,13 @@
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-glfw</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.3</version>
       <scope>provided</scope>
     </dependency>
     <!-- JMonkeyEngine end -->
