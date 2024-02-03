@@ -2,10 +2,19 @@ package org.myrobotlab.kinematics;
 
 import java.util.Map;
 
+/**
+ * An Action is a part of a sequence of actions which can be executed by the
+ * ServoMixer. An action can have different types, such as moveTo, speak, sleep,
+ * and process. This gives each gesture the ability to be scripted with multiple
+ * actions.
+ * 
+ * @author GroG
+ *
+ */
 public class Action {
   // consider enum type
   enum Type {
-    moveTo, speak, sleep, message
+    moveTo, speak, sleep, process
   }
 
   /**
@@ -32,11 +41,10 @@ public class Action {
   public static Action createMoveToAction(Map<String, Map<String, Object>> moves) {
     Action action = new Action();
     action.type = "moveTo";
-    // TODO - check validity of moves 
     action.value = moves;
     return action;
   }
-  
+
   public static Action createSleepAction(double sleep) {
     Action action = new Action();
     action.type = "sleep";
@@ -55,6 +63,13 @@ public class Action {
     Action action = new Action();
     action.type = "gesture";
     action.value = gestureName;
+    return action;
+  }
+
+  public static Action createProcessingAction(String methodName) {
+    Action action = new Action();
+    action.type = "process";
+    action.value = methodName;
     return action;
   }
 }

@@ -22,5 +22,10 @@ public class ServoMixerConfig extends ServiceConfig {
    * speech service name
    */
   public String mouth;
+
+  /**
+   * name of the default processor
+   */
+  public String processor = "python";
   
 }
