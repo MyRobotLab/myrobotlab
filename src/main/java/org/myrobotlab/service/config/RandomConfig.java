@@ -12,11 +12,15 @@ public class RandomConfig extends ServiceConfig {
     public long minIntervalMs;
     public long maxIntervalMs;
     public boolean enabled = true;
+    public String service;
+    public String method;
     
     public RandomMessageConfig() {
     }
 
-    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, double... ranges) {
+    public RandomMessageConfig(String service, String method, long minIntervalMs, long maxIntervalMs, double... ranges) {
+      this.service = service;
+      this.method = method;
       this.minIntervalMs = minIntervalMs;
       this.maxIntervalMs = maxIntervalMs;
       this.data = new Range[ranges.length / 2];
@@ -29,7 +33,9 @@ public class RandomConfig extends ServiceConfig {
       }
     }
 
-    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, int... ranges) {
+    public RandomMessageConfig(String service, String method, long minIntervalMs, long maxIntervalMs, int... ranges) {
+      this.service = service;
+      this.method = method;
       this.minIntervalMs = minIntervalMs;
       this.maxIntervalMs = maxIntervalMs;
       this.data = new Range[ranges.length / 2];
@@ -42,7 +48,9 @@ public class RandomConfig extends ServiceConfig {
       }
     }
 
-    public RandomMessageConfig(long minIntervalMs, long maxIntervalMs, float... ranges) {
+    public RandomMessageConfig(String service, String method, long minIntervalMs, long maxIntervalMs, float... ranges) {
+      this.service = service;
+      this.method = method;
       this.minIntervalMs = minIntervalMs;
       this.maxIntervalMs = maxIntervalMs;
       for (int i = 0; i < (ranges.length / 2); i += 2) {
@@ -55,7 +63,18 @@ public class RandomConfig extends ServiceConfig {
 
   }
 
+  /**
+   * enable or disables all random tasks
+   */
   public boolean enabled = true;
+  
+  /**
+   * map of random data for messaage creation
+   */
   public Map<String, RandomMessageConfig> randomMessages = new HashMap<>();
+  /**
+   * rate at which each random data enqueued is sampled and evaluated
+   */
+  public long rate = 100L;
 
 }

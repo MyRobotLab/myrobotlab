@@ -66,7 +66,7 @@ import org.slf4j.Logger;
  *         EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class Ads1115 extends Service implements I2CControl, PinArrayControl {
+public class Ads1115 extends Service<Ads1115Config> implements I2CControl, PinArrayControl {
   /**
    * Publisher - Publishes pin data at a regular interval
    * 
@@ -1165,8 +1165,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    Ads1115Config config = (Ads1115Config)super.getConfig();
+  public Ads1115Config getConfig() {
+    super.getConfig();
     // FIXME remove member variables - use config only
     config.bus = deviceBus;
     config.address = deviceAddress;
@@ -1175,8 +1175,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Ads1115Config config = (Ads1115Config) super.apply(c);
+  public Ads1115Config apply(Ads1115Config c) {
+    super.apply(c);
     deviceBus = config.bus;
     deviceAddress = config.address;
     if (config.controller != null) {

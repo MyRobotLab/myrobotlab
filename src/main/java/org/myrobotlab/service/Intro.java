@@ -13,9 +13,10 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class Intro extends Service {
+public class Intro extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -61,7 +62,7 @@ public class Intro extends Service {
 
   /**
    * @param introScriptName
-   *          execute an Intro resource script
+   *                        execute an Intro resource script
    */
   public void execScript(String introScriptName) {
     try {
@@ -77,7 +78,7 @@ public class Intro extends Service {
    * This method will load a python file into the python interpreter.
    * 
    * @param file
-   *          the python file to load
+   *             the python file to load
    * @return true/false
    */
   @Deprecated
@@ -126,7 +127,6 @@ public class Intro extends Service {
       // Runtime.start("intro", "Intro");
 
       // Runtime.release("python");
-      // Runtime.releaseAll();
       Runtime.start("python", "Python");
       // Runtime.start("mega", "Arduino");
       // Runtime.start("ada", "Adafruit16CServoDriver");

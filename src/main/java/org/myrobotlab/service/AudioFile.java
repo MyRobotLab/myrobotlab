@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,17 +45,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.audio.PlaylistPlayer;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.config.AudioFileConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.interfaces.AudioControl;
+import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.AudioPublisher;
 import org.slf4j.Logger;
-import java.util.Random;
 /**
  * 
  * AudioFile - This service can be used to play an audio file such as an mp3.
@@ -62,7 +63,7 @@ import java.util.Random;
  * TODO - publishPeak interface
  *
  */
-public class AudioFile extends Service implements AudioPublisher, AudioControl {
+public class AudioFile extends Service<AudioFileConfig> implements AudioPublisher, AudioControl {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(AudioFile.class);
 
@@ -128,7 +129,16 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
-
+  public void attach(Attachable attachable) {
+    if (attachable instanceof AudioListener) {
+      attachAudioListener(attachable.getName());
+    }
+  }
+  
+  public void attach(AudioListener listener) {
+    attachAudioListener(listener.getName());
+  }
+  
   public void setPeakMultiplier(double peakMultiplier) {
     AudioFileConfig c = (AudioFileConfig)config;
     c.peakMultiplier = peakMultiplier;
@@ -165,6 +175,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   public AudioData play(String filename) {
+    log.info("Audio file playing {}", filename);
     return play(filename, false);
   }
 
@@ -174,6 +185,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
 
   public AudioData play(String filename, boolean blocking, Integer repeat, String track) {
 
+    log.info("Play called for Filename {}", filename);
     if (track == null || track.isEmpty()) {
       track = currentTrack;
     }
@@ -221,10 +233,10 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     data.track = track;
     data.repeat = repeat;
 
-    return play(data);
+    return playAudioData(data);
   }
 
-  public AudioData play(AudioData data) {
+  public AudioData playAudioData(AudioData data) {
     // use File interface such that filename is preserved
     // but regardless of location (e.g. url, local, resource)
     // or type (mp3 wav) a stream is opened and the
@@ -380,7 +392,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     // TODO Auto-generated method stub
     AudioData data = new AudioData(filename);
     data.repeat = count;
-    return play(data);
+    return playAudioData(data);
   }
 
   @Deprecated /* use setTrack() */
@@ -517,7 +529,7 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public AudioFileConfig getConfig() {
 
     AudioFileConfig c = (AudioFileConfig) super.getConfig();
     // FIXME - remove members keep data in config !
@@ -535,9 +547,8 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    AudioFileConfig config = (AudioFileConfig) super.apply(c);
+  public AudioFileConfig apply(AudioFileConfig config) {
+    super.apply(config);
     setMute(config.mute);
     setTrack(config.currentTrack);
     setVolume(config.volume);
@@ -552,15 +563,11 @@ public class AudioFile extends Service implements AudioPublisher, AudioControl {
       }
     }
     
-    // FIXME - THIS IS ALL THATS NEEDED AND IT CAN BE 
-    // DONE IN THE SERVICE LEVEL
-    // if services need "special" handling they can override
-    this.config = c;
-    return c;
+    return config;
   }
 
   public double publishPeak(double peak) {
-    log.info("publishPeak {}", peak);
+    log.debug("publishPeak {}", peak);
     return peak;
   }
   

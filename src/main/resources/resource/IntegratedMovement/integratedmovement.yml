@@ -1,8 +1,0 @@
-!!org.myrobotlab.service.config.IntegratedMovementConfig
-listeners: null
-peers:
-  openni:
-    autoStart: true
-    name: integratedmovement.openni
-    type: OpenNi
-type: IntegratedMovement

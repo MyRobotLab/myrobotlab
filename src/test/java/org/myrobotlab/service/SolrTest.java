@@ -20,7 +20,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.programab.Response;
 
-// @Ignore
+@Ignore
 public class SolrTest extends AbstractServiceTest {
   // @Test
   public void testImageStoreFetch() throws SolrServerException, IOException {

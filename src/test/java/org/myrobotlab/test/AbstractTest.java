@@ -30,8 +30,6 @@ public class AbstractTest {
 
   static private boolean logWarnTestHeader = false;
 
-  private static boolean releaseRemainingServices = true;
-
   private static boolean releaseRemainingThreads = false;
 
   protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
@@ -42,9 +40,9 @@ public class AbstractTest {
 
   @Rule
   public final TestName testName = new TestName();
-  
+
   static public String simpleName;
-  
+
   private static boolean lineFeedFooter = true;
 
   public String getSimpleName() {
@@ -100,7 +98,6 @@ public class AbstractTest {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
     installAll();
-    Runtime.clearPlan();
   }
 
   static public List<String> getThreadNames() {
@@ -123,9 +120,7 @@ public class AbstractTest {
   public static void tearDownAbstractTest() throws Exception {
     log.info("tearDownAbstractTest");
 
-    if (releaseRemainingServices) {
-      releaseServices();
-    }
+    releaseServices();
 
     if (logWarnTestHeader) {
       log.warn("=========== finished test {} ===========", simpleName);
@@ -150,19 +145,23 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.info("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
-    
+    log.info("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(),
+        Arrays.toString(Runtime.getServiceNames()));
+
     // release all including runtime - be careful of default runtime.yml
-    // Runtime.releaseAll(true, true);
-    Runtime.releaseAll();
+    Runtime.releaseAll(true, true);
+    // wait for draining threads
     sleep(100);
+    // resets runtime with fresh new instance
+    Runtime.getInstance();
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName())
+          && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
@@ -179,8 +178,10 @@ public class AbstractTest {
     if (threadsRemaining.size() > 0) {
       log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
-    
-    // log.warn("end of test - id {} remaining services after release {}", Platform.getLocalInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
+
+    // log.warn("end of test - id {} remaining services after release {}",
+    // Platform.getLocalInstance().getId(),
+    // Arrays.toString(Runtime.getServiceNames()));
   }
 
   public AbstractTest() {

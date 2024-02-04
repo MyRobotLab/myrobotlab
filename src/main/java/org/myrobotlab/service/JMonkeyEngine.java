@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.cv.CvData;
+import org.myrobotlab.cv.CVData;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
@@ -52,7 +50,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -124,7 +121,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
+public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
 
   final static String CAMERA = "camera";
 
@@ -405,10 +402,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // this is to support future (non-Java) classes that cannot be instantiated
     // and
     // are subclassed in a proxy class with getType() overloaded for to identify
+    /**<pre> DO NOT NEED THIS UNTIL JMONKEY DISPLAYS VIDEO DATA - SLAM MAPPING
     if (service.getTypeKey().equals("org.myrobotlab.service.OpenCV")) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
-    }
+    }</pre>
+     */
 
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
       // non-batched - "instantaneous" move data subscription
@@ -819,7 +818,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public Spatial get(String name, Node startNode) {
     Spatial ret = find(name, startNode);
     if (ret == null) {
-      error("get(%s) could not find child", name);
+      log.info("get({}) could not find child", name);
     }
     return ret;
   }
@@ -1469,7 +1468,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
     // PAN -- works(ish)
     if (mouseMiddle && shiftLeft) {
-      log.info("PAN !!!!");
+      log.debug("panning");
       switch (name) {
         case "mouse-axis-x":
         case "mouse-axis-x-negative":
@@ -1522,7 +1521,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * @param data
    *          cv data
    */
-  public void onCvData(CvData data) {
+  public void onCvData(CVData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
     // FIXME - do something interesting ... :)
   }
@@ -2157,7 +2156,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     new File(getDataDir()).mkdirs();
     new File(getResourceDir()).mkdirs();
 
-    // assetManager.registerLocator("./", FileLocator.class);
+    assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(modelsDir, FileLocator.class);
@@ -2672,8 +2671,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    JMonkeyEngineConfig config = (JMonkeyEngineConfig) super.getConfig();
+  public JMonkeyEngineConfig getConfig() {
+    super.getConfig();
 
     if (config.models != null) {
       Collections.sort(config.models);

@@ -18,7 +18,7 @@ public class PythonMeta extends MetaData {
     addCategory("programming", "control");
 
     includeServiceInOneJar(true);
-    addDependency("org.python", "jython-standalone", "2.7.1");
+    addDependency("org.python", "jython-standalone", "2.7.2");
 
   }
 

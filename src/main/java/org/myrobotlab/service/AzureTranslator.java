@@ -18,6 +18,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.Translator;
@@ -31,7 +32,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AzureTranslator extends Service implements Translator, TextListener, TextPublisher {
+public class AzureTranslator extends Service<ServiceConfig> implements Translator, TextListener, TextPublisher {
 
   private static final long serialVersionUID = 1L;
 

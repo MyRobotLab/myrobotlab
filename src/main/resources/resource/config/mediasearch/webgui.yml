@@ -1,0 +1,10 @@
+!!org.myrobotlab.service.config.WebGuiConfig
+autoStartBrowser: true
+enableMdns: false
+listeners: null
+peers: null
+port: 8888
+resources:
+- ./resource/WebGui/app
+- ./resource
+type: WebGui

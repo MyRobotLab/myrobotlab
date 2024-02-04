@@ -6,9 +6,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class Relay extends Service {
+public class Relay extends Service<ServiceConfig> {
 
   public Arduino arduino;
   public Integer pin;

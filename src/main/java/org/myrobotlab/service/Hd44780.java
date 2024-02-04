@@ -11,7 +11,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.Hd44780Config;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
@@ -25,7 +24,7 @@ import org.slf4j.Logger;
  * @author Moz4r modified by Ray Edgley.
  * 
  */
-public class Hd44780 extends Service implements TextListener {
+public class Hd44780 extends Service<Hd44780Config> implements TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
 
@@ -123,6 +122,10 @@ public class Hd44780 extends Service implements TextListener {
   @Override
   public void attach(String name) {
     ServiceInterface si = Runtime.getService(name);
+    if (si == null) {
+      error("could not attach to %s not found", name);
+      return;
+    }
     if (si instanceof Pcf8574) {
       attachPcf8574((Pcf8574) si);
       return;
@@ -720,8 +723,8 @@ public class Hd44780 extends Service implements TextListener {
    * Load the config into memory
    */
   @Override
-  public ServiceConfig getConfig() {
-    Hd44780Config config = (Hd44780Config) super.getConfig();
+  public Hd44780Config getConfig() {
+    super.getConfig();
     if (pcfName != null) {
       config.controller = pcfName;
     }
@@ -733,19 +736,19 @@ public class Hd44780 extends Service implements TextListener {
    * Applies the config to the service attaching to the PCF8574 if it exists.
    */
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Hd44780Config config = (Hd44780Config) super.apply(c);
+  public Hd44780Config apply(Hd44780Config c) {
+    super.apply(c);
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }
     }
 
-    if (pcf != null && config.backlight != null && config.backlight) {
-      setBackLight(config.backlight);
+    if (pcf != null && c.backlight != null && c.backlight) {
+      setBackLight(c.backlight);
     }
     return c;
   }

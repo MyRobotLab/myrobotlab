@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
@@ -13,6 +14,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2HandConfig;
 import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
@@ -29,7 +31,7 @@ import org.slf4j.Logger;
  * 
  * There is also leap motion support.
  */
-public class InMoov2Hand extends Service implements LeapDataListener, PinArrayListener {
+public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataListener, PinArrayListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2Hand.class);
 
@@ -488,8 +490,13 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return data;
   }
 
+  @Deprecated /* use onMove */
   public void onMoveHand(HashMap<String, Double> map) {
-    moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("majeure"), map.get("pinky"), map.get("wrist"));
+    onMove(map);
+  }
+
+  public void onMove(Map<String, Double> map) {
+    moveTo(map.get("thumb"), map.get("index"), map.get("majeure"), map.get("ringFinger"), map.get("pinky"), map.get("wrist"));
   }
 
   // FIXME - use pub/sub attach to set this up without having this method !

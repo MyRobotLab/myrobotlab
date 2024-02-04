@@ -124,6 +124,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
             // max range of slider bar
         }
 
+        if (service?.config?.controller){
+            $scope.servoOptions.attachName = service?.config?.controller
+        }
+
         $scope.idleSeconds = service.idleTimeout / 1000
         //         $scope.pos.options.minLimit = service.mapper.minX
         //         $scope.pos.options.maxLimit = service.mapper.maxX
@@ -241,6 +245,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scop
         msg.send('setIdleTimeout', idleTime * 1000)
     }
 
+    $scope.toggleServoSpeedBar = function (service) {
+      service.speedBar = !service.speedBar
+    }
+    
     $scope.map = function() {
 
         if ($scope.lockInputOutput) {

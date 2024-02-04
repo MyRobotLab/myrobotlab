@@ -5,9 +5,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
-public class Blocks extends Service {
+public class Blocks extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 

@@ -25,7 +25,5 @@ public class FiniteStateMachineConfig extends ServiceConfig {
 
   public String current = null;
   
-  // FIXME - deprecate in favor of listener subscriptions ??? overlapp problems if not
-  public List<String> messageListeners = new ArrayList<>();
 
 }

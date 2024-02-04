@@ -12,7 +12,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.UltrasonicSensorConfig;
 import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
@@ -30,19 +29,11 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements RangeListener, RangePublisher, UltrasonicSensorControl {
 
   private final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
   private static final long serialVersionUID = 1L;
-
-  // probably should do this in a util class
-  public static int byteArrayToInt(int[] b) {
-    return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
-  }
-
-  // currently not variable in NewPing.h
-  // Integer maxDistanceCm = 500;
 
   transient protected UltrasonicSensorController controller;
 
@@ -50,6 +41,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   transient protected BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
+  @Deprecated /* use directly from config - should be String */
   protected Integer echoPin = null;
 
   protected boolean isAttached = false;
@@ -75,6 +67,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   protected long timeout = 500;
 
+  @Deprecated /* use directly from config - should be String */
   protected Integer trigPin = null;
 
   protected final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
@@ -162,7 +155,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   @Override
   public UltrasonicSensorConfig getConfig() {
 
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig)super.getConfig();
+    super.getConfig();
     // FIXME - remove member variables use config directly
     config.controller = controllerName;
     config.triggerPin = trigPin;
@@ -223,6 +216,10 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   public int getTriggerPin() {
     return trigPin;
   }
+  
+  public boolean isAttached() {
+    return isAttached;
+  }
 
   @Override
   public boolean isAttached(String name) {
@@ -234,21 +231,21 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    UltrasonicSensorConfig config = (UltrasonicSensorConfig) super.apply(c);
+  public UltrasonicSensorConfig apply(UltrasonicSensorConfig c) {
+    super.apply(c);
 
-    if (config.triggerPin != null)
-      setTriggerPin(config.triggerPin);
+    if (c.triggerPin != null)
+      setTriggerPin(c.triggerPin);
 
-    if (config.echoPin != null)
-      setEchoPin(config.echoPin);
+    if (c.echoPin != null)
+      setEchoPin(c.echoPin);
 
-    if (config.timeout != null)
-      timeout = config.timeout;
+    if (c.timeout != null)
+      timeout = c.timeout;
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }
@@ -429,6 +426,10 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   @Override
   public void startRanging() {
+    if (controller == null || !controller.isConnected()) {
+      info("controller must be attached and connected to range");      
+      return;
+    }
     isRanging = true;
     controller.ultrasonicSensorStartRanging(this);
   }
@@ -436,7 +437,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   @Override
   public void stopRanging() {
     isRanging = false;
-    controller.ultrasonicSensorStopRanging(this);
+    if (controller != null) {
+      controller.ultrasonicSensorStopRanging(this);
+    }
   }
 
   public static void main(String[] args) {

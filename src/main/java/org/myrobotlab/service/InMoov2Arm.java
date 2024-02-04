@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
@@ -13,6 +12,7 @@ import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.config.InMoov2ArmConfig;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import org.slf4j.Logger;
  * startPeers() does
  *
  */
-public class InMoov2Arm extends Service implements IKJointAngleListener {
+public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2Arm.class);
 
@@ -89,7 +89,12 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return arm;
   }
   
+  @Deprecated /* use onMove */
   public void onMoveArm(HashMap<String, Double> map) {
+    onMove(map);
+  }
+
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("bicep"), map.get("rotate"), map.get("shoulder"), map.get("omoplate"));
   }
 

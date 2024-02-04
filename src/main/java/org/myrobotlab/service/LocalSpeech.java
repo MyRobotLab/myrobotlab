@@ -18,7 +18,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.LocalSpeechConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -53,7 +52,7 @@ import org.slf4j.Logger;
  *         https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
  */
-public class LocalSpeech extends AbstractSpeechSynthesis {
+public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
 
@@ -133,7 +132,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
       args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
       args.add("$speak.speak('" + toSpeak + "')");
-      String ret = Runtime.execute("powershell.exe", args, null, null, null);
+      String ret = Runtime.execute("powershell.exe", args, null, null, true);
 
       log.info("powershell returned : {}", ret);
 
@@ -207,8 +206,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     String voicesText = null;
 
+    // FIXME this is not right - it should be based on speechType not OS
+    // speechType should be "set" based on OS and user preference
     if (platform.isWindows()) {
-
+      
       try {
 
         List<String> args = new ArrayList<>();
@@ -220,7 +221,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
         args.add("Select-Object  -Property * | ");
         // args.add("Select-Object -Property Culture, Name, Gender, Age");
         args.add("ConvertTo-Json ");
-        voicesText = Runtime.execute("powershell.exe", args, null, null, null);
+        voicesText = Runtime.execute("powershell.exe", args, null, null, true);
 
         // voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\""
         // + " -V" + "\"");
@@ -270,9 +271,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
           addVoice(matcher.group(1).toLowerCase(), "male", matcher.group(2), matcher.group(1).toLowerCase());
         }
       }
-    } else if (platform.isLinux()) {
-      addVoice("Linus", "male", "en-US", "festival");
     }
+    // let apply config add and set the voices
+//    else if (platform.isLinux()) {
+//      addVoice("Linus", "male", "en-US", "festival");
+//    }
   }
 
   public void removeExt(boolean b) {
@@ -283,6 +286,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setEspeak sets the Linux tts to espeak template
    */
   public boolean setEspeak() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("espeak only supported on Linux");
+      return false;
+    }
+
     LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Espeak";
     voices.clear();
@@ -297,6 +305,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return setFestival sets the Linux tts to festival template
    */
   public boolean setFestival() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+
     LocalSpeechConfig c = (LocalSpeechConfig) config;
     voices.clear();
     addVoice("Linus", "male", "en-US", "festival");
@@ -304,10 +317,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
-    if (!Runtime.getPlatform().isLinux()) {
-      error("festival only supported on Linux");
-      return false;
-    }
     return true;
   }
 
@@ -317,6 +326,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * @return true if successfully switched
    */
   public boolean setPico2Wav() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("pico2wave only supported on Linux");
+      return false;
+    }
+    
     LocalSpeechConfig c = (LocalSpeechConfig) config;
     c.speechType = "Pico2Wav";
     removeExt(false);
@@ -329,12 +343,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     addVoice("es-ES", "female", "es-ES", "pico2wav");
     addVoice("fr-FR", "female", "fr-FR", "pico2wav");
     addVoice("it-IT", "female", "it-IT", "pico2wav");
+    
+    if (voice == null) {
+      setVoice(getLocale().getTag());
+    }
 
     setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
-    if (!Runtime.getPlatform().isLinux()) {
-      error("pico2wave only supported on Linux");
-      return false;
-    }
+ 
     broadcastState();
     return true;
   }
@@ -344,9 +359,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * Typically double quotes should be filtered out of the command as creating
    * the text to speech process command can be broken by double quotes
    * 
-   * @param filter
-   *          chars to filter.
-   * 
+   * @param target
+   * @param replace
    */
   public void addFilter(String target, String replace) {
     LocalSpeechConfig c = (LocalSpeechConfig) config;
@@ -478,31 +492,54 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public void setTtsPath(String ttsPath) {
     this.ttsPath = ttsPath;
   }
+  
+  public boolean isExecutableAvailable(String executableName) {
+    ProcessBuilder processBuilder = new ProcessBuilder();
+    String command = "";
+    boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+    if (isWindows) {
+        command = "where " + executableName;
+    } else {
+        command = "which " + executableName;
+    }
+    processBuilder.command("sh", "-c", command);
+    try {
+        Process process = processBuilder.start();
+        process.waitFor();
+        return process.exitValue() == 0;
+    } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 
-  @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    LocalSpeechConfig c = (LocalSpeechConfig) super.apply(config);
+  public LocalSpeechConfig apply(LocalSpeechConfig config) {
+    super.apply(config);
 
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
-    if (c.speechType == null) {
+    if (config.speechType == null) {
       if (platform.isWindows()) {
         setTts();
       } else if (platform.isMac()) {
         setSay();
       } else if (platform.isLinux()) {
-        setFestival();
+        if (isExecutableAvailable("pico2wave")) {
+          setPico2Wav();
+        } else {
+          setFestival();
+        }
       } else {
         error("%s unknown platform %s", getName(), platform.getOS());
       }
     } else {
-      setSpeechType(c.speechType);
+      setSpeechType(config.speechType);
     }
 
-    if (c.voice != null) {
-      setVoice(c.voice);
+    if (config.voice != null) {
+      setVoice(config.voice);
     }
-    return c;
+    return config;
   }
 
   public static void main(String[] args) {
@@ -539,7 +576,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       arguments.add("Add-Type -AssemblyName System.Speech;");
       arguments.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
       arguments.add("$speak.speak('HELLO !!!!');");
-      Runtime.execute("powershell.exe", arguments, null, null, null);
+      Runtime.execute("powershell.exe", arguments, null, null, true);
       // log.info(ret);
 
       mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");

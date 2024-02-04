@@ -13,7 +13,7 @@ import org.myrobotlab.service.config.ServiceConfig;
  * 
  */
 
-public class Motor extends AbstractMotor {
+public class Motor extends AbstractMotor<MotorConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -70,7 +70,7 @@ public class Motor extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {    
+  public MotorConfig getConfig() {    
     MotorConfig config = (MotorConfig)super.getConfig();
     config.dirPin = getDirPin();
     config.pwrPin = getPwrPin();
@@ -78,9 +78,8 @@ public class Motor extends AbstractMotor {
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MotorConfig config = (MotorConfig)super.apply(c);
+  public MotorConfig apply(MotorConfig config) {
+    super.apply(config);
     
     if (config.pwrPin != null) {
       setPwrPin(pwrPin);
@@ -91,7 +90,7 @@ public class Motor extends AbstractMotor {
     if (config.pwmFreq != null) {
       setPwmFreq(pwmFreq);
     }
-    return c;
+    return config;
   }
 
   public static void main(String[] args) {
@@ -195,6 +194,18 @@ public class Motor extends AbstractMotor {
       Logging.logError(e);
     }
 
+  }
+
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

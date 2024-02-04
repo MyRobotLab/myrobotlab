@@ -95,13 +95,16 @@ public class Util {
   // array [r][g][b]
   // TODO - fix arrggh head hurts
   final static String[][][] colorNameCube = {
-      { { "black", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "navy", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+      { { "black", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "navy", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" } },
 
-      { { "maroon", "xxx", "xxx" }, { "green", "xxx", "xxx" }, { "blue", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "gray", "xxx" }, { "xxx", "xxx", "xxx" },
+      { { "maroon", "xxx", "xxx" }, { "green", "xxx", "xxx" }, { "blue", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "gray", "xxx" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" } },
 
-      { { "red", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "lime", "y0", "z0" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "x0", "y0", "z0" }, { "xxx", "xxx", "xxx" },
+      { { "red", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "lime", "y0", "z0" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "xxx", "xxx" }, { "x0", "y0", "z0" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "x0", "y0", "white" } } };
 
   public static BufferedImage brighten(BufferedImage bufferedImage, float amount) {
@@ -115,7 +118,7 @@ public class Util {
    * Produces a copy of the supplied image
    * 
    * @param image
-   *          The original image
+   *              The original image
    * @return The new BufferedImage
    */
   public static BufferedImage copyImage(BufferedImage image) {
@@ -126,14 +129,15 @@ public class Util {
    * Creates an image compatible with the current display
    * 
    * @param width
-   *          int
+   *               int
    * @param height
-   *          int
+   *               int
    * 
    * @return A BufferedImage with the appropriate color model
    */
   public static BufferedImage createCompatibleImage(int width, int height) {
-    GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+    GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+        .getDefaultConfiguration();
     return configuration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
   }
 
@@ -214,7 +218,7 @@ public class Util {
 
   // get images & image icons - with defaults
   public static Image getImage(String path) {
-    return getImage(path, "unknown.png");
+    return getImage(path, "Unknown.png");
   }
 
   /**
@@ -224,9 +228,9 @@ public class Util {
    * resourceName)
    * 
    * @param path
-   *          the path to the image
+   *                     the path to the image
    * @param defaultImage
-   *          a default image to use
+   *                     a default image to use
    * @return an image
    * 
    */
@@ -277,10 +281,12 @@ public class Util {
    * 
    * @return current resource directory
    */
-  @Deprecated /*Resource references do not belong here - the ServiceType and
-  perhaps even the ServiceName are needed in order to provide context. This
-  method should be removed, or parameters provided for ServiceType or 
-  ServiceName */
+  @Deprecated /*
+               * Resource references do not belong here - the ServiceType and
+               * perhaps even the ServiceName are needed in order to provide context. This
+               * method should be removed, or parameters provided for ServiceType or
+               * ServiceName
+               */
   public static String getResourceDir() {
     return Service.getResourceRoot();
   }
@@ -289,7 +295,7 @@ public class Util {
    * Check if file exist from current resource directory
    * 
    * @param element
-   *          - element to be tested
+   *                - element to be tested
    * @return boolean
    */
   @Deprecated /* expect full path - don't use getResourceDir */
@@ -459,11 +465,11 @@ public class Util {
    * Produces a resized image that is of the given dimensions
    * 
    * @param image
-   *          The original image
+   *               The original image
    * @param width
-   *          The desired width
+   *               The desired width
    * @param height
-   *          The desired height
+   *               The desired height
    * @return The new BufferedImage
    */
   public static BufferedImage scaledImage(BufferedImage image, int width, int height) {
@@ -568,7 +574,8 @@ public class Util {
     return cropped;
   }
 
-  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {
+  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes,
+      ArrayList<Float> confidences, float nmsThreshold) {
     RectVector boxesRV = new RectVector();
     for (RotatedRect rr : boxes) {
       boxesRV.push_back(rr.boundingRect());
@@ -603,17 +610,12 @@ public class Util {
     return confidencesFV;
   }
 
-  
   /**
    * deserialize from a png byte array to a base64 encoded string
    * for display inline in html.
    * 
    * @param bytes
-   *          input bytes
-   * @return a string
-   * @throws IOException
-   *           boom
-   * 
+   * @return
    */
   public static String bytesToBase64Jpg(byte[] bytes) {
     //
@@ -634,15 +636,15 @@ public class Util {
 
   /**
    * Helper method to serialize an IplImage into a byte array. returns the bytes
-   * of an image in for format specified, png, jpg, bmp,.etc...  
+   * of an image in for format specified, png, jpg, bmp,.etc...
    * 
    * @param image
-   *          input iage
-   * @param format 
-   *          defaults to jpg.. 
+   *               input iage
+   * @param format
+   *               defaults to jpg..
    * @return byte array of image
    * @throws IOException
-   *           boom
+   *                     boom
    * 
    */
   public static byte[] imageToBytes(IplImage image, String format) throws IOException {
@@ -661,16 +663,16 @@ public class Util {
     converter.close();
     return stream.toByteArray();
   }
-  
+
   /**
    * Helper method to serialize an IplImage into a byte array. returns a jpg
    * version of the original image
    * 
    * @param image
-   *          input iage
+   *              input iage
    * @return byte array of image
    * @throws IOException
-   *           boom
+   *                     boom
    * 
    */
   public static byte[] imageToBytes(IplImage image) throws IOException {
@@ -682,10 +684,10 @@ public class Util {
    * It then converts it to an IplImage
    * 
    * @param bytes
-   *          input bytes
+   *              input bytes
    * @return an iplimage
    * @throws IOException
-   *           boom
+   *                     boom
    * 
    */
   public static IplImage bytesToImage(byte[] bytes) throws IOException {

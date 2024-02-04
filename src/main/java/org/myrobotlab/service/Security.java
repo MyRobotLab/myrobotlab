@@ -47,13 +47,14 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
 
 // controlling export is "nice" but its control messages are the most important to mediate
 
-public class Security extends Service implements AuthorizationProvider {
+public class Security extends Service<ServiceConfig> implements AuthorizationProvider {
 
   protected Set<String> serviceKeyNames = new HashSet<>();
 
@@ -140,7 +141,6 @@ public class Security extends Service implements AuthorizationProvider {
   public static void main(String[] args) throws Exception {
     // LoggingFactory.init(Level.INFO);
 
-    Runtime.getInstance(args);
 
     Runtime.start("gui", "SwingGui");
     // Security security = Security.getInstance();
@@ -770,6 +770,18 @@ public class Security extends Service implements AuthorizationProvider {
     for (String keyName : keyNamesIn) {
       serviceKeyNames.add(keyName);
     }
+  }
+
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
+    config = c;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    return config;
   }
 
 }

@@ -24,7 +24,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.config.Adafruit16CServoDriverConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.I2CControl;
@@ -45,7 +44,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController,
+public class Adafruit16CServoDriver extends Service<Adafruit16CServoDriverConfig> implements I2CControl, ServoController,
     MotorController /* , ServoStatusPublisher */ {
 
   /**
@@ -361,7 +360,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     byte[] buffer = { (byte) (PCA9685_LED0_ON_L + (pin * 4)), (byte) (pulseWidthOn & 0xff), (byte) (pulseWidthOn >> 8), (byte) (pulseWidthOff & 0xff),
         (byte) (pulseWidthOff >> 8) };
     log.debug("Writing pin {}, pulesWidthOn {}, pulseWidthOff {}", pin, pulseWidthOn, pulseWidthOff);
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    if (controller != null) {
+      controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    } else {
+      error("controller not set!");
+    }
   }
 
   /**
@@ -1024,8 +1027,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
   
   @Override
-  public ServiceConfig getConfig() {
-
+  public Adafruit16CServoDriverConfig getConfig() {
+    super.getConfig();
     Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.getConfig();
     // FIXME remove member vars use config directly
     config.controller = controllerName;
@@ -1035,8 +1038,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
   
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    Adafruit16CServoDriverConfig config = (Adafruit16CServoDriverConfig)super.apply(c);
+  public Adafruit16CServoDriverConfig apply(Adafruit16CServoDriverConfig c) {
+    super.apply(c);
     if (config.controller != null) {
       try {
         attach(config.controller);
@@ -1044,6 +1047,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
         log.error("attaching controller failed", e);
       }
     }
+    
+    // lame - this shouldn't be "copied" over - everything should just simply use config.deviceAddress
+    if (config.deviceAddress != null) {
+      deviceAddress = config.deviceAddress;
+    }
+
+    if (config.deviceBus != null) {
+      deviceBus = config.deviceBus;
+    }
+    
     return c;
   }
 

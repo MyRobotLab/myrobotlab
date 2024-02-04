@@ -8,11 +8,12 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.startOffset = 0;
     $scope.endOffset = 0;
     $scope.numFound = 0;
-    $scope.pageSize = 20;
+    $scope.pageSize = 50;
     $scope.filters = [];
     // TODO: maybe some other fields..
     // TODO: support range facets
-    $scope.facetFields = ['type', 'sender_type', 'sender','method'];
+    $scope.facetFields = ['type', 'artist_facet', 'album_facet', 'genre_facet', 'year_facet', 'sender_type', 'sender','method'];
+    $scope.facetFields = ['type', 'artist_facet', 'album_facet', 'genre_facet', 'year_facet', 'sender_type', 'sender','method', 'content_type_facet'];
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
       $scope.service = service
@@ -59,7 +60,7 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     
     // run the search based on the current query params selected.
     $scope.execSearch = function() {
-      mrl.sendTo($scope.service.name, "searchWithFacets", $scope.queryString, 10, $scope.startOffset, $scope.facetFields, $scope.filters);
+      mrl.sendTo($scope.service.name, "searchWithFacets", $scope.queryString, $scope.pageSize, $scope.startOffset, $scope.facetFields, $scope.filters);
     }
     
     $scope.filter = function(field, value) {
@@ -92,6 +93,16 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     		$scope.startOffset -= $scope.pageSize;
     	}
     	$scope.execSearch();
+    }
+    
+    $scope.playFile = function(filepath) {
+    	// stop the audiofile if it's currently playing.
+    	mrl.sendTo("audiofile", "stop");
+    	// start the new song.
+    	mrl.sendTo("audiofile", "playFile", filepath[0]);
+    	
+    //	mrl.sendTo("foobar", "play", filepath[0]);
+    //	mrl.sendTo("solr", "play", filepath[0]);
     }
     
     msg.subscribe('publishResults');

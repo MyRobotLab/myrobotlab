@@ -1,0 +1,14 @@
+<div class="row">
+    File Traverser!  this service can scan a file system and publish documents to other services.
+    <br/>
+    <div>
+      <input class="form-control typeHereField" tabindex="2" type="text" ng-model="filepath" name="filepath" id="filepath" ng-init="" placeholder="type here"/>
+      <button class="btn btn-default" ng-click="startCrawling()">Start Crawl</button>
+      <button class="btn btn-default" ng-click="stopCrawling()">Stop Crawl</button>
+    </div>
+    
+    <h3>Document!</h3>
+    <div>
+    {{document}}
+    </div>
+</div>

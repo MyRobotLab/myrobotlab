@@ -3,7 +3,7 @@
         <button class="btn btn-default" ng-show="!service.isLogging" ng-click="msg.startLogging();msg.broadcastState()">start logging</button>
         <button class="btn btn-default" ng-show="service.isLogging" ng-click="msg.stopLogging();msg.broadcastState()">stop logging</button>
         <div class="btn-group" uib-dropdown>
-            <button id="level-button" type="button" ng-class="{'btn': true, 'btn-success': service.logLevel == 'DEBUG','btn-default': service.logLevel == 'INFO', 'btn-warning': service.logLevel == 'WARN', 'btn-danger': service.logLevel == 'ERROR','small': true}" uib-dropdown-toggle>log level - {{service.logLevel}}</button>
+            <button id="level-button" type="button" ng-class="{'btn': true, 'btn-success': service.logLevel == 'DEBUG','btn-default': service.logLevel == 'INFO', 'btn-warning': service.logLevel == 'WARN', 'btn-danger': service.logLevel == 'ERROR','small': true}" uib-dropdown-toggle>log level - {{service.config.level}}</button>
             <ul uib-dropdown-menu role="menu">
                 <li>
                     <button class="btn btn-success col-md-12" ng-click="msg.setRootLogLevel('debug')">DEBUG</button>
@@ -81,7 +81,7 @@
       class="alert alert-danger"
 -->
     <tbody>
-        <tr ng-repeat="e in log | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
+        <tr ng-repeat="e in service.logs | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
             <td><small>{{e.ts}}</small></td>
             <td><small>[{{e.level}}]</small></td>
             <td><small>{{e.className.substring(e.className.lastIndexOf('.')+1)}}</small></td>

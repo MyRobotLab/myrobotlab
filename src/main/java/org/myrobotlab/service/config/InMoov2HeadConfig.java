@@ -15,8 +15,8 @@ public class InMoov2HeadConfig extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "rothead", "Servo");
     addDefaultPeerConfig(plan, name, "neck", "Servo");
     addDefaultPeerConfig(plan, name, "rollNeck", "Servo");
-    addDefaultPeerConfig(plan, name, "eyelidLeft", "Servo", false);
-    addDefaultPeerConfig(plan, name, "eyelidRight", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidLeft", "Servo");
+    addDefaultPeerConfig(plan, name, "eyelidRight", "Servo");
     
     ServoConfig jaw = (ServoConfig) plan.get(getPeerName("jaw"));
     jaw.autoDisable = true;

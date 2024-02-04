@@ -1,18 +1,19 @@
 package org.myrobotlab.framework;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.test.AbstractTest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-
 public class ServiceTest extends AbstractTest {
 
-    public static class TestService extends Service {
+    public static class TestService extends Service<ServiceConfig> {
+
+        private static final long serialVersionUID = 1L;
 
         /**
          * Constructor of service, reservedkey typically is a services name and inId
@@ -35,10 +36,11 @@ public class ServiceTest extends AbstractTest {
                 new MRLListener("meth", "random@test-id", "onMeth"),
                 new MRLListener("meth", "random2@test-2-id", "onMeth")
         );
-        t.setConfig(new ServiceConfig());
+        t.apply(new ServiceConfig());
         t.outbox.notifyList = Map.of("meth", listeners);
-        List<ServiceConfig.Listener> filtered = t.getConfig().listeners;
+        List<ServiceConfig.Listener> filtered = t.getFilteredConfig().listeners;
         assertEquals("random", filtered.get(0).listener);
         assertEquals("random2@test-2-id", filtered.get(1).listener);
+        t.getFilteredConfig();
     }
 }

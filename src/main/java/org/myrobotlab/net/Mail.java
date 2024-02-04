@@ -164,16 +164,16 @@ public class Mail {
    * This will work with gmail but an "app password" will need to be set up on
    * the sending account.
    * 
-   * "Create & use App Passwords"
+   * "Create and use App Passwords"
    * https://support.google.com/mail/answer/185833?hl=en
    * 
-   * @param host
-   * @param port
-   * @param userName
-   * @param password
-   * @param toAddress
-   * @param subject
-   * @param message
+   * @param host - smtp host
+   * @param port - smtp port
+   * @param userName - username
+   * @param password - password
+   * @param toAddress - address to sender
+   * @param subject - of email
+   * @param message - email body
    * @throws AddressException
    * @throws MessagingException
    */

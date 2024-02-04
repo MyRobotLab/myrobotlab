@@ -24,6 +24,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
 import org.myrobotlab.opencv.OpenCVFilterLloyd;
 import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -38,7 +39,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Lloyd extends Service {
+public class Lloyd extends Service<ServiceConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(Lloyd.class);
   private static final long serialVersionUID = 1L;

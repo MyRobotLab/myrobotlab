@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.FileConnectorConfig
+directory: Z:\Music
+listeners:
+- callback: onFlush
+  listener: docproc
+  method: publishFlush
+- callback: onDocument
+  listener: docproc
+  method: publishDocument
+peers: null
+type: FileConnector

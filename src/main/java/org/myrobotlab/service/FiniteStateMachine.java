@@ -12,12 +12,12 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.FiniteStateMachineConfig;
 import org.myrobotlab.service.config.FiniteStateMachineConfig.Transition;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.github.pnavais.machine.StateMachine;
@@ -32,7 +32,7 @@ import com.github.pnavais.machine.model.StringMessage;
  * 
  * @author GroG
  */
-public class FiniteStateMachine extends Service {
+public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(FiniteStateMachine.class);
 
@@ -46,7 +46,10 @@ public class FiniteStateMachine extends Service {
 
   protected String lastEvent = null;
 
-  protected Set<String> messageListeners = new HashSet<>();
+  /**
+   * state history of fsm
+   */
+  protected List<StateChange> history = new SlidingWindowList<>(100);
 
   // TODO - .from("A").to("B").on(Messages.ANY)
   // TODO - .from("A").to("B").on(Messages.EMPTY)
@@ -57,6 +60,38 @@ public class FiniteStateMachine extends Service {
   public class Tuple {
     public Transition transition;
     public StateTransition stateTransition;
+  }
+  
+  public class StateChange {
+    /**
+     * timestamp
+     */
+    public long ts = System.currentTimeMillis();
+
+    /**
+     * current new state
+     */
+    public String state;
+    
+    /**
+     * event which activated new state
+     */
+    public String event;
+
+    /**
+     * source of event
+     */
+    public String src = getName();
+    
+    
+    public StateChange(String current, String event) {
+      this.state = current;
+      this.event = event;
+    }
+    
+    public String toString() {
+      return String.format("%s --%s--> %s", last, event, state);
+    }
   }
 
   private static Transition toFsmTransition(StateTransition state) {
@@ -92,6 +127,10 @@ public class FiniteStateMachine extends Service {
 
   public void init() {
     stateMachine.init();
+    State state = stateMachine.getCurrent();
+    if (state != null) {
+      history.add(new StateChange(state.getName(), String.format("%s.setCurrent", getName())));
+    }
   }
 
   private String makeKey(String state0, String msgType, String state1) {
@@ -167,7 +206,9 @@ public class FiniteStateMachine extends Service {
       log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        StateChange stateChange = new StateChange(current.getName(), event);
+        invoke("publishStateChange", stateChange);
+        history.add(stateChange);
       }
     } catch (Exception e) {
       log.error("fire threw", e);
@@ -209,35 +250,26 @@ public class FiniteStateMachine extends Service {
   }
 
   /**
-   * publishes state if changed here
+   * Publishes state change (current, last and event) 
    * 
-   * @param state
+   * @param stateChange
    * @return
    */
-  public String publishNewState(String state) {
-    log.error("publishNewState {}", state);
-    for (String listener : messageListeners) {
-      ServiceInterface service = Runtime.getService(listener);
-      if (service != null) {
-        org.myrobotlab.framework.Message msg = org.myrobotlab.framework.Message.createMessage(getName(), listener, CodecUtils.getCallbackTopicName(state), null);
-        service.in(msg);
-      }
-    }
-    return state;
+  public StateChange publishStateChange(StateChange stateChange) {
+    log.info("publishStateChange {}", stateChange);
+    return stateChange;
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    FiniteStateMachineConfig c = (FiniteStateMachineConfig) super.getConfig();
-    c.current = getCurrent();
-    c.messageListeners = new ArrayList<>();
-    c.messageListeners.addAll(messageListeners);
-    return c;
+  public FiniteStateMachineConfig getConfig() {
+    super.getConfig();
+    config.current = getCurrent();
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    FiniteStateMachineConfig config = (FiniteStateMachineConfig) super.apply(c);
+  public FiniteStateMachineConfig apply(FiniteStateMachineConfig c) {
+    super.apply(c);
 
     if (config.transitions != null) {
 
@@ -245,39 +277,20 @@ public class FiniteStateMachine extends Service {
       // when config is "applied" we need to copy out and
       // re-apply the config using addTransition
       List<Transition> newTransistions = new ArrayList<>();
-      newTransistions.addAll(config.transitions);
+      newTransistions.addAll(c.transitions);
       clear();
       for (Transition t : newTransistions) {
         addTransition(t.from, t.event, t.to);
       }
-
-      messageListeners = new HashSet<>();
-      messageListeners.addAll(config.messageListeners);
       broadcastState();
     }
 
     // setCurrent
-    if (config.current != null) {
-      setCurrent(config.current);
+    if (c.current != null) {
+      setCurrent(c.current);
     }
 
     return c;
-  }
-
-  public void attach(String name) {
-    attachMessageListener(name);
-  }
-
-  public void attach(MessageListener listener) {
-    attachMessageListener(listener.getName());
-  }
-
-  public void attachMessageListener(String listener) {
-    messageListeners.add(listener);
-  }
-
-  public void detachMessageListener(String listener) {
-    messageListeners.remove(listener);
   }
 
   public static void main(String[] args) {
@@ -391,12 +404,28 @@ public class FiniteStateMachine extends Service {
       stateMachine.setCurrent(state);
       current = stateMachine.getCurrent();
       if (last != null && !last.equals(current)) {
-        invoke("publishNewState", current.getName());
+        invoke("publishStateChange", new StateChange(current.getName(), String.format("%s.setCurrent", getName())));
       }
     } catch (Exception e) {
       log.error("setCurrent threw", e);
       error(e.getMessage());
     }
+  }
+
+  public String getPreviousState() {
+    if (history.size() == 0) {
+      return null;
+    } else {
+      return history.get(history.size() - 2).state;
+    }
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
+    // should be configured,
+    // need to init
+    init();
   }
 
 }

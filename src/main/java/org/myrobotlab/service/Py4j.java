@@ -3,14 +3,12 @@ package org.myrobotlab.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.bytedeco.javacpp.Loader;
 import org.myrobotlab.codec.CodecUtils;
@@ -22,9 +20,12 @@ import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.Py4jConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Executor;
+import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.Processor;
 import org.slf4j.Logger;
 
 import py4j.GatewayServer;
@@ -54,7 +55,7 @@ import py4j.Py4JServerConnection;
  * 
  * @author GroG
  */
-public class Py4j extends Service implements GatewayServerListener {
+public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, Gateway, Processor {
 
   /**
    * POJO class to tie all the data elements of a external python process
@@ -155,6 +156,8 @@ public class Py4j extends Service implements GatewayServerListener {
 
   public Py4j(String n, String id) {
     super(n, id);
+    // ready when connected
+    ready = false;
   }
 
   /**
@@ -178,6 +181,20 @@ public class Py4j extends Service implements GatewayServerListener {
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
+  
+  /**
+   * If autostartPython is true, Py4j will start a process on starting and
+   * connect the stdout/stdin streams to be redirected to the UI
+   * @param b
+   * @return
+   */
+  public boolean autostartPython(boolean b) {
+    config.autostartPython = b;
+    if (config.autostartPython && pythonProcess == null) {
+      startPythonProcess();
+    }    
+    return b;
+  }
 
   /**
    * removes script from memory of openScripts
@@ -199,7 +216,7 @@ public class Py4j extends Service implements GatewayServerListener {
     try {
       log.info("connectionStarted {}", gatewayConnection.toString());
       clients.put(getClientKey(gatewayConnection), new Py4jClient());
-
+      ready = true;
       info("connection started");
       invoke("getClients");
     } catch (Exception e) {
@@ -219,31 +236,26 @@ public class Py4j extends Service implements GatewayServerListener {
    * 
    * @param code The Python code to execute in the interpreter.
    */
-  public void exec(String code) {
+  @Override
+  public boolean exec(String code) {
+    log.info(String.format("exec %s", code));
     try {
       if (handler != null) {
         handler.exec(code);
+        return true;
       } else {
         error("handler is null");
       }
     } catch (Exception e) {
       error(e);
     }
+    return false;
   }
 
   private String getClientKey(Py4JServerConnection gatewayConnection) {
     return String.format("%s:%d", gatewayConnection.getSocket().getInetAddress(), gatewayConnection.getSocket().getPort());
   }
 
-  /**
-   * return a set of client connections - probably could be deprecated to a
-   * single client, but was not sure
-   * 
-   * @return
-   */
-  public Set<String> getClients() {
-    return clients.keySet();
-  }
 
   /**
    * get listing of filesystem files location will be data/Py4j/{serviceName}
@@ -283,6 +295,15 @@ public class Py4j extends Service implements GatewayServerListener {
   public void onPython(String code) {
     log.info("onPython {}", code);
     exec(code);
+  }
+  
+  
+  public String onPythonMessage(Message msg) {
+    // create wrapper to tunnel incoming message - include original sender?
+    Message tunnelMsg = Message.createMessage(msg.sender, getName(), "onPythonMessage", msg);
+    String json = CodecUtils.toJson(tunnelMsg);
+    handler.send(json);
+    return json;
   }
 
   /**
@@ -337,7 +358,20 @@ public class Py4j extends Service implements GatewayServerListener {
     // TODO - determine clients are connected .. how many clients etc..
     try {
       if (handler != null) {
-        handler.invoke(msg.method, msg.data);
+        // afaik - Py4j does some kind of magical encoding to get a JavaObject
+        // back to the Python process, but:
+        // 1. its useless for users - no way to access the content ?
+        // 2. you can't do anything with it
+        // So, I've chosen to json encode it here, and the Py4j.py MessageHandler will
+        // decode it into a Python dictionary \o/
+        // we do single encoding including the parameter array - there is no header needed
+        // with method and other details, as the invoke here is invoking directly in the
+        // Py4j.py script
+                
+        String json = CodecUtils.toJson(msg);
+        // handler.invoke(msg.method, json);
+        log.info(String.format("handler %s", json));
+        handler.send(json);
       } else {
         error("preProcessHook handler is null");
       }
@@ -360,8 +394,10 @@ public class Py4j extends Service implements GatewayServerListener {
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
-    Py4jConfig c = (Py4jConfig)config;
-    FileIO.toFile(c.scriptRootDir + fs + scriptName, code);
+    if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
+      scriptName = scriptName + ".py";
+    }    
+    FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }
 
@@ -402,6 +438,11 @@ public class Py4j extends Service implements GatewayServerListener {
         gateway.start();
         info("server started listening on %s:%d", gateway.getAddress(), gateway.getListeningPort());
         handler = (Executor) gateway.getPythonServerEntryPoint(new Class[] { Executor.class });
+
+//        sleep(100);
+//        String[] services = Runtime.getServiceNames();
+//        sendRemote(Message.createMessage(getName(), "runtime", "onServiceNames", services));
+
       } else {
         log.info("Py4j gateway server already started");
       }
@@ -494,7 +535,7 @@ public class Py4j extends Service implements GatewayServerListener {
       String s;
       try {
         while ((s = stdOutput.readLine()) != null) {
-          handleStdOut(s + '\n');
+          handleStdOut(s);
         }
       } catch (IOException e) {
         error(e);
@@ -514,17 +555,18 @@ public class Py4j extends Service implements GatewayServerListener {
   @Override
   public void startService() {
     super.startService();
-    Py4jConfig c = (Py4jConfig)config;
-    if (c.scriptRootDir == null) {
-        c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    if (config.scriptRootDir == null) {
+      config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
     }
-    File dataDir = new File(c.scriptRootDir);
+    File dataDir = new File(config.scriptRootDir);
     dataDir.mkdirs();
     // start the py4j socket server
     start();
     sleep(300);
     // start the python process which starts the Py4j.py MessageHandler
-    startPythonProcess();
+    if (config.autostartPython) {
+      startPythonProcess();
+    }
   }
 
   /**
@@ -544,6 +586,8 @@ public class Py4j extends Service implements GatewayServerListener {
     if (pythonProcess != null) {
       log.info("shutting down python process");
       pythonProcess.process.destroy();
+      pythonProcess.gobbler.interrupt();
+      pythonProcess = null;
     }
   }
 
@@ -561,7 +605,6 @@ public class Py4j extends Service implements GatewayServerListener {
    * 
    * @param scriptName
    * @param code
-   * @return
    */
   public void updateScript(String scriptName, String code) {
     if (openedScripts.containsKey(scriptName)) {
@@ -587,7 +630,38 @@ public class Py4j extends Service implements GatewayServerListener {
       log.error("main threw", e);
     }
   }
-  
-  
+
+  @Override
+  public void connect(String uri) throws Exception {
+    // host:port of python process running py4j ???
+    
+  }
+
+  /**
+   * Remote in this context is the remote python process
+   */
+  @Override
+  public void sendRemote(Message msg) throws Exception {
+    log.info("sendRemote");
+    String jsonMsg = CodecUtils.toJson(msg);
+    log.info(String.format("sendRemote %s"));
+    handler.send(jsonMsg);
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    return Runtime.getInstance().isLocal(msg);
+  }
+
+  @Override
+  public List<String> getClientIds() {
+    return Runtime.getInstance().getConnectionUuids(getName());
+  }
+
+  @Override
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
+  }
+    
 }
 

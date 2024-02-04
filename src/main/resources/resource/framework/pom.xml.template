@@ -13,6 +13,9 @@
     # fast build
     mvn -DskipTests package -o 
 
+    # execute
+    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro Intro python Python"
+
     # specific test
     mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
 
@@ -68,7 +71,6 @@
   <name>MyRobotLab</name>
   <description>Open Source Creative Machine Control</description>
   <properties>
-      <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
       <dependency.locations.enabled>false</dependency.locations.enabled>
       <!-- begin env vars -->
       <!-- 
@@ -78,13 +80,10 @@
         maven or jenkins can do this
         
        -->
-      <!-- from jenkins env vars -->
-      <version.prefix>1.1.</version.prefix>
       <!-- force overriding property at command line, use ${maven.build.timestamp}-->
       <timestamp>${maven.build.timestamp}</timestamp>
       <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
-      <build.number>${timestamp}</build.number>
-      <version>${version.prefix}${build.number}</version>   
+      <version>${project.version}</version>   
       <GitBranch>${git.branch}</GitBranch>
       <username>${NODE_NAME}</username>      
       <platform>${NODE_LABELS}</platform>      
@@ -176,53 +175,12 @@
                 </goals>
                 <configuration>
                     <rules>
-                        <banDuplicatePomDependencyVersions/>
+                        <banDuplicatePomDependencyVersions />
                     </rules>
                 </configuration>
             </execution>
         </executions>
       </plugin>
-
-      <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>properties-maven-plugin</artifactId>        
-          <executions>
-            <execution>
-              <phase>initialize</phase>
-              <goals>
-                <goal>read-project-properties</goal>
-              </goals>
-              <configuration>
-                <files>
-                  <file>build.properties</file>
-                </files>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-  
-      <!-- removed because now we generate serviceData.json during runtime plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <executions>
-          <execution>
-            <id>service-data-execution</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
-          <classpathScope>test</classpathScope>
-          <arguments>
-                  <argument>target/classes/resource/framework</argument>
-                </arguments>
-        </configuration>
-      </plugin -->
-    
       <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -235,7 +193,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
-                            <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
+                            <!-- finalName>myrobotlab-${git.branch}-${project.version}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -249,10 +207,10 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                           <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                                          <Major-Version>${version}</Major-Version>
-                                          <Implementation-Version>${version}</Implementation-Version>                               
+                                          <Major-Version>${project.version}</Major-Version>
+                                          <Implementation-Version>${project.version}</Implementation-Version>                               
               
-                        <Build-Version>${build.number}</Build-Version>
+                        <Build-Version>${project.version}</Build-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
                         <Build-Host>${agent.name}</Build-Host>
                         <Build-User>${user.name}</Build-User>
@@ -372,18 +330,34 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
-        <version>2.22.2</version>
+        <!-- do not upgrade this version jacoco will break -->
+        <version>2.18</version>
         <configuration>
-          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
+          <!-- critical for jacoco to have original argLine prefixed here-->
+          <argLine>${argLine} -Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
+            <!-- unfortunately not testing OpenCV is required for ci to work -->
+            <exclude>**/OpenCV*</exclude>
           </excludes>
              <systemPropertyVariables>
               </systemPropertyVariables>
         </configuration>
+        <executions>
+          <execution>
+            <id>surefire-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <!-- Additional configurations for the test execution -->
+            </configuration>
+          </execution>
+        </executions>        
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
@@ -425,12 +399,10 @@
                   </filesets>
                 </configuration>
       </plugin>
-      <!-- attached to Maven test phase -->
-      <!--
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.8</version>
+        <version>0.8.11</version>
         <executions>
           <execution>
             <goals>
@@ -446,7 +418,6 @@
           </execution>
         </executions>
       </plugin>
-      -->
     </plugins>
   </build>
     <reporting>    
@@ -454,7 +425,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>2.18</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

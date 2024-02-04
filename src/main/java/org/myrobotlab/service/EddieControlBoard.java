@@ -9,6 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;
@@ -21,7 +22,7 @@ import org.slf4j.Logger;
  * EddieControlBoard It can publish sensor data , control motors and more!
  *
  */
-public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, JoystickListener {
+public class EddieControlBoard extends Service<ServiceConfig> implements KeyListener, SerialDataListener, JoystickListener {
 
   class SensorPoller extends Thread {
 

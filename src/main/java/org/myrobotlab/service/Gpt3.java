@@ -48,7 +48,8 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class Gpt3 extends Service implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
+@Deprecated /* use OpenAI service */
+public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -61,7 +62,7 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
   private String currentChannelName;
 
   private String currentChannelType;
-
+  
   public Gpt3(String n, String id) {
     super(n, id);
   }
@@ -84,6 +85,10 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
       if (c.sleepWord != null && text.contains(c.sleepWord) && !c.sleeping) {
         sleep();
         responseText = "Ok, I will go to sleep";
+      }
+      
+      if (c.prefix != null) {
+        text = c.prefix + " " + text;
       }
 
       if (!c.sleeping) {
@@ -119,10 +124,7 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
           @SuppressWarnings({ "unchecked", "rawtypes" })
           Map<String, Object> textObject = (Map) choices.get(0);
           responseText = (String) textObject.get("text");
-          if (responseText != null) {
-            // /completions
-            invoke("publishText", responseText);
-          } else {
+          if (responseText == null) {
             // /chat/completions
             @SuppressWarnings({ "unchecked", "rawtypes" })
             Map<String, Object> content = (Map)textObject.get("message"); 
@@ -156,6 +158,7 @@ public class Gpt3 extends Service implements TextListener, TextPublisher, Uttera
       if (responseText != null && responseText.length() > 0) {
         invoke("publishUtterance", utterance);
         invoke("publishResponse", response);
+        invoke("publishText", responseText);
       }
 
       return response;

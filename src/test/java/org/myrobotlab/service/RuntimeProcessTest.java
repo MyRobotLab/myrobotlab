@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -32,12 +33,12 @@ public class RuntimeProcessTest extends AbstractTest {
 
     // from ,to null=runtime, data  
     String cwd = null;
-    Message msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
+    Message msg = CodecUtils.pathToMsg(getName(), "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
 
-    msg = CodecUtils.cliToMsg(null, getName() + "@someWhere", null, "ls");
+    msg = CodecUtils.pathToMsg(getName() + "@someWhere", "ls");
     assertEquals(getName(), msg.getSrcName());
     assertEquals("someWhere", msg.getSrcId());
     assertEquals(getName() + "@someWhere", msg.getSrcFullName());
@@ -46,21 +47,24 @@ public class RuntimeProcessTest extends AbstractTest {
     // Message msg = CodecUtils.cliToMsg(null, getName(), null, "/ls /runtime");
     // FAILS
 
-    msg = CodecUtils.cliToMsg(cwd, getName() + "@someWhere", "blah@far", "ls");
-    assertEquals("blah", msg.getName());
-    assertEquals("blah@far", msg.getFullName());
-    assertEquals("far", msg.getId());
+    msg = CodecUtils.pathToMsg(getName() + "@someWhere", "ls");
+    assertEquals("runtime", msg.getName());
+    assertEquals("runtime", msg.getFullName());
+    assertEquals(getName() + "@someWhere", msg.sender);
+    assertNull(msg.getId());
+    assertEquals(0, msg.data.length);
 
-    cwd = "/";
-    msg = CodecUtils.cliToMsg(cwd, getName(), null, "ls");
+    cwd = "/runtime/";
+    msg = CodecUtils.pathToMsg(getName(), cwd + "ls");
     assertEquals("runtime", msg.getName());
     assertEquals("ls", msg.method);
     assertEquals(getName(), msg.getSrcName());
+    assertNull(msg.data);
 
-    cwd = "/blah";
-    msg = CodecUtils.cliToMsg(cwd, getName(), null, "method");
+    cwd = "/runtime/blahmethod";
+    msg = CodecUtils.pathToMsg(getName(), cwd);
     assertEquals("runtime", msg.getName());
-    assertEquals("ls", msg.method);
+    assertEquals("blahmethod", msg.method);
     assertEquals(getName(), msg.getSrcName());
 
     // make sure runtime is running

@@ -7,13 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.I2cMuxConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -26,39 +24,22 @@ import org.slf4j.Logger;
  * other devices.
  * 
  * 
- * @author Mats Onnerby
+ * @author Mats Onnerby, GroG
  * 
  *         More Info : https://www.adafruit.com/product/2717
  * 
  */
-public class I2cMux extends Service implements I2CControl, I2CController {
-
-  private static final long serialVersionUID = 1L;
-
-  public final static Logger log = LoggerFactory.getLogger(I2cMux.class.getCanonicalName());
-
-  public transient I2CController controller;
-
-  public List<String> controllers = new ArrayList<String>();
-  public String controllerName;
-
-  public List<String> deviceAddressList = Arrays.asList("0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77");
-
-  public String deviceAddress = "0x70";
-
-  public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
-  public String deviceBus = "1";
-
-  public boolean isAttached = false;
-  private int lastBusAddress = -1;
+public class I2cMux extends Service<I2cMuxConfig> implements I2CControl, I2CController {
 
   public static class I2CDeviceMap {
-    public String serviceName;
     public String busAddress;
     public String deviceAddress;
+    public String serviceName;
   }
 
-  public HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+  protected final static Logger log = LoggerFactory.getLogger(I2cMux.class.getCanonicalName());
+
+  private static final long serialVersionUID = 1L;
 
   public static void main(String[] args) {
     LoggingFactory.init("info");
@@ -66,118 +47,69 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     try {
       I2cMux i2cMux = (I2cMux) Runtime.start("i2cMux", "I2CMux");
       i2cMux.setDeviceBus("0");
-      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
+  
+  protected transient I2CController controller;
+
+  protected List<String> controllers = new ArrayList<String>();
+  
+  protected List<String> deviceAddressList = Arrays.asList("0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77");
+  
+  protected List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7");
+
+  protected boolean isAttached = false;
+
+  protected int lastBusAddress = -1;
 
   public I2cMux(String n, String id) {
-    super(n, id);
-    refreshControllers();
-    subscribeToRuntime("registered");
+    super(n, id);    
   }
 
-  public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
-  }
-
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
-    controllers.remove(this.getName());
-    return controllers;
-  }
-
-  /**
-   * Sets the I2C Bus the i2cMux is attached to.
-   * 
-   * @param deviceBus
-   *          default is "1", range "0" - "7".
-   * 
-   */
   @Override
-  public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
+  public void attach(Attachable service) throws Exception {
+
+    if (service == null) {
+      warn("cannot attach to null");
       return;
     }
-    this.deviceBus = deviceBus;
-    broadcastState();
-  }
-
-  /**
-   * Sets the I2C Address of the i2cMux device.
-   * 
-   * @param deviceAddress
-   *          default "0x70" range "0x70" - "0x77"
-   */
-  @Override
-  public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
-    this.deviceAddress = deviceAddress;
-    broadcastState();
-  }
-
-  /**
-   * Returns the current state of the service, if attached returns true, false
-   * if it's not attached.
-   * 
-   * @return
-   */
-  public boolean isAttached() {
-    return isAttached;
-  }
-
-  /**
-   * Sets which bus future commands will be sent down.
-   * 
-   * @param busAddress
-   *          Range 0 - 7
-   */
-  public void setMuxBus(int busAddress) {
-    if (busAddress != lastBusAddress) {
-      byte bus[] = new byte[1];
-      bus[0] = (byte) (1 << busAddress);
-      log.debug("setMux this.deviceBus {} this.deviceAddress {} bus[0] {}", this.deviceBus, this.deviceAddress, bus[0]);
-      controller.i2cWrite(this, Integer.parseInt(this.deviceBus), Integer.decode(this.deviceAddress), bus, bus.length);
-      lastBusAddress = busAddress;
+    
+    if (I2CController.class.isAssignableFrom(service.getClass())) {
+      attachI2CController((I2CController) service);
+    } else {
+      warn("do not know how to attach to %s", service.getName());
     }
   }
 
   @Override
-  public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-    setMuxBus(busAddress);
-    String key = String.format("%d.%d", busAddress, deviceAddress);
-    log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
-    controller.i2cWrite(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
+  @Deprecated /*use attach(String) */
+  public void attach(I2CController controller, String deviceBus, String deviceAddress) {
+
+    if (isAttached && this.controller != controller) {
+      log.error("Already attached to {}, use detach({}) first", config.controller);
+    }
+
+    config.controller = controller.getName();
+    log.info("{} attach {}", getName(), config.controller);
+
+    config.bus = deviceBus;
+    config.address = deviceAddress;
+
+    attachI2CController(controller);
   }
 
-  /**
-   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
-   * data that neeeds to be returned syncronous or asycncronus
-   */
+  // This section contains all the new attach logic
   @Override
-  public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
-    setMuxBus(busAddress);
-    int bytesRead = controller.i2cRead(this, Integer.parseInt(this.deviceBus), deviceAddress, buffer, size);
-    log.debug("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
-    return bytesRead;
+  public void attach(String service) throws Exception {
+    attach(Runtime.getService(service));
   }
 
-  /**
-   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
-   * data that neeeds to be returned syncronous or asycncronus
-   */
-  @Override
-  public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
-    setMuxBus(busAddress);
-    controller.i2cWriteRead(this, Integer.parseInt(this.deviceBus), deviceAddress, writeBuffer, writeSize, readBuffer, readSize);
-    return readBuffer.length;
+  @Deprecated /* use attach(String) */
+  public void attach(String controller, String deviceBus, String deviceAddress) {
+    attach((I2CController) Runtime.getService(controller), deviceBus, deviceAddress);
   }
 
   @Override
@@ -187,16 +119,62 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     // and the service name to be able to send data back to the invoker
     I2CDeviceMap devicedata = new I2CDeviceMap();
     String key = control.getName();
-    if (i2cDevices.containsKey(key)) {
+    if (config.i2cDevices.containsKey(key)) {
       log.error("Device {} {} {} already exists.", control.getBus(), control.getAddress(), control.getName());
     } else {
       devicedata.serviceName = key;
       devicedata.busAddress = control.getBus();
       devicedata.deviceAddress = control.getAddress();
-      i2cDevices.put(key, devicedata);
+      config.i2cDevices.put(key, devicedata);
       control.attachI2CController(this);
     }
     broadcastState();
+  }
+
+  @Override
+  public void attachI2CController(I2CController controller) {
+    if (controller == null) {
+      error("controller can not be null");
+      return;
+    }
+
+    if (isAttached(controller)) {
+      log.info("controller {} is attached", controller.getName());
+      return;
+    }
+
+    this.controller = controller;
+    isAttached = true;
+    config.controller = controller.getName();
+    // FIXME should use attach(string)
+    controller.attachI2CControl(this);
+    broadcastState();
+    log.info("Attached {} device on bus: {} address {}", config.controller, config.bus, config.address);
+  }
+  
+  public void detach() {
+    detach(controller);
+  }
+
+  @Override
+  public void detach(Attachable service) {
+    if (service == null) {
+      warn("detach null");
+      return;
+    }
+
+    if (I2CController.class.isAssignableFrom(service.getClass())) {
+      detachI2CController((I2CController) service);
+    } else {
+      warn("do not know how to attach to %s", service.getName());
+    }
+  }
+
+  // This section contains all the new detach logic
+  // TODO: This default code could be in Attachable
+  @Override
+  public void detach(String service) {
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -208,8 +186,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     // needs this service to still be availabe
     log.info("detachI2CControl {}", control.getName());
     String key = control.getName();
-    if (i2cDevices.containsKey(key)) {
-      i2cDevices.remove(key);
+    if (config.i2cDevices.containsKey(key)) {
+      config.i2cDevices.remove(key);
       control.detachI2CController(this);
       log.info("Detached");
     } else {
@@ -219,94 +197,15 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
-
-  // This section contains all the new attach logic
-  @Override
-  public void attach(String service) throws Exception {
-    attach(Runtime.getService(service));
-  }
-
-  @Override
-  public void attach(Attachable service) throws Exception {
-
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      attachI2CController((I2CController) service);
-      return;
-    }
-  }
-
-  public void attach(String controllerName, String deviceBus, String deviceAddress) {
-    attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
-  }
-
-  @Override
-  public void attach(I2CController controller, String deviceBus, String deviceAddress) {
-
-    if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-    }
-
-    controllerName = controller.getName();
-    log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
-
-    attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
-  }
-
-  @Override
-  public void attachI2CController(I2CController controller) {
-
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
-      return;
-    }
-
-    this.controller = controller;
-    isAttached = true;
-    controller.attachI2CControl(this);
-    log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
-    broadcastState();
-  }
-
-  public HashMap<String, I2CDeviceMap> geti2cDevices() {
-    return i2cDevices;
-  }
-
-  // This section contains all the new detach logic
-  // TODO: This default code could be in Attachable
-  @Override
-  public void detach(String service) {
-    detach(Runtime.getService(service));
-  }
-
-  @Override
-  public void detach(Attachable service) {
-
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      detachI2CController((I2CController) service);
-      return;
-    }
-  }
-
-  @Override
   public void detachI2CController(I2CController controller) {
-
-    if (!isAttached(controller))
-      return;
-
-    controller.detachI2CControl(this);
     isAttached = false;
+    controller.detachI2CControl(this);
     broadcastState();
+  }
+
+  @Override
+  public String getAddress() {
+    return config.address;
   }
 
   // This section contains all the methods used to query / show all attached
@@ -324,65 +223,156 @@ public class I2cMux extends Service implements I2CControl, I2CController {
   }
 
   @Override
-  public String getDeviceBus() {
-    return this.deviceBus;
+  public String getBus() {
+    return config.bus;
   }
 
   @Override
   public String getDeviceAddress() {
-    return this.deviceAddress;
+    return config.address;
+  }
+
+  @Override
+  public String getDeviceBus() {
+    return config.bus;
+  }
+
+  public HashMap<String, I2CDeviceMap> geti2cDevices() {
+    return config.i2cDevices;
+  }
+
+  /**
+   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
+   * data that neeeds to be returned syncronous or asycncronus
+   */
+  @Override
+  public int i2cRead(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
+    setMuxBus(busAddress);
+    // FIXME - sendBlocking or pub/sub to/from controller
+    int bytesRead = controller.i2cRead(this, Integer.parseInt(config.bus), deviceAddress, buffer, size);
+    log.debug("i2cRead. Requested {} bytes, received {} byte", size, bytesRead);
+    return bytesRead;
+  }
+    
+  @Override
+  public void i2cWrite(I2CControl control, int busAddress, int deviceAddress, byte[] buffer, int size) {
+    setMuxBus(busAddress);
+    String key = String.format("%d.%d", busAddress, deviceAddress);
+    log.debug(String.format("i2cWrite busAddress x%02X deviceAddress x%02X key %s", busAddress, deviceAddress, key));
+    // FIXME - would be trivial to fix with a send(controller, Integer.parseInt(config.bus), deviceAddress, buffer, size)
+    // but the read would either need to be pubsub or sendblocking
+    controller.i2cWrite(this, Integer.parseInt(config.bus), deviceAddress, buffer, size);
+  }
+
+  /**
+   * TODO Add demuxing. i.e the route back to the caller The i2c will receive
+   * data that neeeds to be returned syncronous or asycncronus
+   */
+  @Override
+  public int i2cWriteRead(I2CControl control, int busAddress, int deviceAddress, byte[] writeBuffer, int writeSize, byte[] readBuffer, int readSize) {
+    setMuxBus(busAddress);
+    controller.i2cWriteRead(this, Integer.parseInt(config.bus), deviceAddress, writeBuffer, writeSize, readBuffer, readSize);
+    return readBuffer.length;
+  }
+
+  /**
+   * Returns the current state of the service, if attached returns true, false
+   * if it's not attached.
+   * 
+   * @return
+   */
+  public boolean isAttached() {
+    return isAttached;
   }
 
   @Override
   public boolean isAttached(Attachable instance) {
-    if (controller != null && controller.getName().equals(instance.getName())) {
+    if (controller != null && instance != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
     return false;
   }
 
   @Override
-  public void setBus(String bus) {
-    setDeviceBus(bus);
+  public boolean isAttached(String name) {
+    // only one controller possible
+    return isAttached;
   }
 
   @Override
   public void setAddress(String address) {
-    setDeviceAddress(address);
+    if (isAttached) {
+      warn("already attached to %s, use detach first", config.controller);
+      return;
+    }
+    config.address = address;
   }
 
   @Override
-  public String getBus() {
-    return deviceBus;
+  public void setBus(String bus) {
+    if (isAttached) {
+      warn("already attached to %s, use detach first", config.controller);
+      return;
+    }
+    config.bus = bus;
   }
 
-  @Override
-  public String getAddress() {
-    return deviceAddress;
+  public void setController(String controller) {    
+    config.controller = controller;
   }
 
+  /**
+   * Sets the I2C Address of the i2cMux device.
+   * 
+   * @param address
+   *          default "0x70" range "0x70" - "0x77"
+   */
   @Override
-  public ServiceConfig getConfig() {
-    I2cMuxConfig config = (I2cMuxConfig)super.getConfig();
-    // FIXME this should only be in config, no need for local fields
-    config.bus = deviceBus;
-    config.address = deviceAddress;
-    config.i2cDevices = i2cDevices;
-    config.controller = controllerName;
-    return config;
+  public void setDeviceAddress(String address) {
+    setAddress(address);
   }
 
+  /**
+   * Sets the I2C Bus the i2cMux is attached to.
+   * 
+   * @param deviceBus
+   *          default is "1", range "0" - "7".
+   * 
+   */
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    I2cMuxConfig config = (I2cMuxConfig) super.apply(c);
-    // FIXME - remove all this, it should "only" be in config
-    deviceBus = config.bus;
-    deviceAddress = config.address;
-    i2cDevices = config.i2cDevices;
-    if (config.controller != null) {
-      controllerName = config.controller;
+  public void setDeviceBus(String deviceBus) {
+    setBus(deviceBus);
+  }
+  
+  @Override
+  public I2cMuxConfig apply(I2cMuxConfig c) {
+    super.apply(c);
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
     }
     return c;
   }
+
+  /**
+   * Sets which bus future commands will be sent down.
+   * 
+   * @param busAddress
+   *          Range 0 - 7
+   */
+  public void setMuxBus(int busAddress) {
+    if (busAddress != lastBusAddress) {
+      byte bus[] = new byte[1];
+      bus[0] = (byte) (1 << busAddress);
+      log.debug("setMux config.bus {} config.address {} bus[0] {}", config.bus, config.address, bus[0]);
+      controller.i2cWrite(this, Integer.parseInt(config.bus), Integer.decode(config.address), bus, bus.length);
+      lastBusAddress = busAddress;
+    }
+  }
+
+
 
 }

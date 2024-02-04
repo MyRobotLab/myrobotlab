@@ -1,13 +1,22 @@
 package org.myrobotlab.service.config;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.MrlListenerComparator;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -73,18 +82,7 @@ public class ServiceConfig {
    * simple type name of service defined for this config
    */
   public String type;
-
-  // FIXME - change to enum ! 
-  // FIXME - remove this - its not used 
-  // heh non transient makes it easy to debug !
-  transient public String state = "INIT"; // INIT | LOADED | CREATED | STARTED |
-                                          // STOPPED | RELEASED
-  // FIXME - SO IMPORTANT !
-
-  public String getx(String key) {
-    // FIXME - return reflected value
-    return null;
-  }
+  
 
   public String getPath(String name, String peerKey) {
     if (name == null) {
@@ -101,7 +99,7 @@ public class ServiceConfig {
    */
   // public Map<String, Peer> peers = new TreeMap<>();
   public Map<String, Peer> peers = null;
-  public  List<Listener> listeners = null;
+  public  List<Listener> listeners = new ArrayList<>();
                                            
 
   public ServiceConfig() {
@@ -170,7 +168,7 @@ public class ServiceConfig {
    * @param plan
    * @param key
    * @param globalName
-   * @param peer
+   * @param peerType
    * @return
    */
   public ServiceConfig addDefaultGlobalConfig(Plan plan, String key, String globalName, String peerType, boolean autoStart) {
@@ -217,11 +215,6 @@ public class ServiceConfig {
   public static Plan getDefault(Plan plan, String name, String inType) {
     try {
 
-      // if (type == null) {
-      // log.error("getDefault(null)");
-      // return null;
-      // }
-
       // FIXME - at some point setting, examining and changing
       // peer keys to actual names will need to be worky
       String fullType = getConfigType(inType);
@@ -229,15 +222,45 @@ public class ServiceConfig {
       Class<?> c = Class.forName(fullType);
       Constructor<?> mc = c.getConstructor();
       ServiceConfig config = (ServiceConfig) mc.newInstance();
-      // FIXME pass in plan
-      // plan.merge();
+            
       config.getDefault(plan, name);
+      Collections.sort(config.listeners, new MrlListenerComparator());
 
-    } catch (ClassNotFoundException e) {
-      log.info("could not find {} loading generalized ServiceConfig", inType);
-      ServiceConfig sc = new ServiceConfig();
-      sc.type = inType;
-      plan.put(name, sc);
+    } catch (ClassNotFoundException cnfe) {
+      // We could not find the config type with the simple {serviceType}Config pattern
+      // So now we look at its superclasses and try to find a config class in
+      // the generic type parameters
+      // FIXME should also perform the simple pattern check on superclasses
+      try {
+        @SuppressWarnings("rawtypes")
+        Class<? extends Service> serviceClass = Class.forName(CodecUtils.makeFullTypeName(inType)).asSubclass(Service.class);
+        Type superClass = serviceClass.getGenericSuperclass();
+        if (superClass instanceof ParameterizedType) {
+          ParameterizedType genericSuperClass = (ParameterizedType) superClass;
+          log.debug("Got generic superclass: " + genericSuperClass + " for service class " + serviceClass);
+          Class<? extends ServiceConfig> configClass = ((Class<?>) genericSuperClass.getActualTypeArguments()[0]).asSubclass(ServiceConfig.class);
+          ServiceConfig newConfig = configClass.getConstructor().newInstance();
+          newConfig.type = inType;
+          newConfig.getDefault(plan, name);
+        } else {
+          throw new NoSuchElementException("Superclass is not generic");
+        }
+
+      } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchElementException | NoSuchMethodException | InstantiationException |
+               IllegalAccessException | InvocationTargetException | ClassCastException ignored) {
+        // Many ways for the generic inspection code to fail. NoClassDefFound is thrown when the service isn't installed
+        // We should probably only attempt to load configs for installed services
+        // NoSuchElementException is manually thrown when we can't find a generic superclass to inspect
+        // All others are checked exceptions thrown by the reflection utilities being used
+        log.info("could not find config class for {}, loading generalized ServiceConfig", inType);
+        ServiceConfig sc = new ServiceConfig();
+        sc.type = inType;
+        if (name.equals("i01")) {
+          log.info("here");
+        }
+        Collections.sort(sc.listeners, new MrlListenerComparator());
+        plan.put(name, sc);
+      }
     } catch (Exception e) {
       Runtime.getInstance().error(e);
     }

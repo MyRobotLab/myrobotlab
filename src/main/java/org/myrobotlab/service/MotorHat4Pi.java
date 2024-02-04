@@ -8,9 +8,8 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorHat4PiConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 
-public class MotorHat4Pi extends AbstractMotor {
+public class MotorHat4Pi extends AbstractMotor<MotorHat4PiConfig> {
   private static final long serialVersionUID = 1L;
 
   Integer leftDirPin;
@@ -92,17 +91,15 @@ public class MotorHat4Pi extends AbstractMotor {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public MotorHat4PiConfig getConfig() {
     // FIXME - may need to do call super.config for config that has parent :(
-    MotorHat4PiConfig config = (MotorHat4PiConfig) super.getConfig();
     config.motorId = motorId;
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MotorHat4PiConfig config = (MotorHat4PiConfig) super.apply(c);
-    setMotor(config.motorId);
+  public MotorHat4PiConfig apply(MotorHat4PiConfig c) {
+    super.apply(c);
+    setMotor(c.motorId);
     return c;
   }
 
@@ -114,6 +111,18 @@ public class MotorHat4Pi extends AbstractMotor {
     AdafruitMotorHat4Pi hat = (AdafruitMotorHat4Pi) Runtime.start("hat", "AdafruitMotorHat4Pi");
     MotorHat4Pi motor = (MotorHat4Pi) Runtime.start("motor", "MotorHat4Pi");
     hat.attach(raspi, "1", "0x60");
+  }
+
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

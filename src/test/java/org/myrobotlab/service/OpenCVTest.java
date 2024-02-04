@@ -95,37 +95,6 @@ public class OpenCVTest extends AbstractTest {
     long ts = System.currentTimeMillis();
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
 
-    /*
-     * 
-     * log.
-     * warn("========= OpenCVTest - setupbefore class - started cv {} ms ========="
-     * , System.currentTimeMillis()-ts ); ts = System.currentTimeMillis(); log.
-     * warn("========= OpenCVTest - setupbefore class - starting capture ========="
-     * ); cv.capture(TEST_LOCAL_FACE_FILE_JPEG); log.
-     * warn("========= OpenCVTest - setupbefore class - started capture {} ms ========="
-     * , System.currentTimeMillis()-ts ); ts = System.currentTimeMillis(); log.
-     * warn("========= OpenCVTest - setupbefore class - starting getFaceDetect ========="
-     * ); cv.getFaceDetect(120000);// two minute wait to load all libraries log.
-     * warn("========= OpenCVTest - setupbefore class - started getFaceDetect {} ms ========="
-     * , System.currentTimeMillis()-ts ); ts = System.currentTimeMillis(); log.
-     * warn("========= OpenCVTest - setupbefore class - starting getClassifications ========="
-     * ); cv.reset(); OpenCVFilter yoloFilter = cv.addFilter("yolo"); //
-     * cv.getClassifications(120000); cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-     * log.
-     * warn("========= OpenCVTest - setupbefore class - started getClassifications {} ms ========="
-     * , System.currentTimeMillis()-ts );
-     * 
-     * ts = System.currentTimeMillis(); log.
-     * warn("========= OpenCVTest - setupbefore class - starting getOpenCVData ========="
-     * );
-     * 
-     * cv.reset(); cv.capture(TEST_LOCAL_MP4); cv.getOpenCVData(); log.
-     * warn("========= OpenCVTest - setupbefore class - started getOpenCVData {} ms ========="
-     * , System.currentTimeMillis()-ts ); cv.disableAll(); // if (!isHeadless())
-     * { - no longer needed I believe - SwingGui now handles it
-     * 
-     * // }
-     */
   }
 
   // FIXME - do the following test
@@ -215,6 +184,12 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_INPUT_DIR);
     assertNotNull(data);
 
+
+  }
+  
+  @Test
+  public void testHttpCapture() {
+    
     /**
      * Test ImageFile frame grabber
      */
@@ -222,12 +197,12 @@ public class OpenCVTest extends AbstractTest {
     if (hasInternet()) {
       cv.reset();
       cv.setGrabberType("ImageFile");
-      cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaces(MAX_TIMEOUT);
+      cv.capture("https://upload.wikimedia.org/wikipedia/commons/f/fe/Isaac_Asimov%2C_RIT_NandE_Vol13Num29_1981_Sep24_Complete.jpg");
+      List<Classification> data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.size() > 0);
     }
-
+    
   }
 
   // TODO test enable disable & enableDisplay

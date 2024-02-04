@@ -142,6 +142,27 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     return String.format("%s/%s/%s/%s", groupId, artifactId, version, ext);
   }
 
+  /**
+   * Gives the Maven coordinates for this dependency,
+   * which are the group ID, artifact ID, and version
+   * all separated by colons.
+   * @return The Maven coordinates for this dependency
+   */
+  public String getCoordinates() {
+    return String.format("%s:%s:%s", groupId, artifactId, version);
+  }
+
+  /**
+   * Gives the unique Maven coordinates of this dependency's project.
+   * This does not give the version, and is mainly used to determine
+   * if two dependencies are for the same project.
+   *
+   * @return The group ID and the artifact ID, separated by a colon
+   */
+  public String getProjectCoordinates() {
+    return String.format("%s:%s", groupId, artifactId);
+  }
+
   public void add(ServiceExclude serviceExclude) {
     excludes.add(serviceExclude);
   }

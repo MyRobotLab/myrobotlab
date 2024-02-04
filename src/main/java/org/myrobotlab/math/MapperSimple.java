@@ -15,7 +15,7 @@ import org.slf4j.Logger;
  * The original Arduino map() method this was inspired from has no such values.
  * This was an attempt to "clean up" exposing the map to config. Otherwise,
  * users setting config would be asking the same questions regarding the useless
- * fields Inverted & Clip
+ * fields Inverted and Clip
  * 
  * 
  * @author GroG

@@ -8,6 +8,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.IndianTtsConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.HttpData;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import org.slf4j.Logger;
  * 
  * http://indiantts.com/
  */
-public class IndianTts extends AbstractSpeechSynthesis {
+public class IndianTts extends AbstractSpeechSynthesis<IndianTtsConfig> {
 
   private static final long serialVersionUID = 1L;
 

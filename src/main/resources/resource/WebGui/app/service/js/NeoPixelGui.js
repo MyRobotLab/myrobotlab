@@ -11,7 +11,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
     $scope.pins = []
     $scope.speeds = []
     $scope.types = ['RGB', 'RGBW']
-    $scope.animations = ['No animation', 'Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman', 'equalizer']
+    $scope.animations = ['Stop', 'Color Wipe', 'Larson Scanner', 'Theater Chase', 'Theater Chase Rainbow', 'Rainbow', 'Rainbow Cycle', 'Flash Random', 'Ironman']
     $scope.pixelCount = null
 
     // set pixel position
@@ -103,7 +103,7 @@ angular.module('mrlapp.service.NeoPixelGui', []).controller('NeoPixelGuiCtrl', [
             $scope.pin = service.pin
         }
 
-        if (!$scope.state.controller) {
+        if ($scope.service.controller) {
             $scope.state.controller = $scope.service.controller
         }
 

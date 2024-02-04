@@ -34,6 +34,16 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
         }
     }
 
+    $scope.stopPlaylist = function() {
+        if ($scope.selectedPlaylist) {
+            msg.send('stopPlaylist', $scope.selectedPlaylist[0])
+            msg.send('stop')
+        } else {
+            msg.send('stopPlaylist')
+            msg.send('stop')
+        }
+    }
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service

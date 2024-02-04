@@ -5,6 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.MyoData;
 import org.myrobotlab.service.interfaces.MyoDataListener;
 import org.myrobotlab.service.interfaces.MyoDataPublisher;
@@ -44,7 +45,7 @@ import com.thalmic.myo.enums.XDirection;
  * https://github.com/NicholasAStuart/myo-java-JNI-Library
  * 
  */
-public class MyoThalmic extends Service implements DeviceListener, MyoDataListener, MyoDataPublisher {
+public class MyoThalmic extends Service<ServiceConfig> implements DeviceListener, MyoDataListener, MyoDataPublisher {
 
   private static final long serialVersionUID = 1L;
 

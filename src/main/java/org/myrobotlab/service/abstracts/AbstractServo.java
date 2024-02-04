@@ -1,11 +1,11 @@
 package org.myrobotlab.service.abstracts;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -16,7 +16,6 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.ServoMove;
@@ -53,7 +52,7 @@ import org.slf4j.Logger;
  *         outputs.
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
+public abstract class AbstractServo<C extends ServoConfig> extends Service<C> implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -294,8 +293,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   public void setController(String name) {
-    ServoConfig c = (ServoConfig) config;
-    c.controller = name;
+    config.controller = name;
     broadcastState();
   }
 
@@ -323,8 +321,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void attachServoController(String service) {
-    ServoConfig c = (ServoConfig) config;
-
     if (service == null) {
       error("attachServoController null");
       return;
@@ -335,7 +331,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       return;
     }
 
-    if (isAttached && !CodecUtils.getFullName(service).equals(c.controller)) {
+    if (isAttached && !CodecUtils.getFullName(service).equals(CodecUtils.getFullName(config.controller))) {
       warn("%s already attached to %s detach first", getName(), service);
       return;
     } else if (isAttached) {
@@ -350,8 +346,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoSetSpeed", service);
     addListener("publishServoEnable", service);
     addListener("publishServoDisable", service);
-
-    c.controller = service;
+    if (CodecUtils.isLocal(service)) {
+      service = CodecUtils.getShortName(service);
+    }
+    config.controller = service;
 
     // "guessing" its ok if it exists ...
     if (Runtime.getService(service) != null) {
@@ -366,7 +364,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     send(service, "attach", getName());
     log.info("{} attached to {} on pin {}", getName(), service, pin);
 
-    if (c.autoDisable) {
+    if (config.autoDisable) {
       disable();
       addTaskOneShot(idleTimeout, "disable");
     }
@@ -379,8 +377,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void detach() {
-    ServoConfig c = (ServoConfig) config;
-    detach(c.controller);
+    detach(config.controller);
   }
 
   @Override
@@ -398,14 +395,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void detach(String controllerName) {
-    ServoConfig c = (ServoConfig) config;
-
     if (!isAttached) {
       log.info("already detached");
       return;
     }
 
-    if (c.controller != null && !c.controller.equals(controllerName)) {
+    if (config.controller != null && !config.controller.equals(controllerName)) {
       log.warn("{} not attached to {}", getName(), controllerName);
       return;
     }
@@ -444,8 +439,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
-    ServoConfig c = (ServoConfig) config;
-    if (c.autoDisable) {
+    if (config.autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
         purgeTask("disable");
@@ -465,14 +459,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public boolean isAutoDisable() {
-    ServoConfig c = (ServoConfig) config;
-    return c.autoDisable;
+    return config.autoDisable;
   }
 
   @Override
   public String getController() {
-    ServoConfig c = (ServoConfig) config;
-    return c.controller;
+    return config.controller;
   }
 
   @Override
@@ -559,14 +551,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public boolean isAttached(Attachable attachable) {
-    ServoConfig c = (ServoConfig) config;
-    return isAttached && c.controller.equals(attachable.getName());
+    return isAttached && config.controller.equals(attachable.getName());
   }
 
   @Override
   public boolean isAttached(String name) {
-    ServoConfig c = (ServoConfig) config;
-    return isAttached && CodecUtils.getFullName(c.controller).equals(CodecUtils.getFullName(name));
+    return isAttached && CodecUtils.getFullName(config.controller).equals(CodecUtils.getFullName(name));
   }
 
   @Override
@@ -816,7 +806,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public void setAutoDisable(boolean autoDisable) {
-    ServoConfig c = (ServoConfig) config;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -825,8 +814,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     } else {
       purgeTask("disable");
     }
-    boolean valueChanged = c.autoDisable != autoDisable;
-    c.autoDisable = autoDisable;
+    boolean valueChanged = config.autoDisable != autoDisable;
+    config.autoDisable = autoDisable;
     if (valueChanged) {
       broadcastState();
     }
@@ -871,7 +860,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  @Config // default - if pin is different - output servo.setPin()
   public void setPin(Integer pin) {
     if (pin == null) {
       log.info("{}.setPin(null) as pin is not a valid pin value", pin);
@@ -1065,11 +1053,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public ServoEvent publishServoStopped(String name, Double position) {
     log.debug("{} publishServoStopped({}, {})", System.currentTimeMillis(), name, position);
-    ServoConfig c = (ServoConfig) config;
     // log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
     // if we are "stopping" going from moving to not moving
-    if (c.autoDisable && isMoving) {
+    if (config.autoDisable && isMoving) {
       // we cancel any pre-existing timer if it exists
       purgeTask("disable");
       // and start our countdown
@@ -1144,50 +1131,48 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ServoConfig config = (ServoConfig) super.apply(c);
+  public C apply(C c) {
+    super.apply(c);
 
     // important - if starting up
     // and autoDisable - then the assumption at this point
     // is it is currently disabled, otherwise it will take
     // a move to disable
-    if (config.autoDisable) {
+    if (c.autoDisable) {
       disable();
     }
-    if (config.minIn != null && config.maxIn != null && config.minOut != null && config.maxOut != null) {
-      mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
+    if (c.minIn != null && c.maxIn != null && c.minOut != null && c.maxOut != null) {
+      mapper = new MapperLinear(c.minIn, c.maxIn, c.minOut, c.maxOut);
     }
-    mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);
-    enabled = config.enabled;
-    if (config.idleTimeout != null) {
-      idleTimeout = config.idleTimeout;
+    mapper.setInverted(c.inverted);
+    mapper.setClip(c.clip);
+    enabled = c.enabled;
+    if (c.idleTimeout != null) {
+      idleTimeout = c.idleTimeout;
     }
-    pin = config.pin;
+    pin = c.pin;
 
-    speed = config.speed;
-    sweepMax = config.sweepMax;
-    sweepMin = config.sweepMin;
+    speed = c.speed;
+    sweepMax = c.sweepMax;
+    sweepMin = c.sweepMin;
 
-    if (config.synced != null) {
+    if (c.synced != null) {
       syncedServos.clear();
-      for (String s : config.synced) {
-        syncedServos.add(s);
-      }
+      Collections.addAll(syncedServos, c.synced);
     }
 
-    // rest = config.rest;
-    if (config.rest != null) {
-      rest = config.rest;
-      targetPos = config.rest;
-      // currentInputP = mapper.calcOutput(config.rest);
-      currentInputPos = config.rest;
-      broadcast("publishEncoderData", new EncoderData(getName(), pin, config.rest, config.rest));
+    // rest = c.rest;
+    if (c.rest != null) {
+      rest = c.rest;
+      targetPos = c.rest;
+      // currentInputP = mapper.calcOutput(c.rest);
+      currentInputPos = c.rest;
+      broadcast("publishEncoderData", new EncoderData(getName(), pin, c.rest, c.rest));
     }
 
-    if (config.controller != null) {
+    if (c.controller != null) {
       try {
-        attach(config.controller);
+        attach(c.controller);
       } catch (Exception e) {
         error(e);
       }
@@ -1195,7 +1180,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     // connect and attach on an arduino can take considerable time
     // so we'll add our id
-    if (config.autoDisable) {
+    if (c.autoDisable) {
       disable();
       addTaskOneShot(idleTimeout, "disable");
     }
@@ -1204,9 +1189,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public C getConfig() {
 
-    ServoConfig config = (ServoConfig) super.getConfig();
+    super.getConfig();
 
     config.enabled = enabled;
 
@@ -1227,7 +1212,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
 
-    if (syncedServos.size() > 0) {
+    if (!syncedServos.isEmpty()) {
       config.synced = new String[syncedServos.size()];
       int i = 0;
       for (String s : syncedServos) {

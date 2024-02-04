@@ -36,7 +36,7 @@ import okhttp3.WebSocket;
  * @author GroG
  *
  */
-public class Ros extends Service implements RemoteMessageHandler, ConnectionEventListener {
+public class Ros extends Service<RosConfig> implements RemoteMessageHandler, ConnectionEventListener {
 
   /**
    * @see https://github.com/biobotus/rosbridge_suite/blob/master/ROSBRIDGE_PROTOCOL.md
@@ -148,12 +148,12 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    RosConfig config = (RosConfig) super.apply(c);
-    if (config.connect) {
-      connect(config.bridgeUrl);
-      if (config.subscriptions != null) {
-        for (String topic : config.subscriptions) {
+  public RosConfig apply(RosConfig c) {
+    super.apply(c);
+    if (c.connect) {
+      connect(c.bridgeUrl);
+      if (c.subscriptions != null) {
+        for (String topic : c.subscriptions) {
           rosSubscribe(topic);
         }
       }
@@ -185,8 +185,8 @@ public class Ros extends Service implements RemoteMessageHandler, ConnectionEven
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    RosConfig config = (RosConfig) super.getConfig();
+  public RosConfig getConfig() {
+    super.getConfig();
     config.connect = connected;
     return config;
   }

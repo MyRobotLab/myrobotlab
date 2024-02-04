@@ -4,6 +4,7 @@ package org.myrobotlab.arduino;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import org.myrobotlab.service.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
 
+import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.string.StringUtil;
 
 /**
@@ -44,11 +46,12 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -2486,7 +2489,9 @@ public class Msg {
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            if (!arduino.isConnecting()){
+              log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            }
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -2519,7 +2524,10 @@ public class Msg {
           } 
           
           if (!clearToSend) {
-            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            if (!arduino.isConnecting()) {
+              // we're connecting, so we're going to ignore the message.
+              log.warn("NOT CLEAR TO SEND! resetting parser!");
+            }
             // We opened the port, and we got some data that isn't a Begin message.
             // so, I think we need to reset the parser and continue processing bytes...
             // there will be errors until the next magic byte is seen.

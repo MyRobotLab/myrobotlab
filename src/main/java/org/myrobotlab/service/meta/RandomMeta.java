@@ -17,13 +17,10 @@ public class RandomMeta extends MetaData {
     // add a cool description
     addDescription("provides a service for random message generation");
 
-    // false will prevent it being seen in the ui
-    setAvailable(true);
-
     // add dependencies if necessary
     // addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
 
-    setAvailable(false);
+    setAvailable(true);
 
     // add it to one or many categories
     addCategory("general");

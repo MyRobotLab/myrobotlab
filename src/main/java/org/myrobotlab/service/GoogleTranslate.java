@@ -8,6 +8,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -15,7 +16,7 @@ import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
 
-public class GoogleTranslate extends Service {
+public class GoogleTranslate extends Service<ServiceConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -56,25 +57,6 @@ public class GoogleTranslate extends Service {
     return translated;
   }
   
-
-  /**
-   * The methods apply and getConfig can be used, if more complex configuration handling is needed.
-   * By default, the framework takes care of most of it, including subscription handling.
-   * <pre>
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    // _TemplateServiceConfig config = (_TemplateService)super.apply(c);
-    // if more complex config handling is needed
-    return c;
-  }
-
-  @Override
-  public ServiceConfig getConfig() {
-    // _TemplateServiceConfig config = (_TemplateService)super.getConfig();
-    return config;
-  }
-  </pre>
-  **/
 
   public static void main(String[] args) {
     try {

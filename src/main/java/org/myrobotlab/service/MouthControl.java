@@ -19,7 +19,7 @@ import org.slf4j.Logger;
  * It's peers are the jaw servo, speech service and an arduino.
  *
  */
-public class MouthControl extends Service implements SpeechListener {
+public class MouthControl extends Service<MouthControlConfig> implements SpeechListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -121,7 +121,7 @@ public class MouthControl extends Service implements SpeechListener {
   }
 
   public void startMouthAnimation() {
-    send(neoPixel, "playAnimation", "Equalizer");
+    send(neoPixel, "playAnimation", config.animation);
   }
 
   public void stopMouthAnimation() {
@@ -229,9 +229,9 @@ public class MouthControl extends Service implements SpeechListener {
   }
 
   @Override
-  public ServiceConfig getConfig() {
+  public MouthControlConfig getConfig() {
 
-    MouthControlConfig config = (MouthControlConfig)super.getConfig();
+    super.getConfig();
     // FIXME - remove local fields, use config only
     config.jaw = jaw;
     config.mouth = mouth;
@@ -246,23 +246,23 @@ public class MouthControl extends Service implements SpeechListener {
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    MouthControlConfig config = (MouthControlConfig) super.apply(c);
+  public MouthControlConfig apply(MouthControlConfig c) {
+    super.apply(c);
     // FIXME - remove local fields, use config only
-    mouthClosedPos = config.mouthClosedPos;
-    mouthOpenedPos = config.mouthOpenedPos;
-    delaytime = config.delaytime;
-    delaytimestop = config.delaytimestop;
-    delaytimeletter = config.delaytimeletter;
-    jaw = config.jaw;
-    neoPixel = config.neoPixel;
+    mouthClosedPos = c.mouthClosedPos;
+    mouthOpenedPos = c.mouthOpenedPos;
+    delaytime = c.delaytime;
+    delaytimestop = c.delaytimestop;
+    delaytimeletter = c.delaytimeletter;
+    jaw = c.jaw;
+    neoPixel = c.neoPixel;
 
     // mouth needs to attach to us
     // it needs to create notify entries
     // so we fire a message to attach to us
-    mouth = config.mouth;
-    if (config.mouth != null) {
-      mouth = config.mouth;
+    mouth = c.mouth;
+    if (c.mouth != null) {
+      mouth = c.mouth;
       send(mouth, "attach", getName());
     }
 

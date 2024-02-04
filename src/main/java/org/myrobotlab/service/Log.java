@@ -30,10 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.LogConfig;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -43,7 +46,7 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 
-public class Log extends Service implements Appender<ILoggingEvent> {
+public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   public static class LogEntry {
     public long ts;
@@ -73,38 +76,41 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   /**
    * log file name
    */
-  public static String MYROBOTLAB_LOG = "myrobotlab.log";
+  protected static String MYROBOTLAB_LOG = "myrobotlab.log";
+  
+  /**
+   * max size of log buffer
+   */
+  protected int maxSize = 1000;
+
+  /**
+   * a sliding window of logs
+   */
+  protected List<LogEntry> logs = new SlidingWindowList<>(maxSize);
 
   /**
    * buffer of log event - made transient because the appropriate way to
    * broadcast logging is through publishLogEvent (not broadcastState)
    */
-  transient List<LogEntry> buffer = new ArrayList<>();
-
+  protected transient List<LogEntry> buffer = new ArrayList<>();
+  
   /**
    * logging state
    */
-  boolean isLogging = false;
+  protected boolean isLogging = false;
 
   /**
    * last time events were broadcast
    */
-  long lastPublishLogTimeTs = 0;
+  protected long lastPublishLogTimeTs = 0;
 
-  /**
-   * current log level
-   */
-  String logLevel = null;
-
-  /**
-   * max size of log buffer
-   */
-  int maxSize = 1000;
 
   /**
    * minimal time between log broadcasts
    */
-  long minIntervalMs = 1000;
+  protected long minIntervalMs = 1000;
+
+  protected String previousLogLevel;
 
   public Log(String n, String id) {
     super(n, id);
@@ -113,8 +119,10 @@ public class Log extends Service implements Appender<ILoggingEvent> {
 
   public String getLogLevel() {
     Logging logging = LoggingFactory.getInstance();
-    logLevel = logging.getLevel();
-    return logLevel;
+    if (config != null) {
+      config.level = logging.getLevel();
+    }
+    return logging.getLevel();
   }
 
   @Override
@@ -174,7 +182,9 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   @Override
   public void doAppend(ILoggingEvent event) throws LogbackException {
     String name = Thread.currentThread().getName();
-    buffer.add(new LogEntry(event));
+    LogEntry entry = new LogEntry(event);
+    buffer.add(entry);
+    // add to sliding 
     // if (buffer.size() > maxSize || System.currentTimeMillis() -
     // lastPublishLogTimeTs > minIntervalMs) {
     // // event.get
@@ -190,6 +200,8 @@ public class Log extends Service implements Appender<ILoggingEvent> {
    */
   synchronized public void flush() {
     if (buffer.size() > 0) {
+      // bucket add to sliding window
+      logs.addAll(buffer);
       invoke("publishLogEvents", buffer);
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
@@ -220,6 +232,10 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   }
 
   public List<LogEntry> publishLogEvents(List<LogEntry> entries) {
+    return entries;
+  }
+
+  public List<LogEntry> publishErrors(List<LogEntry> entries) {
     return entries;
   }
 
@@ -254,6 +270,19 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     // getting current level before broadcasting state
     getLogLevel();
     broadcastState();
+  }
+
+  public LogConfig apply(LogConfig c) {
+    super.apply(c);
+    previousLogLevel = getLogLevel();
+    if (c.level != null) {
+      setRootLogLevel(c.level);
+    }
+    return c;
+  }
+
+  public LogConfig getConfig() {
+    return config;
   }
 
   @Override
@@ -298,6 +327,13 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   public void stopService() {
     super.stopService();
     stopLogging();
+    if (previousLogLevel != null) {
+      Runtime.setLogLevel(previousLogLevel);
+    }
+  }
+  
+  public void clear() {
+    logs = new SlidingWindowList<>(maxSize);
   }
 
   public static void main(String[] args) {
@@ -307,14 +343,17 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     try {
 
       // Log4jLoggerAdapter blah;
+      Runtime runtime = Runtime.getInstance();
+      RuntimeConfig config = runtime.getConfig();
+      config.resource = "src/main/resources/resource";
+      runtime.apply(config);
 
       Runtime.start("log", "Log");
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      Runtime runtime = Runtime.getInstance();
-      runtime.startInteractiveMode();
+
       log.info("this is an info test");
       log.warn("this is an warn test");
       log.error("this is an error test");

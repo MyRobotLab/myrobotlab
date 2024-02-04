@@ -64,6 +64,11 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
         return ret
     }
 
+    $scope.start = function(name, type) {
+        msg.sendTo('runtime', 'start', name, type)
+    }
+
+
     // this method initializes subPanels when a new service becomes available
     this.onRegistered = function(panel) {
         if (panelNames.has(panel.displayName)) {

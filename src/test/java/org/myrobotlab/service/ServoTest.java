@@ -344,6 +344,7 @@ public class ServoTest extends AbstractTest {
     servo01.setPin(7);
     servo01.setPin(8);
     servo01.setSpeed(1.0);
+    servo01.detach();
     servo01.setController("blah");
     assertEquals("blah", servo01.getController());
     servo01.attach("arduino01");

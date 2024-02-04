@@ -49,7 +49,7 @@ import com.pi4j.wiringpi.SoftPwm;
  * More Info : http://pi4j.com/
  * 
  */
-public class RasPi extends AbstractMicrocontroller implements I2CController, GpioPinListenerDigital {
+public class RasPi extends AbstractMicrocontroller<RasPiConfig> implements I2CController, GpioPinListenerDigital {
 
   public static class I2CDeviceMap {
     transient public I2CBus bus;
@@ -709,14 +709,19 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
       log.info("Initiating i2c");
       I2CFactory.getInstance(Integer.parseInt(bus));
-      log.info("i2c initiated on bus {}", bus);
-      addTask(1000, "scan");
 
-      log.info("read task initialized");
-      addTask(1000, "read");
+      if (config.pollOnStart) {
+        log.info("i2c initiated on bus {}", bus);
+        addTask(1000, "scan");
+
+        log.info("read task initialized");
+        addTask(1000, "read");
+      }
 
     } catch (IOException e) {
       log.error("i2c initiation failed", e);
+    } catch (UnsupportedOperationException er) {
+      log.warn("invalid operation initializing i2c - is platform not raspberry pi?");
     } catch (Exception e) {
       // an error in the constructor won't get broadcast - so we need Runtime to
       // do it

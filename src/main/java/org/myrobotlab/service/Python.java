@@ -24,8 +24,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PythonConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.Processor;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
@@ -50,7 +50,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service implements ServiceLifeCycleListener, MessageListener {
+public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener, Processor {
   
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -177,11 +177,11 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       }
     }
   }
-
+  
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
-  private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
+  private final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
 
@@ -201,7 +201,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @param interp
    * @return
    */
-  private static synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
+  private synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
     // TODO change this from a synchronized method to a few blocks to
     // improve concurrent performance
     if (objectCache.containsKey(name)) {
@@ -313,8 +313,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public void openScript(String scriptName) throws IOException {
-    PythonConfig c = (PythonConfig)config;
-    File script = new File(c.scriptRootDir + fs + scriptName);
+    File script = new File(config.scriptRootDir + fs + scriptName);
 
     if (!script.exists()) {
       error("file %s not found", script.getAbsolutePath());
@@ -327,7 +326,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   
 
   public void closeScript(String file) {
-    PythonConfig c = (PythonConfig) config;
     if (openedScripts.containsKey(file)) {
       openedScripts.remove(file);
       broadcastState();
@@ -337,7 +335,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   /**
    * append more Python to the current script
    * 
-   * @param data
+   * @param code
    *          the code to append
    * @return the resulting concatenation
    */
@@ -408,9 +406,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
   public void addModulePath(String path) {
-    PythonConfig c = (PythonConfig) config;
-    if (c.modulePaths != null) {
-      c.modulePaths.add(path);
+    if (config.modulePaths != null) {
+      config.modulePaths.add(path);
     }
     
     if (interp != null) {
@@ -434,6 +431,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    *          string of code to run
    * @return true/false
    */
+  @Override
   public boolean exec(String code) {
     return exec(code, true);
   }
@@ -743,16 +741,18 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
   /**
-   * Saves a script to the file system default will be in
-   * data/Py4j/{serviceName}/{scriptName}
+   * Saves a script to the file system 
    * 
    * @param scriptName
    * @param code
    * @throws IOException
    */
   public void saveScript(String scriptName, String code) throws IOException {
-    PythonConfig c = (PythonConfig)config;
-    FileIO.toFile(c.scriptRootDir + fs + scriptName, code);
+    if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
+      scriptName = scriptName + ".py";
+    }
+    // FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    FileIO.toFile(scriptName, code);
     info("saved file %s", scriptName);
   }
 
@@ -761,7 +761,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * upserts a script in memory
    * @param file
    * @param code
-   * @return
    */
   public void updateScript(String file, String code) {
       if (openedScripts.containsKey(file)) {
@@ -791,11 +790,10 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   synchronized public void startService() {
     super.startService();
     
-    PythonConfig c = (PythonConfig) config;
-    if (c.scriptRootDir == null) {
-        c.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    if (config.scriptRootDir == null) {
+        config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
     }
-    File dataDir = new File(c.scriptRootDir);
+    File dataDir = new File(config.scriptRootDir);
     dataDir.mkdirs();    
     
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
@@ -806,8 +804,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     Runtime.getInstance().attachServiceLifeCycleListener(getName());
     
     // run start scripts if there are any
-    if (c.startScripts != null) {
-      for (String script : c.startScripts) {
+    if (config.startScripts != null) {
+      for (String script : config.startScripts) {
         // i think in this context its safer to block
         try {
           execFile(script, true);
@@ -830,7 +828,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
     inputQueueThread.stop();
     thread.interruptAllThreads();
-    Py.getSystemState()._systemRestart = true;
   }
 
   /**
@@ -856,9 +853,7 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   @Override
   public void stopService() {
     // run any stop scripts
-    PythonConfig c = (PythonConfig) config;
-
-    for (String script : c.stopScripts) {
+    for (String script : config.stopScripts) {
       // i think in this context its safer to block
       try {
         execFile(script, true);
@@ -895,8 +890,6 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
     localPythonFiles = getFileListing();
 
-    attachPythonConsole();
-
     String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
@@ -906,6 +899,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
+    attachPythonConsole();
+    
     // initialize all the pre-existing service before python was created
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
     for (ServiceInterface service : services.values()) {
@@ -949,19 +944,18 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
   }
 
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    PythonConfig config = (PythonConfig) super.apply(c);
+  public PythonConfig apply(PythonConfig c) {
+    super.apply(c);
     
     // apply is the first method called after construction,
     // since we offer the capability of executing scripts specified in config
     // the interpreter must be configured and created here
     init();
     
-    if (config.startScripts != null && config.startScripts.size() > 0) {
+    if (c.startScripts != null && c.startScripts.size() > 0) {
 
       if (isRunning()) {
-        for (String script : config.startScripts) {
+        for (String script : c.startScripts) {
           try {
             execFile(script);
           } catch (Exception e) {
@@ -973,8 +967,8 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
 
     PySystemState sys = Py.getSystemState();
 
-    if (config.modulePaths != null) {
-      for (String path : config.modulePaths) {
+    if (c.modulePaths != null) {
+      for (String path : c.modulePaths) {
         sys.path.append(new PyString(path));
       }
     }
@@ -991,12 +985,14 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
    * @throws IOException
    */
   public List<String> getScriptList() throws IOException {
-    PythonConfig c = (PythonConfig)config;
     List<String> sorted = new ArrayList<>();
-    List<File> files = FileIO.getFileList(c.scriptRootDir, true);
+    if (config.scriptRootDir == null) {
+      config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+    }    
+    List<File> files = FileIO.getFileList(config.scriptRootDir, true);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {
-        sorted.add(file.toString().substring(c.scriptRootDir.length() + 1));
+        sorted.add(file.toString().substring(config.scriptRootDir.length() + 1));
       }
     }
     Collections.sort(sorted);
@@ -1065,6 +1061,11 @@ public class Python extends Service implements ServiceLifeCycleListener, Message
       log.error("main threw", e);
     }
 
+  }
+
+  @Override
+  public PythonConfig getConfig() {
+    return config;
   }
 
 }

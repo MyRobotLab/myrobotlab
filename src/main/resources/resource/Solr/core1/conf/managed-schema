@@ -2,6 +2,131 @@
 <!-- Solr managed schema - automatically generated - DO NOT EDIT -->
 <schema name="default-config" version="1.6">
   <uniqueKey>id</uniqueKey>
+
+  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+  <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
+  <field name="_version_" type="plong" indexed="false" stored="false"/>
+  <field name="index_date" type="pdates" indexed="true" stored="true" multiValued="false" default="NOW"/>
+
+  <!-- Generic file specific attributes -->
+  <field name="filepath" type="text_general"/>
+  <field name="last_modified" type="pdate"/>
+  <field name="size" type="plong"/>
+  <field name="content_type" type="text_general" />
+  <field name="content_type_facet" type="string" />
+  
+  <copyField source="content_type" dest="content_type_facet" maxChars="256"/>
+  
+  <field name="created_date" type="pdate"/>
+
+  <!-- Media / Music search specific fields -->
+  <field name="title" type="text_general"/>
+  
+  <field name="artist" type="text_general"/>
+  <field name="artist_facet" type="string" />
+  <copyField source="artist" dest="artist_facet" maxChars="256"/>
+  
+  <field name="album" type="text_general"/>
+  <field name="album_facet" type="string" />
+  <copyField source="album" dest="album_facet" maxChars="256"/>
+  
+  <field name="genre" type="text_general"/>
+  <field name="genre_facet" type="string" />
+  <copyField source="genre" dest="genre_facet" maxChars="256"/>
+  
+  <field name="year" type="text_general"/>
+  <field name="year_facet" type="string" />
+  <copyField source="year" dest="year_facet" maxChars="256"/>
+
+  <field name="tracknumber" type="text_general"/>
+  <field name="samplerate" type="pdouble"/>
+  <field name="duration" type="pdouble"/>
+  <field name="channels" type="pint"/>
+  
+  <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
+  <field name="content" type="text_general"/>
+  <field name="date" type="pdates" indexed="true" stored="true" multiValued="false"/>
+  
+  <field name="text" type="text_general"/>
+  
+  <field name="type" type="string" indexed="true" stored="true" multiValued="false" />
+  <!--  we'll add 1 field for storing binary data on this document.  use with caution
+        This field type contains base64 encoded binary data
+        multi valued, so we could store a bunch of frames together in this field. 
+        -->
+  <field name="bytes" type="binary" indexed="false" stored="true" multiValued="true"/>
+  <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
+  <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
+  <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_en_split" type="text_en_splitting" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_rev" type="text_general_rev" indexed="true" stored="true"/>
+  <dynamicField name="*_phon_en" type="phonetic_en" indexed="true" stored="true"/>
+  <dynamicField name="*_s_lower" type="lowercase" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_cjk" type="text_cjk" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_en" type="text_en" indexed="true" stored="true" multiValued="true"/>
+  <dynamicField name="*_txt_ar" type="text_ar" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_bg" type="text_bg" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_ca" type="text_ca" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_cz" type="text_cz" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_da" type="text_da" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_de" type="text_de" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_el" type="text_el" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_es" type="text_es" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_eu" type="text_eu" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_fa" type="text_fa" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_fi" type="text_fi" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_fr" type="text_fr" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_ga" type="text_ga" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_gl" type="text_gl" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_hi" type="text_hi" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_hu" type="text_hu" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_hy" type="text_hy" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_id" type="text_id" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_it" type="text_it" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_ja" type="text_ja" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_lv" type="text_lv" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_nl" type="text_nl" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_no" type="text_no" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_pt" type="text_pt" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_ro" type="text_ro" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_ru" type="text_ru" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_sv" type="text_sv" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_th" type="text_th" indexed="true" stored="true"/>
+  <dynamicField name="*_txt_tr" type="text_tr" indexed="true" stored="true"/>
+  <dynamicField name="*_point" type="point" indexed="true" stored="true"/>
+  <dynamicField name="*_srpt" type="location_rpt" indexed="true" stored="true"/>
+  <dynamicField name="attr_*" type="text_general" multiValued="true" indexed="true" stored="true"/>
+  <dynamicField name="*_txt" type="text_general" indexed="true" stored="true"/>
+  <dynamicField name="*_str" type="strings" docValues="true" indexed="false" stored="false"/>
+  <dynamicField name="*_dts" type="pdate" multiValued="true" indexed="true" stored="true"/>
+  <dynamicField name="*_dpf" type="delimited_payloads_float" indexed="true" stored="true"/>
+  <dynamicField name="*_dpi" type="delimited_payloads_int" indexed="true" stored="true"/>
+  <dynamicField name="*_dps" type="delimited_payloads_string" indexed="true" stored="true"/>
+  <dynamicField name="*_is" type="pints" indexed="true" stored="true"/>
+  <dynamicField name="*_ss" type="strings" indexed="true" stored="true"/>
+  <dynamicField name="*_ls" type="plongs" indexed="true" stored="true"/>
+  <dynamicField name="*_bs" type="booleans" indexed="true" stored="true"/>
+  <dynamicField name="*_fs" type="pfloats" indexed="true" stored="true"/>
+  <dynamicField name="*_ds" type="pdoubles" indexed="true" stored="true"/>
+  <dynamicField name="*_dt" type="pdate" indexed="true" stored="true"/>
+  <dynamicField name="*_ws" type="text_ws" indexed="true" stored="true"/>
+  <dynamicField name="*_i" type="pint" indexed="true" stored="true"/>
+  <dynamicField name="*_s" type="string" indexed="true" stored="true"/>
+  <dynamicField name="*_l" type="plong" indexed="true" stored="true"/>
+  <dynamicField name="*_b" type="boolean" indexed="true" stored="true"/>
+  <dynamicField name="*_f" type="pfloat" indexed="true" stored="true"/>
+  <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
+  <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
+  
+  <!-- the vector search field -->
+  <field name="vector" type="knn_vector" indexed="true" stored="true"/>
+  
+  <!-- the catch all field.. -->
+  <dynamicField name="*" type="strings" indexed="true" stored="true"/>
+  <copyField source="title" dest="title_str" maxChars="256"/>
+  <copyField source="content" dest="content_str" maxChars="256"/>
+  
+  <!-- Field type definitions below here. -->
   <fieldType name="ancestor_path" class="solr.TextField">
     <analyzer type="index">
       <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -418,88 +543,5 @@
   <!-- Adding a dense vector field for knn search to do cosine similarity ( 384 dimensions and cosine similarity matches with al-->
   <fieldType name="knn_vector" class="solr.DenseVectorField" vectorDimension="384" similarityFunction="cosine" knnAlgorithm="hnsw" hnswMaxConnections="10" hnswBeamWidth="40"/>
   
-  <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
-  <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
-  <field name="_version_" type="plong" indexed="false" stored="false"/>
-  <field name="content" type="text_general"/>
-  <field name="date" type="pdates" indexed="true" stored="true" multiValued="false"/>
-  <field name="index_date" type="pdates" indexed="true" stored="true" multiValued="false" default="NOW"/>
-  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="title" type="text_general"/>
-  <field name="type" type="string" indexed="true" stored="true" multiValued="false" />
-  <!--  we'll add 1 field for storing binary data on this document.  use with caution
-        This field type contains base64 encoded binary data
-        multi valued, so we could store a bunch of frames together in this field. 
-        -->
-  <field name="bytes" type="binary" indexed="false" stored="true" multiValued="true"/>
-  <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
-  <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
-  <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_en_split" type="text_en_splitting" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_rev" type="text_general_rev" indexed="true" stored="true"/>
-  <dynamicField name="*_phon_en" type="phonetic_en" indexed="true" stored="true"/>
-  <dynamicField name="*_s_lower" type="lowercase" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_cjk" type="text_cjk" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_en" type="text_en" indexed="true" stored="true" multiValued="true"/>
-  <dynamicField name="*_txt_ar" type="text_ar" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_bg" type="text_bg" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_ca" type="text_ca" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_cz" type="text_cz" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_da" type="text_da" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_de" type="text_de" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_el" type="text_el" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_es" type="text_es" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_eu" type="text_eu" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_fa" type="text_fa" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_fi" type="text_fi" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_fr" type="text_fr" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_ga" type="text_ga" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_gl" type="text_gl" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_hi" type="text_hi" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_hu" type="text_hu" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_hy" type="text_hy" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_id" type="text_id" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_it" type="text_it" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_ja" type="text_ja" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_lv" type="text_lv" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_nl" type="text_nl" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_no" type="text_no" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_pt" type="text_pt" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_ro" type="text_ro" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_ru" type="text_ru" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_sv" type="text_sv" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_th" type="text_th" indexed="true" stored="true"/>
-  <dynamicField name="*_txt_tr" type="text_tr" indexed="true" stored="true"/>
-  <dynamicField name="*_point" type="point" indexed="true" stored="true"/>
-  <dynamicField name="*_srpt" type="location_rpt" indexed="true" stored="true"/>
-  <dynamicField name="attr_*" type="text_general" multiValued="true" indexed="true" stored="true"/>
-  <dynamicField name="*_txt" type="text_general" indexed="true" stored="true"/>
-  <dynamicField name="*_str" type="strings" docValues="true" indexed="false" stored="false"/>
-  <dynamicField name="*_dts" type="pdate" multiValued="true" indexed="true" stored="true"/>
-  <dynamicField name="*_dpf" type="delimited_payloads_float" indexed="true" stored="true"/>
-  <dynamicField name="*_dpi" type="delimited_payloads_int" indexed="true" stored="true"/>
-  <dynamicField name="*_dps" type="delimited_payloads_string" indexed="true" stored="true"/>
-  <dynamicField name="*_is" type="pints" indexed="true" stored="true"/>
-  <dynamicField name="*_ss" type="strings" indexed="true" stored="true"/>
-  <dynamicField name="*_ls" type="plongs" indexed="true" stored="true"/>
-  <dynamicField name="*_bs" type="booleans" indexed="true" stored="true"/>
-  <dynamicField name="*_fs" type="pfloats" indexed="true" stored="true"/>
-  <dynamicField name="*_ds" type="pdoubles" indexed="true" stored="true"/>
-  <dynamicField name="*_dt" type="pdate" indexed="true" stored="true"/>
-  <dynamicField name="*_ws" type="text_ws" indexed="true" stored="true"/>
-  <dynamicField name="*_i" type="pint" indexed="true" stored="true"/>
-  <dynamicField name="*_s" type="string" indexed="true" stored="true"/>
-  <dynamicField name="*_l" type="plong" indexed="true" stored="true"/>
-  <dynamicField name="*_b" type="boolean" indexed="true" stored="true"/>
-  <dynamicField name="*_f" type="pfloat" indexed="true" stored="true"/>
-  <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
-  <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
   
-  <!-- the vector search field -->
-  <field name="vector" type="knn_vector" indexed="true" stored="true"/>
-  
-  <!-- the catch all field.. -->
-  <dynamicField name="*" type="strings" indexed="true" stored="true"/>
-  <copyField source="title" dest="title_str" maxChars="256"/>
-  <copyField source="content" dest="content_str" maxChars="256"/>
 </schema>

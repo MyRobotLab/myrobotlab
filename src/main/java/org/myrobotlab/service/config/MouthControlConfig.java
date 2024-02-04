@@ -12,5 +12,6 @@ public class MouthControlConfig extends ServiceConfig {
   // with the notify entries
   public String mouth;
   public String neoPixel;
+  public String animation = "Theater Chase";
 
 }

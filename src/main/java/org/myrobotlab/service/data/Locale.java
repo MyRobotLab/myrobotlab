@@ -155,7 +155,7 @@ public class Locale {
     // We really only support a few Locales dictated by ProgramAB, Polly,
     // WebkitSpeechRecognition, & WebKitSpeechSynthesis
     Map<String, Locale> locales = new TreeMap<>();
-    locales.put("cn-ZH", new Locale("cn-ZH"));
+    locales.put("cn-ZH", new Locale("zh-CN"));
     locales.put("de-DE", new Locale("de-DE"));
     locales.put("en-US", new Locale("en-US"));
     locales.put("es-ES", new Locale("es-ES"));

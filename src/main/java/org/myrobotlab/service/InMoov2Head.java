@@ -3,7 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.myrobotlab.framework.Service;
@@ -11,6 +11,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.InMoov2HeadConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -19,7 +20,7 @@ import org.slf4j.Logger;
  * servos for the following: jaw, eyeX, eyeY, rothead and neck.
  * 
  */
-public class InMoov2Head extends Service {
+public class InMoov2Head extends Service<InMoov2HeadConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -49,6 +50,8 @@ public class InMoov2Head extends Service {
     rothead = (ServoControl) getPeer("rothead");
     neck = (ServoControl) getPeer("neck");
     rollNeck = (ServoControl) getPeer("rollNeck");
+    eyelidLeft = (ServoControl) getPeer("eyelidLeft");
+    eyelidRight = (ServoControl) getPeer("eyelidRight");
   }
 
   public void blink() {
@@ -142,15 +145,34 @@ public class InMoov2Head extends Service {
       eyelidRight.disable();
   }
 
-  public long getLastActivityTime() {
+  public Long getLastActivityTime() {
 
-    long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
-    lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    Long lastActivityTime = Math.max(rothead.getLastActivityTime(), neck.getLastActivityTime());
+    if (getPeer("eyeX") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeX.getLastActivityTime());
+    }
+    if (getPeer("eyeY") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyeY.getLastActivityTime());
+    }
+    if (getPeer("jaw") != null) {
+      lastActivityTime = Math.max(lastActivityTime, jaw.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rollNeck.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, rothead.getLastActivityTime());
+    }
+    if (getPeer("rollNeck") != null) {
+      lastActivityTime = Math.max(lastActivityTime, neck.getLastActivityTime());
+    }
+
+    if (getPeer("eyelidLeft") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidLeft.getLastActivityTime());
+    }
+    if (getPeer("eyelidRight") != null) {
+      lastActivityTime = Math.max(lastActivityTime, eyelidRight.getLastActivityTime());
+    }
     return lastActivityTime;
   }
 
@@ -199,7 +221,12 @@ public class InMoov2Head extends Service {
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
   }
 
+  @Deprecated /* use onMoov */
   public void onMoveHead(HashMap<String, Double> map) {
+    onMove(map);
+  }
+
+  public void onMove(Map<String, Double> map) {
     moveTo(map.get("neck"), map.get("rothead"), map.get("eyeX"), map.get("eyeY"), map.get("jaw"), map.get("rollNeck"));
   }
 
@@ -245,7 +272,7 @@ public class InMoov2Head extends Service {
     // In theory this could use mrl standard pub/sub by mapping different output
     // topics to ServoControl.onServoMoveTo
     // but I'm tired ... :)
-    ServoControl neck = (ServoControl) Runtime.getService(getPeerName("rothead"));
+    ServoControl neck = (ServoControl) Runtime.getService(getPeerName("neck"));
     if (neck != null) {
       neck.moveTo(neckPos);
     }
@@ -262,7 +289,7 @@ public class InMoov2Head extends Service {
 
     ServoControl eyeY = (ServoControl) Runtime.getService(getPeerName("eyeY"));
     if (eyeY != null) {
-      eyeY.moveTo(eyeXPos);
+      eyeY.moveTo(eyeYPos);
     }
 
     ServoControl jaw = (ServoControl) Runtime.getService(getPeerName("jaw"));

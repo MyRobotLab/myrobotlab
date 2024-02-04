@@ -12,6 +12,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.nxp.com/documents/data_sheet/LM75A.pdf
  */
-public class Lm75a extends Service implements I2CControl {
+public class Lm75a extends Service<ServiceConfig> implements I2CControl {
 
   private static final long serialVersionUID = 1L;
 

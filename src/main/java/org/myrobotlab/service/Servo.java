@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo implements ServiceLifeCycleListener {
+public class Servo extends AbstractServo<ServoConfig> implements ServiceLifeCycleListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -83,7 +83,6 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
    */
   @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-    ServoConfig c = (ServoConfig) super.getFilteredConfig();
     if (newPos == null) {
       log.info("servo processMove(null) not valid position");
       return false;
@@ -104,7 +103,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       firstMove = false;
     }
 
-    if (c.autoDisable && !enabled) {
+    if (config.autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
@@ -197,7 +196,7 @@ public class Servo extends AbstractServo implements ServiceLifeCycleListener {
       sleep(blockingTimeMs);
       isBlocking = false;
       isMoving = false;
-      if (c.autoDisable) {
+      if (config.autoDisable) {
         // and start our countdown
         addTaskOneShot(idleTimeout, "disable");
       }

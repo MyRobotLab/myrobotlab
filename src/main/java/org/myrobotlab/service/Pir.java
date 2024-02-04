@@ -1,17 +1,21 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.TimeoutException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PirConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.slf4j.Logger;
 
-public class Pir extends Service implements PinListener {
+public class Pir extends Service<PirConfig> implements PinListener {
 
   public final static Logger log = LoggerFactory.getLogger(Pir.class);
 
@@ -25,102 +29,92 @@ public class Pir extends Service implements PinListener {
   Boolean active = null;
 
   /**
-   * The pin to be used as a string. Example "D4" or "A0".
-   */
-  // String pin;
-
-  transient PinArrayControl pinControl;
-
-  /**
    * Timestamp of the last poll.
    */
   Long lastChangeTs = null;
 
-  boolean attached = false;
+  protected boolean isAttached = false;
 
   public Pir(String n, String id) {
     super(n, id);
-    registerForInterfaceChange(PinArrayControl.class);
   }
 
   @Deprecated /* use attach(String) or attachPinArrayControl(PinArrayControl) */
   public void attach(PinArrayControl control, String pin) {
     setPin(pin);
-    attachPinArrayControl(control);
+    attachPinArrayControl(control.getName());
   }
 
   @Override
   public void attach(String name) {
-    ServiceInterface si = Runtime.getService(name);
-    if (si instanceof PinArrayControl) {
-      attachPinArrayControl((PinArrayControl) si);
-    } else {
-      error("do not know how to attach to %s of type %s", name, si.getSimpleName());
-    }
+    attachPinArrayControl(name);
   }
 
-  public void attachPinArrayControl(PinArrayControl control) {
-    PirConfig c = (PirConfig) config;
-    try {
-      this.pinControl = control;
-      c.controller = control.getName();
+  public void setPinArrayControl(String control) {
+    config.controller = control;
+  }
 
-      if (c.pin == null) {
-        error("pin should be set before attaching");
-      }
-      pinControl.attach(getName());
-      attached = true;
-      broadcastState();
-    } catch (Exception e) {
-      error(e);
+  public void attachPinArrayControl(String control) {
+
+    if (control == null) {
+      error("controller cannot be null");
+      return;
     }
+
+    if (config.pin == null) {
+      error("pin should be set before attaching");
+      return;
+    }
+
+    config.controller = CodecUtils.getShortName(control);
+
+    // fire and forget
+    send(config.controller, "attach", getName());
+    // assume worky
+    isAttached = true;
+    
+    // enable if configured
+    if (config.enable) {
+        send(config.controller, "enablePin", config.pin, config.rate);
+    }
+    
+    broadcastState();
   }
 
   @Override
   public void detach(String name) {
-    PirConfig c = (PirConfig) config;
-    
-    ServiceInterface si = Runtime.getService(name);
-    if (si instanceof PinArrayControl && c.pin != null) {
-      // FIXME - problem - what if someone else is using this pin ?
-      // FIXME - should disable in the context of this service's name
-      ((PinArrayControl) si).disablePin(c.pin);
-      detachPinArrayControl((PinArrayControl) si);
-    } 
-    
-    active = null;
-    c.enable = false;
-    attached = false;
-    broadcastState();
+    detachPinArrayControl(name);
   }
 
-  public void detachPinArrayControl(PinArrayControl control) {
-    PirConfig c = (PirConfig) config;
+  /**
+   * FIXME - use interface of service names not direct references
+   * 
+   * @param control
+   */
+  public void detachPinArrayControl(String control) {
 
-    try {
       if (control == null) {
         log.info("detaching null");
         return;
       }
 
-      if (c.controller != null) {
-        if (!c.controller.equals(control.getName())) {
-          log.warn("attempting to detach {} but this pir is attached to {}", control.getName(), c.controller);
+      if (config.controller != null) {
+        if (!config.controller.equals(control)) {
+          log.warn("attempting to detach {} but this pir is attached to {}", control, config.controller);
           return;
         }
       }
 
-      // FYI - we could detach like this without a reference - good for remote
-      // send(controllerName, "detach", getName());
-      pinControl.detach(getName());
+      // disable
+      disable();
 
-      this.pinControl = null;
-      c.controller = null;
+      send(config.controller, "detach", getName());
+      // config.controller = null; left as configuration .. "last controller"
+
+      // detached
+      isAttached = false;
 
       broadcastState();
-    } catch (Exception e) {
-      error(e);
-    }
   }
 
   /**
@@ -130,13 +124,12 @@ public class Pir extends Service implements PinListener {
    * 
    */
   public void disable() {
-    PirConfig c = (PirConfig) config;
 
-    if (pinControl != null && c.pin != null) {
-      pinControl.disablePin(c.pin);
+    if (config.controller != null && config.pin != null) {
+      send(config.controller, "disablePin", config.pin);
     }
 
-    c.enable = false;
+    config.enable = false;
     active = null;
     broadcastState();
   }
@@ -145,8 +138,7 @@ public class Pir extends Service implements PinListener {
    * Enables polling at the preset poll rate.
    */
   public void enable() {
-    PirConfig c = (PirConfig) config;
-    enable(c.rate);
+    enable(config.rate);
   }
 
   /**
@@ -156,33 +148,32 @@ public class Pir extends Service implements PinListener {
    * 
    */
   public void enable(int rateHz) {
-    PirConfig c = (PirConfig) config;
 
-    if (pinControl == null) {
+    if (config.controller == null) {
       error("pin control not set");
       return;
     }
 
-    if (c.pin == null) {
+    if (config.pin == null) {
       error("pin not set");
       return;
     }
 
-    if (rateHz < 1) {
+    if (rateHz < 0) {
       error("invalid poll rate - default is 1 Hz valid value is > 0");
       return;
     }
 
-    c.rate = rateHz;
-    pinControl.enablePin(c.pin, rateHz);
-    c.enable = true;
+    config.rate = rateHz;
+    /* PinArrayControl.enablePin */
+    send(config.controller, "enablePin", config.pin, rateHz);
+    config.enable = true;
     broadcastState();
   }
 
   @Override
   public String getPin() {
-    PirConfig c = (PirConfig) config;
-    return c.pin;
+    return config.pin;
   }
 
   /**
@@ -191,8 +182,7 @@ public class Pir extends Service implements PinListener {
    * @return Hz
    */
   public int getRate() {
-    PirConfig c = (PirConfig) config;
-    return c.rate;
+    return config.rate;
   }
 
   /**
@@ -212,15 +202,18 @@ public class Pir extends Service implements PinListener {
    * @return true = Enabled. false = Disabled.
    */
   public boolean isEnabled() {
-    PirConfig c = (PirConfig) config;
-    return c.enable;
+    return config.enable;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    PirConfig config = (PirConfig) super.apply(c);
+  public PirConfig apply(PirConfig c) {
+    super.apply(c);
+    
+    if (config.controller != null) {
+      attach(config.controller);;
+    }
 
-    if (config.enable) {
+    if (config.enable) {      
       enable(config.rate);
     } else {
       disable();
@@ -228,16 +221,28 @@ public class Pir extends Service implements PinListener {
 
     return c;
   }
+  
+  @Override
+  public PirConfig getConfig() {
+    super.getConfig();
+    if (config.controller != null) {
+      // it makes sense that the controller should always be local for a PIR
+      // but in general this is bad practice on 2 levels
+      // 1. in some other context it might make sense not to be local
+      // 2. it should just be another listener on ServiceConfig.listener
+      config.controller=CodecUtils.getShortName(config.controller);
+    }
+    return config;
+  }
 
   @Override
   public void onPin(PinData pindata) {
-
     log.debug("onPin {}", pindata);
 
     boolean sense = (pindata.value != 0);
 
-    // sparse publishing only on state change
-    if (active == null || active != sense) {
+    // sparse publishing only on state change 
+    if (active == null || active != sense && config.enable) {
       // state change
       invoke("publishSense", sense);
       active = sense;
@@ -255,11 +260,11 @@ public class Pir extends Service implements PinListener {
   }
 
   public void publishPirOn() {
-    log.info("publishPirOn");
+    log.debug("publishPirOn");
   }
 
   public void publishPirOff() {
-    log.info("publishPirOff");
+    log.debug("publishPirOff");
   }
 
   /**
@@ -270,15 +275,12 @@ public class Pir extends Service implements PinListener {
    */
   @Override
   public void setPin(String pin) {
-    PirConfig c = (PirConfig) config;
-    c.pin = pin;
+    config.pin = pin;
   }
 
   @Deprecated /* use attach(String) */
   public void setPinArrayControl(PinArrayControl pinControl) {
-    PirConfig c = (PirConfig) config;
-    this.pinControl = pinControl;
-    c.controller = pinControl.getName();
+    config.controller = pinControl.getName();
   }
 
   /**
@@ -291,8 +293,7 @@ public class Pir extends Service implements PinListener {
       error("invalid poll rate - default is 1 Hz valid value is > 0");
       return;
     }
-    PirConfig c = (PirConfig) config;
-    c.rate = rateHz;
+    config.rate = rateHz;
   }
 
   /**
@@ -304,22 +305,51 @@ public class Pir extends Service implements PinListener {
     return lastChangeTs;
   }
 
+  /**
+   * This returns the pin list of the selected PinArrayControl. This allows
+   * dynamic selection of a pin based on a query to a PinArrayControl. It would
+   * be advisable that other services manage pins in the same way. Where
+   * "selecting" the controller's name, returns the possible list of pins to
+   * attach.
+   * 
+   * @param pinArrayControl
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  public List<PinDefinition> getPinList(String pinArrayControl) {
+    List<PinDefinition> pinList = new ArrayList<>();
+    try {
+      if (pinArrayControl != null) {
+        pinList = (List<PinDefinition>) sendBlocking(pinArrayControl, "getPinList");
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+    return pinList;
+  }
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init("info");
 
-      Pir pir = (Pir) Runtime.start("pir", "Pir");
-      pir.setPin("D6");
 
-      Runtime.start("webgui", "WebGui");
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("/dev/ttyACM2");
+      // Runtime.start("webgui", "WebGui");
+      
+      // standard install - develop and debug using config
+      Runtime.main(new String[] {"--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python"});
+          
 
       boolean done = true;
       if (done) {
         return;
       }
+
+      Pir pir = (Pir) Runtime.start("pir", "Pir");
+      pir.setPin("D23");
+      
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("/dev/ttyACM71");
 
       mega.attach(pir);
 

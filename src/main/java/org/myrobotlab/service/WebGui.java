@@ -34,7 +34,6 @@ import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -45,7 +44,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -64,7 +62,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
+public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -91,7 +89,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     }
   }
-
+  
   private final transient IncomingMsgQueue inMsgQueue = new IncomingMsgQueue();
 
   public static class Panel {
@@ -122,7 +120,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public final static Logger log = LoggerFactory.getLogger(WebGui.class);
 
   private static final long serialVersionUID = 1L;
-
 
   transient protected JmDNS jmdns = null;
 
@@ -175,6 +172,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // just marking as transient to remove some of the data load 10240 max frame
   transient Map<String, Panel> panels = new HashMap<String, Panel>();
 
+  // FIXME - add as a config member
   public Integer port;
 
   public String root = "root";
@@ -311,16 +309,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Config.Builder configBuilder = new Config.Builder();
     try {
       if (isSsl) {
-//        SelfSignedCertificate cert = new SelfSignedCertificate();        
-//        SslContext context = SslContextBuilder.forServer(cert.certificate(), cert.privateKey()).build();    
-        
-        
+        // SelfSignedCertificate cert = new SelfSignedCertificate();
+        // SslContext context = SslContextBuilder.forServer(cert.certificate(),
+        // cert.privateKey()).build();
+
         SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-        SslContext context =  SslContextBuilder
-                .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
-                .sslProvider(SslProvider.JDK).clientAuth(ClientAuth.NONE).build();        
-        
-        
+        SslContext context = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).sslProvider(SslProvider.JDK)
+            .clientAuth(ClientAuth.NONE).build();
+
         configBuilder.sslContext(context);
       }
     } catch (Exception e) {
@@ -329,13 +325,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     configBuilder.resource("/stream", stream);
 
-    WebGuiConfig c = (WebGuiConfig) config;
-    
     // add all webgui resource directories
-    for (String resource: c.resources) {
+    for (String resource : config.resources) {
       configBuilder.resource(resource);
     }
-    
+
     // can't seem to make this work .mappingPath("resource/")
 
     // TO SUPPORT LEGACY - BEGIN
@@ -428,10 +422,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * This method handles all http:// and ws:// requests. Depending on apiKey
    * which is part of initial GET
-   * <p></p>
+   * <p>
+   * </p>
    * messages api attempts to promote the connection to websocket and suspends
    * the connection for a 2 way channel
-   * <p></p>
+   * <p>
+   * </p>
    * id and session_id authentication should be required
    * 
    */
@@ -500,8 +496,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
-      MethodCache cache = MethodCache.getInstance();
-
       // important persistent connections will have associated routes ...
       // http/api/service requests (not persistent connections) will not
       // (neither will udp)
@@ -537,19 +531,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
 
-        Message msg = CodecUtils.cliToMsg(
-                null,
-                getName(),
-                null,
-                URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8));
+        String path = URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8);
+        Message msg = CodecUtils.pathToMsg(getFullName(), path);
+
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);
+        } else {
+          msg = CodecUtils.decodeMessageParams(msg);
         }
 
         if (isLocal(msg)) {
           // String serviceName = msg.getFullName();// getName();
           // Class<?> clazz = Runtime.getClass(serviceName);
-          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+          // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method,
+          // msg.data);
           // msg.data = params;
           Object ret = invoke(msg);
           OutputStream out = r.getResponse().getOutputStream();
@@ -602,7 +597,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             }
 
             // do not decode unless needed
-            // Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+            // Object[] params = cache.getDecodedJsonParameters(clazz,
+            // msg.method, msg.data);
 
             ServiceInterface si = Runtime.getService(serviceName);
 
@@ -1077,7 +1073,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void stop() {
     if (nettosphere != null) {
-      log.warn("==== nettosphere STOPPING ====");
+      log.info("==== nettosphere STOPPING ====");
       // done so a thread "from" webgui can stop itself :P
       // Must not be called from a I/O-Thread to prevent deadlocks!
       new Thread() {
@@ -1086,7 +1082,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           nettosphere.framework().removeAllAtmosphereHandler();
           nettosphere.stop();
           nettosphere = null;
-          log.warn("==== nettosphere STOPPED ====");
+          log.info("==== nettosphere STOPPED ====");
         }
       }.start();
     }
@@ -1156,26 +1152,25 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    WebGuiConfig config = (WebGuiConfig)super.getConfig();
-    // FIXME - remove member variables use config only
+  // FIXME port and autoStartBrowser should just be part of config
+  // then this override can be removed
+  public WebGuiConfig getConfig() {
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
     return config;
   }
 
-  @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    WebGuiConfig config = (WebGuiConfig) super.apply(c);
-
-    if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
-      setPort(config.port);
+  public WebGuiConfig apply(WebGuiConfig c) {
+    super.apply(c);
+    
+    if (c.port != null && (port != null && c.port.intValue() != port.intValue())) {
+      setPort(c.port);
     }
-    autoStartBrowser(config.autoStartBrowser);
-    if (config.enableMdns) {
+    autoStartBrowser(c.autoStartBrowser);
+    if (c.enableMdns) {
       startMdns();
     }
-    return config;
+    return c;
   }
 
   public static void main(String[] args) {
@@ -1183,7 +1178,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
+      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       // Platform.setVirtual(true);
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python", "-c", "dev" });
+      // Runtime.startConfig("dev");      
 
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1194,27 +1198,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // webgui.setSsl(true);
       webgui.startService();
 
+
+      
       Runtime.start("python", "Python");
       // Runtime.start("intro", "Intro");
       // Runtime.start("i01", "InMoov2");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }      
-
-
-      
+    
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
       // Runtime.start("i01", "InMoov2");
-      
+
       // Runtime.start("i01", "InMoov2");
       Runtime.start("track", "Tracking");
       // Runtime.startConfig("worky");
       // Runtime.startConfig("InMoov2Head");
       // Runtime.startConfig("Tracking");
-
 
       // Runtime.start("i01", "InMoov2");
       // Runtime.start("python", "Python");
@@ -1244,7 +1243,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       arduino.connect("/dev/ttyACM0");
 
       for (int i = 0; i < 1000; ++i) {
-        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
+        webgui.display(
+            "https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }
 
       // Runtime.setLogLevel("ERROR");
@@ -1307,4 +1307,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void onReleased(String name) {
   }
+
+
 }

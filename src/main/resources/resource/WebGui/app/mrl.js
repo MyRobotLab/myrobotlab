@@ -115,7 +115,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         transport: 'websocket',
         maxRequest: 100,
         maxReconnectOnClose: 100,
-        enableProtocol: true,
+        enableProtocol: false,
         timeout: -1,
         // infinite idle timeout
         fallbackTransport: 'long-polling',
@@ -323,11 +323,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
+        // FIXME - currently handles all unknown types through kludgy test
+        if (!simpleTypeName || simpleTypeName.includes(':') || simpleTypeName == 'Unknown') {
+            simpleTypeName = "Unknown";
+            registration.typeKey = "Unknown"
+        }
+
         serviceTypes[simpleTypeName] = registration.typeKey
 
         // initial de-serialization of state
         let service = JSON.parse(registration.state)
         registry[fullname] = service
+        if (simpleTypeName == "Unknown") {
+            service.simpleName = "Unknown"
+        }
 
         // now add a panel - with the function it registered
         // _self.addServicePanel(service)
@@ -557,6 +566,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 }
             }
         } else {
+
+            if (!service.name) {
+                console.error('uh oh')
+            }
 
             if (service.name.includes('@')) {
                 return service.name
@@ -959,10 +972,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
+            let displayName = fullname.endsWith(_self.remoteId) ? _self.getShortName(fullname) : fullname
+            console.info('createPanel', _self.remoteId, displayName)
             let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
-                displayName: _self.getShortName(fullname),
+                displayName: displayName,
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
                 templatestatus: null,
@@ -1196,6 +1211,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (!tabsViewCtrl || !_self.getService(serviceName)) {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
+                console.info("changeTab !", serviceName)
                 tabsViewCtrl.changeTab(serviceName)
                 history.push(serviceName)
             }
@@ -1205,7 +1221,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (!tabsViewCtrl) {
                 console.error('tabsViewCtrl is null - cannot goBack')
             } else {
-                tabsViewCtrl.goBack()                
+                tabsViewCtrl.goBack()
             }
         }
 
@@ -1233,6 +1249,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 var deferred = $q.defer()
                 if (!msgInterfaces.hasOwnProperty(name)) {
                     //console.log(name + ' getMsgInterface ')
+
                     msgInterfaces[name] = {
                         "name": name,
                         "temp": {},
@@ -1407,6 +1424,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // - name + '@' + _self.id)
                 _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap')
                 msgInterfaces[name].getMethodMap()
+                // deferred.resolve("yay")
                 return deferred.promise
             },
             getPlatform: function() {
@@ -1463,41 +1481,40 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return arrayOfServices
             },
 
-            controllerscope: _self.controllerscope,
-            setSearchFunction: _self.setSearchFunction,
-            setNavCtrl: _self.setNavCtrl,
-            setTabsViewCtrl: _self.setTabsViewCtrl,
-            error: _self.error,
             changeTab: _self.changeTab,
-            goBack: _self.goBack,
-            search: _self.search,
+            controllerscope: _self.controllerscope,
             createMessage: _self.createMessage,
             display: _self.display,
+            error: _self.error,
+            getDisplayName: _self.getDisplayName,
             getDisplayImages: getDisplayImages,
-            setDisplayCallback: setDisplayCallback,
-            subscribeToUpdates: _self.subscribeToUpdates,
-            subscribeToRegistered: _self.subscribeToRegistered,
-            subscribeToReleased: _self.subscribeToReleased,
-            getPanelList: _self.getPanelList,
+            getFullName: _self.getFullName,
             getPanel: _self.getPanel,
-            sendTo: _self.sendTo,
+            getPanelList: _self.getPanelList,
+            getProperties: _self.getProperties,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
             getStyle: _self.getStyle,
-            subscribe: _self.subscribe,
-            unsubscribe: _self.unsubscribe,
+            goBack: _self.goBack,
             isPeerStarted: _self.isPeerStarted,
-            subscribeToService: _self.subscribeToService,
-            getFullName: _self.getFullName,
-            sendBlockingMessage: _self.sendBlockingMessage,
-            subscribeConnected: _self.subscribeConnected,
-            subscribeToMethod: _self.subscribeToMethod,
-            subscribeToServiceMethod: _self.subscribeToServiceMethod,
-            subscribeTo: _self.subscribeTo,
-            // better name
-            getProperties: _self.getProperties,
+            search: _self.search,
             sendMessage: _self.sendMessage,
-            // setViewType: _self.setViewType,
+            sendBlockingMessage: _self.sendBlockingMessage,
+            sendTo: _self.sendTo,
+            setNavCtrl: _self.setNavCtrl,
+            setDisplayCallback: setDisplayCallback,
+            setSearchFunction: _self.setSearchFunction,
+            setTabsViewCtrl: _self.setTabsViewCtrl,
+            subscribe: _self.subscribe,
+            subscribeConnected: _self.subscribeConnected,
+            subscribeTo: _self.subscribeTo,
+            subscribeToMethod: _self.subscribeToMethod,
+            subscribeToReleased: _self.subscribeToReleased,
+            subscribeToRegistered: _self.subscribeToRegistered,
+            subscribeToService: _self.subscribeToService,
+            subscribeToServiceMethod: _self.subscribeToServiceMethod,
+            subscribeToUpdates: _self.subscribeToUpdates,
+            unsubscribe: _self.unsubscribe,
             interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }

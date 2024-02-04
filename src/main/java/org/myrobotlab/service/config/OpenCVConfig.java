@@ -15,5 +15,9 @@ public class OpenCVConfig extends ServiceConfig {
   public boolean webViewer = false;
   public boolean capturing = false;
   public Map<String, OpenCVFilter> filters = new LinkedHashMap<>();
+  /**
+   * flip the video vertically
+   */
+  public boolean flip = false;
 
 }

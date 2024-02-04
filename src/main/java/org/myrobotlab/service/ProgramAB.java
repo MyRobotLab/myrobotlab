@@ -31,6 +31,7 @@ import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
+import org.myrobotlab.programab.handlers.oob.OobProcessor;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
@@ -61,7 +62,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service
+public class ProgramAB extends Service<ProgramABConfig>
     implements TextListener, TextPublisher, LocaleProvider, LogPublisher, ProgramABListener, UtterancePublisher, UtteranceListener, ResponsePublisher {
 
   /**
@@ -97,6 +98,8 @@ public class ProgramAB extends Service
 
   transient SimpleLogPublisher logPublisher = null;
 
+  final transient private OobProcessor oobProcessor;
+
   /**
    * Default constructor for the program ab service.
    * 
@@ -108,6 +111,7 @@ public class ProgramAB extends Service
    */
   public ProgramAB(String n, String id) {
     super(n, id);
+    oobProcessor = new OobProcessor(this);
   }
 
   public String getBotName(File file) {
@@ -559,8 +563,7 @@ public class ProgramAB extends Service
    * @return
    */
   public Map<String, String> getPredicates() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return getPredicates(c.currentUserName, c.currentBotName);
+    return getPredicates(config.currentUserName, config.currentBotName);
   }
 
   /**
@@ -638,8 +641,7 @@ public class ProgramAB extends Service
   }
 
   public Session startSession() throws IOException {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return startSession(c.currentUserName);
+    return startSession(config.currentUserName);
   }
 
   // FIXME - it should just set the current userName only
@@ -760,7 +762,7 @@ public class ProgramAB extends Service
   public void addCategory(String pattern, String template) {
     addCategory(pattern, template, "*");
   }
-  
+
   /**
    * Verifies and adds a new path to the search directories for bots
    * 
@@ -794,7 +796,7 @@ public class ProgramAB extends Service
 
       broadcastState();
     } else {
-      error("invalid bot path - a bot must be a directory with a subdirectory named \"aiml\"");
+      error("invalid bot path %s - a bot must be a directory with a subdirectory named \"aiml\"", path);
       return null;
     }
     return path;
@@ -811,15 +813,13 @@ public class ProgramAB extends Service
   }
 
   public void setCurrentBotName(String botName) {
-    ProgramABConfig c = (ProgramABConfig) config;
-    c.currentBotName = botName;
+    config.currentBotName = botName;
     invoke("getBotImage", botName);
     broadcastState();
   }
 
   public void setCurrentUserName(String currentUserName) {
-    ProgramABConfig c = (ProgramABConfig) config;
-    c.currentUserName = currentUserName;
+    config.currentUserName = currentUserName;
     broadcastState();
   }
 
@@ -832,13 +832,11 @@ public class ProgramAB extends Service
   }
 
   public String getCurrentUserName() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return c.currentUserName;
+    return config.currentUserName;
   }
 
   public String getCurrentBotName() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return c.currentBotName;
+    return config.currentBotName;
   }
 
   /**
@@ -998,8 +996,7 @@ public class ProgramAB extends Service
   }
 
   public BotInfo getBotInfo() {
-    ProgramABConfig c = (ProgramABConfig) config;
-    return getBotInfo(c.currentBotName);
+    return getBotInfo(config.currentBotName);
   }
 
   /**
@@ -1078,35 +1075,35 @@ public class ProgramAB extends Service
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    if (c.bots == null) {
-      c.bots = new ArrayList<>();
+  public ProgramABConfig getConfig() {
+    super.getConfig();
+    if (config.bots == null) {
+      config.bots = new ArrayList<>();
     }
 
-    c.bots.clear();
+    config.bots.clear();
     for (BotInfo bot : bots.values()) {
 
       Path pathAbsolute = Paths.get(bot.path.getAbsolutePath());
       Path pathBase = Paths.get(System.getProperty("user.dir"));
       Path pathRelative = pathBase.relativize(pathAbsolute);
-      c.bots.add(pathRelative.toString());
+      config.bots.add(pathRelative.toString());
 
     }
 
-    return c;
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig config) {
-    ProgramABConfig c = (ProgramABConfig) super.apply(config);
+  public ProgramABConfig apply(ProgramABConfig c) {
+    super.apply(c);
     if (c.bots != null && c.bots.size() > 0) {
       // bots.clear();
       for (String botPath : c.bots) {
         addBotPath(botPath);
       }
     }
-    
+
     if (c.botDir == null) {
       c.botDir = getResourceDir();
     }
@@ -1119,17 +1116,38 @@ public class ProgramAB extends Service
     if (c.currentUserName != null) {
       setCurrentUserName(c.currentUserName);
     }
-    
+
     if (c.currentBotName != null) {
-      setCurrentUserName(c.currentBotName);
-    }    
-    
-    if (c.startTopic != null) {
-      setTopic(c.startTopic);  
+      setCurrentBotName(c.currentBotName);
     }
-    
+
+    if (c.startTopic != null) {
+      setTopic(c.startTopic);
+    }
 
     return c;
+  }
+
+  /**
+   * Set the current locale for this service. In ProgramAB's case if a bot
+   * matches the local then set the bot
+   * 
+   */
+  @Override
+  public void setLocale(String code) {
+    if (code == null) {
+      error("locale cannot be null");
+      return;
+    }
+    locale = new Locale(code);
+    log.info("{} new locale is {}", getName(), code);
+
+    for (String bot : bots.keySet()) {
+      if (code.equals(bot)) {
+        setCurrentBotName(bot);
+      }
+    }
+    broadcastState();
   }
 
   public static void main(String args[]) {
@@ -1297,22 +1315,18 @@ public class ProgramAB extends Service
    * wakes the global session up
    */
   public void wake() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    c.sleep = false;
+    config.sleep = false;
   }
 
   /**
    * sleeps the global session
    */
   public void sleep() {
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
-    c.sleep = true;
+    config.sleep = true;
   }
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
-    
-    ProgramABConfig c = (ProgramABConfig) super.getConfig();
 
     log.info("Utterance Received " + utterance);
 
@@ -1343,8 +1357,8 @@ public class ProgramAB extends Service
         // TODO: don't talk to bots.. it won't go well..
         // TODO: the discord api can provide use the list of mentioned users.
         // for now.. we'll just see if we see Mr. Turing as a substring.
-        c.sleep = (c.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
-        if (!c.sleep) {
+        config.sleep = (config.sleep || utterance.text.contains("@")) && !utterance.text.contains(botName);
+        if (!config.sleep) {
           shouldIRespond = true;
         }
       }
@@ -1378,17 +1392,18 @@ public class ProgramAB extends Service
       }
     }
   }
-  
+
   /**
    * This receiver can take a config published by another service and sync
    * predicates from it
+   * 
    * @param cfg
    */
   public void onConfig(ServiceConfig cfg) {
-    Yaml yaml = new Yaml();    
+    Yaml yaml = new Yaml();
     String yml = yaml.dumpAsMap(cfg);
     Map<String, Object> cfgMap = yaml.load(yml);
-    
+
     for (Map.Entry<String, Object> entry : cfgMap.entrySet()) {
       if (entry.getValue() == null) {
         setPredicate("cfg_" + entry.getKey(), null);
@@ -1396,7 +1411,7 @@ public class ProgramAB extends Service
         setPredicate("cfg_" + entry.getKey(), entry.getValue().toString());
       }
     }
-    
+
     invoke("getPredicates");
   }
 
@@ -1409,20 +1424,24 @@ public class ProgramAB extends Service
     return topicChange;
   }
 
-  public String getTopic() {    
+  public String getTopic() {
     return getPredicate(getCurrentUserName(), "topic");
   }
-  
-  public String getTopic(String username) {    
+
+  public String getTopic(String username) {
     return getPredicate(username, "topic");
   }
-  
-  public void setTopic(String username, String topic) {    
+
+  public void setTopic(String username, String topic) {
     setPredicate(username, "topic", topic);
   }
-  
-  public void setTopic(String topic) {    
+
+  public void setTopic(String topic) {
     setPredicate(getCurrentUserName(), "topic", topic);
+  }
+
+  public OobProcessor getOobProcessor() {
+    return oobProcessor;
   }
 
 }

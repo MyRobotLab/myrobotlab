@@ -38,7 +38,6 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.config.ArduinoConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -71,7 +70,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
@@ -130,6 +129,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   boolean boardInfoEnabled = true;
 
   private long boardInfoRequestTs;
+  
+  /**
+   * connecting is true while the arduino is in the process of connecting
+   * to a port
+   */
+  protected boolean connecting = false;
 
   @Deprecated /*
                * should develop a MrlSerial on Arduinos and
@@ -283,6 +288,17 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void attach(UltrasonicSensorControl sensor, Integer triggerPin, Integer echoPin) throws Exception {
+    
+    if (triggerPin == null) {
+      error("%s please set trigger pin");
+      return;
+    }
+
+    if (echoPin == null) {
+      error("%s please set echo pin");
+      return;
+    }
+    
     // refer to
     // http://myrobotlab.org/content/control-controller-manifesto
     if (isAttached(sensor)) {
@@ -536,7 +552,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
-
+    connecting = true;
     if (port == null) {
       warn("%s attempted to connect with a null port", getName());
       return;
@@ -597,6 +613,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         sleep(30);
       }
 
+      connecting = false;
       log.info("waited {} ms for Arduino {} to say hello", System.currentTimeMillis() - startBoardRequestTs, getName());
 
       // we might be connected now
@@ -661,15 +678,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public void detach() {
-    // make list copy - to iterate without fear of thread or modify issues
-    ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
     log.info("detaching all devices");
-    /*
-     * DOESN'T MATTER IF CONNECTED - IF RECONNECT ARDUINO DEMANDS ITS CURRENT
-     * STATE ONTO MrlComm if (isConnected()) { for (DeviceMapping dm: newList) {
-     * if (dm.getDevice().getName().equals(getName())) { continue; }
-     * detach(dm.getDevice()); sleep(50); } }
-     */
     deviceIndex.clear();
     deviceList.clear();
   }
@@ -930,7 +939,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     List<BoardType> boardTypes = new ArrayList<BoardType>();
     try {
-      String b = FileIO.resourceToString("Arduino" + File.separator + "boards.txt");
+      String b = FileIO.toString(FileIO.gluePaths(getResourceDir(), "boards.txt"));
       Properties boardProps = new Properties();
       boardProps.load(new ByteArrayInputStream(b.getBytes()));
 
@@ -1342,6 +1351,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public boolean isAttached(String name) {
     return deviceList.containsKey(name);
   }
+  
+  public boolean isConnecting() {
+    return connecting;
+  }
 
   @Override
   public boolean isConnected() {
@@ -1596,13 +1609,16 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
     boardInfo = new BoardInfo(version, boardTypeId, boardTypeName, microsPerLoop, sram, activePins, arrayToDeviceSummary(deviceSummary), boardInfoRequestTs);
 
+    // connected now
+    connecting = false;
+    
     boardInfoRequestTs = System.currentTimeMillis();
 
     log.debug("Version return by Arduino: {}", boardInfo.getVersion());
     log.debug("Board type currently set: {} => {}", boardTypeId, boardTypeName);
 
     if (lastBoardInfo == null || !lastBoardInfo.getBoardTypeName().equals(board)) {
-      log.warn("setting board to type {}", board);
+      log.info("setting board to type {}", boardInfo.getBoardTypeName());
       this.board = boardInfo.getBoardTypeName();
       // we don't invoke, because
       // it might get into a race condition
@@ -1909,24 +1925,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoDetachPin/deviceId
   @Override
   public void onServoDisable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer id = getDeviceId(servoName);
-    if (id != null) {
+    if (id != null && isConnected()) {
       msg.servoDetachPin(id);
     }
   }
 
   @Override
   public void onServoEnable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
@@ -1936,7 +1942,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       ServoControl sc = (ServoControl) Runtime.getService(servoName);
       msg.servoAttachPin(deviceId, getAddress(sc.getPin()));
     } else {
-      log.info("not currently connected");
+      log.info("cannot enable servo {} not currently connected", getName());
     }
   }
 
@@ -1950,7 +1956,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      info("arduino cannot move servo %s when not connected", move.name);
       return;
     }
 
@@ -1975,11 +1981,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
     
-    if (!isConnected()) {
-      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
-      return;
-    }
-
     int speed = -1;
     Servo servo = (Servo) Runtime.getService(servoSpeed.name);
     if (servoSpeed.speed != null) {
@@ -1991,7 +1992,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.error("{} has null deviceId", servo);
       return;
     }
-    msg.servoSetVelocity(id, speed);
+    if (isConnected()) {
+      msg.servoSetVelocity(id, speed);
+    } else {
+      info("arduino cannot move servo %s when not connected", servoSpeed.name);
+    }
   }
 
   /**
@@ -2002,7 +2007,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("Arduino cannot write servo %s microseconds when not connected", servo.getName());
       return;
     }
 
@@ -2013,7 +2018,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   public void setAref(String aref) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("cannot set Aref when not connected");
       return;
     }
     aref = aref.toUpperCase();
@@ -2321,19 +2326,19 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public ServiceConfig getConfig() {
-    ArduinoConfig c = (ArduinoConfig) super.getConfig();
+  public ArduinoConfig getConfig() {
+    super.getConfig();
 
     // FIXME "port" shouldn't exist only config.port !
-    c.port = port;
-    c.connect = isConnected();
+    config.port = port;
+    config.connect = isConnected();
 
-    return c;
+    return config;
   }
 
   @Override
-  public ServiceConfig apply(ServiceConfig c) {
-    ArduinoConfig config = (ArduinoConfig) super.apply(c);
+  public ArduinoConfig apply(ArduinoConfig c) {
+    super.apply(c);
 
     if (msg == null) {
       serial = (Serial) startPeer("serial");
