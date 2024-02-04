@@ -524,12 +524,12 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPython", "python"));
 
     // InMoov2 --to--> InMoov2
-    listeners.add(new Listener("publishMoveHead", name));
-    listeners.add(new Listener("publishMoveRightArm", name));
-    listeners.add(new Listener("publishMoveLeftArm", name));
-    listeners.add(new Listener("publishMoveRightHand", name));
-    listeners.add(new Listener("publishMoveLeftHand", name));
-    listeners.add(new Listener("publishMoveTorso", name));
+    listeners.add(new Listener("publishMoveHead", getPeerName("head"), "onMove"));
+    listeners.add(new Listener("publishMoveRightArm", getPeerName("rightArm"), "onMove"));
+    listeners.add(new Listener("publishMoveLeftArm", getPeerName("leftArm"), "onMove"));
+    listeners.add(new Listener("publishMoveRightHand", getPeerName("rightHand"), "onMove"));
+    listeners.add(new Listener("publishMoveLeftHand", getPeerName("leftHand"), "onMove"));
+    listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));

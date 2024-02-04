@@ -490,7 +490,7 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
     return data;
   }
 
-  @Deprecated /* use onMove */
+  @Deprecated /* use onMove(map) */
   public void onMoveHand(HashMap<String, Double> map) {
     onMove(map);
   }

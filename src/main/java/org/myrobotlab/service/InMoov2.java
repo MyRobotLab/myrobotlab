@@ -1320,8 +1320,7 @@ public class InMoov2 extends Service<InMoov2Config>
       invoke("publishEvent", "WAKE");
     }
   }
-  
-  
+
   public void onPirOff() {
     log.info("onPirOff");
   }

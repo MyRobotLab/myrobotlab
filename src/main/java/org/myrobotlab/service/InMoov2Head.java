@@ -221,7 +221,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     log.info("object distance is {},rothead servo {},neck servo {} ", distance, rotation, colatitude);
   }
 
-  @Deprecated /* use onMoov */
+  @Deprecated /* use onMove(map) */
   public void onMoveHead(HashMap<String, Double> map) {
     onMove(map);
   }
