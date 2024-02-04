@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
@@ -103,6 +104,15 @@ public class RuntimeTest extends AbstractTest {
     assertEquals("fr-FR", l.toString());
 
   }
+  
+  @Test 
+  public void testRuntimeIsAvailable() {
+    Runtime runtime = Runtime.getInstance();
+    assertTrue(Runtime.isAvailable());
+    Runtime.releaseAll(true, true);
+    assertFalse(Runtime.isAvailable());
+  }
+  
 
   @Test
   public void testGetDescribeMessage() {
