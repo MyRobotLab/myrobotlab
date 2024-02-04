@@ -2023,7 +2023,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     // and config
     RuntimeConfig c = (RuntimeConfig) Runtime.getInstance().config;
-    c.remove(CodecUtils.getShortName(name));
+    if (c != null) {
+      c.remove(CodecUtils.getShortName(name));
+    }
 
     log.info("released {}", name);
   }
