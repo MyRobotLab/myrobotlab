@@ -107,10 +107,12 @@ public class RuntimeTest extends AbstractTest {
   
   @Test 
   public void testRuntimeIsAvailable() {
-    Runtime runtime = Runtime.getInstance();
+    Runtime.getInstance();
     assertTrue(Runtime.isAvailable());
     Runtime.releaseAll(true, true);
     assertFalse(Runtime.isAvailable());
+    Runtime.getInstance();
+    assertTrue(Runtime.isAvailable());
   }
   
 
