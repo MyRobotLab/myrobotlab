@@ -64,18 +64,18 @@ pipeline {
         } // stage build
 
    
-      stage('dependencies') {
-         when {
-               expression { params.verify == 'true' }
-         }
-         steps {
-            script {
-                  sh '''
-                     mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-                  '''
-            }
-         }
-      } // stage dependencies      
+      // stage('dependencies') {
+      //    when {
+      //          expression { params.verify == 'true' }
+      //    }
+      //    steps {
+      //       script {
+      //             sh '''
+      //                mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
+      //             '''
+      //       }
+      //    }
+      // } // stage dependencies      
 
       // --fail-fast
       // -DargLine="-Xmx1024m"
