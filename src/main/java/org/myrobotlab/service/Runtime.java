@@ -582,7 +582,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    */
   @Override
   public boolean setVirtual(boolean b) {
-    boolean changed = isVirtual != b;
+    boolean changed = config.virtual != b;
     setAllVirtual(b);
     if (changed) {
       broadcastState();
@@ -605,7 +605,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         si.setVirtual(b);
       }
     }
-    Runtime.getInstance().isVirtual = b;
+    Runtime.getInstance().config.virtual = b;
     Runtime.getInstance().broadcastState();
     return b;
   }
@@ -5284,13 +5284,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return ROOT_CONFIG_DIR + fs + configName;
   }
 
-  @Override
-  public RuntimeConfig getConfig() {
-    config = super.getConfig();
-    config.locale = getLocaleTag();
-    config.virtual = isVirtual;
-    return config;
-  }
 
   /**
    * Gets a {serviceName}.yml file config from configName directory

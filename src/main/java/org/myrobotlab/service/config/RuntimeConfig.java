@@ -3,6 +3,8 @@ package org.myrobotlab.service.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.myrobotlab.service.data.Locale;
+
 public class RuntimeConfig extends ServiceConfig {
 
   /**
@@ -26,6 +28,14 @@ public class RuntimeConfig extends ServiceConfig {
    * Root of resource location
    */
   public String resource = "resource";
+  
+  
+  public RuntimeConfig() {
+    if (locale == null) {
+      locale = Locale.getDefault().getTag();
+    }
+  }
+  
 
   /**
    * add and remove a service using these methods and the uniqueness will be
