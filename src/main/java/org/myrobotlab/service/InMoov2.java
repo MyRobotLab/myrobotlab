@@ -259,7 +259,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     super.apply(c);
     try {
 
-      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
+      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
 
       if (c.locale != null) {
         setLocale(c.locale);
