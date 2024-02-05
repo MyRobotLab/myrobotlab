@@ -17,12 +17,30 @@ public class RuntimeConfig extends ServiceConfig {
    * virtual hardware if enabled all services created will enable virtualization if applicable
    */
   public Boolean virtual = false;
+  
+  /**
+   * Determines if stdin can be used for commands 
+   */
   public boolean enableCli = true;
+  
+  /**
+   * Log level debug, info, warning, error
+   */
   public String logLevel = "info";
+  
+  /**
+   * Locale setting for the instance, initial default will be set by the default jvm/os
+   * through java.util.Locale.getDefault()
+   */
   public String locale;
   
-  // NEED THIS PRIVATE BUT CANNOT BE
-  public List<String> registry = new ArrayList<>();
+
+  /**
+   * Although this should be a set of unique services, it cannot be a LinkedHashSet
+   * because SnakeYml's interpretation would be a map with null values.  Instead
+   * its a protected member with accessors that prevent duplicates.
+   */
+  protected List<String> registry = new ArrayList<>();
     
   /**
    * Root of resource location
@@ -30,6 +48,9 @@ public class RuntimeConfig extends ServiceConfig {
   public String resource = "resource";
   
   
+  /**
+   * Constructor sets the default locale if not already set.
+   */
   public RuntimeConfig() {
     if (locale == null) {
       locale = Locale.getDefault().getTag();

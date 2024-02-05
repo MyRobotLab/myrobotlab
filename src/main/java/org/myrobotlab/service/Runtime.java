@@ -938,7 +938,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         } catch (Exception e) {
           log.error("runtime will not be loading config", e);
         }
-
       } // synchronized lock
     }
 
