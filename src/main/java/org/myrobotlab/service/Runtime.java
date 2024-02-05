@@ -910,7 +910,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           Runtime.setAllVirtual(Platform.isVirtual());
 
           // setting the singleton security
-          Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
           // protected services we don't want to remove when releasing a config
@@ -929,7 +928,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             } else {
               RuntimeConfig rtConfig = runtime.readServiceConfig(runtime.getConfigName(), "runtime", new StaticType<>() {
               });
-              runtime.apply(rtConfig);
+              if (rtConfig != null) {
+                runtime.apply(rtConfig);
+              }
             }
           } catch (Exception e) {
             log.info("runtime will not be loading config");
