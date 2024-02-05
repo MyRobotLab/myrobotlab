@@ -583,6 +583,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   @Override
   public boolean setVirtual(boolean b) {
     boolean changed = config.virtual != b;
+    config.virtual = b;
+    isVirtual = b;
     setAllVirtual(b);
     if (changed) {
       broadcastState();
@@ -909,7 +911,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // platform virtual is higher priority than service virtual
           Runtime.setAllVirtual(Platform.isVirtual());
 
-          // setting the singleton security
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
           // protected services we don't want to remove when releasing a config
@@ -932,6 +933,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
                 runtime.apply(rtConfig);
               }
             }
+            
+
+            // FIXME - should simply set default RuntimeConfig services and include security
+            // setting the singleton security
+            Security.getInstance();
+
+            
           } catch (Exception e) {
             log.info("runtime will not be loading config");
           }

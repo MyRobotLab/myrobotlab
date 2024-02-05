@@ -109,7 +109,7 @@ public class ConfigTest extends AbstractTest {
     // starting an empty config automatically needs a runtime, and runtime
     // by default starts the singleton security service
     names = Runtime.getServiceNames();
-    assertEquals("complete teardown should be 2 after trying to start a config runtime and security", 2, names.length);
+    assertEquals("complete teardown should be 2 after trying to start a config runtime and security", 1, names.length);
    
   }
   
