@@ -13,6 +13,7 @@ import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.document.xml.MRLChunkingXMLHandler;
 import org.myrobotlab.document.xml.RecordingInputStream;
+import org.myrobotlab.service.config.XMLConnectorConfig;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -24,7 +25,7 @@ import org.xml.sax.XMLReader;
  * document that can be published to the doc pipeline, or other
  * DocumentListener.
  */
-public class XMLConnector extends AbstractConnector {
+public class XMLConnector extends AbstractConnector<XMLConnectorConfig> {
 
   private static final long serialVersionUID = 1L;
 
