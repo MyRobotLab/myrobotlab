@@ -54,7 +54,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.InstallCert;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
@@ -74,7 +74,7 @@ import org.slf4j.Logger;
  *         - Proxies proxies proxies ! -
  *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
-public class HttpClient<C extends ServiceConfig> extends Service<C> implements TextPublisher {
+public class HttpClient<C extends HttpClientConfig> extends Service<C> implements TextPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
