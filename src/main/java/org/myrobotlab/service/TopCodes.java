@@ -13,6 +13,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.TopCodesConfig;
 import org.slf4j.Logger;
 
 import topcodes.Scanner;
@@ -28,7 +29,7 @@ import topcodes.TopCode;
  * SHOULD BE AS PERPENDICULAR AS POSSIBLE TO THE CODE, IN ORDER TO WORK WELL.
  *
  */
-public class TopCodes extends Service {
+public class TopCodes extends Service<TopCodesConfig> {
 
   private static final long serialVersionUID = 1L;
 
