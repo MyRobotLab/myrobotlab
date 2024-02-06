@@ -20,6 +20,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.TesseractOcrConfig;
 import org.slf4j.Logger;
 
 /**
@@ -37,7 +38,7 @@ import org.slf4j.Logger;
  * thai vie - vietnamese
  * 
  */
-public class TesseractOcr extends Service {
+public class TesseractOcr extends Service<TesseractOcrConfig> {
 
   private static final long serialVersionUID = 1L;
   transient private TessBaseAPI api = null;

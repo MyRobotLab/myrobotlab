@@ -12,9 +12,10 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WatchDogTimerConfig;
 import org.slf4j.Logger;
 
-public class WatchDogTimer extends Service {
+public class WatchDogTimer extends Service<WatchDogTimerConfig> {
 
   List<Message> globalActions = new ArrayList<Message>();
 

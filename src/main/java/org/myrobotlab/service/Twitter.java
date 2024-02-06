@@ -12,6 +12,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.TwitterConfig;
 import org.slf4j.Logger;
 
 import twitter4j.Status;
@@ -26,7 +27,7 @@ import twitter4j.conf.ConfigurationBuilder;
  * have a consumerKey and accessToken from a twitter account.
  *
  */
-public class Twitter extends Service {
+public class Twitter extends Service<TwitterConfig> {
 
   private static final long serialVersionUID = 1L;
 

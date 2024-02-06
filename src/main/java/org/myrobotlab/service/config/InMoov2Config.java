@@ -248,12 +248,13 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.bots.add("resource/ProgramAB/hi-IN");
     chatBot.bots.add("resource/ProgramAB/it-IT");
     chatBot.bots.add("resource/ProgramAB/nl-NL");
+    chatBot.bots.add("resource/ProgramAB/pl-PL");
     chatBot.bots.add("resource/ProgramAB/pt-PT");
     chatBot.bots.add("resource/ProgramAB/ru-RU");
     chatBot.bots.add("resource/ProgramAB/tr-TR");
 
     Runtime runtime = Runtime.getInstance();
-    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
+    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "pl-PL","ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
     if (tag != null) {
       String[] tagparts = tag.split("-");

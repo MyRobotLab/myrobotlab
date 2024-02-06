@@ -7,11 +7,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WikiDataFetcherConfig;
 import org.slf4j.Logger;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.QuantityValue;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
@@ -23,7 +23,7 @@ import org.wikidata.wdtk.datamodel.json.jackson.JacksonValueSnak;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
-public class WikiDataFetcher extends Service {
+public class WikiDataFetcher extends Service<WikiDataFetcherConfig> {
 
   private static final long serialVersionUID = 1L;
 
