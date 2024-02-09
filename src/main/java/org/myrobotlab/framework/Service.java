@@ -619,7 +619,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
     // necessary for serialized transport\
     if (inId == null) {
-      id = Platform.getLocalInstance().getId();
+      id = ConfigUtils.getId();
       log.debug("creating local service for id {}", id);
     } else {
       id = inId;
@@ -670,7 +670,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // register this service if local - if we are a foreign service, we probably
     // are being created in a
     // registration already
-    if (id.equals(Platform.getLocalInstance().getId())) {
+    if (id.equals(ConfigUtils.getId())) {
       Registration registration = new Registration(this);
       Runtime.register(registration);
     }
@@ -1504,7 +1504,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
           // The StringUtils.removeEnd() call is a no-op when the ID is not our
           // local ID,
           // so doesn't conflict with remote routes
-          Listener newConfigListener = new Listener(listener.topicMethod, StringUtil.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
+          Listener newConfigListener = new Listener(listener.topicMethod, StringUtil.removeEnd(listener.callbackName, '@' + Runtime.getInstance().getId()),
               listener.callbackMethod);
           newListeners.add(newConfigListener);
         }

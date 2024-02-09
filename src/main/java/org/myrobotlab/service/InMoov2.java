@@ -2178,7 +2178,6 @@ public class InMoov2 extends Service<InMoov2Config>
 
   @Deprecated /* use startPeers */
   public void startAll(String leftPort, String rightPort) throws Exception {
-    startMouth();
     startChatBot();
 
     // startHeadTracking();
@@ -2287,47 +2286,6 @@ public class InMoov2 extends Service<InMoov2Config>
 
   public void startHeartbeat() {
     heart.start();
-  }
-
-  // TODO - general objective "might" be to reduce peers down to something
-  // that does not need a reference - where type can be switched before creation
-  // and the only thing needed is pubs/subs that are not handled in abstracts
-  @Deprecated /* use startPeer */
-  public SpeechSynthesis startMouth() {
-
-    // FIXME - set type ??? - maybe a good product of InMoov
-    // if "new" type cannot necessarily grab yml file
-    // setMouthType
-
-    // FIXME - bad to have a reference, should only need the "name" of the
-    // service !!!
-    mouth = (SpeechSynthesis) startPeer("mouth");
-
-    // voices = mouth.getVoices();
-    // Voice voice = mouth.getVoice();
-    // if (voice != null) {
-    // voiceSelected = voice.getName();
-    // }
-
-    if (mute) {
-      mouth.setMute(true);
-    }
-
-    mouth.attachSpeechRecognizer(ear);
-    // mouth.attach(htmlFilter); // same as chatBot not needed
-
-    // this.attach((Attachable) mouth);
-    // if (ear != null) ....
-
-    broadcastState();
-
-    speakBlocking(get("STARTINGMOUTH"));
-    if (Platform.isVirtual()) {
-      speakBlocking(get("STARTINGVIRTUALHARD"));
-    }
-    speakBlocking(get("WHATISTHISLANGUAGE"));
-
-    return mouth;
   }
 
   @Deprecated /* use startPeer */

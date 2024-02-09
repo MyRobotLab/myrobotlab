@@ -53,7 +53,7 @@ public class SerialTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     // LoggingFactory.init("WARN");
-    Platform.setVirtual(true);
+    Runtime.getInstance().setVirtual(true);
 
     log.info("setUpBeforeClass");
 

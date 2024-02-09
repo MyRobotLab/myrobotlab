@@ -1,8 +1,11 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.myrobotlab.framework.NameGenerator;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.service.data.Locale;
 
 public class RuntimeConfig extends ServiceConfig {
@@ -11,18 +14,13 @@ public class RuntimeConfig extends ServiceConfig {
    * instance id - important to be unique when connecting multiple
    * mrl instances together
    */
-  public String id;
+  public String id = NameGenerator.getName();
   
   /**
    * virtual hardware if enabled all services created will enable virtualization if applicable
    */
   public Boolean virtual = false;
-  
-  /**
-   * Determines if stdin can be used for commands 
-   */
-  public boolean enableCli = true;
-  
+    
   /**
    * Log level debug, info, warning, error
    */
@@ -32,7 +30,7 @@ public class RuntimeConfig extends ServiceConfig {
    * Locale setting for the instance, initial default will be set by the default jvm/os
    * through java.util.Locale.getDefault()
    */
-  public String locale;
+  public String locale = Locale.getDefault().getTag();
   
 
   /**
@@ -40,7 +38,7 @@ public class RuntimeConfig extends ServiceConfig {
    * because SnakeYml's interpretation would be a map with null values.  Instead
    * its a protected member with accessors that prevent duplicates.
    */
-  protected List<String> registry = new ArrayList<>();
+  public List<String> registry = new ArrayList<>();
     
   /**
    * Root of resource location
@@ -48,13 +46,9 @@ public class RuntimeConfig extends ServiceConfig {
   public String resource = "resource";
   
   
-  /**
-   * Constructor sets the default locale if not already set.
-   */
-  public RuntimeConfig() {
-    if (locale == null) {
-      locale = Locale.getDefault().getTag();
-    }
+  public Plan getDefault(Plan plan, String name) {
+    super.getDefault(plan, name);
+    return plan;
   }
   
 

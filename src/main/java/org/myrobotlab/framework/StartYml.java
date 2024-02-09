@@ -9,10 +9,6 @@ package org.myrobotlab.framework;
  *
  */
 public class StartYml {
-  /**
-   * instance id of myrobotlab, default will be dynamically generated
-   */
-  public String id;  
     
   /**
    * configuration set to start under /data/config/{configName}

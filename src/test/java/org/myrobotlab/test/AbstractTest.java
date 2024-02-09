@@ -103,7 +103,7 @@ public class AbstractTest {
       
 //    }
 
-    Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
 
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
@@ -164,7 +164,7 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.info("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(),
+    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(),
         Arrays.toString(Runtime.getServiceNames()));
 
     // release all including runtime - be careful of default runtime.yml
@@ -211,11 +211,11 @@ public class AbstractTest {
   }
 
   public void setVirtual() {
-    Platform.setVirtual(true);
+    Runtime.getInstance().setVirtual(true);
   }
 
   public boolean isVirtual() {
-    return Platform.isVirtual();
+    return Runtime.getInstance().isVirtual();
   }
 
 }

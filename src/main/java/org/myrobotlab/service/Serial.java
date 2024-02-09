@@ -1338,7 +1338,7 @@ public class Serial extends Service<SerialConfig> implements SerialControl, Queu
 
     try {
 
-      Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
 
       Serial s = (Serial) Runtime.start("s1", "Serial");
       String vport1 = "vport1";

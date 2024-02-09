@@ -495,7 +495,7 @@ public class CodecUtils {
     }
 
     if (getId(name) == null) {
-      return name + '@' + Platform.getLocalInstance().getId();
+      return name + '@' + Runtime.getInstance().getId();
     } else {
       return name;
     }
@@ -1466,7 +1466,7 @@ public class CodecUtils {
     if (!name.contains("@")) {
       return true;
     }
-    return name.substring(name.indexOf("@") + 1).equals(Platform.getLocalInstance().getId());
+    return name.substring(name.indexOf("@") + 1).equals(Runtime.getInstance().getId());
   }
 
   /**
