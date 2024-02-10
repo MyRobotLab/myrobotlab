@@ -195,7 +195,7 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
 
     // log.warn("end of test - id {} remaining services after release {}",

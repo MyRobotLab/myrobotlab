@@ -22,9 +22,9 @@ public class RuntimeConfig extends ServiceConfig {
   public Boolean virtual = false;
     
   /**
-   * Log level debug, info, warning, error
+   * Log level debug, info, warn, error
    */
-  public String logLevel = "info";
+  public String logLevel = "warn";
   
   /**
    * Locale setting for the instance, initial default will be set by the default jvm/os
