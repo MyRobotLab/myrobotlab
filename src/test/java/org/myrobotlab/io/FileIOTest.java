@@ -182,6 +182,7 @@ public class FileIOTest extends AbstractTest {
     InputStream ios = FileIO.toInputStream("This is some data that got turned into a stream");
     String data = FileIO.toString(ios);
     assertEquals("This is some data that got turned into a stream", data);
+    ios.close();
   }
 
   @Test

@@ -26,8 +26,8 @@ public class RuntimeTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(RuntimeTest.class);
 
   @Before
-  public void setUp() {
-    // LoggingFactory.init("WARN");
+  public void beforeTest() {
+    Runtime.releaseAll(true, true);
   }
 
   @Test

@@ -168,7 +168,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
   protected final Map<String, Set<String>> typeToInterface = new HashMap<>();
 
-  private static final Object processLock = new Object();
+  private transient static final Object processLock = new Object();
 
   /**
    * FILTERED_INTERFACES are the set of low level interfaces which we are

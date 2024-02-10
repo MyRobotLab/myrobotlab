@@ -58,7 +58,7 @@ public class AbstractTest {
   public TestWatcher watchman = new TestWatcher() {
       @Override
       protected void starting(Description description) {
-          System.out.println("Starting: " + description.getMethodName());
+          System.out.println("Starting: " + description.getClassName() + "." + description.getMethodName());
       }
 
       @Override
