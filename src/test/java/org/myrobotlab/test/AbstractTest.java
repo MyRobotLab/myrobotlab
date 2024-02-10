@@ -23,6 +23,11 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+
 public class AbstractTest {
 
   /** cached network test value for tests */
@@ -48,6 +53,34 @@ public class AbstractTest {
   static public String simpleName;
 
   private static boolean lineFeedFooter = true;
+  
+  @Rule
+  public TestWatcher watchman = new TestWatcher() {
+      @Override
+      protected void starting(Description description) {
+          System.out.println("Starting: " + description.getMethodName());
+      }
+
+      @Override
+      protected void succeeded(Description description) {
+         // System.out.println("Succeeded: " + description.getMethodName());
+      }
+
+      @Override
+      protected void failed(Throwable e, Description description) {
+          System.out.println("Failed: " + description.getMethodName());
+      }
+
+      @Override
+      protected void skipped(org.junit.AssumptionViolatedException e, Description description) {
+          System.out.println("Skipped: " + description.getMethodName());
+      }
+
+      @Override
+      protected void finished(Description description) {
+          System.out.println("Finished: " + description.getMethodName());
+      }
+  };
 
   public String getSimpleName() {
     return simpleName;
