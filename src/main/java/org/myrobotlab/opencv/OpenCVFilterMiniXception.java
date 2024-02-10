@@ -59,7 +59,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   }
 
   private void loadDL4j() {
-    dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
+    dl4j = (Deeplearning4j) Runtime.start("dl4j", "Deeplearning4j");
     log.info("Loading mini XCEPTION Model.");
     try {
       dl4j.loadMiniEXCEPTION();
@@ -158,6 +158,9 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
     running = false;
     converter1.close();
     converter2.close();
+    if (dl4j != null) {
+      dl4j.releaseService();
+    }
   }
 
   @Override
