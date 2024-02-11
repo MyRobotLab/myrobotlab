@@ -12,12 +12,12 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.MavenConfig;
 import org.slf4j.Logger;
 
 import picocli.CommandLine.Option;
 
-public class Maven extends Service<ServiceConfig> {
+public class Maven extends Service<MavenConfig> {
 
   private static final long serialVersionUID = 1L;
 

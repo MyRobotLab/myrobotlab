@@ -14,7 +14,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.InverseKinematics3DConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -35,7 +35,8 @@ import org.slf4j.Logger;
  * @author kwatters
  * 
  */
-public class InverseKinematics3D extends Service<ServiceConfig> implements IKJointAnglePublisher, PointsListener {
+public class InverseKinematics3D extends Service<InverseKinematics3DConfig> implements IKJointAnglePublisher,PointsListener
+{
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class);
@@ -145,17 +146,17 @@ public class InverseKinematics3D extends Service<ServiceConfig> implements IKJoi
    * "moveTo" call.
    * 
    * @param dx
-   *          - x axis translation
+   *              - x axis translation
    * @param dy
-   *          - y axis translation
+   *              - y axis translation
    * @param dz
-   *          - z axis translation
+   *              - z axis translation
    * @param roll
-   *          - rotation about z (in degrees)
+   *              - rotation about z (in degrees)
    * @param pitch
-   *          - rotation about x (in degrees)
+   *              - rotation about x (in degrees)
    * @param yaw
-   *          - rotation about y (in degrees)
+   *              - rotation about y (in degrees)
    * @return a matric that represents the rotation/translation matrix
    */
   public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {
@@ -201,9 +202,9 @@ public class InverseKinematics3D extends Service<ServiceConfig> implements IKJoi
    * first scale the input point, then apply
    * 
    * @param name
-   *          n
+   *             n
    * @param p
-   *          p
+   *             p
    * 
    */
   public void moveTo(String name, Point p) {

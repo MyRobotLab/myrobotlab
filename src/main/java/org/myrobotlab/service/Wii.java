@@ -34,7 +34,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WiiConfig;
 import org.slf4j.Logger;
 
 import jssc.SerialPortEvent;
@@ -65,7 +65,8 @@ import wiiusej.wiiusejevents.wiiuseapievents.StatusEvent;
  * http://www.bot-thoughts.com/2010/12/connecting-mbed-to-wiimote-ir-camera.html
  *
  */
-public class Wii extends Service<ServiceConfig> implements WiimoteListener, SerialPortEventListener {
+public class Wii extends Service<WiiConfig> implements WiimoteListener,SerialPortEventListener
+{
 
   public static class IRData implements Serializable {
     private static final long serialVersionUID = 1L;
