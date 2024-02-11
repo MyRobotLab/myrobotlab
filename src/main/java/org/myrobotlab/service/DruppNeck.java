@@ -4,7 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.DruppNeckConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
@@ -18,18 +18,14 @@ import org.myrobotlab.service.interfaces.ServoControl;
  * @author kwatters
  *
  */
-public class DruppNeck extends Service<ServiceConfig> {
+public class DruppNeck extends Service<DruppNeckConfig> {
 
   private static final long serialVersionUID = 1L;
   // 3 servos for the drupp neck
-  public transient ServoControl up;
-  public transient ServoControl middle;
-  public transient ServoControl down;
+  protected transient ServoControl up;
+  protected transient ServoControl middle;
+  protected transient ServoControl down;
 
-  // this is an offset angle that is added to the solution from the IK solver
-  public double upOffset = 90;
-  public double middleOffset = 120 + 90;
-  public double downOffset = -120 + 90;
 
   public DruppNeck(String n, String id) {
     super(n, id);
@@ -61,9 +57,9 @@ public class DruppNeck extends Service<ServiceConfig> {
     // TODO: if the solver fails, should we catch this exception ?
     double[] result = solver.solve(rollRad, pitchRad, yawRad);
     // convert to degrees
-    double upDeg = MathUtils.radToDeg(result[0]) + upOffset;
-    double middleDeg = MathUtils.radToDeg(result[1]) + middleOffset;
-    double downDeg = MathUtils.radToDeg(result[2]) + downOffset;
+    double upDeg = MathUtils.radToDeg(result[0]) + config.upOffset;
+    double middleDeg = MathUtils.radToDeg(result[1]) + config.middleOffset;
+    double downDeg = MathUtils.radToDeg(result[2]) + config.downOffset;
     // Ok, servos can only (typically) move from 0 to 180.. if any of the angles
     // are
     // negative... we can't move there.. let's log a warning
@@ -84,6 +80,7 @@ public class DruppNeck extends Service<ServiceConfig> {
     down.moveTo(downDeg);
     // TODO: broadcast state?
   }
+  
 
   /**
    * Enable the servos
@@ -141,27 +138,27 @@ public class DruppNeck extends Service<ServiceConfig> {
   }
 
   public double getUpOffset() {
-    return upOffset;
+    return config.upOffset;
   }
 
   public void setUpOffset(double upOffset) {
-    this.upOffset = upOffset;
+    this.config.upOffset = upOffset;
   }
 
   public double getMiddleOffset() {
-    return middleOffset;
+    return config.middleOffset;
   }
 
   public void setMiddleOffset(double middleOffset) {
-    this.middleOffset = middleOffset;
+    this.config.middleOffset = middleOffset;
   }
 
   public double getDownOffset() {
-    return downOffset;
+    return config.downOffset;
   }
 
   public void setDownOffset(double downOffset) {
-    this.downOffset = downOffset;
+    this.config.downOffset = downOffset;
   }
 
   public static void main(String[] args) throws Exception {
