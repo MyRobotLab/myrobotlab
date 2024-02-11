@@ -30,6 +30,13 @@ public class DruppNeck extends Service<DruppNeckConfig> {
   public DruppNeck(String n, String id) {
     super(n, id);
   }
+  
+  public void startService() {
+    super.startService();
+    up = (ServoControl)startPeer("up");
+    middle = (ServoControl)startPeer("middle");
+    down = (ServoControl)startPeer("down");
+  }
 
   private DruppIKSolver solver = new DruppIKSolver();
 
@@ -165,26 +172,26 @@ public class DruppNeck extends Service<DruppNeckConfig> {
     LoggingFactory.init("INFO");
     // To use the drup service you need to configure and attach the servos
     // then set them on the service.
-    Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
-    Servo up = (Servo) Runtime.start("up", "Servo");
-    Servo middle = (Servo) Runtime.start("middle", "Servo");
-    Servo down = (Servo) Runtime.start("down", "Servo");
-    up.setPin(6);
-    middle.setPin(5);
-    down.setPin(4);
-    // String port = "COM4";
-    String port = "VIRTUAL_COM_PORT";
-    VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
-    va1.connect(port);
-    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
-    ard.connect(port);
-    ard.attach(up);
-    ard.attach(middle);
-    ard.attach(down);
+//    Runtime.start("python", "Python");
+//    Servo up = (Servo) Runtime.start("up", "Servo");
+//    Servo middle = (Servo) Runtime.start("middle", "Servo");
+//    Servo down = (Servo) Runtime.start("down", "Servo");
+//    up.setPin(6);
+//    middle.setPin(5);
+//    down.setPin(4);
+//    // String port = "COM4";
+//    String port = "VIRTUAL_COM_PORT";
+//    VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
+//    va1.connect(port);
+//    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
+//    ard.connect(port);
+//    ard.attach(up);
+//    ard.attach(middle);
+//    ard.attach(down);
     // Create the drupp service
     DruppNeck neck = (DruppNeck) Runtime.start("neck", "DruppNeck");
-    neck.setServos(up, middle, down);
+    Runtime.start("webgui", "WebGui");
+    // neck.setServos(up, middle, down);
     // neck.moveTo(0, 0, 0);
     // neck.moveTo(0, 0, -45);
     // neck.moveTo(0, 0, 45);

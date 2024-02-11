@@ -1933,6 +1933,22 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   public static boolean releaseService(String inName) {
+    ServiceInterface sc = getService(inName);
+    if (sc != null) {
+      sc.releaseService();
+      return true;
+    }
+    return false;
+  }
+  
+  
+  /**
+   * Called after any subclassed releaseService has been called, this cleans
+   * up the registry and removes peers
+   * @param inName
+   * @return
+   */
+  public static boolean releaseServiceInternal(String inName) {
     synchronized (processLock) {
       if (inName == null) {
         log.debug("release (null)");
@@ -1987,6 +2003,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return true;
     }
   }
+
 
   /**
    * Removes registration for a service. Removes the service from

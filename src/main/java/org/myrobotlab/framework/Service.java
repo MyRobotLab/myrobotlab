@@ -1608,7 +1608,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   synchronized public void releaseService() {
     // auto release children and unregister
-    Runtime.releaseService(getName());
+    Runtime.releaseServiceInternal(getName());
   }
 
   /**
