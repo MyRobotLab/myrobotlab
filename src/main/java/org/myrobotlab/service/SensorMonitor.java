@@ -36,7 +36,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.SensorMonitorConfig;
 import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.data.Trigger;
 import org.slf4j.Logger;
@@ -48,7 +48,8 @@ import org.slf4j.Logger;
  * would be triggered if a sensor goes above or below some threshold.
  *
  */
-public class SensorMonitor extends Service<ServiceConfig> {
+public class SensorMonitor extends Service<SensorMonitorConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -114,7 +115,8 @@ public class SensorMonitor extends Service<ServiceConfig> {
 
   public final void addTrigger(Trigger trigger) {
     if (trigger.pinData.source == null) {
-      log.error("addTrigger adding trigger with no source controller - will be based on pin only ! " + trigger.pinData.pin);
+      log.error(
+          "addTrigger adding trigger with no source controller - will be based on pin only ! " + trigger.pinData.pin);
     }
     triggers.put(makeKey(trigger.pinData), trigger);
     triggers_nameIndex.put(trigger.name, trigger);

@@ -85,7 +85,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.YoloDetectedObject;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.Deeplearning4jConfig;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -113,7 +113,8 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Deeplearning4j extends Service<ServiceConfig> {
+public class Deeplearning4j extends Service<Deeplearning4jConfig>
+{
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(Deeplearning4j.class);
@@ -179,9 +180,10 @@ public class Deeplearning4j extends Service<ServiceConfig> {
    * label. Normally a directory will contain a bunch of training images.
    * 
    * @param trainingDataDir
-   *          the directory that contains the subdirectories of labels.
+   *                        the directory that contains the subdirectories of
+   *                        labels.
    * @throws IOException
-   *           e
+   *                     e
    */
   public void trainModel(String trainingDataDir) throws IOException {
     log.info("Load data....");
@@ -269,7 +271,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     ImageTransform flipTransform1 = new FlipImageTransform(rng);
     ImageTransform flipTransform2 = new FlipImageTransform(new Random(123));
     ImageTransform warpTransform = new WarpImageTransform(rng, 42);
-    List<ImageTransform> transforms = Arrays.asList(new ImageTransform[] { flipTransform1, warpTransform, flipTransform2 });
+    List<ImageTransform> transforms = Arrays
+        .asList(new ImageTransform[] { flipTransform1, warpTransform, flipTransform2 });
     return transforms;
   }
 
@@ -400,12 +403,17 @@ public class Deeplearning4j extends Service<ServiceConfig> {
      * random Reference:
      * https://gist.github.com/ramgo2/833f12e92359a2da9e5c2fb6333351c5
      **/
-    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).l2(0.005).activation(Activation.RELU).weightInit(WeightInit.XAVIER)
+    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).l2(0.005).activation(Activation.RELU)
+        .weightInit(WeightInit.XAVIER)
         // .updater(new Nadam(1e-4))
-        .updater(new AdaDelta()).list().layer(0, convInit("cnn1", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 0, 0 }, 0))
-        .layer(1, maxPool("maxpool1", new int[] { 2, 2 })).layer(2, conv5x5("cnn2", 100, new int[] { 5, 5 }, new int[] { 1, 1 }, 0))
+        .updater(new AdaDelta()).list()
+        .layer(0, convInit("cnn1", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 0, 0 }, 0))
+        .layer(1, maxPool("maxpool1", new int[] { 2, 2 }))
+        .layer(2, conv5x5("cnn2", 100, new int[] { 5, 5 }, new int[] { 1, 1 }, 0))
         .layer(3, maxPool("maxool2", new int[] { 2, 2 })).layer(4, new DenseLayer.Builder().nOut(500).build())
-        .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(numLabels).activation(Activation.SOFTMAX).build())
+        .layer(5,
+            new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(numLabels)
+                .activation(Activation.SOFTMAX).build())
         .setInputType(InputType.convolutional(height, width, channels)).build();
 
     return new MultiLayerNetwork(conf);
@@ -423,7 +431,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     double nonZeroBias = 1;
     double dropOut = 0.5;
 
-    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).weightInit(new NormalDistribution(0.0, 0.01)).activation(Activation.RELU).updater(new AdaDelta())
+    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed)
+        .weightInit(new NormalDistribution(0.0, 0.01)).activation(Activation.RELU).updater(new AdaDelta())
         .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize
                                                                             // to
                                                                             // prevent
@@ -431,13 +440,19 @@ public class Deeplearning4j extends Service<ServiceConfig> {
                                                                             // or
                                                                             // exploding
                                                                             // gradients
-        .l2(5 * 1e-4).list().layer(convInit("cnn1", channels, 96, new int[] { 11, 11 }, new int[] { 4, 4 }, new int[] { 3, 3 }, 0))
-        .layer(new LocalResponseNormalization.Builder().name("lrn1").build()).layer(maxPool("maxpool1", new int[] { 3, 3 }))
-        .layer(conv5x5("cnn2", 256, new int[] { 1, 1 }, new int[] { 2, 2 }, nonZeroBias)).layer(new LocalResponseNormalization.Builder().name("lrn2").build())
-        .layer(maxPool("maxpool2", new int[] { 3, 3 })).layer(conv3x3("cnn3", 384, 0)).layer(conv3x3("cnn4", 384, nonZeroBias)).layer(conv3x3("cnn5", 256, nonZeroBias))
-        .layer(maxPool("maxpool3", new int[] { 3, 3 })).layer(fullyConnected("ffn1", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
+        .l2(5 * 1e-4).list()
+        .layer(convInit("cnn1", channels, 96, new int[] { 11, 11 }, new int[] { 4, 4 }, new int[] { 3, 3 }, 0))
+        .layer(new LocalResponseNormalization.Builder().name("lrn1").build())
+        .layer(maxPool("maxpool1", new int[] { 3, 3 }))
+        .layer(conv5x5("cnn2", 256, new int[] { 1, 1 }, new int[] { 2, 2 }, nonZeroBias))
+        .layer(new LocalResponseNormalization.Builder().name("lrn2").build())
+        .layer(maxPool("maxpool2", new int[] { 3, 3 })).layer(conv3x3("cnn3", 384, 0))
+        .layer(conv3x3("cnn4", 384, nonZeroBias)).layer(conv3x3("cnn5", 256, nonZeroBias))
+        .layer(maxPool("maxpool3", new int[] { 3, 3 }))
+        .layer(fullyConnected("ffn1", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
         .layer(fullyConnected("ffn2", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
-        .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build())
+        .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels)
+            .activation(Activation.SOFTMAX).build())
         .setInputType(InputType.convolutional(height, width, channels)).build();
 
     return new MultiLayerNetwork(conf);
@@ -457,7 +472,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
   }
 
   private ConvolutionLayer conv3x3(String name, int out, double bias) {
-    return new ConvolutionLayer.Builder(new int[] { 3, 3 }, new int[] { 1, 1 }, new int[] { 1, 1 }).name(name).nOut(out).biasInit(bias).build();
+    return new ConvolutionLayer.Builder(new int[] { 3, 3 }, new int[] { 1, 1 }, new int[] { 1, 1 }).name(name).nOut(out)
+        .biasInit(bias).build();
   }
 
   private ConvolutionLayer conv5x5(String name, int out, int[] stride, int[] pad, double bias) {
@@ -522,7 +538,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
 
-  public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
+  public void loadMiniEXCEPTION()
+      throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
     // load it up!
     String filename = "models" + File.separator + "miniXCEPTION" + File.separator + "_mini_XCEPTION.102-0.66.hdf5";
 
@@ -663,7 +680,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     scaler.transform(image);
     INDArray outputs = tinyyolo.outputSingle(image);
 
-    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(tinyYOLOModel.getPriorBoxes()), outputs, 0.6, 0.4);
+    List<DetectedObject> objs = YoloUtils.getPredictedObjects(Nd4j.create(tinyYOLOModel.getPriorBoxes()), outputs, 0.6,
+        0.4);
     // List<DetectedObject> objs =
     // YoloUtils.getPredictedObjects(Nd4j.create(TinyYOLO.priorBoxes), outputs,
     // 0.6, 0.4);
@@ -710,7 +728,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
         int xRightTop = y2;
 
         Rect boundingBox = new Rect(xLeftBottom, yLeftBottom, xRightTop - xLeftBottom, yRightTop - yLeftBottom);
-        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float) (classPrediction.getProbability()), classPrediction.getLabel(), frameIndex, null, null);
+        YoloDetectedObject yoloobj = new YoloDetectedObject(boundingBox, (float) (classPrediction.getProbability()),
+            classPrediction.getLabel(), frameIndex, null, null);
         log.info("Yolo Object: {}", yoloobj);
         results.add(yoloobj);
       }
@@ -719,7 +738,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     return results;
   }
 
-  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound, List<String> labels, int batch, int height, int width, int channels,
+  public DataSetIterator makeSolrInputSplitIterator(Solr solr, SolrQuery datasetQuery, long numFound,
+      List<String> labels, int batch, int height, int width, int channels,
       String labelField) throws IOException {
     // TODO: don't depend on the solr service, but rather some datasource that
     // can produce input splits...
@@ -738,7 +758,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     return iter;
   }
 
-  public CustomModel trainModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter, String filename, int maxEpochs, double targetAccuracy,
+  public CustomModel trainModel(List<String> labels, DataSetIterator trainIter, DataSetIterator testIter,
+      String filename, int maxEpochs, double targetAccuracy,
       String featureExtractionLayer) throws IOException {
     // loop for each epoch?
     ComputationGraph model = createVGG16TransferModel(featureExtractionLayer, labels.size());
@@ -785,7 +806,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     return descriptions;
   }
 
-  public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels) throws IOException {
+  public Map<String, Double> classifyImageCustom(IplImage iplImage, ComputationGraph model, List<String> labels)
+      throws IOException {
     // this height width channel info is for VGG16 based models.
     CloseableFrameConverter converter = new CloseableFrameConverter();
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3);
@@ -903,12 +925,12 @@ public class Deeplearning4j extends Service<ServiceConfig> {
    * the new output layer of the transfer learned model
    * 
    * @param featureExtractionLayer
-   *          specifies the frozen layer of the model
+   *                               specifies the frozen layer of the model
    * @param numClasses
-   *          the new number of outputs for the model.
+   *                               the new number of outputs for the model.
    * @return the loaded computation graph
    * @throws IOException
-   *           if there was an error reading the model
+   *                     if there was an error reading the model
    */
   public ComputationGraph createVGG16TransferModel(String featureExtractionLayer, int numClasses) throws IOException {
     log.info("Loading org.deeplearning4j.transferlearning.vgg16...\n\n");
@@ -918,9 +940,11 @@ public class Deeplearning4j extends Service<ServiceConfig> {
     // Decide on a fine tune configuration to use.
     // In cases where there already exists a setting the fine tune setting will
     // override the setting for all layers that are not "frozen".
-    FineTuneConfiguration fineTuneConf = new FineTuneConfiguration.Builder().updater(new Nesterovs(5e-5)).seed(seed).build();
+    FineTuneConfiguration fineTuneConf = new FineTuneConfiguration.Builder().updater(new Nesterovs(5e-5)).seed(seed)
+        .build();
     // Construct a new model with the intended architecture and print summary
-    ComputationGraph vgg16Transfer = new TransferLearning.GraphBuilder(vgg16).fineTuneConfiguration(fineTuneConf).setFeatureExtractor(featureExtractionLayer) // the
+    ComputationGraph vgg16Transfer = new TransferLearning.GraphBuilder(vgg16).fineTuneConfiguration(fineTuneConf)
+        .setFeatureExtractor(featureExtractionLayer) // the
         // specified
         // layer
         // and
@@ -930,7 +954,8 @@ public class Deeplearning4j extends Service<ServiceConfig> {
         .removeVertexKeepConnections("predictions") // replace the functionality
         // of the final vertex
         .addLayer("predictions",
-            new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nIn(4096).nOut(numClasses).weightInit(WeightInit.DISTRIBUTION)
+            new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nIn(4096).nOut(numClasses)
+                .weightInit(WeightInit.DISTRIBUTION)
                 .dist(new NormalDistribution(0, 0.2 * (2.0 / (4096 + numClasses)))) // This
                 // weight
                 // init
@@ -951,9 +976,9 @@ public class Deeplearning4j extends Service<ServiceConfig> {
    * Fit a model against a training set Note: iterator is reset before fitting
    * 
    * @param trainIter
-   *          training set iterator
+   *                  training set iterator
    * @param model
-   *          the model itself
+   *                  the model itself
    * 
    */
   public void runFitter(DataSetIterator trainIter, ComputationGraph model) {
@@ -968,9 +993,9 @@ public class Deeplearning4j extends Service<ServiceConfig> {
    * before evaluating.
    * 
    * @param testIter
-   *          interator
+   *                 interator
    * @param model
-   *          model
+   *                 model
    * @return accuracy score
    * 
    */

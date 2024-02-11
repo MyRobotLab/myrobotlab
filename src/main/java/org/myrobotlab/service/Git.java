@@ -36,10 +36,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.GitConfig;
 import org.slf4j.Logger;
 
-public class Git extends Service<ServiceConfig> {
+public class Git extends Service<GitConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -76,26 +77,28 @@ public class Git extends Service<ServiceConfig> {
   public Git(String n, String id) {
     super(n, id);
   }
-  
-  public void clone(String location, String url, String branch, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+
+  public void clone(String location, String url, String branch, String checkout)
+      throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     clone(location, url, branch, checkout, false);
   }
 
- 
-
   // max complexity sync
-  public void sync(String location, String url, String branch, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+  public void sync(String location, String url, String branch, String checkout)
+      throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     // initial clone
     clone(location, url, branch, checkout);
 
     addTask(checkStatusIntervalMs, "checkStatus");
   }
 
-  public void sync(String location, String url, String checkout) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+  public void sync(String location, String url, String checkout)
+      throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     sync(location, url, checkout, checkout);
   }
 
-  public RevCommit checkStatus() throws WrongRepositoryStateException, InvalidConfigurationException, InvalidRemoteException, CanceledException, RefNotFoundException,
+  public RevCommit checkStatus() throws WrongRepositoryStateException, InvalidConfigurationException,
+      InvalidRemoteException, CanceledException, RefNotFoundException,
       RefNotAdvertisedException, NoHeadException, TransportException, GitAPIException, IOException {
     for (RepoData repository : repos.values()) {
       org.eclipse.jgit.api.Git git = repository.git;
@@ -135,7 +138,8 @@ public class Git extends Service<ServiceConfig> {
   }
 
   private List<RevCommit> getLogs(org.eclipse.jgit.api.Git git, String ref, int maxCount)
-      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
+      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException,
+      AmbiguousObjectException, GitAPIException, IOException {
     List<RevCommit> ret = new ArrayList<>();
     Repository repository = git.getRepository();
     Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
@@ -145,7 +149,8 @@ public class Git extends Service<ServiceConfig> {
     return ret;
   }
 
-  public void sync(String location, String url) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+  public void sync(String location, String url)
+      throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     sync(location, url, "master");
   }
 
@@ -160,12 +165,14 @@ public class Git extends Service<ServiceConfig> {
     purgeTasks();
   }
 
-  public int pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException, RefNotFoundException,
+  public int pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException,
+      InvalidRemoteException, CanceledException, RefNotFoundException,
       NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, null);
   }
 
-  public int pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+  public int pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException,
+      DetachedHeadException, InvalidRemoteException, CanceledException,
       RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, branch);
   }
@@ -191,7 +198,8 @@ public class Git extends Service<ServiceConfig> {
     return git;
   }
 
-  public int pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
+  public int pull(String src, String branch) throws IOException, WrongRepositoryStateException,
+      InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
       CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
 
     if (src == null) {
@@ -233,7 +241,8 @@ public class Git extends Service<ServiceConfig> {
     // FIXME - Git.close() file handles
 
     if (status.getBehindCount() > 0) {
-      log.info("local ts {}, remote {} - {} pulling", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
+      log.info("local ts {}, remote {} - {} pulling", localCommit.getCommitTime(), remoteCommit.getCommitTime(),
+          remoteCommit.getFullMessage());
       PullCommand pullCmd = git.pull();
       pullCmd.setProgressMonitor(monitor);
       pullCmd.call();
@@ -286,7 +295,8 @@ public class Git extends Service<ServiceConfig> {
       rootFolder = System.getProperty("user.dir");
     }
 
-    File props = new File(rootFolder + File.separator + "target" + File.separator + "classes" + File.separator + "git.properties");
+    File props = new File(
+        rootFolder + File.separator + "target" + File.separator + "classes" + File.separator + "git.properties");
     props.delete();
 
   }
@@ -303,14 +313,14 @@ public class Git extends Service<ServiceConfig> {
       git.clone("./depthai", "https://github.com/luxonis/depthai.git", "main", "refs/tags/v1.13.1-sdk", true);
       log.info("here");
 
-
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
 
   // max complexity clone and checkout
-  public void clone(String location, String url, String branch, String checkout, boolean recursive) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+  public void clone(String location, String url, String branch, String checkout, boolean recursive)
+      throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 
     File repoLocation = new File(location);
     org.eclipse.jgit.api.Git git = null;
@@ -321,7 +331,8 @@ public class Git extends Service<ServiceConfig> {
     if (!repoLocation.exists()) {
       // clone
       log.info("cloning {} {} checking out {} into {}", url, branch, checkout, location);
-      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url).setDirectory(repoLocation).setBranch(branch).call();
+      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url)
+          .setDirectory(repoLocation).setBranch(branch).call();
 
     } else {
       // Open an existing repository
@@ -332,7 +343,7 @@ public class Git extends Service<ServiceConfig> {
     }
 
     repo = git.getRepository();
-    
+
     // git pull
 
     PullCommand pullCmd = git.pull()
@@ -343,25 +354,24 @@ public class Git extends Service<ServiceConfig> {
 
     // Perform the pull operation
     pullCmd.call();
-    
-    
+
     // recursive
     if (recursive) {
-      
+
       // Recursively fetch and checkout submodules if they exist
       SubmoduleWalk submoduleWalk = SubmoduleWalk.forIndex(repo);
       while (submoduleWalk.next()) {
-          String submodulePath = submoduleWalk.getPath();
-          org.eclipse.jgit.api.Git submoduleGit = org.eclipse.jgit.api.Git.open(new File(location, submodulePath));
-          submoduleGit.fetch()
-                  .setRemote("origin")
-                  .call();
-          submoduleGit.checkout()
-                  .setName(branch) // Replace with the desired branch name
-                  .call();
+        String submodulePath = submoduleWalk.getPath();
+        org.eclipse.jgit.api.Git submoduleGit = org.eclipse.jgit.api.Git.open(new File(location, submodulePath));
+        submoduleGit.fetch()
+            .setRemote("origin")
+            .call();
+        submoduleGit.checkout()
+            .setName(branch) // Replace with the desired branch name
+            .call();
       }
-      
-    }    
+
+    }
 
     if (checkout != null) {
       // checkout
@@ -375,5 +385,5 @@ public class Git extends Service<ServiceConfig> {
     repos.put(location, new RepoData(location, url, checkout, git));
 
   }
-  
+
 }

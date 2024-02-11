@@ -14,7 +14,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.OscConfig;
 import org.slf4j.Logger;
 
 import com.illposed.osc.OSCListener;
@@ -22,7 +22,7 @@ import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 
-public class Osc extends Service<ServiceConfig> implements OSCListener {
+public class Osc extends Service<OscConfig> implements OSCListener {
 
   private static final long serialVersionUID = 1L;
 

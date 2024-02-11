@@ -4,7 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.IBusConfig;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
  * @author aanon4
  *
  */
-public class IBus extends Service<ServiceConfig> implements SerialDataListener {
+public class IBus extends Service<IBusConfig> implements SerialDataListener {
 
   private static final long serialVersionUID = 1L;
 

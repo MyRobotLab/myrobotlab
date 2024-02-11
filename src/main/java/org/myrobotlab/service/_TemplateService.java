@@ -4,10 +4,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config._TemplateServiceConfig;
 import org.slf4j.Logger;
 
-public class _TemplateService extends Service<ServiceConfig> {
+public class _TemplateService extends Service<_TemplateServiceConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
