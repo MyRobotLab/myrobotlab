@@ -45,13 +45,13 @@ public class DruppNeck extends Service<DruppNeckConfig> {
    * down servos.
    * 
    * @param roll
-   *              degrees
+   *          degrees
    * @param pitch
-   *              degrees
+   *          degrees
    * @param yaw
-   *              degrees
+   *          degrees
    * @throws Exception
-   *                   boom
+   *           boom
    * 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
@@ -74,14 +74,12 @@ public class DruppNeck extends Service<DruppNeckConfig> {
     // but for the drupp neck, if you've installed it correctly,
     // all servos can go from 0 to 180...
     if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
-      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw,
-          MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
+      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
           MathUtils.round(downDeg, 3));
       // Skipping this movement as it's likely unstable!
       return;
     }
-    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3),
-        MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
+    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
     // we should probably track the last moved to position.
     up.moveTo(upDeg);
     middle.moveTo(middleDeg);
@@ -181,7 +179,8 @@ public class DruppNeck extends Service<DruppNeckConfig> {
     // down.setPin(4);
     // // String port = "COM4";
     // String port = "VIRTUAL_COM_PORT";
-    // VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
+    // VirtualArduino va1 = (VirtualArduino) Runtime.start("va1",
+    // "VirtualArduino");
     // va1.connect(port);
     // Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     // ard.connect(port);
