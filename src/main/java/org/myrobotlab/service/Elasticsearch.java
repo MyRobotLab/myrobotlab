@@ -6,13 +6,14 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ElasticsearchConfig;
 import org.slf4j.Logger;
 
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
-public class Elasticsearch extends Service<ServiceConfig> {
+public class Elasticsearch extends Service<ElasticsearchConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -35,7 +36,8 @@ public class Elasticsearch extends Service<ServiceConfig> {
     // mkdirs Elasticsearch/elastic/<- mabye not name as its a server port
     // (single instance)
 
-    elastic = EmbeddedElastic.builder().withElasticVersion(version).withSetting(PopularProperties.TRANSPORT_TCP_PORT, 9350)
+    elastic = EmbeddedElastic.builder().withElasticVersion(version)
+        .withSetting(PopularProperties.TRANSPORT_TCP_PORT, 9350)
         .withSetting(PopularProperties.CLUSTER_NAME, "mrl_cluster")
         // .withPlugin("analysis-stempel")
         .withIndex("index")

@@ -12,7 +12,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.AdafruitIna219Config;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.VoltageSensorControl;
@@ -26,7 +26,8 @@ import org.slf4j.Logger;
  * 
  *         References : https://www.adafruit.com/products/904
  */
-public class AdafruitIna219 extends Service<ServiceConfig> implements I2CControl, VoltageSensorControl {
+public class AdafruitIna219 extends Service<AdafruitIna219Config> implements I2CControl,VoltageSensorControl
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -36,7 +37,8 @@ public class AdafruitIna219 extends Service<ServiceConfig> implements I2CControl
   public static final byte INA219_SHUNTVOLTAGE = 0x01;
   public static final byte INA219_BUSVOLTAGE = 0x02;
 
-  public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47", "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
+  public List<String> deviceAddressList = Arrays.asList("0x40", "0x41", "0x42", "0x43", "0x44", "0x45", "0x46", "0x47",
+      "0x48", "0x49", "0x4A", "0x4B", "0x4C", "0x4D", "0x4E",
       "0x4F");
 
   public String deviceAddress = "0x40";
@@ -171,7 +173,8 @@ public class AdafruitIna219 extends Service<ServiceConfig> implements I2CControl
   public double getShuntVoltage() {
     byte[] writebuffer = { INA219_SHUNTVOLTAGE };
     byte[] readbuffer = { 0x0, 0x0 };
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer,
+        writebuffer.length);
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // log.info(String.format("getShuntVoltage x%02X x%02X", readbuffer[0],
     // readbuffer[1]));
@@ -189,14 +192,16 @@ public class AdafruitIna219 extends Service<ServiceConfig> implements I2CControl
   public double getBusVoltage() {
     byte[] writebuffer = { INA219_BUSVOLTAGE };
     byte[] readbuffer = { 0x0, 0x0 };
-    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer,
+        writebuffer.length);
     controller.i2cRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), readbuffer, readbuffer.length);
     // A bit tricky conversion. The LSB needs to be right shifted 3 bits, so
     // the MSB needs to be left shifted (8-3) = 5 bits
     // And bytes are signed in Java so first a mask of 0xff needs to be
     // applied to the MSB to remove the sign
     int rawBusVoltage = ((readbuffer[0] & 0xff) << 8 | readbuffer[1] & 0xff) >> 3;
-    log.debug("Busvoltage high byte = {}, low byte = {}, rawBusVoltagee = {}", readbuffer[0], readbuffer[1], rawBusVoltage);
+    log.debug("Busvoltage high byte = {}, low byte = {}, rawBusVoltagee = {}", readbuffer[0], readbuffer[1],
+        rawBusVoltage);
     // LSB = 4mV, so multiply wit 4 to get the volatage in mV
     busVoltage = rawBusVoltage * 4;
     return busVoltage;

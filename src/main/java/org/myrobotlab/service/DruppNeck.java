@@ -4,7 +4,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.DruppNeckConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
@@ -18,7 +18,8 @@ import org.myrobotlab.service.interfaces.ServoControl;
  * @author kwatters
  *
  */
-public class DruppNeck extends Service<ServiceConfig> {
+public class DruppNeck extends Service<DruppNeckConfig>
+{
 
   private static final long serialVersionUID = 1L;
   // 3 servos for the drupp neck
@@ -43,13 +44,13 @@ public class DruppNeck extends Service<ServiceConfig> {
    * down servos.
    * 
    * @param roll
-   *          degrees
+   *              degrees
    * @param pitch
-   *          degrees
+   *              degrees
    * @param yaw
-   *          degrees
+   *              degrees
    * @throws Exception
-   *           boom
+   *                   boom
    * 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
@@ -72,12 +73,14 @@ public class DruppNeck extends Service<ServiceConfig> {
     // but for the drupp neck, if you've installed it correctly,
     // all servos can go from 0 to 180...
     if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
-      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
+      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw,
+          MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
           MathUtils.round(downDeg, 3));
       // Skipping this movement as it's likely unstable!
       return;
     }
-    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
+    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3),
+        MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
     // we should probably track the last moved to position.
     up.moveTo(upDeg);
     middle.moveTo(middleDeg);

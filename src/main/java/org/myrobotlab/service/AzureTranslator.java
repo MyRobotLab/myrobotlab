@@ -9,7 +9,6 @@
 
 package org.myrobotlab.service;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +17,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.AzureTranslatorConfig;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.Translator;
@@ -32,7 +31,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AzureTranslator extends Service<ServiceConfig> implements Translator, TextListener, TextPublisher {
+public class AzureTranslator extends Service<AzureTranslatorConfig> implements Translator,TextListener,TextPublisher
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -105,10 +105,14 @@ public class AzureTranslator extends Service<ServiceConfig> implements Translato
   }
 
   public String[] getLanguages() {
-    String[] languages = { "af", "sq", "am", "ar", "hy", "as", "az", "bn", "ba", "eu", "bs", "bg", "yue", "ca", "lzh", "zh-Hans", "zh-Hant", "hr", "cs", "da", "prs", "dv", "nl",
-        "en", "et", "fj", "fil", "fi", "fr", "fr-ca", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "mww", "hu", "is", "id", "ikt", "iu", "iu-Latn", "ga", "it", "ja", "kn", "kk",
-        "km", "tlh-Latn", "tlh-Piqd", "ko", "ku", "kmr", "ky", "lo", "lv", "lt", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn-Cyrl", "mn-Mong", "my", "ne", "nb", "or", "ps", "fa",
-        "pl", "pt", "pt-pt", "pa", "otq", "ro", "ru", "sm", "sr-Cyrl", "sr-Latn", "sk", "sl", "so", "es", "sw", "sv", "ty", "ta", "tt", "te", "th", "bo", "ti", "to", "tr", "tk",
+    String[] languages = { "af", "sq", "am", "ar", "hy", "as", "az", "bn", "ba", "eu", "bs", "bg", "yue", "ca", "lzh",
+        "zh-Hans", "zh-Hant", "hr", "cs", "da", "prs", "dv", "nl",
+        "en", "et", "fj", "fil", "fi", "fr", "fr-ca", "gl", "ka", "de", "el", "gu", "ht", "he", "hi", "mww", "hu", "is",
+        "id", "ikt", "iu", "iu-Latn", "ga", "it", "ja", "kn", "kk",
+        "km", "tlh-Latn", "tlh-Piqd", "ko", "ku", "kmr", "ky", "lo", "lv", "lt", "mk", "mg", "ms", "ml", "mt", "mi",
+        "mr", "mn-Cyrl", "mn-Mong", "my", "ne", "nb", "or", "ps", "fa",
+        "pl", "pt", "pt-pt", "pa", "otq", "ro", "ru", "sm", "sr-Cyrl", "sr-Latn", "sk", "sl", "so", "es", "sw", "sv",
+        "ty", "ta", "tt", "te", "th", "bo", "ti", "to", "tr", "tk",
         "uk", "hsb", "ur", "ug", "uz", "vi", "cy", "yua", "zu" };
     return languages;
   }
@@ -156,7 +160,8 @@ public class AzureTranslator extends Service<ServiceConfig> implements Translato
   public String translate(String toTranslate, String from, String to) {
     StringBuilder sb = new StringBuilder();
     try {
-      Builder builder = new HttpUrl.Builder().scheme("https").host("api.cognitive.microsofttranslator.com").addPathSegment("/translate").addQueryParameter("api-version", "3.0")
+      Builder builder = new HttpUrl.Builder().scheme("https").host("api.cognitive.microsofttranslator.com")
+          .addPathSegment("/translate").addQueryParameter("api-version", "3.0")
           .addQueryParameter("to", to);
 
       if (!detect) {
@@ -166,7 +171,8 @@ public class AzureTranslator extends Service<ServiceConfig> implements Translato
       toTranslate = toTranslate.replace("\"", "");
       MediaType mediaType = MediaType.parse("application/json");
       RequestBody body = RequestBody.create(mediaType, "[{\"Text\": \" " + toTranslate + " \"}]");
-      Request request = new Request.Builder().url(url).post(body).addHeader("Ocp-Apim-Subscription-Key", getKey()).addHeader("Ocp-Apim-Subscription-Region", location)
+      Request request = new Request.Builder().url(url).post(body).addHeader("Ocp-Apim-Subscription-Key", getKey())
+          .addHeader("Ocp-Apim-Subscription-Region", location)
           .addHeader("Content-type", "application/json").build();
       Response response = client.newCall(request).execute();
       String resp = response.body().string();

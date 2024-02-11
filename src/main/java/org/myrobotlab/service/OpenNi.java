@@ -19,7 +19,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.OpenNiConfig;
 import org.myrobotlab.service.interfaces.VideoSink;
 import org.slf4j.Logger;
 
@@ -49,7 +49,7 @@ import SimpleOpenNI.SimpleOpenNIConstants;
  * 
  * 
  */
-public class OpenNi extends Service<ServiceConfig> // implements
+public class OpenNi extends Service<OpenNiConfig> // implements
 // UserTracker.NewFrameListener,
 // HandTracker.NewFrameListener
 {
@@ -220,27 +220,39 @@ public class OpenNi extends Service<ServiceConfig> // implements
   public void addRubySketchUpFrame(Skeleton skeleton, boolean singleFrame) {
     try {
       StringBuffer sb = new StringBuffer();
-      sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+      sb.append(String
+          .format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
       sb.append(String.format("head = [%f,%f,%f]\n", skeleton.head.x, skeleton.head.z, skeleton.head.y));
       sb.append(String.format("neck = [%f,%f,%f]\n", skeleton.neck.x, skeleton.neck.z, skeleton.neck.y));
 
-      sb.append(String.format("leftShoulder = [%f,%f,%f]\n", skeleton.leftShoulder.x, skeleton.leftShoulder.z, skeleton.leftShoulder.y));
-      sb.append(String.format("leftElbow = [%f,%f,%f]\n", skeleton.leftElbow.x, skeleton.leftElbow.z, skeleton.leftElbow.y));
-      sb.append(String.format("leftHand = [%f,%f,%f]\n", skeleton.leftHand.x, skeleton.leftHand.z, skeleton.leftHand.y));
+      sb.append(String.format("leftShoulder = [%f,%f,%f]\n", skeleton.leftShoulder.x, skeleton.leftShoulder.z,
+          skeleton.leftShoulder.y));
+      sb.append(
+          String.format("leftElbow = [%f,%f,%f]\n", skeleton.leftElbow.x, skeleton.leftElbow.z, skeleton.leftElbow.y));
+      sb.append(
+          String.format("leftHand = [%f,%f,%f]\n", skeleton.leftHand.x, skeleton.leftHand.z, skeleton.leftHand.y));
 
-      sb.append(String.format("rightShoulder = [%f,%f,%f]\n", skeleton.rightShoulder.x, skeleton.rightShoulder.z, skeleton.rightShoulder.y));
-      sb.append(String.format("rightElbow = [%f,%f,%f]\n", skeleton.rightElbow.x, skeleton.rightElbow.z, skeleton.rightElbow.y));
-      sb.append(String.format("rightHand = [%f,%f,%f]\n", skeleton.rightHand.x, skeleton.rightHand.z, skeleton.rightHand.y));
+      sb.append(String.format("rightShoulder = [%f,%f,%f]\n", skeleton.rightShoulder.x, skeleton.rightShoulder.z,
+          skeleton.rightShoulder.y));
+      sb.append(String.format("rightElbow = [%f,%f,%f]\n", skeleton.rightElbow.x, skeleton.rightElbow.z,
+          skeleton.rightElbow.y));
+      sb.append(
+          String.format("rightHand = [%f,%f,%f]\n", skeleton.rightHand.x, skeleton.rightHand.z, skeleton.rightHand.y));
 
       sb.append(String.format("torso = [%f,%f,%f]\n", skeleton.torso.x, skeleton.torso.z, skeleton.torso.y));
 
       sb.append(String.format("leftHip = [%f,%f,%f]\n", skeleton.leftHip.x, skeleton.leftHip.z, skeleton.leftHip.y));
-      sb.append(String.format("leftKnee = [%f,%f,%f]\n", skeleton.leftKnee.x, skeleton.leftKnee.z, skeleton.leftKnee.y));
-      sb.append(String.format("leftFoot = [%f,%f,%f]\n", skeleton.leftFoot.x, skeleton.leftFoot.z, skeleton.leftFoot.y));
+      sb.append(
+          String.format("leftKnee = [%f,%f,%f]\n", skeleton.leftKnee.x, skeleton.leftKnee.z, skeleton.leftKnee.y));
+      sb.append(
+          String.format("leftFoot = [%f,%f,%f]\n", skeleton.leftFoot.x, skeleton.leftFoot.z, skeleton.leftFoot.y));
 
-      sb.append(String.format("rightHip = [%f,%f,%f]\n", skeleton.rightHip.x, skeleton.rightHip.z, skeleton.rightHip.y));
-      sb.append(String.format("rightKnee = [%f,%f,%f]\n", skeleton.rightKnee.x, skeleton.rightKnee.z, skeleton.rightKnee.y));
-      sb.append(String.format("rightFoot = [%f,%f,%f]\n", skeleton.rightFoot.x, skeleton.rightFoot.z, skeleton.rightFoot.y));
+      sb.append(
+          String.format("rightHip = [%f,%f,%f]\n", skeleton.rightHip.x, skeleton.rightHip.z, skeleton.rightHip.y));
+      sb.append(
+          String.format("rightKnee = [%f,%f,%f]\n", skeleton.rightKnee.x, skeleton.rightKnee.z, skeleton.rightKnee.y));
+      sb.append(
+          String.format("rightFoot = [%f,%f,%f]\n", skeleton.rightFoot.x, skeleton.rightFoot.z, skeleton.rightFoot.y));
 
       sb.append("model = Sketchup.active_model\n");
       sb.append("model.entities.add_line(head, neck)\n");
@@ -264,7 +276,8 @@ public class OpenNi extends Service<ServiceConfig> // implements
       sb.append("model.entities.add_line(rightHip, rightKnee)\n");
       sb.append("model.entities.add_line(rightKnee, rightFoot)\n");
 
-      sb.append(String.format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
+      sb.append(String
+          .format(String.format("\n#-----------------------frame %d begin----------------------\n", frameNumber)));
 
       if (rubySketchUpFile == null) {
         String filename = String.format("skeleton.%d.rb", skeleton.frameNumber);
@@ -582,7 +595,8 @@ public class OpenNi extends Service<ServiceConfig> // implements
       x2 = Math.round(joint2Pos2d.x);
       y2 = Math.round(joint2Pos2d.y);
 
-      g2d.drawString(String.format("lsh xy %d yz %d", Math.round(skeleton.leftShoulder.getAngleXY()), Math.round(skeleton.leftShoulder.getAngleYZ())), x2, y2);
+      g2d.drawString(String.format("lsh xy %d yz %d", Math.round(skeleton.leftShoulder.getAngleXY()),
+          Math.round(skeleton.leftShoulder.getAngleYZ())), x2, y2);
       g2d.drawLine(x1, y1, x2, y2);
 
       line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);
@@ -594,7 +608,8 @@ public class OpenNi extends Service<ServiceConfig> // implements
       x2 = Math.round(joint2Pos2d.x);
       y2 = Math.round(joint2Pos2d.y);
 
-      g2d.drawString(String.format("rsh xy %d yz %d", Math.round(skeleton.rightShoulder.getAngleXY()), Math.round(skeleton.rightShoulder.getAngleYZ())), x2, y2);
+      g2d.drawString(String.format("rsh xy %d yz %d", Math.round(skeleton.rightShoulder.getAngleXY()),
+          Math.round(skeleton.rightShoulder.getAngleYZ())), x2, y2);
       g2d.drawLine(x1, y1, x2, y2);
 
       line(joint1Pos2d.x, joint1Pos2d.y, joint2Pos2d.x, joint2Pos2d.y);

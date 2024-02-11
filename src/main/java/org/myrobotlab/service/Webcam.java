@@ -12,7 +12,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebcamConfig;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -21,7 +21,7 @@ import com.github.sarxos.webcam.WebcamListener;
 import com.github.sarxos.webcam.WebcamStreamer;
 import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
 
-public class Webcam extends Service<ServiceConfig> implements WebcamListener {
+public class Webcam extends Service<WebcamConfig> implements WebcamListener {
 
   protected class VideoProcessor implements Runnable {
 

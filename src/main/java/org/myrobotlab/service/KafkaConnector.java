@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.KafkaConnectorConfig;
 
 /**
  * A kafka connector that can subscribe to a string/string kafka stopic and
@@ -20,8 +20,10 @@ import org.myrobotlab.service.config.ServiceConfig;
  * @author kwatters
  *
  */
-public class KafkaConnector extends Service<ServiceConfig> {
+public class KafkaConnector extends Service<KafkaConnectorConfig>
+{
 
+  private static final long serialVersionUID = 1L;
   public String bootstrapServers = "localhost:9092";
   public String groupId = "test";
   public String keyDeserializer = "org.apache.kafka.common.serialization.StringDeserializer";

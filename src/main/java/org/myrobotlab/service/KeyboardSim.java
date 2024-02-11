@@ -8,14 +8,15 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.KeyboardSimConfig;
 import org.slf4j.Logger;
 
 /**
  * @author MaVo (MyRobotLab) / LunDev (GitHub)
  */
 
-public class KeyboardSim extends Service<ServiceConfig> {
+public class KeyboardSim extends Service<KeyboardSimConfig>
+{
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(KeyboardSim.class);
 
@@ -38,9 +39,9 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * simulate pressing and releasing a keyboard key after the desired duration
    * 
    * @param keycode
-   *          keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
+   *                 keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
    * @param duration
-   *          key press duration in milliseconds
+   *                 key press duration in milliseconds
    */
   public void pressAndRelease(int keycode, int duration) {
     press(keycode);
@@ -52,7 +53,7 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * simulate pressing a keyboard key (does NOT release the key!)
    * 
    * @param keycode
-   *          keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
+   *                keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
    */
   public void press(int keycode) {
     robot.keyPress(keycode);
@@ -62,7 +63,7 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * simulate releasing a keyboard key (does NOT press the key!)
    * 
    * @param keycode
-   *          keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
+   *                keycode of key (use KeyEvent.VK_XXX, where XXX is your key)
    */
   public void release(int keycode) {
     robot.keyRelease(keycode);
@@ -73,10 +74,11 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * duration The keys are released in reverse order they were pressed.
    * 
    * @param keycodes
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
-   *          key)
+   *                 array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is
+   *                 your
+   *                 key)
    * @param duration
-   *          key press duration in milliseconds
+   *                 key press duration in milliseconds
    */
   public void pressAndRelease(int[] keycodes, int duration) {
     press(keycodes);
@@ -88,8 +90,9 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * simulate pressing several keyboard keys (does NOT release the keys!)
    * 
    * @param keycodes
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
-   *          key)
+   *                 array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is
+   *                 your
+   *                 key)
    */
   public void press(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -101,8 +104,9 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * simulate releasing several keyboard keys (does NOT press the keys!)
    * 
    * @param keycodes
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
-   *          key)
+   *                 array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is
+   *                 your
+   *                 key)
    */
   public void release(int[] keycodes) {
     for (int keycode : keycodes) {
@@ -115,8 +119,9 @@ public class KeyboardSim extends Service<ServiceConfig> {
    * Releases keys in reversed order they were specified.
    * 
    * @param keycodes
-   *          array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is your
-   *          key)
+   *                 array of keycodes of keys (use KeyEvent.VK_XXX, where XXX is
+   *                 your
+   *                 key)
    */
   public void releaseReversed(int[] keycodes) {
     for (int i = keycodes.length - 1; i >= 0; i--) {

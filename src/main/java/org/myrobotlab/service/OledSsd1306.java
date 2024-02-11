@@ -19,7 +19,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.OledSsd1306Config;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ import org.slf4j.Logger;
  *         pin and VCC
  * 
  */
-public class OledSsd1306 extends Service<ServiceConfig> implements I2CControl {
+public class OledSsd1306 extends Service<OledSsd1306Config> implements I2CControl {
 
   private static final long serialVersionUID = 1L;
 
