@@ -359,10 +359,70 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
   public void release() {
     disable();
   }
+  
+  @Override
+  public void stopService() {
+
+    if (jaw != null) {
+      ((Service)jaw).stopService();
+    }
+    if (eyeX != null) {
+      ((Service)eyeX).stopService();
+    }
+    if (eyeY != null) {
+      ((Service)eyeY).stopService();
+    }
+    if (neck != null) {
+      ((Service)neck).stopService();
+    }
+    if (rothead != null) {
+      ((Service)rothead).stopService();
+    }
+    if (rollNeck != null) {
+      ((Service)rollNeck).stopService();
+    }
+    if (eyelidLeft != null) {
+      ((Service)eyelidLeft).stopService();
+    }
+    if (eyelidRight != null) {
+      ((Service)eyelidRight).stopService();
+    }
+    
+    super.stopService();
+  }
+  
+  
+  
 
   @Override
   public void releaseService() {
     disable();
+    
+    if (jaw != null) {
+      ((Service)jaw).releaseService();
+    }
+    if (eyeX != null) {
+      ((Service)eyeX).releaseService();
+    }
+    if (eyeY != null) {
+      ((Service)eyeY).releaseService();
+    }
+    if (neck != null) {
+      ((Service)neck).releaseService();
+    }
+    if (rothead != null) {
+      ((Service)rothead).releaseService();
+    }
+    if (rollNeck != null) {
+      ((Service)rollNeck).releaseService();
+    }
+    if (eyelidLeft != null) {
+      ((Service)eyelidLeft).releaseService();
+    }
+    if (eyelidRight != null) {
+      ((Service)eyelidRight).releaseService();
+    }
+    
     super.releaseService();
   }
 

@@ -10,7 +10,9 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.config.InMoov2ArmConfig;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -127,10 +129,18 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   @Override
   public void stopService() {
     super.stopService();
-    releasePeer("bicep");
-    releasePeer("rotate");
-    releasePeer("shoulder");
-    releasePeer("omoplate");
+    if (bicep != null) {
+      ((Service)bicep).stopService();
+    }
+    if (rotate != null) {
+      ((Service)rotate).stopService();
+    }
+    if (shoulder != null) {
+      ((Service)shoulder).stopService();
+    }
+    if (omoplate != null) {
+      ((Service)omoplate).stopService();
+    }
   }
 
   @Override
@@ -296,6 +306,20 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   public void releaseService() {
     try {
       disable();
+      
+      if (bicep != null) {
+        ((Service)bicep).releaseService();
+      }
+      if (rotate != null) {
+        ((Service)rotate).releaseService();
+      }
+      if (shoulder != null) {
+        ((Service)shoulder).releaseService();
+      }
+      if (omoplate != null) {
+        ((Service)omoplate).releaseService();
+      }
+      
       super.releaseService();
     } catch (Exception e) {
       error(e);
@@ -467,6 +491,28 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
       shoulder.waitTargetPos();
     if (omoplate != null)
       omoplate.waitTargetPos();
+  }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      Runtime.main(new String[] { "--log-level", "info", "-s", "inmoov2arm", "InMoov2Arm" });
+      // Runtime.main(new String[] {});
+      // Runtime.main(new String[] { "--install" });
+      InMoov2Arm arm = (InMoov2Arm)Runtime.start("inmoov2arm", "InMoov2Arm");
+      arm.releaseService();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      log.info("leaving main");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }
