@@ -90,7 +90,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
 
     return arm;
   }
-  
+
   @Deprecated /* use onMove(map) */
   public void onMoveArm(HashMap<String, Double> map) {
     onMove(map);
@@ -99,7 +99,6 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   public void onMove(Map<String, Double> map) {
     moveTo(map.get("bicep"), map.get("rotate"), map.get("shoulder"), map.get("omoplate"));
   }
-
 
   /**
    * peer services FIXME - framework should always - startPeers() unless
@@ -124,23 +123,6 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
     rotate = (ServoControl) startPeer("rotate");
     shoulder = (ServoControl) startPeer("shoulder");
     omoplate = (ServoControl) startPeer("omoplate");
-  }
-  
-  @Override
-  public void stopService() {
-    super.stopService();
-    if (bicep != null) {
-      ((Service)bicep).stopService();
-    }
-    if (rotate != null) {
-      ((Service)rotate).stopService();
-    }
-    if (shoulder != null) {
-      ((Service)shoulder).stopService();
-    }
-    if (omoplate != null) {
-      ((Service)omoplate).stopService();
-    }
   }
 
   @Override
@@ -210,8 +192,8 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
 
   public String getScript(String service) {
     String side = getName().contains("left") ? "left" : "right";
-    return String.format("%s.moveArm(\"%s\",%.0f,%.0f,%.0f,%.0f)\n", service, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(),
-        shoulder.getCurrentInputPos(), omoplate.getCurrentInputPos());
+    return String.format("%s.moveArm(\"%s\",%.0f,%.0f,%.0f,%.0f)\n", service, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(), shoulder.getCurrentInputPos(),
+        omoplate.getCurrentInputPos());
   }
 
   public ServoControl getShoulder() {
@@ -298,31 +280,6 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
           }
         }
       }
-    }
-  }
-
-  // FIXME - framework should auto-release - unless configured not to
-  @Override
-  public void releaseService() {
-    try {
-      disable();
-      
-      if (bicep != null) {
-        ((Service)bicep).releaseService();
-      }
-      if (rotate != null) {
-        ((Service)rotate).releaseService();
-      }
-      if (shoulder != null) {
-        ((Service)shoulder).releaseService();
-      }
-      if (omoplate != null) {
-        ((Service)omoplate).releaseService();
-      }
-      
-      super.releaseService();
-    } catch (Exception e) {
-      error(e);
     }
   }
 
@@ -492,7 +449,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
     if (omoplate != null)
       omoplate.waitTargetPos();
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -501,7 +458,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
       Runtime.main(new String[] { "--log-level", "info", "-s", "inmoov2arm", "InMoov2Arm" });
       // Runtime.main(new String[] {});
       // Runtime.main(new String[] { "--install" });
-      InMoov2Arm arm = (InMoov2Arm)Runtime.start("inmoov2arm", "InMoov2Arm");
+      InMoov2Arm arm = (InMoov2Arm) Runtime.start("inmoov2arm", "InMoov2Arm");
       arm.releaseService();
 
       boolean done = true;
