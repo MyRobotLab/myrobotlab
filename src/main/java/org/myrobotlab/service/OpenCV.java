@@ -461,6 +461,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     singleFrame = false;
     lastFrame = null;
     blockingData.clear();
+    removeFilters();
   }
 
   public static IplImage cropImage(IplImage img, CvRect rect) {
@@ -2099,6 +2100,11 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
 
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      cv.capture();
+      
+      cv.addFilter(new OpenCVFilterYolo("yolo"));
+      sleep(1000);
+      cv.removeFilters();
 
       OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
       cv.addFilter(fr);
