@@ -18,22 +18,23 @@ import org.myrobotlab.service.interfaces.ServoControl;
  * @author kwatters
  *
  */
-public class DruppNeck extends Service<DruppNeckConfig>
-{
+public class DruppNeck extends Service<DruppNeckConfig> {
 
   private static final long serialVersionUID = 1L;
   // 3 servos for the drupp neck
-  public transient ServoControl up;
-  public transient ServoControl middle;
-  public transient ServoControl down;
-
-  // this is an offset angle that is added to the solution from the IK solver
-  public double upOffset = 90;
-  public double middleOffset = 120 + 90;
-  public double downOffset = -120 + 90;
+  protected transient ServoControl up;
+  protected transient ServoControl middle;
+  protected transient ServoControl down;
 
   public DruppNeck(String n, String id) {
     super(n, id);
+  }
+
+  public void startService() {
+    super.startService();
+    up = (ServoControl) startPeer("up");
+    middle = (ServoControl) startPeer("middle");
+    down = (ServoControl) startPeer("down");
   }
 
   private DruppIKSolver solver = new DruppIKSolver();
@@ -44,13 +45,13 @@ public class DruppNeck extends Service<DruppNeckConfig>
    * down servos.
    * 
    * @param roll
-   *              degrees
+   *          degrees
    * @param pitch
-   *              degrees
+   *          degrees
    * @param yaw
-   *              degrees
+   *          degrees
    * @throws Exception
-   *                   boom
+   *           boom
    * 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
@@ -62,9 +63,9 @@ public class DruppNeck extends Service<DruppNeckConfig>
     // TODO: if the solver fails, should we catch this exception ?
     double[] result = solver.solve(rollRad, pitchRad, yawRad);
     // convert to degrees
-    double upDeg = MathUtils.radToDeg(result[0]) + upOffset;
-    double middleDeg = MathUtils.radToDeg(result[1]) + middleOffset;
-    double downDeg = MathUtils.radToDeg(result[2]) + downOffset;
+    double upDeg = MathUtils.radToDeg(result[0]) + config.upOffset;
+    double middleDeg = MathUtils.radToDeg(result[1]) + config.middleOffset;
+    double downDeg = MathUtils.radToDeg(result[2]) + config.downOffset;
     // Ok, servos can only (typically) move from 0 to 180.. if any of the angles
     // are
     // negative... we can't move there.. let's log a warning
@@ -73,14 +74,12 @@ public class DruppNeck extends Service<DruppNeckConfig>
     // but for the drupp neck, if you've installed it correctly,
     // all servos can go from 0 to 180...
     if (upDeg < 0 || middleDeg < 0 || downDeg < 0 || upDeg > 180 || middleDeg > 180 || downDeg > 180) {
-      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw,
-          MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
+      log.warn("Target Position out of range! {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3),
           MathUtils.round(downDeg, 3));
       // Skipping this movement as it's likely unstable!
       return;
     }
-    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3),
-        MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
+    log.info("Input Roll {} Pitch {} Yaw {} -> Up {} Middle {} Down {}", roll, pitch, yaw, MathUtils.round(upDeg, 3), MathUtils.round(middleDeg, 3), MathUtils.round(downDeg, 3));
     // we should probably track the last moved to position.
     up.moveTo(upDeg);
     middle.moveTo(middleDeg);
@@ -144,53 +143,54 @@ public class DruppNeck extends Service<DruppNeckConfig>
   }
 
   public double getUpOffset() {
-    return upOffset;
+    return config.upOffset;
   }
 
   public void setUpOffset(double upOffset) {
-    this.upOffset = upOffset;
+    this.config.upOffset = upOffset;
   }
 
   public double getMiddleOffset() {
-    return middleOffset;
+    return config.middleOffset;
   }
 
   public void setMiddleOffset(double middleOffset) {
-    this.middleOffset = middleOffset;
+    this.config.middleOffset = middleOffset;
   }
 
   public double getDownOffset() {
-    return downOffset;
+    return config.downOffset;
   }
 
   public void setDownOffset(double downOffset) {
-    this.downOffset = downOffset;
+    this.config.downOffset = downOffset;
   }
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init("INFO");
     // To use the drup service you need to configure and attach the servos
     // then set them on the service.
-    Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
-    Servo up = (Servo) Runtime.start("up", "Servo");
-    Servo middle = (Servo) Runtime.start("middle", "Servo");
-    Servo down = (Servo) Runtime.start("down", "Servo");
-    up.setPin(6);
-    middle.setPin(5);
-    down.setPin(4);
-    // String port = "COM4";
-    String port = "VIRTUAL_COM_PORT";
-    VirtualArduino va1 = (VirtualArduino) Runtime.start("va1", "VirtualArduino");
-    va1.connect(port);
-    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
-    ard.connect(port);
-    ard.attach(up);
-    ard.attach(middle);
-    ard.attach(down);
+    // Runtime.start("python", "Python");
+    // Servo up = (Servo) Runtime.start("up", "Servo");
+    // Servo middle = (Servo) Runtime.start("middle", "Servo");
+    // Servo down = (Servo) Runtime.start("down", "Servo");
+    // up.setPin(6);
+    // middle.setPin(5);
+    // down.setPin(4);
+    // // String port = "COM4";
+    // String port = "VIRTUAL_COM_PORT";
+    // VirtualArduino va1 = (VirtualArduino) Runtime.start("va1",
+    // "VirtualArduino");
+    // va1.connect(port);
+    // Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
+    // ard.connect(port);
+    // ard.attach(up);
+    // ard.attach(middle);
+    // ard.attach(down);
     // Create the drupp service
     DruppNeck neck = (DruppNeck) Runtime.start("neck", "DruppNeck");
-    neck.setServos(up, middle, down);
+    Runtime.start("webgui", "WebGui");
+    // neck.setServos(up, middle, down);
     // neck.moveTo(0, 0, 0);
     // neck.moveTo(0, 0, -45);
     // neck.moveTo(0, 0, 45);

@@ -36,8 +36,7 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
 
   // helper function to add html tags
   public String addHtml(String text) {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    return c.preHtmlTag + text + c.postHtmlTag;
+    return config.preHtmlTag + text + config.postHtmlTag;
   }
 
   public void addTextListener(TextListener service) {
@@ -45,18 +44,15 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
   }
 
   public String getPostHtmlTag() {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    return c.postHtmlTag;
+    return config.postHtmlTag;
   }
 
   public String getPreHtmlTag() {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    return c.preHtmlTag;
+    return config.preHtmlTag;
   }
 
   public boolean isStripHtml() {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    return c.stripHtml;
+    return config.stripHtml;
   }
 
   @Override
@@ -67,20 +63,20 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
 
   @Override
   public String processText(String text) {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
+    
 
     invoke("publishRawText", text);
 
     String processedText = text;
 
-    if (c.stripHtml) {
+    if (config.stripHtml) {
       // clean text
       processedText = stripHtml(text);
     } else {
       processedText = addHtml(text);
     }
 
-    if (c.stripUrls) {
+    if (config.stripUrls) {
       processedText = stripUrls(processedText);
     }
 
@@ -104,8 +100,8 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
    *          - a string to append to the text
    */
   public void setPostHtmlTag(String postHtmlTag) {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    c.postHtmlTag = postHtmlTag;
+    
+    config.postHtmlTag = postHtmlTag;
   }
 
   /**
@@ -115,8 +111,7 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
    *          - a string to prepend to the text.
    */
   public void setPreHtmlTag(String preHtmlTag) {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    c.preHtmlTag = preHtmlTag;
+    config.preHtmlTag = preHtmlTag;
   }
 
   /**
@@ -127,8 +122,7 @@ public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListene
    *          - if true, all content between &lt;and &gt; will be removed.
    */
   public void setStripHtml(boolean stripHtml) {
-    HtmlFilterConfig c = (HtmlFilterConfig) config;
-    c.stripHtml = stripHtml;
+    config.stripHtml = stripHtml;
   }
 
   // helper function to strip html tags.
