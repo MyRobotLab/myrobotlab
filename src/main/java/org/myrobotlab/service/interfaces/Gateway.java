@@ -83,7 +83,7 @@ public interface Gateway extends NameProvider {
             "describe",
             new Object[] {
                 FILL_UUID_MAGIC_VAL,
-                new DescribeQuery(Platform.getLocalInstance().getId(), connId)
+                new DescribeQuery(Runtime.getInstance().getId(), connId)
             }
             );
   }
