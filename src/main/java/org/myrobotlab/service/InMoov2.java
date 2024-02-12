@@ -1877,7 +1877,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     broadcastState();
 
     speakBlocking(get("STARTINGMOUTH"));
-    if (Platform.isVirtual()) {
+    if (isVirtual()) {
       speakBlocking(get("STARTINGVIRTUALHARD"));
     }
     speakBlocking(get("WHATISTHISLANGUAGE"));
