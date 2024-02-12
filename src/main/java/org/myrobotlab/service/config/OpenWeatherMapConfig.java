@@ -3,7 +3,7 @@ package org.myrobotlab.service.config;
 import org.myrobotlab.framework.Peer;
 import org.myrobotlab.framework.Plan;
 
-public class OpenWeatherMapConfig extends ServiceConfig {
+public class OpenWeatherMapConfig extends HttpClientConfig {
 
   public String currentUnits;
   public String currentTown;

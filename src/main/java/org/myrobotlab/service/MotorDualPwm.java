@@ -96,7 +96,7 @@ public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
       LoggingFactory.init(Level.INFO);
       String arduinoPort = "COM5";
 
-      Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
       Runtime.startConfig("dev");
       Runtime.start("webgui", "WebGui");
       MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");

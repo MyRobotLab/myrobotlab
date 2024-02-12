@@ -1,5 +1,5 @@
 package org.myrobotlab.service.config;
 
-public class YahooFinanceStockQuoteConfig extends ServiceConfig {
+public class YahooFinanceStockQuoteConfig extends HttpClientConfig {
 
 }

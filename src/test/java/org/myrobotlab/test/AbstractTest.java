@@ -1,5 +1,7 @@
 package org.myrobotlab.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,11 +15,18 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 public class AbstractTest {
 
@@ -44,6 +53,34 @@ public class AbstractTest {
   static public String simpleName;
 
   private static boolean lineFeedFooter = true;
+  
+  @Rule
+  public TestWatcher watchman = new TestWatcher() {
+      @Override
+      protected void starting(Description description) {
+          System.out.println("Starting: " + description.getClassName() + "." + description.getMethodName());
+      }
+
+      @Override
+      protected void succeeded(Description description) {
+         // System.out.println("Succeeded: " + description.getMethodName());
+      }
+
+      @Override
+      protected void failed(Throwable e, Description description) {
+          System.out.println("Failed: " + description.getMethodName());
+      }
+
+      @Override
+      protected void skipped(org.junit.AssumptionViolatedException e, Description description) {
+          System.out.println("Skipped: " + description.getMethodName());
+      }
+
+      @Override
+      protected void finished(Description description) {
+          System.out.println("Finished: " + description.getMethodName());
+      }
+  };
 
   public String getSimpleName() {
     return simpleName;
@@ -83,8 +120,23 @@ public class AbstractTest {
 
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
+    
+    // setup runtime resource = src/main/resources/resource
+    File runtimeYml = new File("data/config/default/runtime.yml");
+//    if (!runtimeYml.exists()) {
+      runtimeYml.getParentFile().mkdirs();
+      RuntimeConfig rc = new RuntimeConfig();
+      rc.resource = "src/main/resources/resource";
+      String yml = CodecUtils.toYaml(rc);
+      
+      FileOutputStream fos = null;
+      fos = new FileOutputStream(runtimeYml);
+      fos.write(yml.getBytes());
+      fos.close();
+      
+//    }
 
-    Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
 
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
@@ -145,7 +197,7 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.info("end of test - id {} remaining services {}", Platform.getLocalInstance().getId(),
+    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(),
         Arrays.toString(Runtime.getServiceNames()));
 
     // release all including runtime - be careful of default runtime.yml
@@ -176,7 +228,7 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
 
     // log.warn("end of test - id {} remaining services after release {}",
@@ -192,11 +244,11 @@ public class AbstractTest {
   }
 
   public void setVirtual() {
-    Platform.setVirtual(true);
+    Runtime.getInstance().setVirtual(true);
   }
 
   public boolean isVirtual() {
-    return Platform.isVirtual();
+    return Runtime.getInstance().isVirtual();
   }
 
 }
