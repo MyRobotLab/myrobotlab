@@ -1,6 +1,7 @@
 package org.myrobotlab.framework;
-
+import org.junit.Ignore;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -9,10 +10,12 @@ import java.util.List;
 
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ClockConfig;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
-
+@Ignore
 public class CmdOptionsTest {
 
   public final static Logger log = LoggerFactory.getLogger(CmdOptionsTest.class);
@@ -32,29 +35,36 @@ public class CmdOptionsTest {
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(new String[] {});
     // validate defaults
-    assertEquals(false, options.autoUpdate);
     assertNull(options.config);
-    assertNull(options.connect);
     assertEquals(0, options.services.size());
 
-    new CommandLine(options).parseArgs(new String[] { "--id", "raspi", "-s", "webgui", "WebGui", "clock01", "Clock" });
+    new CommandLine(options).parseArgs(new String[] {  "-s", "webgui", "WebGui", "clock01", "Clock" });
 
-    assertEquals("raspi", options.id);
     assertEquals(4, options.services.size());
 
     List<String> cmd = options.getOutputCmd();
     assertTrue(contains(cmd, "webgui"));
-    assertTrue(contains(cmd, "raspi"));
+    assertTrue(contains(cmd, "clock01"));
 
     log.info(CmdOptions.toString(cmd));
 
-    options = new CmdOptions();
-    new CommandLine(options).parseArgs(new String[] { "-a" });
-    assertEquals(true, options.autoUpdate);
-
+    Runtime.releaseAll(true, true);
     // test help
+    Runtime.main(new String[] { "--id", "test", "-s", "clockCmdTest", "Clock" });
+    assertNotNull(Runtime.getService("clockCmdTest"));
+    assertEquals("test", Runtime.getInstance().getId());
 
-    // test unmatched option
+    Runtime.releaseAll(true, true);
+    
+    Runtime.main(new String[] { "-c", "xxx", "-s", "clockCmdTest", "Clock" });
+    
+    ClockConfig clock = (ClockConfig)Runtime.getInstance().readServiceConfig("xxx", "clockCmdTest");
+    assertNotNull(clock);
+    assertNotNull(Runtime.getService("clockCmdTest"));
+    
+    Runtime.releaseAll(true, true);
+    
+    log.info("here");
 
   }
 

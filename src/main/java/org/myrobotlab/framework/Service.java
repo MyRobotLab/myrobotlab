@@ -57,6 +57,7 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.config.ConfigUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.framework.interfaces.ConfigurableService;
@@ -474,22 +475,15 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    *         then it needs an instance of Runtime which is not available.
    * 
    */
-  @Deprecated /* this should not be static - remove it */
   static public String getResourceDir(String serviceType, String additionalPath) {
 
     // setting resource directory
-    String resourceDir = null;
+    String resource = ConfigUtils.getResourceRoot() + fs + serviceType;
 
-    // stupid solution to get past static problem
-    if (!"Runtime".equals(serviceType)) {
-      resourceDir = Runtime.getInstance().getConfig().resource + fs + serviceType;
-    } else {
-      resourceDir = "resource";
-    }
     if (additionalPath != null) {
-      resourceDir = FileIO.gluePaths(resourceDir, additionalPath);
+      resource = FileIO.gluePaths(resource, additionalPath);
     }
-    return resourceDir;
+    return resource;
   }
 
   /**
@@ -516,7 +510,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
 
   static public String getResourceRoot() {
-    return Runtime.getInstance().getConfig().resource;
+    return ConfigUtils.getResourceRoot();//Runtime.getInstance().getConfig().resource;
   }
 
   /**
@@ -625,7 +619,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
     // necessary for serialized transport\
     if (inId == null) {
-      id = Platform.getLocalInstance().getId();
+      id = ConfigUtils.getId();
       log.debug("creating local service for id {}", id);
     } else {
       id = inId;
@@ -676,7 +670,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // register this service if local - if we are a foreign service, we probably
     // are being created in a
     // registration already
-    if (id.equals(Platform.getLocalInstance().getId())) {
+    if (id.equals(ConfigUtils.getId())) {
       Registration registration = new Registration(this);
       Runtime.register(registration);
     }
@@ -1510,7 +1504,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
           // The StringUtils.removeEnd() call is a no-op when the ID is not our
           // local ID,
           // so doesn't conflict with remote routes
-          Listener newConfigListener = new Listener(listener.topicMethod, StringUtil.removeEnd(listener.callbackName, '@' + Platform.getLocalInstance().getId()),
+          Listener newConfigListener = new Listener(listener.topicMethod, StringUtil.removeEnd(listener.callbackName, '@' + Runtime.getInstance().getId()),
               listener.callbackMethod);
           newListeners.add(newConfigListener);
         }
@@ -1614,7 +1608,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   synchronized public void releaseService() {
     // auto release children and unregister
-    Runtime.releaseService(getName());
+    Runtime.releaseServiceInternal(getName());
   }
 
   /**

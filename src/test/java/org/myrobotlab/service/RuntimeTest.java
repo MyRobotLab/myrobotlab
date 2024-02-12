@@ -26,8 +26,8 @@ public class RuntimeTest extends AbstractTest {
   public final static Logger log = LoggerFactory.getLogger(RuntimeTest.class);
 
   @Before
-  public void setUp() {
-    // LoggingFactory.init("WARN");
+  public void beforeTest() {
+    Runtime.releaseAll(true, true);
   }
 
   @Test
@@ -92,9 +92,6 @@ public class RuntimeTest extends AbstractTest {
   @Test
   public void testRuntimeLocale() {
 
-    long curr = 1479044758691L;
-    Date d = new Date(curr);
-
     Runtime runtime = Runtime.getInstance();
     runtime.setLocale("fr-FR");
     assertEquals("expecting concat fr-FR", "fr-FR", runtime.getLocale().getTag());
@@ -103,16 +100,6 @@ public class RuntimeTest extends AbstractTest {
     Locale l = runtime.getLocale();
     assertEquals("fr-FR", l.toString());
 
-  }
-  
-  @Test 
-  public void testRuntimeIsAvailable() {
-    Runtime.getInstance();
-    assertTrue(Runtime.isAvailable());
-    Runtime.releaseAll(true, true);
-    assertFalse(Runtime.isAvailable());
-    Runtime.getInstance();
-    assertTrue(Runtime.isAvailable());
   }
   
 

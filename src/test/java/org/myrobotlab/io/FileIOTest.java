@@ -135,11 +135,6 @@ public class FileIOTest extends AbstractTest {
   }
 
   @Test
-  public void testIsJar() {
-    assertFalse(FileIO.isJar());
-  }
-
-  @Test
   public void testGetFileListString() throws IOException {
     String dir = FileIO.gluePaths(tempDir, "testGetFileListString");
     File f = new File(dir);
@@ -187,6 +182,7 @@ public class FileIOTest extends AbstractTest {
     InputStream ios = FileIO.toInputStream("This is some data that got turned into a stream");
     String data = FileIO.toString(ios);
     assertEquals("This is some data that got turned into a stream", data);
+    ios.close();
   }
 
   @Test

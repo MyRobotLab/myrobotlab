@@ -1,7 +1,12 @@
 package org.myrobotlab.service.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.myrobotlab.framework.NameGenerator;
+import org.myrobotlab.framework.Plan;
+import org.myrobotlab.service.data.Locale;
 
 public class RuntimeConfig extends ServiceConfig {
 
@@ -9,23 +14,43 @@ public class RuntimeConfig extends ServiceConfig {
    * instance id - important to be unique when connecting multiple
    * mrl instances together
    */
-  public String id;
+  public String id = NameGenerator.getName();
   
   /**
    * virtual hardware if enabled all services created will enable virtualization if applicable
    */
   public Boolean virtual = false;
-  public boolean enableCli = true;
-  public String logLevel = "info";
-  public String locale;
+    
+  /**
+   * Log level debug, info, warn, error
+   */
+  public String logLevel = "warn";
   
-  // NEED THIS PRIVATE BUT CANNOT BE
+  /**
+   * Locale setting for the instance, initial default will be set by the default jvm/os
+   * through java.util.Locale.getDefault()
+   */
+  public String locale = Locale.getDefault().getTag();
+  
+
+  /**
+   * Although this should be a set of unique services, it cannot be a LinkedHashSet
+   * because SnakeYml's interpretation would be a map with null values.  Instead
+   * its a protected member with accessors that prevent duplicates.
+   */
   public List<String> registry = new ArrayList<>();
     
   /**
    * Root of resource location
    */
   public String resource = "resource";
+  
+  
+  public Plan getDefault(Plan plan, String name) {
+    super.getDefault(plan, name);
+    return plan;
+  }
+  
 
   /**
    * add and remove a service using these methods and the uniqueness will be
