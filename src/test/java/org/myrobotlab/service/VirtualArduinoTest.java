@@ -30,6 +30,10 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     VirtualArduino service = (VirtualArduino) Runtime.start("virtualArduino", "VirtualArduino");
     return service;
   }
+  
+  public String getName() {
+    return "VirtualArduinoTest";
+  }
 
   @Override
   public void testService() throws Exception {

@@ -14,81 +14,55 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.rules.TestName;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-
 public class AbstractTest {
 
   /** cached network test value for tests */
-  static Boolean hasInternet = null;
+  protected static Boolean hasInternet = null;
 
   protected static boolean installed = false;
 
-  public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
+  protected final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
-  static private boolean logWarnTestHeader = false;
+  protected static boolean releaseRemainingThreads = false;
 
-  private static boolean releaseRemainingThreads = false;
+  protected static transient Set<Thread> threadSetStart = null;
 
-  protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
-
-  static transient Set<Thread> threadSetStart = null;
-
-  protected Set<Attachable> attached = new HashSet<>();
-
-  @Rule
-  public final TestName testName = new TestName();
-
-  static public String simpleName;
-
-  private static boolean lineFeedFooter = true;
-  
   @Rule
   public TestWatcher watchman = new TestWatcher() {
-      @Override
-      protected void starting(Description description) {
-          System.out.println("Starting: " + description.getClassName() + "." + description.getMethodName());
-      }
+    @Override
+    protected void starting(Description description) {
+      System.out.println("Starting: " + description.getClassName() + "." + description.getMethodName());
+    }
 
-      @Override
-      protected void succeeded(Description description) {
-         // System.out.println("Succeeded: " + description.getMethodName());
-      }
+    @Override
+    protected void succeeded(Description description) {
+      // System.out.println("Succeeded: " + description.getMethodName());
+    }
 
-      @Override
-      protected void failed(Throwable e, Description description) {
-          System.out.println("Failed: " + description.getMethodName());
-      }
+    @Override
+    protected void failed(Throwable e, Description description) {
+      System.out.println("Failed: " + description.getMethodName());
+    }
 
-      @Override
-      protected void skipped(org.junit.AssumptionViolatedException e, Description description) {
-          System.out.println("Skipped: " + description.getMethodName());
-      }
+    @Override
+    protected void skipped(org.junit.AssumptionViolatedException e, Description description) {
+      System.out.println("Skipped: " + description.getMethodName());
+    }
 
-      @Override
-      protected void finished(Description description) {
-          System.out.println("Finished: " + description.getMethodName());
-      }
+    @Override
+    protected void finished(Description description) {
+      System.out.println("Finished: " + description.getMethodName());
+    }
   };
-
-  public String getSimpleName() {
-    return simpleName;
-  }
-
-  public String getName() {
-    return testName.getMethodName();
-  }
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
@@ -120,23 +94,23 @@ public class AbstractTest {
 
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
-    
+
     // setup runtime resource = src/main/resources/resource
     File runtimeYml = new File("data/config/default/runtime.yml");
-//    if (!runtimeYml.exists()) {
-      runtimeYml.getParentFile().mkdirs();
-      RuntimeConfig rc = new RuntimeConfig();
-      rc.resource = "src/main/resources/resource";
-      String yml = CodecUtils.toYaml(rc);
-      
-      FileOutputStream fos = null;
-      fos = new FileOutputStream(runtimeYml);
-      fos.write(yml.getBytes());
-      fos.close();
-      
-//    }
+    // if (!runtimeYml.exists()) {
+    runtimeYml.getParentFile().mkdirs();
+    RuntimeConfig rc = new RuntimeConfig();
+    rc.resource = "src/main/resources/resource";
+    String yml = CodecUtils.toYaml(rc);
 
-      Runtime.getInstance().setVirtual(true);
+    FileOutputStream fos = null;
+    fos = new FileOutputStream(runtimeYml);
+    fos.write(yml.getBytes());
+    fos.close();
+
+    // }
+
+    Runtime.getInstance().setVirtual(true);
 
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
@@ -171,16 +145,7 @@ public class AbstractTest {
   @AfterClass
   public static void tearDownAbstractTest() throws Exception {
     log.info("tearDownAbstractTest");
-
     releaseServices();
-
-    if (logWarnTestHeader) {
-      log.warn("=========== finished test {} ===========", simpleName);
-    }
-
-    if (lineFeedFooter) {
-      System.out.println();
-    }
   }
 
   static protected void installAll() {
@@ -197,8 +162,7 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(),
-        Arrays.toString(Runtime.getServiceNames()));
+    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
 
     // release all including runtime - be careful of default runtime.yml
     Runtime.releaseAll(true, true);
@@ -212,8 +176,7 @@ public class AbstractTest {
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName())
-          && !"runtime".equals(thread.getName())) {
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
           log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
@@ -234,13 +197,6 @@ public class AbstractTest {
     // log.warn("end of test - id {} remaining services after release {}",
     // Platform.getLocalInstance().getId(),
     // Arrays.toString(Runtime.getServiceNames()));
-  }
-
-  public AbstractTest() {
-    simpleName = this.getClass().getSimpleName();
-    if (logWarnTestHeader) {
-      log.info("=========== starting test {} ===========", this.getClass().getSimpleName());
-    }
   }
 
   public void setVirtual() {

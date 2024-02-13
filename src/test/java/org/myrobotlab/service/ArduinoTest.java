@@ -62,7 +62,6 @@ public class ArduinoTest extends AbstractTest {
     }
   }
 
-  @Override
   public String getName() {
     return "arduinoTest";
   }
