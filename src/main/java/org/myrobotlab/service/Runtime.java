@@ -1204,12 +1204,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    *
    */
   static public String[] getServiceNames() {
-    Set<String> ret = registry.keySet();    
+    Set<String> ret = registry.keySet();
     String[] services = new String[ret.size()];
     if (ret.size() == 0) {
       return services;
     }
-    
+
     // if there are more than 0 services we need runtime
     // to filter to make sure they are "local"
     // and this requires a runtime service
@@ -1940,11 +1940,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     }
     return false;
   }
-  
-  
+
   /**
-   * Called after any subclassed releaseService has been called, this cleans
-   * up the registry and removes peers
+   * Called after any subclassed releaseService has been called, this cleans up
+   * the registry and removes peers
+   * 
    * @param inName
    * @return
    */
@@ -2003,7 +2003,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return true;
     }
   }
-
 
   /**
    * Removes registration for a service. Removes the service from
@@ -2199,7 +2198,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         if (runtime != null) {
           runtime.releaseService();
         }
-        runtime = null;
+        synchronized (INSTANCE_LOCK) {
+          runtime = null;
+        }
       } else {
         // put runtime in new registry
         Runtime.getInstance();
@@ -2830,26 +2831,20 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // because you need to start with something ...
     config = new RuntimeConfig();
 
-    synchronized (INSTANCE_LOCK) {
-      if (runtime == null) {
-        // fist and only time....
-        runtime = this;
-        repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
+    repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
 
-        /**
-         * This is used to run through all the possible services and determine
-         * if they have any missing dependencies. If they do not they become
-         * "installed". The installed flag makes the gui do a crossout when a
-         * service type is selected.
-         */
-        for (MetaData metaData : serviceData.getServiceTypes()) {
-          Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
-          if (deps.size() == 0) {
-            metaData.installed = true;
-          } else {
-            log.info("{} not installed", metaData.getSimpleName());
-          }
-        }
+    /**
+     * This is used to run through all the possible services and determine if
+     * they have any missing dependencies. If they do not they become
+     * "installed". The installed flag makes the gui do a crossout when a
+     * service type is selected.
+     */
+    for (MetaData metaData : serviceData.getServiceTypes()) {
+      Set<ServiceDependency> deps = repo.getUnfulfilledDependencies(metaData.getType());
+      if (deps.size() == 0) {
+        metaData.installed = true;
+      } else {
+        log.info("{} not installed", metaData.getSimpleName());
       }
     }
 
