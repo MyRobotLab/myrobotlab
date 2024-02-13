@@ -25,14 +25,19 @@ import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  /** cached network test value for tests */
+  /**
+   * cached network test value for tests
+   */
   protected static Boolean hasInternet = null;
 
+  /**
+   * Install dependencies once per process, same process
+   * will not check.  A new process will use the libraries/serviceData.json
+   * to determine if deps are satisfied
+   */
   protected static boolean installed = false;
 
   protected final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
-
-  protected static boolean releaseRemainingThreads = false;
 
   protected static transient Set<Thread> threadSetStart = null;
 
@@ -177,17 +182,7 @@ public class AbstractTest {
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
-        if (releaseRemainingThreads) {
-          log.warn("interrupting thread {}", thread.getName());
-          thread.interrupt();
-          /*
-           * if (useDeprecatedThreadStop) { thread.stop(); }
-           */
-        } else {
-          // log.warn("thread {} marked as straggler - should be killed",
-          // thread.getName());
           threadsRemaining.add(thread.getName());
-        }
       }
     }
     if (threadsRemaining.size() > 0) {

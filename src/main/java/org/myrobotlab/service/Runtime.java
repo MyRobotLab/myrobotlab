@@ -3446,6 +3446,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       runtime.stopService();
       runtime.stopInteractiveMode();
       runtime.getRepo().removeStatusPublishers();
+      if (cli != null) {
+        cli.stop();
+      }
       registry = new TreeMap<>();
     }
     synchronized (INSTANCE_LOCK) {
