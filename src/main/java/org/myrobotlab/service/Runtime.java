@@ -910,9 +910,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             // klunky
             Runtime.register(new Registration(runtime));
 
-            // assign, do not apply otherwise there will be
-            // a chicken-egg problem
-            runtime.config = c;
           }
 
           runtime.getRepo().addStatusPublisher(runtime);
