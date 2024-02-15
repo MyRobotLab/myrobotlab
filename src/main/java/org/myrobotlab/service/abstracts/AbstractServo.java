@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -217,16 +216,6 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
 
   public AbstractServo(String n, String id) {
     super(n, id);
-    // this servo is interested in new services which support either
-    // ServoControllers or EncoderControl interfaces
-    // we subscribe to runtime here for new services
-    subscribeToRuntime("registered");
-    /*
-     * // new feature - // extracting the currentPos from serialized servo
-     * Double lastCurrentPos = null; try { lastCurrentPos = (Double)
-     * loadField("currentPos"); } catch (IOException e) {
-     * log.info("current pos cannot be found in saved file"); }
-     */
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
     targetPos = rest;
@@ -241,17 +230,6 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
         currentInputPos = targetPos = savedPos;
       }
     }
-  }
-
-  /**
-   * if a new service is added to the system refresh the controllers
-   */
-  @Deprecated /*
-               * lifecycle events not necessary for ui, probably should be
-               * pulled out
-               */
-  public void onStarted(String name) {
-    invoke("refreshControllers");
   }
 
   /**
@@ -697,10 +675,6 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
     }
   }
 
-  public void onRegistered(Registration s) {
-    refreshControllers();
-  }
-
   /**
    * Servo has the ability to act as an encoder if it is using TimeEncoder.
    * TimeEncoder will use Servo to publish a series of encoder events with
@@ -1096,7 +1070,6 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
   @Override
   public void startService() {
     super.startService();
-    Runtime.getInstance().attachServiceLifeCycleListener(getName());
   }
 
   @Override

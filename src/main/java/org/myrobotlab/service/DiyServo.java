@@ -28,7 +28,6 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -44,8 +43,6 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
-import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
@@ -76,7 +73,7 @@ import org.slf4j.Logger;
  *         TODO : move is not accurate ( 1° step seem not possible )
  */
 
-public class DiyServo extends AbstractServo<ServoConfig> implements PinListener, ServiceLifeCycleListener {
+public class DiyServo extends AbstractServo<ServoConfig> implements PinListener {
 
   double lastOutput = 0.0;
   /**
@@ -198,16 +195,6 @@ public class DiyServo extends AbstractServo<ServoConfig> implements PinListener,
     lastActivityTimeTs = System.currentTimeMillis();
   }
 
-  /*
-   * Update the list of PinArrayControls
-   */
-  @Override
-  public void onRegistered(Registration s) {
-    refreshPinArrayControls();
-    broadcastState();
-
-  }
-
   /**
    * Initiate the PID controller
    */
@@ -224,7 +211,7 @@ public class DiyServo extends AbstractServo<ServoConfig> implements PinListener,
     pid.setSetpoint(pidKey, setPoint);
     pid.startService();
   }
-  
+
   @Override
   public void startService() {
     super.startService();
@@ -232,7 +219,6 @@ public class DiyServo extends AbstractServo<ServoConfig> implements PinListener,
     motorControl = (MotorControl) startPeer("motor");
     initPid();
   }
-  
 
   /**
    * Equivalent to Arduino's Servo.detach() it de-energizes the servo
@@ -694,19 +680,17 @@ public class DiyServo extends AbstractServo<ServoConfig> implements PinListener,
       // if (done) {
       // return;
       // }
-      
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       Runtime.start("diy", "DiyServo");
-      
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-      
 
       String port = "COM4";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
@@ -786,21 +770,6 @@ public class DiyServo extends AbstractServo<ServoConfig> implements PinListener,
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  @Override
-  public void onCreated(String name) {
-    log.info("created {}", name);
-  }
-
-  @Override
-  public void onStopped(String name) {
-    log.info("stopped {}", name);
-  }
-
-  @Override
-  public void onReleased(String name) {
-    log.info("released {}", name);
   }
 
 }

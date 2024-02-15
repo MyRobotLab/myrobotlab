@@ -61,7 +61,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class Servo extends AbstractServo<ServoConfig> implements ServiceLifeCycleListener {
+public class Servo extends AbstractServo<ServoConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -264,18 +264,5 @@ public class Servo extends AbstractServo<ServoConfig> implements ServiceLifeCycl
       log.error("main threw", e);
     }
   }
-
-  @Override
-  public void onCreated(String name) {
-  }
-
-  @Override
-  public void onStopped(String name) {
-  }
-
-  @Override
-  public void onReleased(String name) {
-  }
-
 
 }
