@@ -2,7 +2,7 @@ package org.myrobotlab.service.config;
 
 import org.myrobotlab.framework.Plan;
 
-public class SabertoothConfig extends MotorConfig {
+public class SabertoothConfig extends AbstractMotorControllerConfig {
 
   public String port;
   public boolean connect = false;

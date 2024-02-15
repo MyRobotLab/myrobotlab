@@ -281,8 +281,7 @@ public class InMoov2Config extends ServiceConfig {
     // setup name references to different services
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
-    mouth.speechRecognizers = new String[] { name + ".ear" };
-
+    
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
@@ -549,6 +548,10 @@ public class InMoov2Config extends ServiceConfig {
 
     // Needs upcoming pr
     fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+    
+    // peer --to--> peer
+    mouth.listeners.add(new Listener("publishStartSpeaking", getPeerName("ear")));
+    mouth.listeners.add(new Listener("publishEndSpeaking", getPeerName("ear")));
 
     return plan;
   }
