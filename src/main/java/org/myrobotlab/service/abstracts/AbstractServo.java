@@ -434,6 +434,12 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
   public void fullSpeed() {
     setSpeed((Double) null);
   }
+  
+  @Override
+  public void setMaxSpeed() {
+    setSpeed((Double) null);
+  }
+
 
   @Override
   public boolean isAutoDisable() {

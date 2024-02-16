@@ -380,6 +380,7 @@ public class InMoov2Config extends ServiceConfig {
     fsm.transitions.add(new Transition("sleep", "power_down", "power_down"));
     fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
     fsm.transitions.add(new Transition("wake", "setup", "setup"));
+    fsm.transitions.add(new Transition("wake", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "setup", "setup"));
     // power_down to shutdown
     // fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished",

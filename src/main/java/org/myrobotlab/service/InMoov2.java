@@ -856,7 +856,7 @@ public class InMoov2 extends Service<InMoov2Config>
     if (fsm == null) {
       return null;
     }
-    return fsm.getCurrent();
+    return fsm.getState();
   }
 
   /**
@@ -1553,7 +1553,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
       if (System.currentTimeMillis() > stateLastIdleTime + (config.stateIdleInterval * 1000)) {
         // idle event to be handled with the processor
-        processMessage("onIdle");
+        // processMessage("onIdle");
+        fire("idle");
         stateLastIdleTime = System.currentTimeMillis();
       }
 

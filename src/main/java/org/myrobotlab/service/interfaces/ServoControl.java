@@ -404,6 +404,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * disable speed control and move the servos at full speed.
    */
+  @Deprecated
   void fullSpeed();
-
+  
+  /**
+   * 
+   */
+  void setMaxSpeed();
+  
 }

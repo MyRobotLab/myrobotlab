@@ -2,16 +2,11 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.MessageListener;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -61,7 +56,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     public Transition transition;
     public StateTransition stateTransition;
   }
-  
+
   public class StateChange {
     /**
      * timestamp
@@ -72,7 +67,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
      * current new state
      */
     public String state;
-    
+
     /**
      * event which activated new state
      */
@@ -82,13 +77,12 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
      * source of event
      */
     public String src = getName();
-    
-    
+
     public StateChange(String current, String event) {
       this.state = current;
       this.event = event;
     }
-    
+
     public String toString() {
       return String.format("%s --%s--> %s", last, event, state);
     }
@@ -221,18 +215,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   }
 
   /**
-   * gets the current state of this state machine
-   * 
-   * @return
-   */
-  public String getCurrent() {
-    if (current != null) {
-      return current.getName();
-    }
-    return null;
-  }
-
-  /**
    * get the previous state of this state machine
    * 
    * @return
@@ -244,13 +226,25 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     return null;
   }
 
+  /**
+   * gets the current state of this state machine
+   * 
+   * @return
+   */
+  public String getState() {
+    if (current != null) {
+      return current.getName();
+    }
+    return null;
+  }
+
   public List<Transition> getTransitions() {
     FiniteStateMachineConfig c = (FiniteStateMachineConfig) config;
     return c.transitions;
   }
 
   /**
-   * Publishes state change (current, last and event) 
+   * Publishes state change (current, last and event)
    * 
    * @param stateChange
    * @return
@@ -263,7 +257,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   @Override
   public FiniteStateMachineConfig getConfig() {
     super.getConfig();
-    config.current = getCurrent();
+    config.current = getState();
     return config;
   }
 
@@ -361,15 +355,15 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
       // fsm.subscribe("fsm", "publishState");
 
-      log.info("state - {}", fsm.getCurrent());
+      log.info("state - {}", fsm.getState());
 
       fsm.setCurrent("neutral");
 
-      log.info("state - {}", fsm.getCurrent());
+      log.info("state - {}", fsm.getState());
 
       fsm.fire("ill-event");
 
-      log.info("state - {}", fsm.getCurrent());
+      log.info("state - {}", fsm.getState());
 
       fsm.fire("ill-event");
       fsm.fire("ill-event");
@@ -387,7 +381,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
 
       // fsm.removeScheduledEvents();
 
-      log.info("state - {}", fsm.getCurrent());
+      log.info("state - {}", fsm.getState());
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -419,7 +413,7 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       return history.get(history.size() - 2).state;
     }
   }
-  
+
   @Override
   public void startService() {
     super.startService();
