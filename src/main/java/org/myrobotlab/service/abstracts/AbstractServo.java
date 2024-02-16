@@ -898,6 +898,11 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
     // speed = maxSpeed;
     // log.info("Trying to set speed to a value greater than max speed");
     // }
+    
+    if (degreesPerSecond != null && degreesPerSecond < 0) {
+      warn("setting speed to negative value %d ignoring", degreesPerSecond);
+      return;
+    }
 
     speed = degreesPerSecond;
 
