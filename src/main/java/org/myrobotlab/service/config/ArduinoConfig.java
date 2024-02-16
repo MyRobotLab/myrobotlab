@@ -4,7 +4,16 @@ import org.myrobotlab.framework.Plan;
 
 public class ArduinoConfig extends ServiceConfig {
 
+  /**
+   * Port (usb or ip:port) to connect)
+   */
   public String port;
+  
+  /**
+   * If you want the arduino to try to connect
+   * port must not be null.
+   * This is not a status field.
+   */
   public boolean connect;
 
   @Override
