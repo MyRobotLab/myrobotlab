@@ -96,8 +96,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.setConfig = function() {
         console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
-            $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
+            $scope.configName = $scope.selectedConfig[0]
+            msg.sendTo('runtime', 'setConfig', $scope.configName)
+            msg.sendTo('runtime', 'getConfigName')
         }
     }
 
@@ -233,6 +234,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             console.info("runtime - onRelease" + data)
             break
         case 'onConfigName':
+            $scope.configName = data
+            $scope.$apply()
             console.info("runtime - onConfigName" + data)
             break
         case 'onHeartbeat':
@@ -356,7 +359,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     $scope.getConfigName = function(){
-        return $scope.service.configName
+        return $scope.configName
     }
 
     $scope.setAutoStart = function(b) {

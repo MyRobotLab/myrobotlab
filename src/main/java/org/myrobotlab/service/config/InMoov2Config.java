@@ -232,7 +232,16 @@ public class InMoov2Config extends ServiceConfig {
     }
 
     mouthControl.mouth = i01Name + ".mouth";
+    
+    UltrasonicSensorConfig ultrasonicLeft = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicLeft"));
+    ultrasonicLeft.triggerPin = 64;
+    ultrasonicLeft.echoPin = 63;
 
+    UltrasonicSensorConfig ultrasonicRight = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicRight"));
+    ultrasonicRight.triggerPin = 64;
+    ultrasonicRight.echoPin = 63;
+    
+    
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
     chatBot.botDir = "resource/ProgramAB";
 
