@@ -14,7 +14,7 @@ public class TesseractOcrMeta extends MetaData {
    */
   public TesseractOcrMeta() {
 
-    String tesseractVersion = "5.0.1-1.5.7";
+    String tesseractVersion = "5.2.0-1.5.8";
     addDescription("Optical character recognition - the ability to read");
     addCategory("ai", "vision");
     addDependency("org.bytedeco", "tesseract", tesseractVersion);
