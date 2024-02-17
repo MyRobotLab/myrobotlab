@@ -911,13 +911,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           // extract resources "if a jar"
           FileIO.extractResources();
           runtime.startInteractiveMode();
-
-          if (Runtime.options.install != null) {
-            // minimal processed runtime - return it
-            return runtime;
+          if (c != null) {
+            runtime.apply(c);
           }
-
-          runtime.apply(c);
 
           if (options.services != null) {
             log.info("command line override for services created");
