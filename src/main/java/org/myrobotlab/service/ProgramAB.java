@@ -943,9 +943,6 @@ public class ProgramAB extends Service<ProgramABConfig>
     logging.setLevel("org.alicebot.ab.MagicBooleans", "DEBUG");
     logging.setLevel("class org.myrobotlab.programab.MrlSraixHandler", "DEBUG");
     logPublisher.start();
-
-    scanForBots(getResourceDir());
-
   }
 
   @Override /* FIXME - just do this once in abstract */
@@ -1102,15 +1099,6 @@ public class ProgramAB extends Service<ProgramABConfig>
       for (String botPath : c.bots) {
         addBotPath(botPath);
       }
-    }
-
-    if (c.botDir == null) {
-      c.botDir = getResourceDir();
-    }
-
-    List<File> botsFromScanning = scanForBots(c.botDir);
-    for (File file : botsFromScanning) {
-      addBotPath(file.getAbsolutePath());
     }
 
     if (c.currentUserName != null) {

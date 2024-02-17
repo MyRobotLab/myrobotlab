@@ -2318,26 +2318,20 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public void systemCheck() {
-    log.error("systemCheck()");
-    Runtime runtime = Runtime.getInstance();
-    int servoCount = 0;
-    int servoAttachedCount = 0;
+    Platform platform = Runtime.getPlatform();
+    int servoCount = 0;    
     for (ServiceInterface si : Runtime.getServices()) {
       if (si.getClass().getSimpleName().equals("Servo")) {
         servoCount++;
-        if (((Servo) si).getController() != null) {
-          servoAttachedCount++;
-        }
       }
     }
 
-    setPredicate("systemServoCount", servoCount);
-    setPredicate("systemAttachedServoCount", servoAttachedCount);
-    setPredicate("systemFreeMemory", Runtime.getFreeMemory());
-    Platform platform = Runtime.getPlatform();
-    setPredicate("system version", platform.getVersion());
-    // ERROR buffer !!!
-    systemEvent("SYSTEMCHECKFINISHED"); // wtf is this?
+    setPredicate("system_uptime", Runtime.getUptime());
+    setPredicate("system_servo_count", servoCount);
+    setPredicate("system_free_memory", Runtime.getFreeMemory());
+    setPredicate("system_version", platform.getVersion());
+    setPredicate("system_errors", errors.size());
+    
   }
 
   public String systemEvent(String eventMsg) {
