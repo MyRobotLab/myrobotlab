@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.StartYml;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Runtime;
 
 public class ConfigUtilsTest {
@@ -13,6 +14,8 @@ public class ConfigUtilsTest {
   @Before
   public void beforeTest() {
     Runtime.releaseAll(true, true);
+    // remove config
+    FileIO.rm("data/config/default");
   }
 
   @Test

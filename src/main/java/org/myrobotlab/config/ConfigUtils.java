@@ -60,6 +60,8 @@ public class ConfigUtils {
 
     if (startYml.enable) {
       configName = startYml.config;
+    } else {
+      configName = "default";
     }
 
     // start with default

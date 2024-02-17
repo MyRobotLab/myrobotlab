@@ -316,12 +316,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
   protected List<String> configList;
 
-  /***
-   * runtime, security, webgui, perhaps python - we don't want to remove when
-   * releasing config
-   */
-  protected Set<String> startingServices = new HashSet<>();
-
   /**
    * Wraps {@link java.lang.Runtime#availableProcessors()}.
    *
@@ -580,7 +574,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             Logging.logError(e);
           }
         } else {
-          runtime.error(String.format("could not create service %1$s %2$s", name, type));
+          runtime.error(String.format("could not create service %s %s", name, type));
         }
 
       }
@@ -910,9 +904,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             // klunky
             Runtime.register(new Registration(runtime));
 
-            // assign, do not apply otherwise there will be
-            // a chicken-egg problem
-            runtime.config = c;
           }
 
           runtime.getRepo().addStatusPublisher(runtime);
@@ -4924,8 +4915,18 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
       List<String> registry = config.getRegistry();
       Collections.reverse(Arrays.asList(registry));
+      
+      // get starting services if any entered on the command line
+      // -s log Log webgui WebGui ... etc - these will be protected 
+      List<String> startingServices = new ArrayList<>();
+      if (options.services.size() % 2 == 0) {
+        for (int i = 0; i < options.services.size(); i += 2) {
+          startingServices.add(options.services.get(i));
+        }
+      }
+      
       for (String name : registry) {
-        if (Runtime.getInstance().startingServices.contains(name)) {
+        if (startingServices.contains(name)) {
           continue;
         }
         release(name);

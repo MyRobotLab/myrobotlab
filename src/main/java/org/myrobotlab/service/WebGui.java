@@ -34,7 +34,6 @@ import org.atmosphere.nettosphere.Nettosphere;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -62,8 +61,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  * services are already APIs - perhaps a data API - same as service without the
  * message wrapper
  */
-public class WebGui extends Service<WebGuiConfig>
-    implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
+public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvider, Gateway, Handler, ServiceLifeCycleListener {
 
   public static class LiveVideoStreamHandler implements Handler {
 
@@ -128,7 +126,7 @@ public class WebGui extends Service<WebGuiConfig>
    * needed to get the api key to select the appropriate api processor
    * 
    * @param uri
-   *            u
+   *          u
    * @return api key
    * 
    */
@@ -271,9 +269,9 @@ public class WebGui extends Service<WebGuiConfig>
    * String broadcast to specific client
    * 
    * @param uuid
-   *             u
+   *          u
    * @param str
-   *             s
+   *          s
    * 
    */
   public void broadcast(String uuid, String str) {
@@ -315,9 +313,7 @@ public class WebGui extends Service<WebGuiConfig>
         // cert.privateKey()).build();
 
         SelfSignedCertificate selfSignedCertificate = new SelfSignedCertificate();
-        SslContext context = SslContextBuilder
-            .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
-            .sslProvider(SslProvider.JDK)
+        SslContext context = SslContextBuilder.forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey()).sslProvider(SslProvider.JDK)
             .clientAuth(ClientAuth.NONE).build();
 
         configBuilder.sslContext(context);
@@ -496,8 +492,7 @@ public class WebGui extends Service<WebGuiConfig>
         } else if ((bodyData != null) && log.isDebugEnabled()) {
           logData = bodyData;
         }
-        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(),
-            request.getRequestURI(), logData, uuid);
+        log.debug("-->{} {} {} - [{}] from connection {}", (newPersistentConnection) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
       // important persistent connections will have associated routes ...
@@ -575,8 +570,7 @@ public class WebGui extends Service<WebGuiConfig>
           }
 
           if (msg.containsHop(getId())) {
-            log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender,
-                msg.name, msg.method);
+            log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
             return;
           }
 
@@ -920,7 +914,7 @@ public class WebGui extends Service<WebGuiConfig>
    * remotely control UI
    * 
    * @param panel
-   *              - the panel which has been moved or resized
+   *          - the panel which has been moved or resized
    */
   public void savePanel(Panel panel) {
     if (panel.name == null) {
@@ -1107,7 +1101,7 @@ public class WebGui extends Service<WebGuiConfig>
    * Default (false) is to use the CDN
    *
    * @param useLocalResources
-   *                          - true uses local resources fals uses cdn
+   *          - true uses local resources fals uses cdn
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
@@ -1183,8 +1177,7 @@ public class WebGui extends Service<WebGuiConfig>
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui","intro", "Intro", "python", "Python" });
-      // Runtime.main(new String[] {});
+      Runtime.main(new String[] { "--log-level", "info", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
       // Runtime.main(new String[] { "--install" });
 
       boolean done = true;
@@ -1193,7 +1186,8 @@ public class WebGui extends Service<WebGuiConfig>
       }
 
       // Platform.setVirtual(true);
-      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui",
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui",
+      // "WebGui",
       // "intro", "Intro", "python", "Python", "-c", "dev" });
       // Runtime.startConfig("dev");
 
@@ -1248,8 +1242,7 @@ public class WebGui extends Service<WebGuiConfig>
       arduino.connect("/dev/ttyACM0");
 
       for (int i = 0; i < 1000; ++i) {
-        webgui.display(
-            "https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
+        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }
 
       // Runtime.setLogLevel("ERROR");

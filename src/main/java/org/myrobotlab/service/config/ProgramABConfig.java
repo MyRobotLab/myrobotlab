@@ -11,11 +11,6 @@ public class ProgramABConfig extends ServiceConfig {
   public String[] textFilters;
   
   /**
-   * a directory ProgramAB will scan for new bots
-   */
-  public String botDir;
-
-  /**
    * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
