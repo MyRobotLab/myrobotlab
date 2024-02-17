@@ -384,6 +384,14 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     return new ArrayList<File>();
   }
 
+  @Override
+  public void releaseService() {
+    super.releaseService();
+    for (AudioProcessor processor: processors.values()) {
+      processor.stopPlaying();
+    }
+  }
+  
   public AudioData repeat(String filename) {
     return repeat(filename, -1);
   }

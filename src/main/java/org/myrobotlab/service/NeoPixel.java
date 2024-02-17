@@ -810,6 +810,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   public void releaseService() {
     super.releaseService();
     clear();
+    worker.stop();
   }
 
   @Override
