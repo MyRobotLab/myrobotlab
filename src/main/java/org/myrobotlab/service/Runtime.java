@@ -1549,6 +1549,11 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       if (blocking == null) {
         blocking = false;
       }
+      
+      if (installerThread != null) {
+        log.error("another request to install dependencies, 1st request has not completed");
+        return;
+      }
 
       installerThread = new Thread() {
         @Override
@@ -1571,6 +1576,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       } else {
         installerThread.start();
       }
+      
+      installerThread = null;
     }
   }
 

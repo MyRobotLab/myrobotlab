@@ -97,7 +97,7 @@ public class ConfigUtils {
       try {
         FileIO.toFile("start.yml", defaultStartFile);
       } catch (IOException e) {
-        log.error("could not save start.yml");
+        log.error("could not save start.yml", e);
       }
     } else {
       // load start.yml

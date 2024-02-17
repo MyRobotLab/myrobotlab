@@ -510,7 +510,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
 
   static public String getResourceRoot() {
-    return ConfigUtils.getResourceRoot();//Runtime.getInstance().getConfig().resource;
+    return ConfigUtils.getResourceRoot();
   }
 
   /**

@@ -58,7 +58,7 @@ public class VertxTest extends AbstractTest {
       assertNotNull(bytes);
       String ret = new String(bytes);
       assertTrue(ret.contains("days"));
-      System.out.println(String.format("%d", i));
+      log.info(String.format("%d", i));
     }
   }
 
