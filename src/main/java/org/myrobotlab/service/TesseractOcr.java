@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.leptonica.global.lept.pixDestroy;
-import static org.bytedeco.leptonica.global.lept.pixRead;
+import static org.bytedeco.leptonica.global.leptonica.pixDestroy;
+import static org.bytedeco.leptonica.global.leptonica.pixRead;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
