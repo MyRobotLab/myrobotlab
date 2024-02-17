@@ -3,8 +3,8 @@ package org.myrobotlab.service;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WolframAlphaConfig;
 import org.myrobotlab.service.data.SearchResults;
 import org.slf4j.Logger;
 
@@ -23,7 +23,7 @@ import com.wolfram.alpha.visitor.Visitable;
  * get the result.
  *
  */
-public class WolframAlpha extends Service {
+public class WolframAlpha extends Service<WolframAlphaConfig> {
 
   private static final long serialVersionUID = 1L;
 

@@ -94,7 +94,7 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
       lowStom.disable();
   }
   
-  @Deprecated /* use onMove */
+  @Deprecated /* use onMove(map) */
   public void onMoveTorso(HashMap<String, Double> map) {
     onMove(map);
   }

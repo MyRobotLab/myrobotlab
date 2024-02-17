@@ -51,6 +51,7 @@ angular.module('mrlapp.service.FiniteStateMachineGui', []).controller('FiniteSta
             break
         case 'onStateChange':
             $scope.current = data.current
+            $scope.service.history.push(data)
             $scope.$apply()
             break
         default:

@@ -8,7 +8,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.GoogleTranslateConfig;
 import org.slf4j.Logger;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -16,7 +16,8 @@ import com.google.cloud.translate.Translate;
 import com.google.cloud.translate.TranslateOptions;
 import com.google.cloud.translate.Translation;
 
-public class GoogleTranslate extends Service<ServiceConfig> {
+public class GoogleTranslate extends Service<GoogleTranslateConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -25,8 +26,7 @@ public class GoogleTranslate extends Service<ServiceConfig> {
   public GoogleTranslate(String n, String id) {
     super(n, id);
   }
-  
-  
+
   public String translate(String text) throws FileNotFoundException, IOException {
     // Set the path to the Google Cloud service account key file
     String credentialsFilePath = "/path/to/key.json";
@@ -50,13 +50,12 @@ public class GoogleTranslate extends Service<ServiceConfig> {
     Translation translation = translate.translate(text, Translate.TranslateOption.targetLanguage(targetLanguage));
 
     String translated = translation.getTranslatedText();
-    
+
     // Print the translated text
     System.out.printf("Input Text: %s%nTranslated Text: %s%n", text, translated);
 
     return translated;
   }
-  
 
   public static void main(String[] args) {
     try {

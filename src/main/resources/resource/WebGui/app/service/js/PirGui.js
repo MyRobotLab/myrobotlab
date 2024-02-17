@@ -34,9 +34,11 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
             $scope.$apply()
             break
         case 'onPinList':
-            $scope.pinList = []
-            for (var pinDef of data) {
-                $scope.pinList.push(pinDef.pin)
+            if (data && data.length){
+                $scope.pinList = []
+                for (var pinDef of data) {
+                    $scope.pinList.push(pinDef.pin)
+                }                
             }
             $scope.$apply()
             break

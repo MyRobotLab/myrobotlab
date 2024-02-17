@@ -56,9 +56,9 @@ public class Plan {
    * Puts a service name and its service config into the plan, replacing any
    * previous definition. It WILL NOT replace a runtime config !
    * 
-   * @param name
-   * @param sc
-   * @return
+   * @param name - name of the service
+   * @param sc - service config to be updated
+   * @return - updated service config
    */
   public ServiceConfig put(String name, ServiceConfig sc) {
 
@@ -96,7 +96,7 @@ public class Plan {
    */
   public ServiceConfig remove(String service) {
     RuntimeConfig rtConfig = (RuntimeConfig) config.get("runtime");
-    rtConfig.registry.remove(service);
+    rtConfig.remove(service);
     return config.remove(service);
   }
 
@@ -142,21 +142,5 @@ public class Plan {
     runtime.add(service);
   }
 
-  /**
-   * good to prune trees of peers from starting - expecially if the peers
-   * require re-configuring
-   * 
-   * @param startsWith
-   *          - removes RuntimeConfig.registry all services that start with
-   *          input
-   */
-  public void removeStartsWith(String startsWith) {
-    RuntimeConfig runtime = (RuntimeConfig) config.get("runtime");
-    if (runtime == null) {
-      log.error("removeRegistry - runtime null !");
-      return;
-    }
-    runtime.removeStartsWith(startsWith);
-  }
 
 }

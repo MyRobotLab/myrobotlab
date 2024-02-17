@@ -533,10 +533,11 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
         String path = URLDecoder.decode(r.getRequest().getPathInfo(), StandardCharsets.UTF_8);
         Message msg = CodecUtils.pathToMsg(getFullName(), path);
-        msg = CodecUtils.decodeMessageParams(msg);
-        // if body exists it overrides
+
         if (bodyData != null) {
           msg.data = CodecUtils.fromJson(bodyData, Object[].class);
+        } else {
+          msg = CodecUtils.decodeMessageParams(msg);
         }
 
         if (isLocal(msg)) {
@@ -1177,7 +1178,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      Runtime.main(new String[] { "--install" });
       
       boolean done = true;
       if (done) {
@@ -1242,7 +1244,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
       arduino.connect("/dev/ttyACM0");
 
       for (int i = 0; i < 1000; ++i) {
-        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
+        webgui.display(
+            "https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }
 
       // Runtime.setLogLevel("ERROR");

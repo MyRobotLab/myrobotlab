@@ -9,7 +9,7 @@ public class ServoMixerConfig extends ServiceConfig {
   public boolean autoDisable = true;
   
   /**
-   * where gesture files are stored
+   * where gesture files are stored 
    */
   public String gesturesDir = "data/ServoMixer/gestures";
   
@@ -17,6 +17,15 @@ public class ServoMixerConfig extends ServiceConfig {
    * where pose files are stored
    */
   public String posesDir = "data/ServoMixer/poses";
+  
+  /**
+   * speech service name
+   */
+  public String mouth;
 
+  /**
+   * name of the default processor
+   */
+  public String processor = "python";
   
 }

@@ -51,15 +51,11 @@ angular.module("mrlapp.service.VertxGui", []).controller("VertxGuiCtrl", [
       }
     };
 
-    //mrl.subscribe($scope.service.name, 'pulse')
     msg.subscribe("publishShowAll");
-    // msg.subscribe('publishHideAll') FIXME ? not symmetric
     msg.subscribe("publishHide");
     msg.subscribe("publishShow");
     msg.subscribe("publishSet");
     msg.subscribe("publishPanel");
-    // msg.send("publishPanels")
-    // msg.subscribe('loadPanels')
     msg.subscribe(this);
   },
 ]);

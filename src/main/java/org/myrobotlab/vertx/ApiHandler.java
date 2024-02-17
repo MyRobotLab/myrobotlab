@@ -118,11 +118,18 @@ public class ApiHandler implements Handler<RoutingContext> {
       String uuid = UUID.randomUUID().toString();
       String verb = request.method().name().toLowerCase();
 
+      /**
+       * Do not want to do this until you manage a session, which includes
+       * removing the session too.
+       * <pre>
+       * 
       Connection connection = new Connection(uuid, id, service.getName());
       connection.put("c-type", service.getSimpleName());
       connection.put("gateway", service.getName());
 
       Runtime.getInstance().addConnection(uuid, id, connection);
+      *</pre>
+      **/
 
       // content type always json for now
       request.response().putHeader("content-type", "application/json");

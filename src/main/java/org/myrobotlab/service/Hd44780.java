@@ -687,7 +687,7 @@ public class Hd44780 extends Service<Hd44780Config> implements TextListener {
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Runtime.getInstance().setVirtual(false);
 
       Runtime.start("webgui", "WebGui");
       Pcf8574 pcf = (Pcf8574) Runtime.start("pcf8574t", "Pcf8574");

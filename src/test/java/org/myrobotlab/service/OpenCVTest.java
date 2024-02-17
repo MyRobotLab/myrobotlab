@@ -184,6 +184,12 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_INPUT_DIR);
     assertNotNull(data);
 
+
+  }
+  
+  @Test
+  public void testHttpCapture() {
+    
     /**
      * Test ImageFile frame grabber
      */
@@ -191,12 +197,12 @@ public class OpenCVTest extends AbstractTest {
     if (hasInternet()) {
       cv.reset();
       cv.setGrabberType("ImageFile");
-      cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaces(MAX_TIMEOUT);
+      cv.capture("https://upload.wikimedia.org/wikipedia/commons/f/fe/Isaac_Asimov%2C_RIT_NandE_Vol13Num29_1981_Sep24_Complete.jpg");
+      List<Classification> data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.size() > 0);
     }
-
+    
   }
 
   // TODO test enable disable & enableDisplay

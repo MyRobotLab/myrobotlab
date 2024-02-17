@@ -43,6 +43,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.XmppConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
@@ -55,7 +56,8 @@ import org.slf4j.Logger;
  * @author GROG
  *
  */
-public class Xmpp extends Service<ServiceConfig> implements Gateway, ChatManagerListener, ChatMessageListener, MessageListener, RosterListener, ConnectionListener {// ,
+public class Xmpp extends Service<XmppConfig> implements Gateway,ChatManagerListener,ChatMessageListener,MessageListener,RosterListener,ConnectionListener
+{// ,
 
   public static class Contact {
     public String user;
@@ -103,7 +105,7 @@ public class Xmpp extends Service<ServiceConfig> implements Gateway, ChatManager
   transient XMPPTCPConnectionConfiguration configx;
   transient XMPPTCPConnection connection;
   transient ChatManager chatManager;
-  
+
   protected ServiceConfig config;
 
   transient Roster roster = null;
@@ -126,7 +128,8 @@ public class Xmpp extends Service<ServiceConfig> implements Gateway, ChatManager
     super(n, id);
   }
 
-  public void addBuddy(String user) throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {
+  public void addBuddy(String user)
+      throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {
     Roster roster = Roster.getInstanceFor(connection);
     roster.setSubscriptionMode(SubscriptionMode.accept_all);
     // jid: String, user: String, groups: String[]

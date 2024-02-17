@@ -171,7 +171,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
-  // make final - if not "connected" log error but don't allow Arduino NPEs
   public final transient Msg msg = new Msg(this, null);
 
   Integer nextDeviceId = 0;
@@ -191,10 +190,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   private volatile boolean syncInProgress = false;
 
-  /**
-   * the port the user attempted to connect to
-   */
-  String port;
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -552,6 +547,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
+    config.connect = true;
     connecting = true;
     if (port == null) {
       warn("%s attempted to connect with a null port", getName());
@@ -563,7 +559,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     serial.addByteListener(this);
 
     // test to see if we've been started. the serial might be null
-    this.port = port;
+    config.port = port;
 
     try {
 
@@ -678,15 +674,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   @Override
   public void detach() {
-    // make list copy - to iterate without fear of thread or modify issues
-    ArrayList<DeviceMapping> newList = new ArrayList<>(deviceIndex.values());
     log.info("detaching all devices");
-    /*
-     * DOESN'T MATTER IF CONNECTED - IF RECONNECT ARDUINO DEMANDS ITS CURRENT
-     * STATE ONTO MrlComm if (isConnected()) { for (DeviceMapping dm: newList) {
-     * if (dm.getDevice().getName().equals(getName())) { continue; }
-     * detach(dm.getDevice()); sleep(50); } }
-     */
     deviceIndex.clear();
     deviceList.clear();
   }
@@ -819,6 +807,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   @Override
   public void disconnect() {
+    config.connect = false;
     // FIXED - all don in 'onDisconnect()'
     // enableBoardInfo(false);
     // boardInfo is not valid after disconnect
@@ -1933,24 +1922,14 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoDetachPin/deviceId
   @Override
   public void onServoDisable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer id = getDeviceId(servoName);
-    if (id != null) {
+    if (id != null && isConnected()) {
       msg.servoDetachPin(id);
     }
   }
 
   @Override
   public void onServoEnable(String servoName) {
-    if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
-      return;
-    }
-
     Integer deviceId = getDeviceId(servoName);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servoName);
@@ -1960,7 +1939,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       ServoControl sc = (ServoControl) Runtime.getService(servoName);
       msg.servoAttachPin(deviceId, getAddress(sc.getPin()));
     } else {
-      log.info("not currently connected");
+      log.info("cannot enable servo {} not currently connected", getName());
     }
   }
 
@@ -1974,7 +1953,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoWrite/deviceId/target
   public void onServoMoveTo(ServoMove move) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b", isConnected());
+      info("arduino cannot move servo %s when not connected", move.name);
       return;
     }
 
@@ -1999,11 +1978,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       return;
     }
     
-    if (!isConnected()) {
-      log.info("Arduino cannot set speed of %s when not connected", servoSpeed.name);
-      return;
-    }
-
     int speed = -1;
     Servo servo = (Servo) Runtime.getService(servoSpeed.name);
     if (servoSpeed.speed != null) {
@@ -2015,7 +1989,11 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       log.error("{} has null deviceId", servo);
       return;
     }
-    msg.servoSetVelocity(id, speed);
+    if (isConnected()) {
+      msg.servoSetVelocity(id, speed);
+    } else {
+      info("arduino cannot move servo %s when not connected", servoSpeed.name);
+    }
   }
 
   /**
@@ -2026,7 +2004,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   // > servoWriteMicroseconds/deviceId/b16 ms
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("Arduino cannot write servo %s microseconds when not connected", servo.getName());
       return;
     }
 
@@ -2037,7 +2015,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   public void setAref(String aref) {
     if (!isConnected()) {
-      warn("Arduino cannot set speed when not connected - connected %b msg %b", isConnected());
+      warn("cannot set Aref when not connected");
       return;
     }
     aref = aref.toUpperCase();
@@ -2252,7 +2230,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
 
   @Override
   public void ackTimeout() {
-    log.warn("{} Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", getName(), port);
+    log.warn("{} Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", getName(), config.port);
   }
 
   @Override
@@ -2345,33 +2323,12 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   }
 
   @Override
-  public ArduinoConfig getConfig() {
-    super.getConfig();
-
-    // FIXME "port" shouldn't exist only config.port !
-    config.port = port;
-    config.connect = isConnected();
-
-    return config;
-  }
-
-  @Override
   public ArduinoConfig apply(ArduinoConfig c) {
     super.apply(c);
-
-    if (msg == null) {
+    if (config.connect && config.port != null) {      
       serial = (Serial) startPeer("serial");
-      if (serial == null) {
-        log.error("serial is null");
-      }      
       msg.setSerial(serial);
-      serial.addByteListener(this);
-    } else {
-      // TODO: figure out why this gets called so often.
-      log.info("Init serial we already have a msg class.");
-    }
-
-    if (config.connect && config.port != null) {
+      serial.addByteListener(this);      
       connect(config.port);
     }
 
@@ -2391,12 +2348,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   public static void main(String[] args) {
     try {
 
-      // Platform.setVirtual(true);
-
       LoggingFactory.init(Level.INFO);
-
-      Runtime runtime = Runtime.getInstance();
-      runtime.saveAllDefaults();
 
       Runtime.start("arduino", "Arduino");
       Runtime.start("webgui", "WebGui");
@@ -2406,115 +2358,12 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       if (isDone) {
         return;
       }
-      // Platform.setVirtual(true);
 
-      /*
-       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-       * webgui.autoStartBrowser(false); webgui.setPort(8887);
-       * webgui.startService();
-       */
-
-      // Runtime.start("gui", "SwingGui");
-      Serial.listPorts();
-
-      Arduino hub = (Arduino) Runtime.start("controller", "Arduino");
-      Runtime.start("pir", "Pir");
-
-      hub.connect("/dev/ttyACM0");
-
-      // hub.enableAck(false);
-
-      ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
-      sc.setPin(3);
-      hub.attach(sc);
-      sc = (ServoControl) Runtime.start("s2", "Servo");
-      sc.setPin(9);
-      hub.attach(sc);
-
-      hub.detach();
-
-      // hub.enableAck(true);
-      /*
-       * sc = (ServoControl) Runtime.start("s3", "Servo"); sc.setPin(12);
-       * hub.attach(sc);
-       */
-
-      log.info("here");
-      // hub.connect("COM6"); // uno
-
-      // hub.startTcpServer();
-
-      VirtualArduino vmega = null;
-
-      vmega = (VirtualArduino) Runtime.start("vmega", "VirtualArduino");
-      vmega.connect("COM7");
-      Serial sd = vmega.getSerial();
-      sd.startTcpServer();
-
-      // Runtime.start("webgui", "WebGui");
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-
-      if (mega.isVirtual()) {
-        vmega = mega.getVirtual();
-        vmega.setBoardMega();
-      }
-
-      // mega.getBoardTypes();
-      // mega.setBoardMega();
-      // mega.setBoardUno();
-      mega.connect("COM7");
-
-      /*
-       * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
-       * uno.connect("COM6");
-       */
-
-      // log.info("port names {}", mega.getPortNames());
-
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      // servo.load();
-      log.info("rest is {}", servo.getRest());
-      servo.save();
-      // servo.setPin(8);
-      servo.attach(mega);
-
-      servo.moveTo(90.0);
-
-      /*
-       * servo.moveTo(3); sleep(300); servo.moveTo(130); sleep(300);
-       * servo.moveTo(90); sleep(300);
-       * 
-       * 
-       * // minmax checking
-       * 
-       * servo.invoke("moveTo", 120);
-       */
-
-      /*
-       * mega.attach(servo);
-       * 
-       * servo.moveTo(3);
-       * 
-       * servo.moveTo(30);
-       * 
-       * mega.enablePin("A4");
-       * 
-       * // arduino.setBoardMega();
-       * 
-       * Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)
-       * Runtime.start("adafruit", "Adafruit16CServoDriver");
-       * adafruit.attach(mega); mega.attach(adafruit);
-       */
-
-      // servo.attach(arduino, 8, 90);
-
-      // Runtime.start("webgui", "WebGui");
-      // Service.sleep(3000);
-
-      // remote.startListening();
-
-      // Runtime.start("webgui", "WebGui");
+//    Platform.setVirtual(true);
+//    Serial sd = vmega.getSerial();
+//    sd.startTcpServer();
+//    Serial.listPorts();
+     
 
     } catch (Exception e) {
       log.error("main threw", e);

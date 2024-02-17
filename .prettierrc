@@ -1,4 +1,5 @@
 {
-    "htmlWhitespaceSensitivity": "ignore",
-    "printWidth": 180
+  "htmlWhitespaceSensitivity": "ignore",
+  "printWidth": 180,
+  "semi": false
 }

@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -141,9 +142,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
   transient protected Thread thisThread = null;
 
-  transient protected Inbox inbox = null;
+  final transient protected Inbox inbox;
 
-  protected Outbox outbox = null;
+  final protected Outbox outbox;
 
   protected String serviceVersion = null;
 
@@ -515,8 +516,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
 
   static public String getResourceRoot() {
-    // setting resource root details
-    return "resource";
+    return Runtime.getInstance().getConfig().resource;
   }
 
   /**
@@ -721,8 +721,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
-  public void addListener(String topicMethod, String callbackName) {
-    addListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
+  public void addListener(String localMethod, String remoteName) {
+    addListener(localMethod, remoteName, CodecUtils.getCallbackTopicName(localMethod));
   }
 
   /**
@@ -730,18 +730,18 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * "subscribe" from a different service FIXME !! - implement with HashMap or
    * HashSet .. WHY ArrayList ???
    * 
-   * @param topicMethod
+   * @param localMethod
    *          - method when called, it's return will be sent to the
-   *          callbackName/calbackMethod
-   * @param callbackName
+   *          remoteName.remoteMethod
+   * @param remoteName
    *          - name of the service to send return message to
-   * @param callbackMethod
+   * @param remoteMethod
    *          - name of the method to send return data to
    */
   @Override
-  public void addListener(String topicMethod, String callbackName, String callbackMethod) {
-    callbackName = CodecUtils.getFullName(callbackName);
-    MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
+  public void addListener(String localMethod, String remoteName, String remoteMethod) {
+    remoteName = CodecUtils.getFullName(remoteName);
+    MRLListener listener = new MRLListener(localMethod, remoteName, remoteMethod);
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
       boolean found = false;
@@ -889,27 +889,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
+  @Deprecated /* use publishStatus */
   public void broadcastStatus(Status status) {
-    long now = System.currentTimeMillis();
-    /*
-     * if (status.equals(lastStatus) && now - lastStatusTs <
-     * statusBroadcastLimitMs) { return; }
-     */
-    if (status.name == null) {
-      status.name = getName();
-    }
-    if (status.level.equals(StatusLevel.ERROR)) {
-      lastError = status;
-      lastErrorTs = now;
-      log.error(status.toString());
-      invoke("publishError", status);
-    } else {
-      log.info(status.toString());
-    }
-
     invoke("publishStatus", status);
-    lastStatusTs = now;
-    lastStatus = status;
   }
 
   @Override
@@ -1209,6 +1191,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // happen in other situations...
     if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
+      if (Runtime.getService(msg.getName()) == null) {
+        error("cannot get service %s", msg.getName());
+        return null;
+      }
       return Runtime.getService(msg.getName()).invoke(msg);
     }
 
@@ -1434,7 +1420,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
 
     // Java generics don't let us create a new StaticType using
-    // P here because the type variable is erased, so we have to cast anyway for now
+    // P here because the type variable is erased, so we have to cast anyway for
+    // now
     ConfigurableService<P> si = (ConfigurableService<P>) Runtime.getService(peerName);
     if (si != null) {
       // peer is currently running - get its config
@@ -1465,7 +1452,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     field.set(sc, value);
     savePeerConfig(peerKey, sc);
     String peerName = getPeerName(peerKey);
-    var cs = Runtime.getConfigurableService(peerName, new StaticType<Service<ServiceConfig>>() {});
+    var cs = Runtime.getConfigurableService(peerName, new StaticType<Service<ServiceConfig>>() {
+    });
     if (cs != null) {
       cs.apply(sc); // TODO - look for applies if its read from the file system
                     // it needs to update Runtime.plan
@@ -1473,7 +1461,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
     // broadcast change
     invoke("getPeerConfig", peerKey);
-    Runtime.getPlan().put(peerName, sc);
     Runtime runtime = Runtime.getInstance();
     runtime.broadcastState();
   }
@@ -1533,6 +1520,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (newListeners.size() > 0) {
       sc.listeners = newListeners;
     }
+    
+    if (sc.listeners != null) {
+      Collections.sort(sc.listeners, new MrlListenerComparator());
+    }
+       
     return sc;
   }
 
@@ -1612,7 +1604,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @return the service
    */
   @Override
-  public Service publishState() {
+  public Service<T> publishState() {
     return this;
   }
 
@@ -1724,8 +1716,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   public boolean save() {
     Runtime runtime = Runtime.getInstance();
-    // save all services ... weird notation - should have explicit
-    // saveAllServices
     return runtime.saveService(runtime.getConfigName(), getName(), null);
   }
 
@@ -1994,31 +1984,24 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
       return null;
     }
-
-    ServiceInterface si = Runtime.getService(peer.name);
-    if (si != null) {
-      // so this peer is already started, but are we responsible for
-      // all subpeers ?
-      return si;
-    }
-
-    // request to modify the plan's runtime to start all service that match
-    // actualName.*
-    Plan plan = Runtime.getPlan();
-    ServiceConfig sc = plan.get(peer.name);
-
-    if (sc == null) {
-      log.info("no current plan for peer {} - since this is a peer request we can make a plan", peer.name);
-      // error("plan.get(%s) == null", actualName);
-      Runtime.load(peer.name, peer.type);
-      sc = plan.get(peer.name);
-    }
-
+  
     // start peer requested
-    Runtime.start(peer.name, sc.type);
     broadcastState();
-    return Runtime.getService(peer.name);
+    return Runtime.start(peer.name);
   }
+  
+  @Override
+  synchronized public void startPeers(String[] peerKeys) {
+    
+    if (peerKeys == null) {
+      return;
+    }
+    
+    for (String peerKey: peerKeys) {
+      startPeer(peerKey);
+    }    
+  }
+
 
   /**
    * Release a peer by peerKey. There can be advantages to refer to a peer with
@@ -2029,11 +2012,17 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * 
    * @param peerKey
    */
+  @Override
   synchronized public void releasePeer(String peerKey) {
 
     if (getConfig() != null && getConfig().getPeer(peerKey) != null) {
-      Peer peer = getConfig().getPeer(peerKey);
-      ServiceConfig sc = Runtime.getPlan().get(peer.name);
+      ServiceConfig sc = null;
+      String peerName = getPeerName(peerKey);
+      ServiceInterface si = Runtime.getService(peerName);
+      if (si != null) {
+        sc = si.getConfig();
+      }
+        
       // peer recursive
       if (sc != null && sc.getPeers() != null) {
         for (String subPeerKey : sc.getPeers().keySet()) {
@@ -2043,12 +2032,24 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
           }
         }
       }
-      Plan plan = Runtime.getPlan();
-      plan.removeRegistry(peer.name);
-      Runtime.release(peer.name);
+      Runtime.release(peerName);
       broadcastState();
     } else {
       error("%s.releasePeer(%s) does not exist", getName(), peerKey);
+    }
+  }
+  
+  /**
+   * Release a set of peers in the order they are provided.
+   */
+  @Override
+  synchronized public void releasePeers(String[] peerKeys) {
+    if (peerKeys == null) {
+      return;
+    }
+    
+    for (String peerKey: peerKeys) {
+      releasePeer(peerKey);
     }
   }
 
@@ -2175,11 +2176,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   @Override
   public Status error(Exception e) {
     log.error("status:", e);
-    Status ret = Status.error(e);
-    ret.name = getName();
-    log.error(ret.toString());
-    invoke("publishStatus", ret);
-    return ret;
+    Status status = Status.error(e);
+    status.name = getName();
+    log.error(status.toString());
+    invoke("publishStatus", status);
+    return status;
   }
 
   @Override
@@ -2194,20 +2195,27 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public Status error(String msg) {
-    return error(msg, (Object[]) null);
+    Status status = Status.error(msg);
+    status.name = getName();
+    log.error(status.toString());
+    lastError = status;
+    invoke("publishStatus", status);
+    return status;
   }
 
   public Status warn(String msg) {
-    return warn(msg, (Object[]) null);
-  }
-
-  @Override
-  public Status warn(String format, Object... args) {
-    Status status = Status.warn(format, args);
+    Status status = Status.warn(msg);
     status.name = getName();
     log.warn(status.toString());
     invoke("publishStatus", status);
     return status;
+  }
+
+  @Override
+  public Status warn(String format, Object... args) {
+    String msg = String.format(Objects.requireNonNullElse(format, ""), args);
+
+    return warn(msg);
   }
 
   /**
@@ -2245,8 +2253,18 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return status;
   }
 
+  public Status publishWarn(Status status) {
+    return status;
+  }
+
   @Override
   public Status publishStatus(Status status) {
+    // demux over different channels
+    if (status.isError()) {
+      invoke("publishError", status);
+    } else if (status.isWarn()) {
+      invoke("publishWarn", status);
+    }
     return status;
   }
 
@@ -2827,7 +2845,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   final public Plan getDefault() {
-    return ServiceConfig.getDefault(Runtime.getPlan(), getName(), this.getClass().getSimpleName());
+    return ServiceConfig.getDefault(new Plan("runtime"), getName(), this.getClass().getSimpleName());
   }
 
   @Override
@@ -2848,15 +2866,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       return;
     }
 
-    // updating plan - FIXME remove plan
-    Runtime.getPlan().put(getName(), sc);
-
     // applying config to self
     apply((T) sc);
   }
 
   public void applyPeerConfig(String peerKey, ServiceConfig config) {
-    applyPeerConfig(peerKey, config, new StaticType<>() {});
+    applyPeerConfig(peerKey, config, new StaticType<>() {
+    });
   }
 
   /**
@@ -2868,8 +2884,6 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
   public <P extends ServiceConfig> void applyPeerConfig(String peerKey, P config, StaticType<Service<P>> configServiceType) {
     String peerName = getPeerName(peerKey);
-
-    Runtime.getPlan().put(peerName, config);
 
     // meh - templating is not very helpful here
     ConfigurableService<P> si = Runtime.getService(peerName, configServiceType);
@@ -2891,7 +2905,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     String oldName = peer.name;
     peer.name = fullName;
     // update plan ?
-    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peer.type);
+    ServiceConfig.getDefault(new Plan("runtime"), peer.name, peer.type);
     // FIXME - determine if only updating the Plan in memory is enough,
     // should we also make or update a config file - if the config path is set?
     info("updated %s name to %s", oldName, peer.name);
@@ -2915,26 +2929,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
   public void updatePeerType(String key, String peerType) {
 
-    // MAKE NOTE ! - CONFIG IS DIFFERENT THAN PLAN !!!! MODIFY BOTH ???!?
-
-    // get current plan
-    Plan plan = Runtime.getPlan();
-
-    // get self
-    ServiceConfig sc = plan.get(getName());
-    if (sc != null) {
-      sc.putPeerType(key, String.format("%s.%s", getName(), key), peerType);
-    }
-
     Peer peer = getConfig().getPeer(key);
     peer.type = peerType;
 
-    // not Needed
-    // config.putPeerType(key, String.format("%s.%s", key, getName()),
-    // peerType);
-    plan.remove(peer.name);
-    // FIXME - rename putDefault
-    ServiceConfig.getDefault(Runtime.getPlan(), peer.name, peerType);
+    ServiceConfig.getDefault(new Plan("runtime"), peer.name, peerType);
     Runtime runtime = Runtime.getInstance();
     String configName = runtime.getConfigName();
     // Seems a bit invasive - but yml file overrides everything

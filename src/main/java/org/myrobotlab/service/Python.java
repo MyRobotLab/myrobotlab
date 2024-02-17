@@ -25,6 +25,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.Processor;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener {
+public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener, Processor {
   
   /**
    * this thread handles all callbacks to Python process all input and sets msg
@@ -180,7 +181,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
-  private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
+  private final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
 
@@ -200,7 +201,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * @param interp
    * @return
    */
-  private static synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
+  private synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
     // TODO change this from a synchronized method to a few blocks to
     // improve concurrent performance
     if (objectCache.containsKey(name)) {
@@ -430,6 +431,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    *          string of code to run
    * @return true/false
    */
+  @Override
   public boolean exec(String code) {
     return exec(code, true);
   }
@@ -677,7 +679,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
   @Override
   public void onReleased(String serviceName) {
-    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(serviceName));
+    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(CodecUtils.getShortName(serviceName)));
     exec(registerScript, false);
   }
 
@@ -739,8 +741,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   }
 
   /**
-   * Saves a script to the file system default will be in
-   * data/Py4j/{serviceName}/{scriptName}
+   * Saves a script to the file system 
    * 
    * @param scriptName
    * @param code
@@ -750,7 +751,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
       scriptName = scriptName + ".py";
     }
-    FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    // FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    FileIO.toFile(scriptName, code);
     info("saved file %s", scriptName);
   }
 
@@ -888,8 +890,6 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
 
     localPythonFiles = getFileListing();
 
-    attachPythonConsole();
-
     String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
@@ -899,6 +899,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
+    attachPythonConsole();
+    
     // initialize all the pre-existing service before python was created
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
     for (ServiceInterface service : services.values()) {

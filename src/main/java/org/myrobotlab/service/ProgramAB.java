@@ -31,6 +31,7 @@ import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
+import org.myrobotlab.programab.handlers.oob.OobProcessor;
 import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
@@ -97,6 +98,8 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   transient SimpleLogPublisher logPublisher = null;
 
+  final transient private OobProcessor oobProcessor;
+
   /**
    * Default constructor for the program ab service.
    * 
@@ -108,6 +111,7 @@ public class ProgramAB extends Service<ProgramABConfig>
    */
   public ProgramAB(String n, String id) {
     super(n, id);
+    oobProcessor = new OobProcessor(this);
   }
 
   public String getBotName(File file) {
@@ -758,7 +762,7 @@ public class ProgramAB extends Service<ProgramABConfig>
   public void addCategory(String pattern, String template) {
     addCategory(pattern, template, "*");
   }
-  
+
   /**
    * Verifies and adds a new path to the search directories for bots
    * 
@@ -1099,7 +1103,7 @@ public class ProgramAB extends Service<ProgramABConfig>
         addBotPath(botPath);
       }
     }
-    
+
     if (c.botDir == null) {
       c.botDir = getResourceDir();
     }
@@ -1112,17 +1116,38 @@ public class ProgramAB extends Service<ProgramABConfig>
     if (c.currentUserName != null) {
       setCurrentUserName(c.currentUserName);
     }
-    
+
     if (c.currentBotName != null) {
       setCurrentBotName(c.currentBotName);
-    }    
-    
-    if (c.startTopic != null) {
-      setTopic(c.startTopic);  
     }
-    
+
+    if (c.startTopic != null) {
+      setTopic(c.startTopic);
+    }
 
     return c;
+  }
+
+  /**
+   * Set the current locale for this service. In ProgramAB's case if a bot
+   * matches the local then set the bot
+   * 
+   */
+  @Override
+  public void setLocale(String code) {
+    if (code == null) {
+      error("locale cannot be null");
+      return;
+    }
+    locale = new Locale(code);
+    log.info("{} new locale is {}", getName(), code);
+
+    for (String bot : bots.keySet()) {
+      if (code.equals(bot)) {
+        setCurrentBotName(bot);
+      }
+    }
+    broadcastState();
   }
 
   public static void main(String args[]) {
@@ -1302,7 +1327,7 @@ public class ProgramAB extends Service<ProgramABConfig>
 
   @Override
   public void onUtterance(Utterance utterance) throws Exception {
-    
+
     log.info("Utterance Received " + utterance);
 
     boolean talkToBots = false;
@@ -1367,17 +1392,18 @@ public class ProgramAB extends Service<ProgramABConfig>
       }
     }
   }
-  
+
   /**
    * This receiver can take a config published by another service and sync
    * predicates from it
+   * 
    * @param cfg
    */
   public void onConfig(ServiceConfig cfg) {
-    Yaml yaml = new Yaml();    
+    Yaml yaml = new Yaml();
     String yml = yaml.dumpAsMap(cfg);
     Map<String, Object> cfgMap = yaml.load(yml);
-    
+
     for (Map.Entry<String, Object> entry : cfgMap.entrySet()) {
       if (entry.getValue() == null) {
         setPredicate("cfg_" + entry.getKey(), null);
@@ -1385,7 +1411,7 @@ public class ProgramAB extends Service<ProgramABConfig>
         setPredicate("cfg_" + entry.getKey(), entry.getValue().toString());
       }
     }
-    
+
     invoke("getPredicates");
   }
 
@@ -1398,20 +1424,24 @@ public class ProgramAB extends Service<ProgramABConfig>
     return topicChange;
   }
 
-  public String getTopic() {    
+  public String getTopic() {
     return getPredicate(getCurrentUserName(), "topic");
   }
-  
-  public String getTopic(String username) {    
+
+  public String getTopic(String username) {
     return getPredicate(username, "topic");
   }
-  
-  public void setTopic(String username, String topic) {    
+
+  public void setTopic(String username, String topic) {
     setPredicate(username, "topic", topic);
   }
-  
-  public void setTopic(String topic) {    
+
+  public void setTopic(String topic) {
     setPredicate(getCurrentUserName(), "topic", topic);
+  }
+
+  public OobProcessor getOobProcessor() {
+    return oobProcessor;
   }
 
 }

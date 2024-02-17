@@ -453,6 +453,12 @@ public class Random extends Service<RandomConfig> {
     }
     broadcastState();
   }
+  
+  @Override
+  public void releaseService() {
+    disable();
+    super.releaseService();
+  }
 
   public static void main(String[] args) {
     try {

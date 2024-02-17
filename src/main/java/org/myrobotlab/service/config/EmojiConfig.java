@@ -7,6 +7,9 @@ import org.myrobotlab.framework.Plan;
 
 public class EmojiConfig extends ServiceConfig {
 
+  /**
+   * emoji repo
+   */
   public String emojiSourceUrlTemplate = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/{size}/emoji_{code}.png";
 
   /**
@@ -14,7 +17,10 @@ public class EmojiConfig extends ServiceConfig {
    */
   public Map<String, String> map = new HashMap<String, String>();
 
-  public int size = 512;
+  /**
+   * repo has 32, 72, 128, and 512
+   */
+  public int size = 72;
   
   @Override
   public Plan getDefault(Plan plan, String name) {

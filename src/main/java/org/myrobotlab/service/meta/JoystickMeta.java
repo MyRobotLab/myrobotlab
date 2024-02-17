@@ -20,12 +20,12 @@ public class JoystickMeta extends MetaData {
     addCategory("control", "telerobotics");
     addDependency("net.java.jinput", "jinput", "2.0.9");
 
-    log.info("Joystick.getMetaData {}  isArm() {}", platform, platform.isArm());
+    log.debug("Joystick.getMetaData {}  isArm() {}", platform, platform.isArm());
     if (platform.isArm()) {
-      log.info("adding armv7 native dependencies");
+      log.debug("adding armv7 native dependencies");
       addDependency("jinput-natives", "jinput-natives-armv7.hfp", "2.0.7", "zip");
     } else {
-      log.info("adding jinput native dependencies");
+      log.debug("adding jinput native dependencies");
       addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
     }
   }

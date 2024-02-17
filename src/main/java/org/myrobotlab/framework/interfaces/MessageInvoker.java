@@ -7,8 +7,8 @@ public interface MessageInvoker {
    * Invoke a method on a service with a Message POPO, typical internal 
    * messaging used from dequing messages from the inbox
    * 
-   * @param msg
-   * @return
+   * @param msg - message to invoke
+   * @return - returned value
    */
   public Object invoke(Message msg);
 

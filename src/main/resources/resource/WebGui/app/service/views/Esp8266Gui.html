@@ -1,0 +1,11 @@
+<div class="row">
+  <h3>{{onEpoch}}</h3>
+</div>
+<div class="row">
+  <form class="form-inline">
+    <br />
+    <input class="form-control" type="text" ng-model="service.config.host" placeholder="host/ip address" title="dns or ip of esp8226" press-enter="start(newName, newType)" />
+    <button class="btn btn-default" ng-click="msg.send('setHost', service.config.host)">connect</button>
+    <img src="Esp8266/esp8266-pinout.png" />
+  </form>
+</div>

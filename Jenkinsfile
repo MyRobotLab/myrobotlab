@@ -131,7 +131,12 @@ pipeline {
             if (currentBuild.result == 'SUCCESS'){
                workyNoWorky = 'Worky !'
             }
-            discordSend description: workyNoWorky, footer: '', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: 'https://discord.com/api/webhooks/1015707773260005388/1i6svmKMHYKAFbTXBgen_4CClypYpeqg4WEBMFnc-46Vmf1TNWCxW-ASgDE7mDkkix3u'
+
+            // Fetch the Discord webhook URL from the secure store
+            withCredentials([string(credentialsId: 'jenkins-discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
+                // Use the secure webhook URL for sending the message
+                discordSend description: workyNoWorky, footer: '', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: DISCORD_WEBHOOK_URL
+            }            
          }
       }
 

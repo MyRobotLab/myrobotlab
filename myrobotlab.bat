@@ -28,5 +28,5 @@ IF NOT "%*"=="" (
         "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --install --log-file myrobotlab-install.log
     )
 
-    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --log-level info -s vertx Vertx intro Intro python Python
+    "%JAVA%" %JAVA_OPTIONS% -cp %CLASSPATH% org.myrobotlab.service.Runtime --log-level info -s log Log vertx Vertx intro Intro python Python
 )

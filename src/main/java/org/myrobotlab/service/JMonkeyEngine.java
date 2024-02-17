@@ -2489,7 +2489,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         i01.startPeer("simulator");
       }
 
-      Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
       // Runtime.main(new String[] { "--interactive", "--id", "admin" });
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
 

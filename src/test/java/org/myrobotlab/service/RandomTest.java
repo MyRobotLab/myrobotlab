@@ -17,7 +17,7 @@ public class RandomTest extends AbstractServiceTest {
              * rarely happens - seems not useful and silly
              */
   public Service createService() throws Exception {
-    return (Service) Runtime.start("random", "Random");
+    return (Service) Runtime.start("randomTest", "Random");
   }
   
   @Before /* before each test */
@@ -34,7 +34,7 @@ public class RandomTest extends AbstractServiceTest {
   @Override
   public void testService() throws Exception {
     Clock clock = (Clock) Runtime.start("clock", "Clock");
-    Random random = (Random) Runtime.start("random", "Random");
+    Random random = (Random) Runtime.start("randomTest", "Random");
 
     clock.stopClock();
     clock.setInterval(1000);
@@ -43,7 +43,7 @@ public class RandomTest extends AbstractServiceTest {
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.enable();
 
-    sleep(500);
+    sleep(1000);
 
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
     
@@ -74,7 +74,7 @@ public class RandomTest extends AbstractServiceTest {
     // disable one method - leave other enabled
     random.disable("clock.startClock");
     clock.stopClock();
-    clock.setInterval(999999);
+    clock.setInterval(9999);
     sleep(200);
     assertTrue("clock should not be started 3", !clock.isClockRunning());
     assertTrue(String.format("random method 2 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
@@ -83,9 +83,9 @@ public class RandomTest extends AbstractServiceTest {
     // disable all
     random.disable();
     sleep(200);
-    clock.setInterval(999999);
+    clock.setInterval(9999);
     assertTrue("clock should not be started 4", !clock.isClockRunning());   
-    assertEquals(999999, (long)clock.getInterval());
+    assertEquals(9999, (long)clock.getInterval());
 
     // re-enable all that were previously enabled but not explicitly disabled ones
     random.enable();
