@@ -260,7 +260,6 @@ public class VirtualArduino extends Service<VirtualArduinoConfig> implements Por
     }
     // sleep(300);
     disconnect();
-    super.releaseService();
   }
 
   public Serial getSerial() {

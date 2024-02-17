@@ -188,6 +188,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
+    addDefaultGlobalConfig(plan, "python", "python", "Python");
     addDefaultPeerConfig(plan, name, "py4j", "Py4j", false);
     addDefaultPeerConfig(plan, name, "random", "Random", false);
     addDefaultPeerConfig(plan, name, "right", "Arduino", false);
@@ -370,7 +371,7 @@ public class InMoov2Config extends ServiceConfig {
     // exists ?
     fsm.current = "boot";
     fsm.transitions.add(new Transition("boot", "wake", "wake"));
-    // fsm.transitions.add(new Transition("wake", "idle", "idle")); wake, setup, nor sleep should be affected by idle
+    // setup, nor sleep should be affected by idle
     fsm.transitions.add(new Transition("setup", "setup_done", "idle"));
     fsm.transitions.add(new Transition("idle", "random", "random"));
     fsm.transitions.add(new Transition("random", "idle", "idle"));
@@ -528,9 +529,9 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
     // listeners.add(new Listener("publishProcessMessage",
     // getPeerName("python"), "onPythonMessage"));
-    listeners.add(new Listener("publishProcessMessage", "python", "onPythonMessage"));
+    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
     
-    listeners.add(new Listener("publishPython", "python"));
+    listeners.add(new Listener("publishPython", getPeerName("python")));
 
     // InMoov2 --to--> InMoov2
     listeners.add(new Listener("publishMoveHead", getPeerName("head"), "onMove"));
