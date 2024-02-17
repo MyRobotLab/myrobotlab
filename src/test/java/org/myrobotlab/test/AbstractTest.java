@@ -173,8 +173,6 @@ public class AbstractTest {
     Runtime.releaseAll(true, true);
     // wait for draining threads
     sleep(100);
-    // resets runtime with fresh new instance
-    Runtime.getInstance();
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
@@ -189,9 +187,9 @@ public class AbstractTest {
       log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
 
-    // log.warn("end of test - id {} remaining services after release {}",
-    // Platform.getLocalInstance().getId(),
-    // Arrays.toString(Runtime.getServiceNames()));
+    // resets runtime with fresh new instance
+    Runtime.getInstance();
+
   }
 
   public void setVirtual() {
