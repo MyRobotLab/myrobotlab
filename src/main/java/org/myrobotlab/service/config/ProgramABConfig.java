@@ -11,11 +11,6 @@ public class ProgramABConfig extends ServiceConfig {
   public String[] textFilters;
   
   /**
-   * a directory ProgramAB will scan for new bots
-   */
-  public String botDir;
-
-  /**
    * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
@@ -39,6 +34,14 @@ public class ProgramABConfig extends ServiceConfig {
    * current sleep/wake value
    */
   public boolean sleep = false;
+  
+  
+  /**
+   * Specific list of channels ProgramAB will respond to, if not defined, then
+   * ProgramAB will respond to all channels
+   */
+  public List<String> channels = new ArrayList<>();
+  
   
   /**
    * topic to start with, if null then topic will be loaded from predicates of 
