@@ -516,7 +516,9 @@ public class InMoov2Config extends ServiceConfig {
 
     LogConfig log = (LogConfig) plan.get(getPeerName("log"));
     log.level = "WARN";
-    log.listeners.add(new Listener("publishLogEvents", name));
+    log.listeners.add(new Listener("publishErrors", name));
+    // service --to--> InMoov2
+
 
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
@@ -542,6 +544,8 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
+    
+    
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
     

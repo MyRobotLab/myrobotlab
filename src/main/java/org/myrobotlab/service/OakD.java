@@ -19,8 +19,10 @@ import org.slf4j.Logger;
 
 /**
  * 
+ * https://github.com/luxonis/depthai
+ * python3 depthai_demo.py -cb callbacks.py
  * 
- * 
+ * https://github.com/luxonis/depthai-experiments/tree/master/gen2-face-recognition
  * 
  * @author GroG
  *

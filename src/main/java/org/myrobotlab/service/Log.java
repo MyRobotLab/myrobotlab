@@ -132,6 +132,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   @Override
   public void addError(String arg0, Throwable arg1) {
+    System.out.println("addError");
   }
 
   @Override
@@ -202,6 +203,15 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     if (buffer.size() > 0) {
       // bucket add to sliding window
       logs.addAll(buffer);
+      
+      List<LogEntry> errors = new ArrayList<>();
+      for(int i = 0; i < buffer.size(); ++i) {
+        errors.add(buffer.get(i));
+      }
+      if (errors.size() > 0) {
+        invoke("publishErrors", errors);
+      }
+      
       invoke("publishLogEvents", buffer);
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
