@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.util.List;
-import java.util.Set;
 
 import org.myrobotlab.discord.MrlDiscordBotListener;
 import org.myrobotlab.framework.Service;
@@ -9,7 +8,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config.DiscordBotConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.ImageListener;
@@ -86,6 +84,10 @@ public class DiscordBot extends Service<DiscordBotConfig> implements UtterancePu
       attachUtteranceListener(attachable.getName());
     }
 
+    if (attachable instanceof UtterancePublisher) {
+      attachUtterancePublisher(attachable.getName());
+    }
+
     if (attachable instanceof ImagePublisher) {
       attachImagePublisher(attachable.getName());
     }
@@ -93,6 +95,22 @@ public class DiscordBot extends Service<DiscordBotConfig> implements UtterancePu
     if (!(attachable instanceof UtteranceListener) && !(attachable instanceof ImagePublisher)) {
       error("don't know how to attach a %s", attachable.getName());
     }
+  }
+
+  @Override
+  public void detach(Attachable attachable) {
+    if (attachable instanceof UtteranceListener) {
+      detachUtteranceListener(attachable.getName());
+    }
+
+    if (attachable instanceof UtterancePublisher) {
+      detachUtterancePublisher(attachable.getName());
+    }
+
+    if (attachable instanceof ImagePublisher) {
+      detachImagePublisher(attachable.getName());
+    }
+
   }
 
   @Override

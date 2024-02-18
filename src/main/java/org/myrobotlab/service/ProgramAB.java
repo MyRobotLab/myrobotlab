@@ -1349,6 +1349,16 @@ public class ProgramAB extends Service<ProgramABConfig>
         if (!config.sleep) {
           shouldIRespond = true;
         }
+        
+        if (config.channels != null && config.channels.size() > 0) {
+          // assume false
+          shouldIRespond = false;
+          for (String channelName : config.channels) {
+            if (channelName.equals(utterance.channelName)) {
+              shouldIRespond = true;
+            }
+          }
+        }
       }
     }
 

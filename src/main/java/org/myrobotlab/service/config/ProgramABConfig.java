@@ -35,6 +35,14 @@ public class ProgramABConfig extends ServiceConfig {
    */
   public boolean sleep = false;
   
+  
+  /**
+   * Specific list of channels ProgramAB will respond to, if not defined, then
+   * ProgramAB will respond to all channels
+   */
+  public List<String> channels = new ArrayList<>();
+  
+  
   /**
    * topic to start with, if null then topic will be loaded from predicates of 
    * a new session if available, this means a config/{username}.predicates.txt 
