@@ -1222,11 +1222,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * @param volume
    */
   public void onPeak(double volume) {
-    if (config.neoPixelFlashWhenSpeaking && !"boot".equals(getState())) {
-      if (volume > 0.5) {
-        invoke("publishSpeakingFlash", "speaking");
-      }
-    }
+    processMessage("onPeak", volume);
   }
 
   /**
