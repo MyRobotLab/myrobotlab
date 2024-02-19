@@ -255,13 +255,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   }
 
   @Override
-  public FiniteStateMachineConfig getConfig() {
-    super.getConfig();
-    config.current = getState();
-    return config;
-  }
-
-  @Override
   public FiniteStateMachineConfig apply(FiniteStateMachineConfig c) {
     super.apply(c);
 
@@ -280,8 +273,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     }
 
     // setCurrent
-    if (c.current != null) {
-      setCurrent(c.current);
+    if (c.start != null) {
+      setCurrent(c.start);
     }
 
     return c;

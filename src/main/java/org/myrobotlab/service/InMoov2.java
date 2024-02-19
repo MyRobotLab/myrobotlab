@@ -102,7 +102,6 @@ public class InMoov2 extends Service<InMoov2Config>
     double batteryLevel = 100;
     public long count = 0;
     public List<LogEntry> errors;
-    public boolean isPirOn = false;
     public String state;
     public long ts = System.currentTimeMillis();
 
@@ -110,7 +109,6 @@ public class InMoov2 extends Service<InMoov2Config>
       this.state = inmoov.state;
       this.errors = inmoov.errors;
       this.count = inmoov.heartbeatCount;
-      this.isPirOn = inmoov.isPirOn;
     }
   }
 
@@ -236,8 +234,6 @@ public class InMoov2 extends Service<InMoov2Config>
   protected transient HtmlFilter htmlFilter;
 
   protected transient ImageDisplay imageDisplay;
-
-  protected boolean isPirOn = false;
 
   protected boolean isSpeaking = false;
 
@@ -1239,16 +1235,12 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public void onPirOn() {
     log.info("onPirOn");
-    // FIXME flash on config.flashOnBoot
-    invoke("publishFlash", "pir");
-    String botState = chatBot.getPredicate("botState");
-    if ("sleeping".equals(botState)) {
-      invoke("publishEvent", "WAKE");
-    }
+    processMessage("onPirOn");
   }
 
   public void onPirOff() {
     log.info("onPirOff");
+    processMessage("onPirOff");
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
@@ -1682,6 +1674,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
+   * One of the most important publishing point.
    * Processing publishing point, where everything InMoov2 wants to be processed
    * is turned into a message and published.
    * 

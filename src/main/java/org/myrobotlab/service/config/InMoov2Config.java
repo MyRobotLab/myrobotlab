@@ -369,7 +369,7 @@ public class InMoov2Config extends ServiceConfig {
     // TODO - events easily gotten from InMoov data ?? auto callbacks in python
     // if
     // exists ?
-    fsm.current = "boot";
+    fsm.start = "boot";
     fsm.transitions.add(new Transition("boot", "wake", "wake"));
     // setup, nor sleep should be affected by idle
     fsm.transitions.add(new Transition("setup", "setup_done", "idle"));

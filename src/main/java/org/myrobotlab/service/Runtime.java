@@ -433,11 +433,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       RuntimeConfig currentConfig = Runtime.getInstance().config;
 
       for (String service : plansRtConfig.getRegistry()) {
-        // FIXME - determine if you want to return a complete merge of activated
-        // or just "recent"
-        if (Runtime.getService(service) != null) {
-          continue;
-        }
         ServiceConfig sc = plan.get(service);
         if (sc == null) {
           runtime.error("could not get %s from plan", service);
