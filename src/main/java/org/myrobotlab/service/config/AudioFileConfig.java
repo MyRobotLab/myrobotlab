@@ -2,8 +2,7 @@ package org.myrobotlab.service.config;
 
 import java.util.List;
 import java.util.Map;
-
-import org.myrobotlab.service.AudioFile;
+import java.util.TreeMap;
 
 public class AudioFileConfig extends ServiceConfig {
 
@@ -13,7 +12,7 @@ public class AudioFileConfig extends ServiceConfig {
   
   public String currentPlaylist = "default";
   
-  public Map<String, List<String>> playlists;
+  public Map<String, List<String>> playlists = new TreeMap<>();
   
   @Deprecated /* use regular "listeners" from ServiceConfig parent */
   public String[] audioListeners;
