@@ -37,7 +37,7 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean flashOnErrors = true;
 
-  public boolean flashOnPir;
+  public boolean flashOnPir = false;
 
   public boolean forceMicroOnIfSleeping = true;
 
@@ -276,7 +276,8 @@ public class InMoov2Config extends ServiceConfig {
       }
     }
 
-    chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    chatBot.listeners.add(new Listener("publishText", getPeerName("htmlFilter"), "onText"));
+    chatBot.listeners.add(new Listener("publishSession", name));
 
     Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
     gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));

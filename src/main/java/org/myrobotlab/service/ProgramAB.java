@@ -711,11 +711,24 @@ public class ProgramAB extends Service<ProgramABConfig>
     }
 
     session = new Session(this, userName, botInfo);
-    sessions.put(getSessionKey(userName, botName), session);
+    String sessionKey = getSessionKey(userName, botName);
+    sessions.put(sessionKey, session);
 
     log.info("Started session for bot botName:{} , userName:{}", botName, userName);
     setCurrentSession(userName, botName);
+    
+    invoke("publishSession", sessionKey);
+    
     return session;
+  }
+  
+  /**
+   * When a new session is started this event is published with the session's key
+   * @param sessionKey of new Session
+   * @return sessionKey
+   */
+  public String publishSession(String sessionKey) {
+    return sessionKey;
   }
 
   /**

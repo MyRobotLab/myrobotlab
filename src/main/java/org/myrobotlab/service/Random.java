@@ -229,11 +229,21 @@ public class Random extends Service<RandomConfig> {
           // and see if any random event needs processing
 
           sleep(config.rate);
-          for (String key : randomData.keySet()) {
+          // copy to avoid concurrent exceptions, avoid iterating over randomData
+          Map<String, RandomMessage> tasks = new HashMap<>(); 
+          Set<String> keySet = new HashSet<String>(randomData.keySet());
+          for (String k : keySet) {
+            RandomMessage rm = randomData.get(k);
+            if (rm != null) {
+              tasks.put(k, rm);
+            }
+          }
+          
+          for (String key : tasks.keySet()) {
 
             long now = System.currentTimeMillis();
 
-            RandomMessage randomEntry = randomData.get(key);
+            RandomMessage randomEntry = tasks.get(key);
             if (!randomEntry.enabled) {
               continue;
             }
