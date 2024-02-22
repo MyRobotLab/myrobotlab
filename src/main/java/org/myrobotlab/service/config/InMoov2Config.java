@@ -516,7 +516,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishConfigFinished", name));
 
     LogConfig log = (LogConfig) plan.get(getPeerName("log"));
-    log.level = "WARN";
+    log.level = "warn";
     log.listeners.add(new Listener("publishErrors", name));
     // service --to--> InMoov2
 
