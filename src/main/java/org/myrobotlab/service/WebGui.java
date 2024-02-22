@@ -1177,7 +1177,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--log-level", "info", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      Runtime.main(new String[] { "-c", "worky"});
       // Runtime.main(new String[] { "--install" });
 
       boolean done = true;
