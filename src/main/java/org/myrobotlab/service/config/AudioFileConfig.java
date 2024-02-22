@@ -12,11 +12,11 @@ public class AudioFileConfig extends ServiceConfig {
   
   public String currentPlaylist = "default";
   
+  /**
+   * Named map of lists of files
+   */
   public Map<String, List<String>> playlists = new TreeMap<>();
-  
-  @Deprecated /* use regular "listeners" from ServiceConfig parent */
-  public String[] audioListeners;
-  
+    
   /**
    * a multiplier to scale amplitude of output waveform
    */

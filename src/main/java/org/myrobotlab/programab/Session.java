@@ -5,7 +5,9 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -122,7 +124,12 @@ public class Session {
    */
   public Map<String, String> getPredicates() {
     TreeMap<String, String> sort = new TreeMap<>();
-    sort.putAll(getChat().predicates);
+    // copy keys, making this sort thread safe
+    Set<String> keys = new HashSet(getChat().predicates.keySet());
+    for (String key: keys) {
+      String value = getChat().predicates.get(key);
+      sort.put(key, value);
+    }
     return sort;
   }
 

@@ -374,12 +374,12 @@ public class InMoov2Config extends ServiceConfig {
     fsm.transitions.add(new Transition("boot", "wake", "wake"));
     // setup, nor sleep should be affected by idle
     fsm.transitions.add(new Transition("setup", "setup_done", "idle"));
-    fsm.transitions.add(new Transition("idle", "random", "random"));
     fsm.transitions.add(new Transition("random", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "sleep", "sleep"));
+    fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
+    fsm.transitions.add(new Transition("idle", "random", "random"));
     fsm.transitions.add(new Transition("sleep", "wake", "wake"));
     fsm.transitions.add(new Transition("sleep", "power_down", "power_down"));
-    fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
     fsm.transitions.add(new Transition("wake", "setup", "setup"));
     fsm.transitions.add(new Transition("wake", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "setup", "setup"));
@@ -565,7 +565,9 @@ public class InMoov2Config extends ServiceConfig {
     fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
     
     // peer --to--> peer
+    mouth.listeners.add(new Listener("publishStartSpeaking", name));
     mouth.listeners.add(new Listener("publishStartSpeaking", getPeerName("ear")));
+    mouth.listeners.add(new Listener("publishEndSpeaking", name));
     mouth.listeners.add(new Listener("publishEndSpeaking", getPeerName("ear")));
 
     return plan;

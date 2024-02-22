@@ -98,15 +98,10 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public static class Heartbeat {
-    double batteryLevel = 100;
     public long count = 0;
-    public List<LogEntry> errors;
-    public String state;
     public long ts = System.currentTimeMillis();
 
     public Heartbeat(InMoov2 inmoov) {
-      this.state = inmoov.state;
-      this.errors = inmoov.errors;
       this.count = inmoov.heartbeatCount;
     }
   }
@@ -581,9 +576,9 @@ public class InMoov2 extends Service<InMoov2Config>
           if (sessions != null) {
             for (Session session : sessions.values()) {
               if (value != null) {
-                session.setPredicate(field.getName(), value.toString());
+                session.setPredicate(String.format("config.%s", field.getName()), value.toString());
               } else {
-                session.setPredicate(field.getName(), null);
+                session.setPredicate(String.format("config.%s", field.getName()), null);
               }
 
             }
@@ -639,6 +634,23 @@ public class InMoov2 extends Service<InMoov2Config>
     } catch (Exception e) {
       error("could not display picture %s", src);
     }
+  }
+  
+  public void enableRandomHead() {
+    Random random = (Random)getPeer("random");
+    if (random != null) {
+      random.disableAll();
+      random.enable(String.format("%s.setHeadSpeed", getName()));
+      random.enable(String.format("%s.moveHead", getName()));
+      random.enable();
+    }
+  }
+  
+  public void disableRandom() {
+    Random random = (Random)getPeer("random");
+    if (random != null) {
+      random.disable();
+    }    
   }
 
   public void enable() {
@@ -1155,6 +1167,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
   @Override
   public void onEndSpeaking(String utterance) {
+    processMessage("onEndSpeaking", utterance);
     isSpeaking = false;
   }
 
@@ -1337,9 +1350,9 @@ public class InMoov2 extends Service<InMoov2Config>
     }
   }
 
-  // FIXME - rebroadcast these
   @Override
   public void onStartSpeaking(String utterance) {
+    processMessage("onStartSpeaking", utterance);
     isSpeaking = true;
   }
 
@@ -1402,7 +1415,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * @param method
    * @param data
    */
-  public void processMessage(String method, Object data) {
+  public void processMessage(String method, Object ... data) {
     // User processing should not occur until after boot has completed
     if (!state.equals("boot")) {
       // FIXME - this needs to be in config
@@ -1490,7 +1503,7 @@ public class InMoov2 extends Service<InMoov2Config>
       if ("boot".equals(state)) {
         // continue booting - we don't put heartbeats in user/python space
         // until java-land is done booting
-        log.info("boot hasn't completed, will not process heartbeat");
+        log.info("boot hasn't completed, will not process heartbeat - trying boot");
         boot();
         return heartbeat;
       }
@@ -1721,6 +1734,9 @@ public class InMoov2 extends Service<InMoov2Config>
 
     lastState = state;
     state = stateChange.state;
+    
+    setPredicate(String.format("%s.end", lastState), System.currentTimeMillis());
+    setPredicate(String.format("%s.start", state), System.currentTimeMillis());
 
     processMessage("onStateChange", stateChange);
 
@@ -2185,15 +2201,15 @@ public class InMoov2 extends Service<InMoov2Config>
     // TODO change to experimental :)
     String version = ("unknownVersion".equals(platform.getVersion())) ? "experimental" : platform.getVersion();
 
-    setPredicate("system_version", version);
-    setPredicate("system_uptime", Runtime.getUptime());
-    setPredicate("system_servo_count", servoCount);
-    setPredicate("system_service_count", Runtime.getServices().size());
-    setPredicate("system_free_memory", Runtime.getFreeMemory() / 1000000);
-    setPredicate("system_errors_exist", errors.size() > 0);
-    setPredicate("system_error_count", errors.size());
-    setPredicate("system_battery_level", Runtime.getBatteryLevel());
+    setPredicate("system.version", version);
+    setPredicate("system.uptime", Runtime.getUptime());
+    setPredicate("system.servoCount", servoCount);
+    setPredicate("system.serviceCount", Runtime.getServices().size());
+    setPredicate("system.freeMemory", Runtime.getFreeMemory() / 1000000);
+    setPredicate("system.errorsExist", errors.size() > 0);
+    setPredicate("system.errorCount", errors.size());
     setPredicate("state", getState());
+    setPredicate("system.batteryLevel", Runtime.getBatteryLevel().intValue());
 
   }
 

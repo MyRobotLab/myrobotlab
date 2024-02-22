@@ -206,7 +206,10 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
       
       List<LogEntry> errors = new ArrayList<>();
       for(int i = 0; i < buffer.size(); ++i) {
-        errors.add(buffer.get(i));
+        LogEntry entry = buffer.get(i);
+        if ("ERROR".equals(entry.level)) {
+          errors.add(entry);
+        }
       }
       if (errors.size() > 0) {
         invoke("publishErrors", errors);
