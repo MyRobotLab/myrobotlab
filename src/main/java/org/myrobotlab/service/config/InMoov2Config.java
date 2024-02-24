@@ -234,7 +234,6 @@ public class InMoov2Config extends ServiceConfig {
     mouthControl.mouth = i01Name + ".mouth";
 
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
-    chatBot.botDir = "resource/ProgramAB";
 
     chatBot.bots.add("resource/ProgramAB/Alice");
     chatBot.bots.add("resource/ProgramAB/Dr.Who");
