@@ -14,7 +14,6 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
 
     // filesystem list of scripts
     $scope.scriptList = []
-    $scope.log = ""
 
     // this UI's currently active script
     $scope.activeKey = null
@@ -36,25 +35,26 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
           _self.updateState(data)
           $scope.$apply()
           break
-        case "onStdOut":
-          $scope.log = data + $scope.log
-          $scope.$apply()
-          break
-        case "onAppend":
-          $scope.log = data + $scope.log
-          $scope.$apply()
-          break
+        case 'onStdOut':
+            if (data !== "\n") {
+                $scope.service.logs.unshift(data)
+                if ($scope.service.logs.length > 300) {
+                    $scope.service.logs.pop()
+                }
+                $scope.$apply()
+            }
+            break
         case "onScriptList":
           $scope.scriptList = data
           $scope.$apply()
           break
         case "onStatus":
-          if (data.level == "error") {
-            $scope.log = data.detail + "\n" + $scope.log
-          }
-          console.info("onStatus ", data)
-          $scope.$apply()
-          break
+            if (data.level == 'error') {
+                $scope.service.logs.unshift(data.detail)
+            }
+            console.info("onStatus ", data)
+            $scope.$apply()
+            break
         default:
           console.error("ERROR - unhandled method " + msg.method)
           break
@@ -133,11 +133,11 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
       modalInstance.result.then(
         function (filename) {
           // Do something with the filename
-          console.log("Filename: ", filename)
+          console.info("Filename: ", filename)
         },
         function () {
           // Modal dismissed
-          console.log("Modal dismissed")
+          console.info("Modal dismissed")
         }
       )
     }
@@ -170,17 +170,20 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
       modalInstance.result.then(
         function (filename) {
           // Do something with the filename
-          console.log("Filename: ", filename)
+          console.info("Filename: ", filename)
         },
         function () {
           // Modal dismissed
-          console.log("Modal dismissed")
+          console.info("Modal dismissed")
         }
       )
     }
 
+    $scope.clear = function() {
+        msg.send('clear')
+    }
+    
     msg.subscribe("publishStdOut")
-    msg.subscribe("publishAppend")
     msg.subscribe("getClients")
     msg.subscribe("getScriptList")
     msg.send("getScriptList")

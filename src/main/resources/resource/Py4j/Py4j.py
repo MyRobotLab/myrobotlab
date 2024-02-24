@@ -1,10 +1,10 @@
 ################################
 # Py4j.py
 # more info here: https://www.py4j.org/
-# Py4J enables Python programs running in a Python interpreter to dynamically access 
-# Java objects in a Java Virtual Machine. 
-# Methods are called as if the Java objects resided in the Python interpreter and 
-# Java collections can be accessed through standard Python collection methods. 
+# Py4J enables Python programs running in a Python interpreter to dynamically access
+# Java objects in a Java Virtual Machine.
+# Methods are called as if the Java objects resided in the Python interpreter and
+# Java collections can be accessed through standard Python collection methods.
 # Py4J also enables Java programs to call back Python objects. Py4J is distributed under the BSD license
 # Python 2.7 -to- 3.x is supported
 # In your python 3.x project
@@ -12,11 +12,12 @@
 # you have full access to mrl instance that's running
 # the gateway
 
-import sys
 import json
+import sys
 from abc import ABC, abstractmethod
-from py4j.java_collections import JavaObject, JavaClass
-from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
+
+from py4j.java_collections import JavaClass, JavaObject
+from py4j.java_gateway import CallbackServerParameters, GatewayParameters, JavaGateway
 
 
 class Service(ABC):
@@ -30,11 +31,11 @@ class Service(ABC):
     def __str__(self):
         # Delegate string representation to the underlying Java object
         return str(self.java_object)
-    
+
     def subscribe(self, event):
         print("subscribe")
         self.java_object.subscribe(event)
-    
+
     @abstractmethod
     def getType(self):
         pass
@@ -42,8 +43,8 @@ class Service(ABC):
 
 class NeoPixel(Service):
     def __init__(self, name):
-        super().__init__(name)        
-    
+        super().__init__(name)
+
     def getType(self):
         return "NeoPixel"
 
@@ -54,7 +55,7 @@ class NeoPixel(Service):
 class InMoov2(Service):
     def __init__(self, name):
         super().__init__(name)
-        self.subscribe('onStateChange')
+        self.subscribe("onStateChange")
 
     def getType(self):
         return "InMoov2"
@@ -62,9 +63,9 @@ class InMoov2(Service):
     def onOnStateChange(self, state):
         print("onOnStateChange")
         print(state)
-        print(state.get('last'))
-        print(state.get('current'))
-        print(state.get('event'))
+        print(state.get("last"))
+        print(state.get("current"))
+        print(state.get("event"))
 
 
 # TODO dynamically add classes that you don't bother to check in
@@ -77,7 +78,8 @@ class InMoov2(Service):
 # FIXME - REMOVE THIS - DO NOT SET ANY GLOBALS !!!!
 runtime = None
 
-# TODO - rename to mrl_lib ? 
+
+# TODO - rename to mrl_lib ?
 # e.g.
 # mrl = mrl_lib.connect("localhost", 1099)
 # i01 = InMoov("i01", mrl)
@@ -102,9 +104,11 @@ class MessageHandler(object):
         self.stderr = sys.stderr
         sys.stdout = self
         sys.stderr = self
-        self.gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
-                                   python_server_entry_point=self,
-                                   gateway_parameters=GatewayParameters(auto_convert=True))
+        self.gateway = JavaGateway(
+            callback_server_parameters=CallbackServerParameters(),
+            python_server_entry_point=self,
+            gateway_parameters=GatewayParameters(auto_convert=True),
+        )
         self.runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
         # FIXME - REMOVE THIS - DO NOT SET ANY GLOBALS !!!!
         runtime = self.runtime
@@ -116,33 +120,33 @@ class MessageHandler(object):
         Constructs a new Runtime instance and returns it.
         """
         jvm_runtime = self.gateway.jvm.org.myrobotlab.service.Runtime.getInstance()
-        
+
         # Define class attributes and methods as dictionaries
         class_attributes = {
-            'x': 0,
-            'y': 0,
-            'move': lambda self, dx, dy: setattr(self, 'x', self.x + dx) or setattr(self, 'y', self.y + dy),
-            'get_position': lambda self: (self.x, self.y),
+            "x": 0,
+            "y": 0,
+            "move": lambda self, dx, dy: setattr(self, "x", self.x + dx)
+            or setattr(self, "y", self.y + dy),
+            "get_position": lambda self: (self.x, self.y),
         }
 
         # Create the class dynamically using the type() function
-        MyDynamicClass = type('MyDynamicClass', (object,), class_attributes)
+        MyDynamicClass = type("MyDynamicClass", (object,), class_attributes)
 
         # Create an instance of the dynamically created class
         obj = MyDynamicClass()
-
 
         return self.runtime
 
     # Define the callback function
     def handle_connection_break(self):
         # Add your custom logic here to handle the connection break
-        print("Connection with Java gateway was lost or terminated.")        
+        print("Connection with Java gateway was lost or terminated.")
         print("goodbye.")
         sys.exit(1)
 
-    def write(self,string):
-        if (self.py4j):
+    def write(self, string):
+        if self.py4j:
             self.py4j.handleStdOut(string)
 
     def flush(self):
@@ -167,7 +171,7 @@ class MessageHandler(object):
         print("reference to runtime")
         # TODO print env vars PYTHONPATH etc
         return name
-    
+
     def getRuntime(self):
         return self.runtime
 
@@ -261,11 +265,13 @@ class MessageHandler(object):
         return result
 
     class Java:
-        implements = ['org.myrobotlab.framework.interfaces.Invoker']
+        implements = ["org.myrobotlab.framework.interfaces.Invoker"]
 
 
 handler = MessageHandler()
 if len(sys.argv) > 1:
     handler.setName(sys.argv[1])
 else:
-    raise RuntimeError("This script requires the full name of the Py4j service as its first command-line argument")
+    raise RuntimeError(
+        "This script requires the full name of the Py4j service as its first command-line argument"
+    )
