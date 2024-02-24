@@ -484,10 +484,6 @@
     <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
     <!-- IndianTts end -->
 
-    <!-- IntegratedMovement begin -->
-    <!-- Duplicate entry for fr.inmoov-inmoov2-null skipping -->
-    <!-- IntegratedMovement end -->
-
     <!-- JFugue begin -->
     <dependency>
       <groupId>jfugue</groupId>
@@ -501,25 +497,25 @@
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-core</artifactId>
-      <version>3.3.2-stable</version>
+      <version>3.6.1-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-desktop</artifactId>
-      <version>3.3.2-stable</version>
+      <version>3.6.1-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-lwjgl3</artifactId>
-      <version>3.3.2-stable</version>
+      <version>3.6.1-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-jogg</artifactId>
-      <version>3.3.2-stable</version>
+      <version>3.6.1-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -537,7 +533,7 @@
     <dependency>
       <groupId>org.jmonkeyengine</groupId>
       <artifactId>jme3-plugins</artifactId>
-      <version>3.3.2-stable</version>
+      <version>3.6.1-stable</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -555,13 +551,13 @@
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-glfw</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.3</version>
       <scope>provided</scope>
     </dependency>
     <!-- JMonkeyEngine end -->
@@ -1690,10 +1686,6 @@
     </dependency>
     <!-- WebGui end -->
 
-    <!-- WebSocketConnector begin -->
-    <!-- Duplicate entry for javax.websocket-javax.websocket-api-1.1 skipping -->
-    <!-- WebSocketConnector end -->
-
     <!-- Webcam begin -->
     <dependency>
       <groupId>com.github.sarxos</groupId>
@@ -1750,10 +1742,6 @@
       <scope>provided</scope>
     </dependency>
     <!-- WolframAlpha end -->
-
-    <!-- WorkE begin -->
-    <!-- skipping org.myrobotlab worke org.myrobotlab-worke-null null version/latest -->
-    <!-- WorkE end -->
 
     <!-- Xmpp begin -->
     <dependency>
@@ -2024,9 +2012,7 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
-            <!-- unfortunately not testing OpenCV is required for ci to work -->
           </excludes>
-          <!-- required so surefire doesnt die talking to the agent over stdin -->
           <forkNode
             implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
         </configuration>
