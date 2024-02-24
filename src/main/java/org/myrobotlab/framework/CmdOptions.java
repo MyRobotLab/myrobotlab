@@ -39,7 +39,7 @@ public class CmdOptions {
 
   // launcher
   @Option(names = { "-c",
-      "--config" }, fallbackValue = "default", description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config data/config/my-config-dir")
+      "--config" }, fallbackValue = "default", description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config my-config-dir to start the configuration stored in config data/config/my-config-dir")
   public String config = null;
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")

@@ -433,11 +433,6 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       RuntimeConfig currentConfig = Runtime.getInstance().config;
 
       for (String service : plansRtConfig.getRegistry()) {
-        // FIXME - determine if you want to return a complete merge of activated
-        // or just "recent"
-        if (Runtime.getService(service) != null) {
-          continue;
-        }
         ServiceConfig sc = plan.get(service);
         if (sc == null) {
           runtime.error("could not get %s from plan", service);
@@ -915,12 +910,14 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             runtime.apply(c);
           }
 
-          if (options.services != null) {
+          if (options.services != null && options.services.size() != 0) {
             log.info("command line override for services created");
             createAndStartServices(options.services);
           } else {
             log.info("processing config.registry");
-            if (startYml.enable) {
+            if (options.config != null) {
+              Runtime.startConfig(options.config);
+            } else if (startYml.enable) {
               Runtime.startConfig(startYml.config);
             }
           }
@@ -1549,7 +1546,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       if (blocking == null) {
         blocking = false;
       }
-      
+
       if (installerThread != null) {
         log.error("another request to install dependencies, 1st request has not completed");
         return;
@@ -1576,7 +1573,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       } else {
         installerThread.start();
       }
-      
+
       installerThread = null;
     }
   }
@@ -4918,16 +4915,16 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
       List<String> registry = config.getRegistry();
       Collections.reverse(Arrays.asList(registry));
-      
+
       // get starting services if any entered on the command line
-      // -s log Log webgui WebGui ... etc - these will be protected 
+      // -s log Log webgui WebGui ... etc - these will be protected
       List<String> startingServices = new ArrayList<>();
       if (options.services.size() % 2 == 0) {
         for (int i = 0; i < options.services.size(); i += 2) {
           startingServices.add(options.services.get(i));
         }
       }
-      
+
       for (String name : registry) {
         if (startingServices.contains(name)) {
           continue;
