@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -17,7 +14,6 @@ import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.config.RuntimeConfig;
@@ -31,9 +27,9 @@ public class AbstractTest {
   protected static Boolean hasInternet = null;
 
   /**
-   * Install dependencies once per process, same process
-   * will not check.  A new process will use the libraries/serviceData.json
-   * to determine if deps are satisfied
+   * Install dependencies once per process, same process will not check. A new
+   * process will use the libraries/serviceData.json to determine if deps are
+   * satisfied
    */
   protected static boolean installed = false;
 
@@ -180,7 +176,7 @@ public class AbstractTest {
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
-          threadsRemaining.add(thread.getName());
+        threadsRemaining.add(thread.getName());
       }
     }
     if (threadsRemaining.size() > 0) {
