@@ -259,7 +259,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     super.apply(c);
     try {
 
-      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
+      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
 
       if (c.locale != null) {
         setLocale(c.locale);
@@ -1123,7 +1123,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    */
   @Override
   public void onStarted(String name) {
-    InMoov2Config c = (InMoov2Config) config;
 
     log.info("onStarted {}", name);
     try {
@@ -1157,80 +1156,20 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
           chatBot.attachTextListener(getPeerName("htmlFilter"));
           startPeer("htmlFilter");
           break;
-        case "controller3":
-          break;
-        case "controller4":
-          break;
         case "ear":
           AbstractSpeechRecognizer ear = (AbstractSpeechRecognizer) Runtime.getService(name);
           ear.attachTextListener(getPeerName("chatBot"));
-          break;
-        case "eyeTracking":
-          break;
-        case "fsm":
-          break;
-        case "gpt3":
-          break;
-        case "head":
-          addListener("publishMoveHead", name);
-          break;
-        case "headTracking":
           break;
         case "htmlFilter":
           TextPublisher htmlFilter = (TextPublisher) Runtime.getService(name);
           htmlFilter.attachTextListener(getPeerName("mouth"));
           break;
-        case "imageDisplay":
-          break;
-        case "leap":
-          break;
-        case "left":
-          break;
-        case "leftArm":
-          addListener("publishMoveLeftArm", name, "onMoveArm");
-          break;
-        case "leftHand":
-          addListener("publishMoveLeftHand", name, "onMoveHand");
-          break;
         case "mouth":
           mouth = (AbstractSpeechSynthesis) Runtime.getService(name);
           mouth.attachSpeechListener(getPeerName("ear"));
           break;
-        case "mouthControl":
-          break;
-        case "neoPixel":
-          break;
         case "opencv":
           subscribeTo(name, "publishOpenCVData");
-          break;
-        case "openni":
-          break;
-        case "openWeatherMap":
-          break;
-        case "pid":
-          break;
-        case "pir":
-          break;
-        case "random":
-          break;
-        case "right":
-          break;
-        case "rightArm":
-          addListener("publishMoveRightArm", name, "onMoveArm");
-          break;
-        case "rightHand":
-          addListener("publishMoveRightHand", name, "onMoveHand");
-          break;
-        case "servoMixer":
-          break;
-        case "simulator":
-          break;
-        case "torso":
-          addListener("publishMoveTorso", name);
-          break;
-        case "ultrasonicRight":
-          break;
-        case "ultrasonicLeft":
           break;
         default:
           log.warn("unknown peer %s not hanled in onStarted", peerKey);
@@ -1990,28 +1929,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
-
-    try {
-      // copy config if it doesn't already exist
-      String resourceBotDir = FileIO.gluePaths(getResourceDir(), "config");
-      List<File> files = FileIO.getFileList(resourceBotDir);
-      for (File f : files) {
-        String botDir = "data/config/" + f.getName();
-        File bDir = new File(botDir);
-        if (bDir.exists() || !f.isDirectory()) {
-          log.info("skipping data/config/{}", botDir);
-        } else {
-          log.info("will copy new data/config/{}", botDir);
-          try {
-            FileIO.copy(f.getAbsolutePath(), botDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-    } catch (Exception e) {
-      error(e);
-    }
 
     runtime.invoke("publishConfigList");
   }

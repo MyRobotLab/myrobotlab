@@ -26,6 +26,7 @@ import javax.mail.internet.MimeMultipart;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.transformer.ConnectorConfig;
+import org.myrobotlab.service.config.ImapEmailConnectorConfig;
 
 import com.sun.mail.imap.IMAPFolder;
 
@@ -36,7 +37,7 @@ import com.sun.mail.imap.IMAPFolder;
  * documents that represents the emails messages that were crawled.
  *
  */
-public class ImapEmailConnector extends AbstractConnector {
+public class ImapEmailConnector extends AbstractConnector<ImapEmailConnectorConfig> {
 
   private static final long serialVersionUID = 1L;
   private static final String MESSAGE_ID_HEADER = "message_id";

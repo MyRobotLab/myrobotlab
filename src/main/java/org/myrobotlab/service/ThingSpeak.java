@@ -8,6 +8,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.config.ThingSpeakConfig;
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
  * 
  */
 
-public class ThingSpeak extends Service {
+public class ThingSpeak extends Service<ThingSpeakConfig> {
 
   private static final long serialVersionUID = 1L;
 

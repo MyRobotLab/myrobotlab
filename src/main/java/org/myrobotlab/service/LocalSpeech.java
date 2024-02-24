@@ -77,8 +77,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-
     // the actual filename on the file system
     String localFileName = getLocalFileName(toSpeak);
 
@@ -96,13 +94,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
     }
 
     // filter out breaking chars
-    if (c.replaceChars == null) {
+    if (config.replaceChars == null) {
       // if not user defined - escape double quotes to not affect templates
-      c.replaceChars = new HashMap<>();
-      c.replaceChars.put("\'", "\'\'");
+      config.replaceChars = new HashMap<>();
+      config.replaceChars.put("\'", "\'\'");
     }
-    for (String target : c.replaceChars.keySet()) {
-      toSpeak = toSpeak.replace(target, c.replaceChars.get(target));
+    for (String target : config.replaceChars.keySet()) {
+      toSpeak = toSpeak.replace(target, config.replaceChars.get(target));
     }
 
     Platform platform = Runtime.getPlatform();
@@ -209,7 +207,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
     // FIXME this is not right - it should be based on speechType not OS
     // speechType should be "set" based on OS and user preference
     if (platform.isWindows()) {
-      
+
       try {
 
         List<String> args = new ArrayList<>();
@@ -273,9 +271,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       }
     }
     // let apply config add and set the voices
-//    else if (platform.isLinux()) {
-//      addVoice("Linus", "male", "en-US", "festival");
-//    }
+    // else if (platform.isLinux()) {
+    // addVoice("Linus", "male", "en-US", "festival");
+    // }
   }
 
   public void removeExt(boolean b) {
@@ -291,8 +289,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       return false;
     }
 
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "Espeak";
+    config.speechType = "Espeak";
     voices.clear();
     addVoice("espeak", "male", "en-US", "espeak");
     removeExt(false);
@@ -310,10 +307,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       return false;
     }
 
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
     voices.clear();
     addVoice("Linus", "male", "en-US", "festival");
-    c.speechType = "Festival";
+    config.speechType = "Festival";
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
@@ -330,9 +326,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       error("pico2wave only supported on Linux");
       return false;
     }
-    
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "Pico2Wav";
+
+    config.speechType = "Pico2Wav";
     removeExt(false);
     setTtsHack(false);
 
@@ -343,13 +338,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
     addVoice("es-ES", "female", "es-ES", "pico2wav");
     addVoice("fr-FR", "female", "fr-FR", "pico2wav");
     addVoice("it-IT", "female", "it-IT", "pico2wav");
-    
+
     if (voice == null) {
       setVoice(getLocale().getTag());
     }
 
     setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
- 
+
     broadcastState();
     return true;
   }
@@ -363,19 +358,19 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
    * @param replace
    */
   public void addFilter(String target, String replace) {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    if (c.replaceChars == null) {
-      c.replaceChars = new HashMap<>();
+
+    if (config.replaceChars == null) {
+      config.replaceChars = new HashMap<>();
     }
-    c.replaceChars.put(target, replace);
+    config.replaceChars.put(target, replace);
   }
 
   /**
    * @return setMimic sets the Windows mimic template
    */
   public boolean setMimic() {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "Mimic";
+
+    config.speechType = "Mimic";
     removeExt(false);
     setTtsHack(false);
     if (Runtime.getPlatform().isWindows()) {
@@ -404,8 +399,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
   }
 
   public String getSpeechType() {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    return c.speechType;
+
+    return config.speechType;
   }
 
   /**
@@ -418,8 +413,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       error("microsoft speech is only supported on Windows");
       return false;
     }
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "MsSpeech";
+
+    config.speechType = "MsSpeech";
 
     removeExt(false);
     setTtsHack(false);
@@ -438,8 +433,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
    * @return setSay sets the Mac say template
    */
   public boolean setSay() {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "Say";
+
+    config.speechType = "Say";
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
@@ -455,8 +450,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
    * 
    */
   public boolean setTts() {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    c.speechType = "Tts";
+
+    config.speechType = "Tts";
     removeExt(false);
     setTtsHack(true);
     setTtsCommand("\"" + ttsPath + "\" -f 9 -v {voice} -o {filename} -t \"{text}\"");
@@ -473,8 +468,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
    * 
    */
   public void setTtsCommand(String ttsCommand) {
-    LocalSpeechConfig c = (LocalSpeechConfig) config;
-    info("LocalSpeech speechType %s template is now: %s", c.speechType, ttsCommand);
+
+    info("LocalSpeech speechType %s template is now: %s", config.speechType, ttsCommand);
     this.ttsCommand = ttsCommand;
   }
 
@@ -492,26 +487,26 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
   public void setTtsPath(String ttsPath) {
     this.ttsPath = ttsPath;
   }
-  
+
   public boolean isExecutableAvailable(String executableName) {
     ProcessBuilder processBuilder = new ProcessBuilder();
     String command = "";
     boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
     if (isWindows) {
-        command = "where " + executableName;
+      command = "where " + executableName;
     } else {
-        command = "which " + executableName;
+      command = "which " + executableName;
     }
     processBuilder.command("sh", "-c", command);
     try {
-        Process process = processBuilder.start();
-        process.waitFor();
-        return process.exitValue() == 0;
+      Process process = processBuilder.start();
+      process.waitFor();
+      return process.exitValue() == 0;
     } catch (IOException | InterruptedException e) {
-        e.printStackTrace();
-        return false;
+      e.printStackTrace();
+      return false;
     }
-}
+  }
 
   public LocalSpeechConfig apply(LocalSpeechConfig config) {
     super.apply(config);

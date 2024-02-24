@@ -248,12 +248,13 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.bots.add("resource/ProgramAB/hi-IN");
     chatBot.bots.add("resource/ProgramAB/it-IT");
     chatBot.bots.add("resource/ProgramAB/nl-NL");
+    chatBot.bots.add("resource/ProgramAB/pl-PL");
     chatBot.bots.add("resource/ProgramAB/pt-PT");
     chatBot.bots.add("resource/ProgramAB/ru-RU");
     chatBot.bots.add("resource/ProgramAB/tr-TR");
 
     Runtime runtime = Runtime.getInstance();
-    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
+    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "pl-PL","ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
     if (tag != null) {
       String[] tagparts = tag.split("-");
@@ -522,12 +523,12 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishProcessMessage", getPeerName("py4j"), "onPythonMessage"));
 
     // InMoov2 --to--> InMoov2
-    listeners.add(new Listener("publishMoveHead", name));
-    listeners.add(new Listener("publishMoveRightArm", name));
-    listeners.add(new Listener("publishMoveLeftArm", name));
-    listeners.add(new Listener("publishMoveRightHand", name));
-    listeners.add(new Listener("publishMoveLeftHand", name));
-    listeners.add(new Listener("publishMoveTorso", name));
+    listeners.add(new Listener("publishMoveHead", getPeerName("head"), "onMove"));
+    listeners.add(new Listener("publishMoveRightArm", getPeerName("rightArm"), "onMove"));
+    listeners.add(new Listener("publishMoveLeftArm", getPeerName("leftArm"), "onMove"));
+    listeners.add(new Listener("publishMoveRightHand", getPeerName("rightHand"), "onMove"));
+    listeners.add(new Listener("publishMoveLeftHand", getPeerName("leftHand"), "onMove"));
+    listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));

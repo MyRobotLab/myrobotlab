@@ -24,7 +24,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVFilterDL4JTransfer;
 import org.myrobotlab.opencv.OpenCVFilterLloyd;
 import org.myrobotlab.programab.OOBPayload;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.LloydConfig;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -39,7 +39,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class Lloyd extends Service<ServiceConfig> {
+public class Lloyd extends Service<LloydConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(Lloyd.class);
   private static final long serialVersionUID = 1L;
@@ -625,9 +625,9 @@ public class Lloyd extends Service<ServiceConfig> {
     Lloyd lloyd = (Lloyd) Runtime.start("lloyd", "Lloyd");
     // start python
     Runtime.start("python", "Python");
-//    gui.undockTab("memory");
-//    gui.undockTab("brain");
-//    gui.undockTab("leftEye");
+    // gui.undockTab("memory");
+    // gui.undockTab("brain");
+    // gui.undockTab("leftEye");
     // gui.undockTab("leftEye");
     // opencvdata_214c7381-ddfe-406a-adfa-f1bf9aebd367
     lloyd.initializeBrain();

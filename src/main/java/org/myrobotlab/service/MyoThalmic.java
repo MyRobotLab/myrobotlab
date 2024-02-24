@@ -5,7 +5,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.MyoThalmicConfig;
 import org.myrobotlab.service.data.MyoData;
 import org.myrobotlab.service.interfaces.MyoDataListener;
 import org.myrobotlab.service.interfaces.MyoDataPublisher;
@@ -45,7 +45,8 @@ import com.thalmic.myo.enums.XDirection;
  * https://github.com/NicholasAStuart/myo-java-JNI-Library
  * 
  */
-public class MyoThalmic extends Service<ServiceConfig> implements DeviceListener, MyoDataListener, MyoDataPublisher {
+public class MyoThalmic extends Service<MyoThalmicConfig>  implements DeviceListener,MyoDataListener,MyoDataPublisher
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -264,9 +265,12 @@ public class MyoThalmic extends Service<ServiceConfig> implements DeviceListener
   public String toString() {
     StringBuilder builder = new StringBuilder("\r");
 
-    String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW), repeatCharacter(' ', (int) (scale - rollW)));
-    String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW), repeatCharacter(' ', (int) (scale - pitchW)));
-    String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW), repeatCharacter(' ', (int) (scale - yawW)));
+    String xDisplay = String.format("[%s%s]", repeatCharacter('*', (int) rollW),
+        repeatCharacter(' ', (int) (scale - rollW)));
+    String yDisplay = String.format("[%s%s]", repeatCharacter('*', (int) pitchW),
+        repeatCharacter(' ', (int) (scale - pitchW)));
+    String zDisplay = String.format("[%s%s]", repeatCharacter('*', (int) yawW),
+        repeatCharacter(' ', (int) (scale - yawW)));
 
     String armString = null;
     if (whichArm != null) {
@@ -458,7 +462,8 @@ public class MyoThalmic extends Service<ServiceConfig> implements DeviceListener
 
   // @Override
   @Override
-  public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection, float rotation, WarmupState warmupState) {
+  public void onArmSync(Myo myo, long timestamp, Arm arm, XDirection xDirection, float rotation,
+      WarmupState warmupState) {
     log.info("onArmSync {}", arm);
     whichArm = arm;
     invoke("publishArmSync", arm);

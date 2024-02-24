@@ -131,7 +131,7 @@ public class WebSocketHandler implements Handler<ServerWebSocket> {
         // FIXME get rid of fill-uuid
         Message describe = Message.createMessage(String.format("%s@%s", service.getName(), Runtime.get().getId()),
             "runtime", "describe",
-            new Object[] { "fill-uuid", new DescribeQuery(Platform.getLocalInstance().getId(), uuid) });
+            new Object[] { "fill-uuid", new DescribeQuery(Runtime.getInstance().getId(), uuid) });
         service.sendRemote(describe);
         log.info(String.format("<-- %s", describe));
         newConnection = false;

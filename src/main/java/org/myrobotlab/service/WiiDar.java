@@ -34,12 +34,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Wii.IRData;
+import org.myrobotlab.service.config.WiiDarConfig;
 import org.myrobotlab.service.data.Pin;
 import org.slf4j.Logger;
 
 // TODO - BlockingQueue - + reference !
 
-public class WiiDar extends Service {
+public class WiiDar extends Service<WiiDarConfig> {
 
   public final static class Point implements Serializable {
     private static final long serialVersionUID = 1L;

@@ -4,12 +4,13 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ChassisConfig;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.slf4j.Logger;
 
-public class Chassis extends Service<ServiceConfig> {
+public class Chassis extends Service<ChassisConfig>
+{
 
   private static final long serialVersionUID = 1L;
 

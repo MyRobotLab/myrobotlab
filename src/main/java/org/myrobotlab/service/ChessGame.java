@@ -31,10 +31,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ChessGameConfig;
 import org.slf4j.Logger;
 
-public class ChessGame extends Service<ServiceConfig> {
+public class ChessGame extends Service<ChessGameConfig>
+{
 
   public final static Logger log = LoggerFactory.getLogger(ChessGame.class.getCanonicalName());
 

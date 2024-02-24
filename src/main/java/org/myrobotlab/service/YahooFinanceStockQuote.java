@@ -7,13 +7,14 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.YahooFinanceStockQuoteConfig;
 import org.slf4j.Logger;
 
 /**
  * A service to query into Yahoo's api with a query to the current price for a
  * given ticker symbol. This requires
  */
-public class YahooFinanceStockQuote extends HttpClient {
+public class YahooFinanceStockQuote extends HttpClient<YahooFinanceStockQuoteConfig> {
 
   private static final long serialVersionUID = 1L;
   private String apiBase = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=&q=";

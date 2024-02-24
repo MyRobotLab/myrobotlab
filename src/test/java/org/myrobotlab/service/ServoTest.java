@@ -73,7 +73,7 @@ public class ServoTest extends AbstractTest {
   @Test
   public void disabledMove() throws Exception {
     // take off speed control
-    servo.fullSpeed();
+    servo.setMaxSpeed();
     servo.moveTo(0.0);
     servo.setInverted(false);
     Service.sleep(1000);

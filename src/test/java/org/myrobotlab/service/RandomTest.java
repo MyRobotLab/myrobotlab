@@ -74,7 +74,7 @@ public class RandomTest extends AbstractServiceTest {
     // disable one method - leave other enabled
     random.disable("clock.startClock");
     clock.stopClock();
-    clock.setInterval(999999);
+    clock.setInterval(9999);
     sleep(200);
     assertTrue("clock should not be started 3", !clock.isClockRunning());
     assertTrue(String.format("random method 2 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
@@ -83,9 +83,9 @@ public class RandomTest extends AbstractServiceTest {
     // disable all
     random.disable();
     sleep(200);
-    clock.setInterval(999999);
+    clock.setInterval(9999);
     assertTrue("clock should not be started 4", !clock.isClockRunning());   
-    assertEquals(999999, (long)clock.getInterval());
+    assertEquals(9999, (long)clock.getInterval());
 
     // re-enable all that were previously enabled but not explicitly disabled ones
     random.enable();

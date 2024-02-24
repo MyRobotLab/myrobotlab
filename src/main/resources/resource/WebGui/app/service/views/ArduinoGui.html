@@ -15,11 +15,11 @@
     <div class="row">
         <div class="form-group">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="port">port</label>
-            <input class="form-control" type="text"  ng-readonly="isConnected" id="{{service.name}}-port" ng-model="service.port" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
+            <input class="form-control" type="text"  ng-readonly="isConnected" id="{{service.name}}-port" ng-model="service.config.port" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
             <label for="rate">rate</label>
             <input type="text" class="form-control" ng-readonly="isConnected" id="{{service.name}}-rate" ng-model="rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue" typeahead-min-length="0"/>
             <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.getPortNames()">refresh</button>
-            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(service.port, rate)">connect</button>
+            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(service.config.port, rate)">connect</button>
             <button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button>
             <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
             <button class="btn btn-default" ng-click="msg.getBase64ZippedMrlComm()">Get MrlComm Library</button>
