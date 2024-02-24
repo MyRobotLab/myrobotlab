@@ -313,6 +313,7 @@ public class MavenWrapper extends Repo implements Serializable {
       // repo.installEach(); <-- TODO - test
       Runtime.shutdown();
       log.info("done");
+      Runtime.shutdown();
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);
