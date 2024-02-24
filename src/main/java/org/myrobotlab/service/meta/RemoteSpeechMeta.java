@@ -21,13 +21,8 @@ public class RemoteSpeechMeta extends MetaData {
     // false will prevent it being seen in the ui
     setAvailable(true);
 
-    // add dependencies if necessary
-    // addDependency("com.twelvemonkeys.common", "common-lang", "3.1.1");
-
-    setAvailable(false);
-
     // add it to one or many categories
-    addCategory("general");
+    addCategory("speech");
 
     // add a sponsor to this service
     // the person who will do maintenance
