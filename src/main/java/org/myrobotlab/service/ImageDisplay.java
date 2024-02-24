@@ -275,6 +275,7 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
 
           // TODO - make better / don't use setImageAutoSize (very bad
           // algorithm)
+          /** <pre> No real use, and doesn't remove
           if (SystemTray.isSupported()) {
             log.info("SystemTray is supported");
             SystemTray tray = SystemTray.getSystemTray();
@@ -285,6 +286,8 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
 
             tray.add(trayIcon);
           }
+          </pre>
+          */
 
           if (display.bgColor != null) {
             Color color = Color.decode(display.bgColor);

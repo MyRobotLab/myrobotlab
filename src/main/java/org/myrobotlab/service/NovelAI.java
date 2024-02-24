@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
 
 import org.myrobotlab.io.FileIO;
@@ -16,6 +17,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.Request.Builder;
 
 public class NovelAI extends AbstractSpeechSynthesis<NovelAIConfig> {
 
@@ -49,8 +51,12 @@ public class NovelAI extends AbstractSpeechSynthesis<NovelAIConfig> {
     String baseUrl = "https://api.novelai.net/ai/generate-voice?voice=-1&seed=" + config.voice + "&opus=false&version=v2&text=";
     String encodedText = URLEncoder.encode(toSpeak, StandardCharsets.UTF_8.toString());
     String url = baseUrl + encodedText;
-
-    Request request = new Request.Builder().url(url).build();
+    
+    Builder builder = new Request.Builder().url(url);
+    if (config.token != null) {
+      builder.addHeader("Authorization", "Bearer " + config.token);
+    }    
+    Request request = builder.build();
 
     try {
       Response response = client.newCall(request).execute();

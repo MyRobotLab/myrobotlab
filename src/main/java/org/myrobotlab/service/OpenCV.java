@@ -155,7 +155,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
 
     @Override
     synchronized public void run() {
-      // create a closeable frame converter     
+      // create a closeable frame converter
       CloseableFrameConverter converter = new CloseableFrameConverter();
 
       try {
@@ -723,7 +723,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public void captureFromResourceFile(String filename) throws IOException {
     capture(filename);
   }
-  
+
   /**
    * Gets valid camera indexes by iterating through 8
    * 
@@ -761,7 +761,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
 
     return cameraIndexes;
   }
-  
+
   public int getCameraIndex() {
     return this.cameraIndex;
   }
@@ -1076,6 +1076,27 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return lastImage;
   }
 
+  /**
+   * "Easy" Base64 web image from display last frame
+   * 
+   * @return
+   */
+  public String getWebImage() {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      String imgType = "jpg";
+      BufferedImage bi = getDisplay();
+      if (bi != null) {
+        ImageIO.write(bi, imgType, os);
+        os.close();
+        return String.format("data:image/%s;base64,%s", imgType, CodecUtils.toBase64(os.toByteArray()));
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
+
   public String getInputFile() {
     return inputFile;
   }
@@ -1136,7 +1157,10 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return recording;
   }
 
-  @Deprecated /* was used in SwingGui - nice feature through .. ability to undock displays */
+  @Deprecated /*
+               * was used in SwingGui - nice feature through .. ability to
+               * undock displays
+               */
   public boolean isUndocked() {
     return undockDisplay;
   }
@@ -1970,11 +1994,12 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
 
   /**
    * flip the video display vertically
+   * 
    * @param toFlip
    */
   public void flip(boolean toFlip) {
     config.flip = toFlip;
-    if (config.flip) {      
+    if (config.flip) {
       addFilter("Flip");
     } else {
       removeFilter("Flip");
@@ -2076,7 +2101,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
         // TODO: better configuration of the filter when it's added.
       }
     }
-    
+
     flip(c.flip);
 
     if (c.capturing) {
@@ -2101,7 +2126,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
       // Runtime.start("python", "Python");
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
       cv.capture();
-      
+
       cv.addFilter(new OpenCVFilterYolo("yolo"));
       sleep(1000);
       cv.removeFilters();
