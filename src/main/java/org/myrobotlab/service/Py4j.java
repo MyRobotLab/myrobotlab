@@ -15,6 +15,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.Level;
@@ -35,8 +36,9 @@ import py4j.Py4JServerConnection;
 /**
  * 
  * 
- * A bridge between a native proces of Python running and MRL.
- * Should support any version of Python. 
+ * A bridge between a native proces of Python running and MRL. Should support
+ * any version of Python.
+ * 
  * <pre>
  *  requirements: 
  * 
@@ -138,6 +140,11 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   private transient Executor handler = null;
 
   /**
+   * a sliding window of logs
+   */
+  protected List<String> logs = new SlidingWindowList<>(300);
+
+  /**
    * Opened scripts are scripts opened in memory, from there they can be
    * executed or saved to the file system, or updatd in memory which the js
    * client does
@@ -170,7 +177,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    *          - code block
    */
   public void addScript(String scriptName, String code) {
-    Py4jConfig c = (Py4jConfig)config;
+    Py4jConfig c = (Py4jConfig) config;
     File script = new File(c.scriptRootDir + fs + scriptName);
 
     if (script.exists()) {
@@ -181,10 +188,11 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
-  
+
   /**
    * If autostartPython is true, Py4j will start a process on starting and
    * connect the stdout/stdin streams to be redirected to the UI
+   * 
    * @param b
    * @return
    */
@@ -192,14 +200,15 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     config.autostartPython = b;
     if (config.autostartPython && pythonProcess == null) {
       startPythonProcess();
-    }    
+    }
     return b;
   }
 
   /**
    * removes script from memory of openScripts
    * 
-   * @param scriptName The name of the script to close.
+   * @param scriptName
+   *          The name of the script to close.
    */
   public void closeScript(String scriptName) {
     openedScripts.remove(scriptName);
@@ -234,7 +243,8 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   /**
    * One of 3 methods supported on the MessageHandler() callbacks
    * 
-   * @param code The Python code to execute in the interpreter.
+   * @param code
+   *          The Python code to execute in the interpreter.
    */
   @Override
   public boolean exec(String code) {
@@ -256,7 +266,6 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     return String.format("%s:%d", gatewayConnection.getSocket().getInetAddress(), gatewayConnection.getSocket().getPort());
   }
 
-
   /**
    * get listing of filesystem files location will be data/Py4j/{serviceName}
    * 
@@ -266,7 +275,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
     System.out.println(CodecUtils.toJson(config));
-    Py4jConfig c = (Py4jConfig)config;
+    Py4jConfig c = (Py4jConfig) config;
     List<File> files = FileIO.getFileList(c.scriptRootDir, true);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {
@@ -278,13 +287,17 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   }
 
   /**
-   * Sink for standard output from Py4j-related subprocesses.
-   * This method immediately publishes the output on {@link #publishStdOut(String)}.
+   * Sink for standard output from Py4j-related subprocesses. This method
+   * immediately publishes the output on {@link #publishStdOut(String)}.
    *
-   * @param msg The output from a py4j related subprocess.
+   * @param msg
+   *          The output from a py4j related subprocess.
    */
   public void handleStdOut(String msg) {
-    invoke("publishStdOut", msg);
+    if (!"\n".equals(msg)) {
+      logs.add(msg);
+      invoke("publishStdOut", msg);
+    }
   }
 
   /**
@@ -296,8 +309,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     log.info("onPython {}", code);
     exec(code);
   }
-  
-  
+
   public String onPythonMessage(Message msg) {
     // create wrapper to tunnel incoming message - include original sender?
     Message tunnelMsg = Message.createMessage(msg.sender, getName(), "onPythonMessage", msg);
@@ -335,7 +347,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * @throws IOException
    */
   public void openScript(String scriptName) throws IOException {
-    Py4jConfig c = (Py4jConfig)config;
+    Py4jConfig c = (Py4jConfig) config;
     File script = new File(c.scriptRootDir + fs + scriptName);
 
     if (!script.exists()) {
@@ -362,12 +374,15 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
         // back to the Python process, but:
         // 1. its useless for users - no way to access the content ?
         // 2. you can't do anything with it
-        // So, I've chosen to json encode it here, and the Py4j.py MessageHandler will
+        // So, I've chosen to json encode it here, and the Py4j.py
+        // MessageHandler will
         // decode it into a Python dictionary \o/
-        // we do single encoding including the parameter array - there is no header needed
-        // with method and other details, as the invoke here is invoking directly in the
+        // we do single encoding including the parameter array - there is no
+        // header needed
+        // with method and other details, as the invoke here is invoking
+        // directly in the
         // Py4j.py script
-                
+
         String json = CodecUtils.toJson(msg);
         // handler.invoke(msg.method, json);
         log.info(String.format("handler %s", json));
@@ -396,7 +411,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   public void saveScript(String scriptName, String code) throws IOException {
     if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
       scriptName = scriptName + ".py";
-    }    
+    }
     FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
     info("saved file %s", scriptName);
   }
@@ -439,9 +454,10 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
         info("server started listening on %s:%d", gateway.getAddress(), gateway.getListeningPort());
         handler = (Executor) gateway.getPythonServerEntryPoint(new Class[] { Executor.class });
 
-//        sleep(100);
-//        String[] services = Runtime.getServiceNames();
-//        sendRemote(Message.createMessage(getName(), "runtime", "onServiceNames", services));
+        // sleep(100);
+        // String[] services = Runtime.getServiceNames();
+        // sendRemote(Message.createMessage(getName(), "runtime",
+        // "onServiceNames", services));
 
       } else {
         log.info("Py4j gateway server already started");
@@ -462,7 +478,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
       String pythonScript = new File(getResourceDir() + fs + "Py4j.py").getAbsolutePath();
 
       // Script requires full name as first command line argument
-      String[] pythonArgs = {getFullName()};
+      String[] pythonArgs = { getFullName() };
 
       // Build the command to start the Python process
       ProcessBuilder processBuilder;
@@ -475,8 +491,10 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
           String python = Loader.load(org.bytedeco.cpython.python.class);
           String venvLib = new File(python).getParent() + fs + "lib" + fs + "venv" + fs + "scripts" + fs + "nt";
           if (Platform.getLocalInstance().isWindows()) {
-            // Super hacky workaround, venv works differently on Windows and requires these two
-            // files, but they are not distributed in bare-bones Python or in any pip packages.
+            // Super hacky workaround, venv works differently on Windows and
+            // requires these two
+            // files, but they are not distributed in bare-bones Python or in
+            // any pip packages.
             // So we copy them where it expects, and it seems to work now
             FileIO.copy(getResourceDir() + fs + "python.exe", venvLib + fs + "python.exe");
             FileIO.copy(getResourceDir() + fs + "pythonw.exe", venvLib + fs + "pythonw.exe");
@@ -515,13 +533,15 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   }
 
   /**
-   * Install a list of packages into the environment Py4j is running in.
-   * Py4j does not need to be running/connected to call this method as it
-   * spawns a new subprocess to invoke Pip. Output from pip is echoed
-   * via {@link #handleStdOut(String)}.
+   * Install a list of packages into the environment Py4j is running in. Py4j
+   * does not need to be running/connected to call this method as it spawns a
+   * new subprocess to invoke Pip. Output from pip is echoed via
+   * {@link #handleStdOut(String)}.
    * 
-   * @param packages The list of packages to install. Must be findable by Pip
-   * @throws IOException If an I/O error occurs running Pip.
+   * @param packages
+   *          The list of packages to install. Must be findable by Pip
+   * @throws IOException
+   *           If an I/O error occurs running Pip.
    */
   public void installPipPackages(List<String> packages) throws IOException {
     List<String> commandArgs = new ArrayList<>(List.of("-m", "pip", "install"));
@@ -530,8 +550,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     pipProcess.command().addAll(commandArgs);
     Process proc = pipProcess.redirectErrorStream(true).start();
     new Thread(() -> {
-      BufferedReader stdOutput = new BufferedReader(new
-              InputStreamReader(proc.getInputStream()));
+      BufferedReader stdOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
       String s;
       try {
         while ((s = stdOutput.readLine()) != null) {
@@ -614,7 +633,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
       error("cannot find script %s to update", scriptName);
     }
   }
-  
+
   public static void main(String[] args) {
     try {
 
@@ -624,7 +643,8 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
       webgui.autoStartBrowser(false);
       webgui.startService();
       // Runtime.start("servo", "Servo");
-      Py4j py4j = (Py4j) Runtime.start("py4j", "Py4j");
+      Runtime.start("py4j", "Py4j");
+      // Runtime.start("python", "Python");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -634,7 +654,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   @Override
   public void connect(String uri) throws Exception {
     // host:port of python process running py4j ???
-    
+
   }
 
   /**
@@ -662,6 +682,9 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   public Map<String, Connection> getClients() {
     return Runtime.getInstance().getConnections(getName());
   }
-    
-}
 
+  public void clear() {
+    logs = new SlidingWindowList<>(300);
+  }
+
+}

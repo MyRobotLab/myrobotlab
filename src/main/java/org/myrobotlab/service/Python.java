@@ -18,11 +18,13 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Processor;
@@ -184,6 +186,12 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   private final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * a sliding window of logs
+   */
+  protected List<String> logs = new SlidingWindowList<>(300);
+  
 
   protected int newScriptCnt = 0;
 
@@ -339,6 +347,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    *          the code to append
    * @return the resulting concatenation
    */
+  @Deprecated /* wtf is this for? */
   public String appendScript(String code) {
     invoke("publishAppend", code);
     return code;
@@ -719,12 +728,14 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     return code;
   }
 
-  public String publishStdOut(String data) {
-    return data;
+  public String publishStdOut(String msg) {
+    logs.add(msg);
+    return msg;
   }
 
-  public String publishStdError(String data) {
-    return data;
+  public String publishStdError(String msg) {
+    logs.add(msg);
+    return msg;
   }
 
   public void setLocalScriptDir(String path) {
@@ -1068,4 +1079,8 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     return config;
   }
 
+  public void clear() {
+    logs = new SlidingWindowList<>(300);
+  }
+  
 }
