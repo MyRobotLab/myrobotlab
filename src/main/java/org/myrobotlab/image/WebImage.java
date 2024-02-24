@@ -56,7 +56,7 @@ public class WebImage {
       if (quality == null) {
         ImageIO.write(img, imgType, os);
         os.close();
-        data = String.format("data:image/%s;base64,%s", type,CodecUtils.toBase64(os.toByteArray()));
+        data = String.format("data:image/%s;base64,%s", imgType,CodecUtils.toBase64(os.toByteArray()));
       } else {
 
         // save jpeg image with specific quality. "1f" corresponds to 100% ,

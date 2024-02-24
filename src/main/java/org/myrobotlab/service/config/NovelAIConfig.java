@@ -3,6 +3,11 @@ package org.myrobotlab.service.config;
 import org.myrobotlab.framework.Plan;
 
 public class NovelAIConfig extends SpeechSynthesisConfig {
+  
+  /**
+   * Bearer token - get it rom account settings in NovelAI
+   */
+  public String token = null;
 
 
   public NovelAIConfig() {
