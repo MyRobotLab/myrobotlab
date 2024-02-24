@@ -48,7 +48,7 @@ public class RandomTest extends AbstractTest {
     assertTrue("should not have method", !random.getKeySet().contains("clock.setInterval"));
 
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
-    random.addRandom(0, 200, "clock", "startClock");
+    random.addRandom(0, 100, "clock", "startClock");
 
     sleep(500);
     assertTrue("clock should be started 1", clock.isClockRunning());
