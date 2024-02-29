@@ -593,7 +593,9 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
             serviceName = msg.getFullName();
             Class<?> clazz = Runtime.getClass(serviceName);
             if (clazz == null) {
-              log.error("cannot derive local type from service {}", serviceName);
+              // can occur if target service is no longer running
+              log.warn("cannot derive local type from service {}", serviceName);
+              return;
             }
 
             // do not decode unless needed
@@ -1178,8 +1180,8 @@ public class WebGui extends Service<WebGuiConfig> implements AuthorizationProvid
 
     try {
 
-      // Runtime.main(new String[] { "--log-level", "info", "-s", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
-      Runtime.main(new String[] { "--install" });
+      Runtime.main(new String[] { "--log-level", "info", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      // Runtime.main(new String[] { "--install" });
       
       boolean done = true;
       if (done) {

@@ -1998,7 +1998,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
     
     for (String peerKey: peerKeys) {
-      startPeer(peerKey);
+      try {
+        startPeer(peerKey);
+      } catch(Exception e) {
+        error(e);
+      }
     }    
   }
 
@@ -2049,7 +2053,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
     
     for (String peerKey: peerKeys) {
-      releasePeer(peerKey);
+      try {
+        releasePeer(peerKey);
+      } catch(Exception e) {
+        error(e);
+      }
+
     }
   }
 
