@@ -516,8 +516,9 @@ public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig>
   @Override
   public void stopListening() {
     log.debug("stopListening()");
-
-    config.listening = false;
+    if (config != null) {
+      config.listening = false;
+    }
     broadcastState();
   }
 
