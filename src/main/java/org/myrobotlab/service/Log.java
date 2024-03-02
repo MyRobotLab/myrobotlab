@@ -54,6 +54,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     public String threadName;
     public String className;
     public String body;
+    public String src;
 
     public LogEntry(ILoggingEvent event) {
       ts = event.getTimeStamp();
@@ -61,6 +62,11 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
       threadName = event.getThreadName();
       className = event.getLoggerName();
       body = event.getFormattedMessage();
+    }
+
+    public LogEntry() {
+      ts = System.currentTimeMillis();
+      threadName = Thread.currentThread().getName();
     }
 
     @Override
