@@ -1,0 +1,29 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th style="width: 10%"></th>
+      <th style="width: 10%"></th>
+      <th style="width: 10%"></th>
+      <th style="width: 10%">Name</th>
+      <th style="width: 10%">PID</th>
+      <th style="width: 10%">Shell</th>
+      <th style="width: 70%">Command</th>
+      <th style="width: 70%">Control</th>
+    </tr>
+  </thead>
+  <tr ng-repeat="(key, value) in service.terminals">
+    <td style="width: 10%"><input type="radio" name="selectedTerminal" ng-model="ctrl.selectedTerminal" ng-value="terminal" /></td>
+    <td style="width: 10%"><img src="TerminalManager.png" width="16" /></td>
+    <td style="width: 10%"><img ng-src="{{value.connected ? 'connected.png' : 'disconnected.png'}}" alt="Connection Status" width="16" /></td>
+    <td style="width: 10%"><small>{{key}}</small></td>
+    <td><small>{{value.pid}}</small></td>
+    <td><small>{{value.shellCommand}}</small></td>
+    <td><small>{{value.lastInput}}</small></td>
+    <td>
+      <button ng-click="startTerminal(key)">Start</button>
+      <button ng-click="terminateTerminal(key)">Terminate</button>
+      <button ng-click="saveTerminal(key)">Save</button>
+      <button ng-click="deleteTerminal(key)">Delete</button>
+    </td>
+  </tr>
+</table>
