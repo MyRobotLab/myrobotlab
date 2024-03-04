@@ -3143,7 +3143,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
   static public Status noWorky(String userId) {
     Status status = null;
     try {
-      String retStr = HttpRequest.postFile("http://myrobotlab.org/myrobotlab_log/postLogFile.php", userId, "file", new File(LoggingFactory.getLogFileName()));
+      String retStr = HttpRequest.postFile("http://noworky.myrobotlab.org/no-worky", userId, "file", new File(LoggingFactory.getLogFileName()));
       if (retStr.contains("Upload:")) {
         log.info("noWorky successfully sent - our crack team of experts will check it out !");
         status = Status.info("no worky sent");
