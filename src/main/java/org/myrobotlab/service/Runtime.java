@@ -2782,7 +2782,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           if (deps.size() == 0) {
             metaData.installed = true;
           } else {
-            warn("{} not installed", metaData.getSimpleName());
+            info("%s not installed", metaData.getSimpleName());
           }
         }
         
