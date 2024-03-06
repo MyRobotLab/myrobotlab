@@ -27,9 +27,7 @@ public class PythonTerminal extends Terminal {
   @Override
   public String getVersion() {
     try {
-      processCommand(getScriptCmd("python --version"));
-      Service.sleep(300);
-      return outputCapture.toString();
+      return processBlockingCommand(getScriptCmd("python --version"));
     } catch (Exception e) {
       service.error(e);
     }
