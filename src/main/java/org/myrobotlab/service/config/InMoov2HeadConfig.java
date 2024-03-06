@@ -33,7 +33,6 @@ public class InMoov2HeadConfig extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "forheadLeft", "Servo", false);
     addDefaultPeerConfig(plan, name, "eyelidLeftUpper", "Servo", false);
     addDefaultPeerConfig(plan, name, "eyelidLeftLower", "Servo", false);
-    addDefaultPeerConfig(plan, name, "rothead", "Servo", false);
     addDefaultPeerConfig(plan, name, "upperLip", "Servo", false);
 
     addDefaultPeerConfig(plan, name, "eyeLeftLR", "Servo", false);
