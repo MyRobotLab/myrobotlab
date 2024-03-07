@@ -1,28 +1,3 @@
-/**
- *                    
- * @author GroG (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the Apache License 2.0 as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Apache License 2.0 for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
- * 
- * */
-
 package org.myrobotlab.service;
 
 import java.util.Set;
@@ -35,32 +10,27 @@ import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.data.ServoMove;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.slf4j.Logger;
 
 /**
+ * Servos have both input and output. Input is usually of the range of integers
+ * between 0.0 - 180.0, and output can relay those values directly to the
+ * servo's firmware (Arduino ServoLib, I2C controller, etc)
+ * 
+ * However there can be the occasion that the input comes from a system which
+ * does not have the same range. Such that input can vary from 0.0 to 1.0. For
+ * example, OpenCV coordinates are often returned in this range. When a mapping
+ * is needed Servo.map can be used. For this mapping Servo.map(0.0, 1.0, 0, 180)
+ * might be desired. Reversing input would be done with Servo.map(180, 0, 0,
+ * 180)
+ * 
+ * outputY - is the values sent to the firmware, and should not necessarily be
+ * confused with the inputX which is the input values sent to the servo
+ * 
+ * FIXME - inherit from AbstractMotor ..
+ * 
  * @author GroG
- * 
- *         Servos have both input and output. Input is usually of the range of
- *         integers between 0.0 - 180.0, and output can relay those values
- *         directly to the servo's firmware (Arduino ServoLib, I2C controller,
- *         etc)
- * 
- *         However there can be the occasion that the input comes from a system
- *         which does not have the same range. Such that input can vary from 0.0
- *         to 1.0. For example, OpenCV coordinates are often returned in this
- *         range. When a mapping is needed Servo.map can be used. For this
- *         mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input
- *         would be done with Servo.map(180, 0, 0, 180)
- * 
- *         outputY - is the values sent to the firmware, and should not
- *         necessarily be confused with the inputX which is the input values
- *         sent to the servo
- * 
- *         FIXME - inherit from AbstractMotor ..
- * 
  */
-
 public class Servo extends AbstractServo<ServoConfig> {
 
   private static final long serialVersionUID = 1L;
@@ -92,7 +62,7 @@ public class Servo extends AbstractServo<ServoConfig> {
     double maxLimit = Math.max(mapper.minX, mapper.maxX);
     newPos = (newPos < minLimit) ? minLimit : newPos;
     newPos = (newPos > maxLimit) ? maxLimit : newPos;
-    
+
     log.debug("{} processMove {}", getName(), newPos);
 
     // This is to allow attaching disabled
@@ -258,7 +228,6 @@ public class Servo extends AbstractServo<ServoConfig> {
       if (done) {
         return;
       }
-
 
     } catch (Exception e) {
       log.error("main threw", e);

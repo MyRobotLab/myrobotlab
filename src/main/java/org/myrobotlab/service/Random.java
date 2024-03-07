@@ -140,6 +140,14 @@ public class Random extends Service<RandomConfig> {
   public void addRandom(long minIntervalMs, long maxIntervalMs, String name, String method) {
     addRandom(minIntervalMs, maxIntervalMs, name, method, toRanges((Object[]) null));
   }
+  
+  /**
+   * Global check for enabled
+   * @return
+   */
+  public boolean isEnabled() {
+    return enabled;
+  }
 
   public Range intRange(int min, int max) {
     return new Range(min, max);
