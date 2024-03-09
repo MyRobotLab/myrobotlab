@@ -512,7 +512,7 @@ public class InMoov2Config extends ServiceConfig {
     // allow user to override or extend with python
     listeners.add(new Listener("publishBoot", name));
     // listeners.add(new Listener("publishHeartbeat", name));
-    listeners.add(new Listener("publishConfigFinished", name));
+    // listeners.add(new Listener("publishConfigFinished", name));
 
     LogConfig log = (LogConfig) plan.get(getPeerName("log"));
     log.level = "WARN";

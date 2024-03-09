@@ -17,6 +17,29 @@ public class InMoov2HeadConfig extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "rollNeck", "Servo");
     addDefaultPeerConfig(plan, name, "eyelidLeft", "Servo");
     addDefaultPeerConfig(plan, name, "eyelidRight", "Servo");
+
+    // v2
+    addDefaultPeerConfig(plan, name, "forheadRight", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidRightUpper", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidRightLower", "Servo", false);
+    
+    addDefaultPeerConfig(plan, name, "eyeRightLR", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyeRightUD", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyeRightLR", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyeRightUD", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyebrowRight", "Servo", false);
+    addDefaultPeerConfig(plan, name, "cheekRight", "Servo", false);
+    
+    addDefaultPeerConfig(plan, name, "forheadLeft", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidLeftUpper", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyelidLeftLower", "Servo", false);
+    addDefaultPeerConfig(plan, name, "upperLip", "Servo", false);
+
+    addDefaultPeerConfig(plan, name, "eyeLeftLR", "Servo", false);
+    addDefaultPeerConfig(plan, name, "eyeLeftUD", "Servo", false);
+
+    addDefaultPeerConfig(plan, name, "eyebrowLeft", "Servo", false);
+    addDefaultPeerConfig(plan, name, "cheekLeft", "Servo", false);
     
     ServoConfig jaw = (ServoConfig) plan.get(getPeerName("jaw"));
     jaw.autoDisable = true;

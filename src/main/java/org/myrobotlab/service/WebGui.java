@@ -1184,8 +1184,7 @@ public class WebGui extends Service<WebGuiConfig>
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "info", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro",
-          "python", "Python" });
+      Runtime.main(new String[] { "--log-level", "warn", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
       // Runtime.main(new String[] { "--install" });
 
       boolean done = true;
