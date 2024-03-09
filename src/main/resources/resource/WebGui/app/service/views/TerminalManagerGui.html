@@ -92,10 +92,11 @@
         </td>
     </tr>
 </table>
-<div class="terminal-wrapper" ng-repeat="(key, value) in service.terminals">
+
+<div class="terminal-wrapper" ng-repeat="(key, value) in service.terminals" data-terminal-id="{{key}}">
     {{key}}<button class="btn btn-sm" ng-click="deleteTerminal(key)">Clear</button>
     
-    <pre class="terminal2">{{value.output}}</pre>
+    <pre class="terminal2" id="terminal-{{key}}" >{{value.output}}</pre>
     
-    <input class="terminal-input" type="text" class="form-control" id="inputField" ng-model="service.inputValue" ng-keyup="$event.keyCode == 13 ? processCommand(key, service.inputValue) : null" placeholder="type here...">
+    <input class="terminal-input" type="text" class="form-control" ng-model="service.inputValue" ng-keyup="$event.keyCode == 13 ? processCommand(key, service.inputValue) : null" placeholder="type here...">
 </div>

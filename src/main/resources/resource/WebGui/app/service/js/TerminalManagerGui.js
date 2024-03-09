@@ -22,11 +22,24 @@ angular.module("mrlapp.service.TerminalManagerGui", []).controller("TerminalMana
                 let overLength = length - 1024;
                 $scope.service.terminals[data.terminal].output = $scope.service.terminals[data.terminal].output.substring(overLength);
             }
-            $scope.$apply()
+            // $scope.$apply()
+            $scope.$apply(function() {
+                    // Scroll logic here
+                    // Assuming you can uniquely identify the <pre> for this terminal
+                    let terminalElement = document.querySelector('.terminal-wrapper[data-terminal-id="' + data.terminal + '"] .terminal2');
+                    if (terminalElement) {
+                        terminalElement.scrollTop = terminalElement.scrollHeight;
+                    }
+                });
+                
             break
         case "onStdOut":
             break
         case "onCmd":
+            // FIXME - keep a list of commands ... can support history and maybe more importantly 
+            // script generation to make automated packages
+            $scope.service.terminals[data.terminal].output = $scope.service.terminals[data.terminal].output + '# ' + data.cmd    
+            $scope.$apply()
             break
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
