@@ -4550,6 +4550,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // initialize logging
       initLog();
 
+      // extract if necessary
+      FileIO.extractResources();
+      
       // help and exit
       if (options.help) {
         mainHelp();
