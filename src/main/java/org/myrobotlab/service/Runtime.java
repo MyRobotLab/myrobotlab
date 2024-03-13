@@ -5033,10 +5033,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * Sets the directory for the current config. This will be under configRoot +
    * fs + configName. Static wrapper around setConfigName - so it can be used in
    * the same way as all the other common static service methods
-   *
-   * @param configName
-   *          - config dir name under data/config/{config}
-   * @return configName
+   * 
+   * @param name - config dir name under data/config/{config}
+   * @return config dir name
    */
   public static String setConfig(String name) {
     if (name == null) {

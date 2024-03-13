@@ -46,7 +46,7 @@ public class ConfigUtils {
    * data/config/{configName}/runtime.yml If one does exits, it is returned, if
    * one does not exist a default one is created and saved.
    * 
-   * @param configName
+   * @param options
    * @return
    */
   static public RuntimeConfig loadRuntimeConfig(CmdOptions options) {
