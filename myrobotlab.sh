@@ -59,7 +59,7 @@ if test -f "$REPO_FILE"; then
     echo "$REPO_FILE exists."
 else 
     echo "$REPO_FILE does not exist."
-    "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --install --log-file myrobotlab-install.log
+    "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --install
 fi
 
 "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --log-level warn -s log Log webgui WebGui intro Intro python Python
