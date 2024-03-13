@@ -163,7 +163,8 @@ public class AbstractTest {
    */
   public static void releaseServices() {
 
-    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(), Arrays.toString(Runtime.getServiceNames()));
+    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(),
+        Arrays.toString(Runtime.getServiceNames()));
 
     // release all including runtime - be careful of default runtime.yml
     Runtime.releaseAll(true, true);
@@ -175,7 +176,8 @@ public class AbstractTest {
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName())
+          && !"runtime".equals(thread.getName())) {
         threadsRemaining.add(thread.getName());
       }
     }

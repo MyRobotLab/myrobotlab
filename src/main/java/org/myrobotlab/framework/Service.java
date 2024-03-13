@@ -89,7 +89,8 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster, QueueReporter, FutureInvoker, ConfigurableService<T> {
+public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster,
+    QueueReporter, FutureInvoker, ConfigurableService<T> {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -234,9 +235,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * copyShallowFrom is used to help maintain state information with
    * 
    * @param target
-   *          t
+   *               t
    * @param source
-   *          s
+   *               s
    * @return o
    */
   public static Object copyShallowFrom(Object target, Object source) {
@@ -254,7 +255,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // been tested before - so we copy all definitions from
     // other superclasses e.g. - org.myrobotlab.service.abstracts
     // it might be safe in the future to copy all the way up without stopping...
-    while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+    while (targetClass.getCanonicalName().startsWith("org.myrobotlab")
+        && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
       ancestry.add(targetClass);
       targetClass = targetClass.getSuperclass();
     }
@@ -281,7 +283,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
            * ){ log.info("here"); }
            */
 
-          if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+          if (Modifier.isPrivate(modifiers) || fname.equals("log") || Modifier.isTransient(modifiers)
+              || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
             log.debug("skipping {}", field.getName());
             continue;
           } else {
@@ -361,7 +364,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * sleep without the throw
    * 
    * @param millis
-   *          the time in milliseconds
+   *               the time in milliseconds
    * 
    */
   public static void sleep(int millis) {
@@ -400,7 +403,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     File f = new File(dataDir);
     if (!f.exists()) {
       if (!f.mkdirs()) {
-        log.error("Cannot create data directory: {}", dataDir);
+        log.error("Cannot create data directory: %s", dataDir);
       }
     }
     return dataDir;
@@ -415,7 +418,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     File f = new File(dataDir);
     if (!f.exists()) {
       if (!f.mkdirs()) {
-        error("Cannot create data directory: {}", dataDir);
+        error("Cannot create data directory: %s", dataDir);
       }
     }
     return dataDir;
@@ -440,7 +443,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * in the presence of other developing directories.
    * 
    * @param clazz
-   *          the class name
+   *              the class name
    * @return the resource dir
    * 
    */
@@ -465,9 +468,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * </pre>
    * 
    * @param serviceType
-   *          the type of service
+   *                       the type of service
    * @param additionalPath
-   *          to glue together
+   *                       to glue together
    * @return the full resolved path
    * 
    *         FIXME - DO NOT USE STATIC !!!! all instances of services should be
@@ -492,7 +495,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * and adds the additionalPath..
    * 
    * @param additionalPath
-   *          additional paths to add to the resource path
+   *                       additional paths to add to the resource path
    * @return the combined file path
    * 
    */
@@ -526,9 +529,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * Get a resource, first parameter is serviceType
    * 
    * @param serviceType
-   *          - the type of service
+   *                     - the type of service
    * @param resourceName
-   *          - the path of the resource
+   *                     - the path of the resource
    * @return the bytes of the resource
    */
   static public byte[] getResource(String serviceType, String resourceName) {
@@ -556,9 +559,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * resources
    * 
    * @param clazz
-   *          the class
+   *                     the class
    * @param resourceName
-   *          the resource name
+   *                     the resource name
    * @return bytes of the resource
    * 
    */
@@ -571,7 +574,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * appropriate resource dir
    * 
    * @param resourceName
-   *          the name of the resource
+   *                     the name of the resource
    * @return the string of the bytes , assuming utf-8
    * 
    */
@@ -608,9 +611,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * will be its process id
    * 
    * @param reservedKey
-   *          the service name
+   *                    the service name
    * @param inId
-   *          process id
+   *                    process id
    * 
    */
   public Service(String reservedKey, String inId) {
@@ -679,7 +682,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   /**
    * 
    * @param additionalPath
-   *          get a list of resource files in a resource path
+   *                       get a list of resource files in a resource path
    * @return list of files
    * 
    */
@@ -694,7 +697,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * subscriptions
    * 
    * @param data
-   *          - listener callback info
+   *             - listener callback info
    */
   public void addListener(Map data) {
     // {topicMethod=pulse, callbackName=mqtt01, callbackMethod=onPulse}
@@ -707,7 +710,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (!data.containsKey("callbackMethod")) {
       error("addListener callbackMethod missing");
     }
-    addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(), data.get("callbackMethod").toString());
+    addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(),
+        data.get("callbackMethod").toString());
   }
 
   public void addListener(MRLListener listener) {
@@ -725,12 +729,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * HashSet .. WHY ArrayList ???
    * 
    * @param localMethod
-   *          - method when called, it's return will be sent to the
-   *          remoteName.remoteMethod
+   *                     - method when called, it's return will be sent to the
+   *                     remoteName.remoteMethod
    * @param remoteName
-   *          - name of the service to send return message to
+   *                     - name of the service to send return message to
    * @param remoteMethod
-   *          - name of the method to send return data to
+   *                     - name of the method to send return data to
    */
   @Override
   public void addListener(String localMethod, String remoteName, String remoteMethod) {
@@ -749,13 +753,15 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
         }
       }
       if (!found) {
-        log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
+        log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName,
+            listener.callbackMethod);
         nes.add(listener);
       }
     } else {
       List<MRLListener> notifyList = new CopyOnWriteArrayList<MRLListener>();
       notifyList.add(listener);
-      log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
+      log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName,
+          listener.callbackMethod);
       outbox.notifyList.put(listener.topicMethod, notifyList);
     }
   }
@@ -794,18 +800,19 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * a stronger bigger better task handler !
    * 
    * @param taskName
-   *          task name
+   *                   task name
    * @param intervalMs
-   *          how frequent in milliseconds
+   *                   how frequent in milliseconds
    * @param delayMs
-   *          the delay
+   *                   the delay
    * @param method
-   *          the method
+   *                   the method
    * @param params
-   *          the params to pass
+   *                   the params to pass
    */
   @Override
-  synchronized public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method, Object... params) {
+  synchronized public void addTask(String taskName, boolean oneShot, long intervalMs, long delayMs, String method,
+      Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
       return;
@@ -1006,11 +1013,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * add all interface names to the specified map.
    *
    * @param c
-   *          The class to start the traversal from.
+   *                       The class to start the traversal from.
    * @param ret
-   *          The map to store the interface names.
+   *                       The map to store the interface names.
    * @param visitedClasses
-   *          A set to keep track of visited classes to avoid infinite loops.
+   *                       A set to keep track of visited classes to avoid
+   *                       infinite loops.
    */
   private void getAllInterfacesHelper(Class<?> c, Map<String, String> ret, Set<Class<?>> visitedClasses) {
     if (c != null && !visitedClasses.contains(c)) {
@@ -1047,7 +1055,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       // use the runtime to send a message
       // FIXME - parameters !
       try {
-        return (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+        return (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList",
+            new Object[] { key });
       } catch (Exception e) {
         log.error("remote getNotifyList threw", e);
         return null;
@@ -1114,7 +1123,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * returns the peer key if a name is supplied and matches a peer name
    * 
    * @param name
-   *          - name of service
+   *             - name of service
    * @return - key of peer if it exists
    */
   public String getPeerKey(String name) {
@@ -1251,11 +1260,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * thread blocking invoke call on different service in the same process
    * 
    * @param serviceName
-   *          the service to invoke on
+   *                    the service to invoke on
    * @param methodName
-   *          the method to invoke
+   *                    the method to invoke
    * @param params
-   *          var args of the params to pass
+   *                    var args of the params to pass
    * @return the returned value from invoking
    * 
    */
@@ -1267,11 +1276,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * the core working invoke method
    * 
    * @param obj
-   *          - the object
+   *                   - the object
    * @param methodName
-   *          - the method to invoke on that object
+   *                   - the method to invoke on that object
    * @param params
-   *          - the list of args to pass to the method
+   *                   - the list of args to pass to the method
    * @return return object
    */
   @Override
@@ -1285,7 +1294,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       }
       Method method = cache.getMethod(obj.getClass(), methodName, params);
       if (method == null) {
-        error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
+        error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName,
+            MethodCache.formatParams(params));
         return null; // should this be allowed to throw to a higher level ?
       }
       retobj = method.invoke(obj, params);
@@ -1307,7 +1317,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
               if (si == null) {
-                log.debug("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
+                log.debug("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName,
+                    listener.callbackMethod);
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
                 if (m == null) {
@@ -1317,7 +1328,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
                   if (m != null) {
                     m.invoke(si, listener.callbackMethod, new Object[] { retobj });
                   } else {
-                    log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
+                    log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(),
+                        listener.callbackMethod, retobj);
                   }
                 } else {
                   try {
@@ -1389,9 +1401,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   public ServiceConfig getPeerConfig(String peerKey) {
-    return getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
+    return getPeerConfig(peerKey, new StaticType<ServiceConfig>() {
+    });
   }
-
 
   /**
    * Get a service's peer's configuration. This method is used to get the
@@ -1402,8 +1414,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * the default configuration for this peer is used.
    * 
    * @param peerKey
-   *          - key of the peer service. e.g. "opencv" in the case of
-   *          i01."opencv"
+   *                - key of the peer service. e.g. "opencv" in the case of
+   *                i01."opencv"
    * @return
    */
   public <P extends ServiceConfig> P getPeerConfig(String peerKey, StaticType<P> type) {
@@ -1436,8 +1448,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return sc;
   }
 
-  public void setPeerConfigValue(String peerKey, String fieldname, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<ServiceConfig>() {});
+  public void setPeerConfigValue(String peerKey, String fieldname, Object value)
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    ServiceConfig sc = getPeerConfig(peerKey, new StaticType<ServiceConfig>() {
+    });
     if (sc == null) {
       error("invalid config for peer key %s field name %s", peerKey, fieldname);
       return;
@@ -1514,16 +1528,17 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (newListeners.size() > 0) {
       sc.listeners = newListeners;
     }
-    
+
     if (sc.listeners != null) {
       Collections.sort(sc.listeners, new MrlListenerComparator());
     }
-       
+
     return sc;
   }
 
   @Override
-  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+  public void setConfigValue(String fieldname, Object value)
+      throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
     log.info("setting field name fieldname {} to {}", fieldname, value);
 
     Field field = getConfig().getClass().getDeclaredField(fieldname);
@@ -1585,7 +1600,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * throughput of Inbox &amp; Outbox queues
    * 
    * @param stats
-   *          s
+   *              s
    * @return the stats
    */
   public QueueStats publishQueueStats(QueueStats stats) {
@@ -1639,7 +1654,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
         // subscriptions to the same topic (one to many mapping), the first in
         // the list would be removed
         // instead of the requested one.
-        if (listener.callbackMethod.equals(inMethod) && CodecUtils.checkServiceNameEquality(listener.callbackName, fullName)) {
+        if (listener.callbackMethod.equals(inMethod)
+            && CodecUtils.checkServiceNameEquality(listener.callbackName, fullName)) {
           log.info("removeListener requested {}.{} to be removed", fullName, outMethod);
           return true;
         }
@@ -1764,7 +1780,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     send(msg);
   }
 
-  public Object sendToPeerBlocking(String peerName, String method, Object... data) throws InterruptedException, TimeoutException {
+  public Object sendToPeerBlocking(String peerName, String method, Object... data)
+      throws InterruptedException, TimeoutException {
     return sendBlocking(getPeerName(peerName), method, data);
   }
 
@@ -1811,7 +1828,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
-  public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
+  public Object sendBlocking(String name, Integer timeout, String method, Object... data)
+      throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getFullName(), name, method, data);
     msg.msgId = Runtime.getUniqueID();
 
@@ -1850,20 +1868,21 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * null return.
    * 
    * @param fullName
-   *          - service name
+   *                 - service name
    * @param method
-   *          - method name
+   *                 - method name
    * @param timeout
-   *          - max time to wait in ms
+   *                 - max time to wait in ms
    * @param sendMsg
-   *          - optional message to send to the remote topic
+   *                 - optional message to send to the remote topic
    * @return the returned object
    * @throws InterruptedException
-   *           boom
+   *                              boom
    * @throws TimeoutException
-   *           boom
+   *                              boom
    */
-  protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
+  protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg)
+      throws InterruptedException, TimeoutException {
 
     String subscriber = null;
     if (sendMsg != null) {
@@ -1978,28 +1997,27 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       error("startPeer could not find peerKey of %s in %s", peerKey, getName());
       return null;
     }
-  
+
     // start peer requested
     broadcastState();
     return Runtime.start(peer.name);
   }
-  
+
   @Override
   synchronized public void startPeers(String[] peerKeys) {
-    
+
     if (peerKeys == null) {
       return;
     }
-    
-    for (String peerKey: peerKeys) {
+
+    for (String peerKey : peerKeys) {
       try {
         startPeer(peerKey);
-      } catch(Exception e) {
+      } catch (Exception e) {
         error(e);
       }
-    }    
+    }
   }
-
 
   /**
    * Release a peer by peerKey. There can be advantages to refer to a peer with
@@ -2020,7 +2038,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       if (si != null) {
         sc = si.getConfig();
       }
-        
+
       // peer recursive
       if (sc != null && sc.getPeers() != null) {
         for (String subPeerKey : sc.getPeers().keySet()) {
@@ -2036,7 +2054,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       error("%s.releasePeer(%s) does not exist", getName(), peerKey);
     }
   }
-  
+
   /**
    * Release a set of peers in the order they are provided.
    */
@@ -2045,11 +2063,11 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     if (peerKeys == null) {
       return;
     }
-    
-    for (String peerKey: peerKeys) {
+
+    for (String peerKey : peerKeys) {
       try {
         releasePeer(peerKey);
-      } catch(Exception e) {
+      } catch (Exception e) {
         error(e);
       }
 
@@ -2171,7 +2189,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     topicName = CodecUtils.getFullName(topicName);
     callbackName = CodecUtils.getFullName(callbackName);
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    send(Message.createMessage(getFullName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(getFullName(), topicName, "removeListener",
+        new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------
@@ -2225,7 +2244,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * set status broadcasts an info string to any subscribers
    * 
    * @param msg
-   *          m
+   *            m
    * @return string
    */
   public Status info(String msg) {
@@ -2249,7 +2268,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * info, warn &amp; error
    * 
    * @param status
-   *          status
+   *               status
    * @return the status
    */
   public Status publishError(Status status) {
@@ -2389,14 +2408,17 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * </pre>
    * 
    * @param service
-   *          - the service to detach from this service
+   *                - the service to detach from this service
    * 
    * 
-   *          FIXME !!! - although this is a nice pub/sub function to clear out
-   *          pubs - it will often have to be overriden and therefore will be
-   *          extremely easy to forget to call super a "framework" method should
-   *          replace this - so that a service.detachOutbox() calls -&gt; a
-   *          detach that can be overidden !
+   *                FIXME !!! - although this is a nice pub/sub function to clear
+   *                out
+   *                pubs - it will often have to be overriden and therefore will
+   *                be
+   *                extremely easy to forget to call super a "framework" method
+   *                should
+   *                replace this - so that a service.detachOutbox() calls -&gt; a
+   *                detach that can be overidden !
    * 
    */
   @Override
@@ -2459,7 +2481,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * path
    * 
    * @param filename
-   *          - file name to get
+   *                 - file name to get
    * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
@@ -2555,7 +2577,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * static class version for use when class is available "preferred"
    * 
    * @param serviceType
-   *          the type of service
+   *                    the type of service
    * @return the bytes representing it's icon (png)
    * 
    */
@@ -2568,7 +2590,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * with "resource/Servo.png"
    * 
    * @param serviceType
-   *          name of the service type
+   *                    name of the service type
    * @return byte array of the icon image (png)
    * 
    */
@@ -2631,7 +2653,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
    * 
    * @param key
-   *          key to lookup in localize
+   *            key to lookup in localize
    * @return localized string for key
    * 
    */
@@ -2643,9 +2665,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * String format template processing localization
    * 
    * @param key
-   *          lookup key
+   *             lookup key
    * @param args
-   *          var args
+   *             var args
    * @return localized string for key
    * 
    */
@@ -2699,7 +2721,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
     }
 
-    localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
+    localization = Locale
+        .loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
   }
 
   /**
@@ -2885,7 +2908,8 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * @param peerKey
    * @param config
    */
-  public <P extends ServiceConfig> void applyPeerConfig(String peerKey, P config, StaticType<Service<P>> configServiceType) {
+  public <P extends ServiceConfig> void applyPeerConfig(String peerKey, P config,
+      StaticType<Service<P>> configServiceType) {
     String peerName = getPeerName(peerKey);
 
     // meh - templating is not very helpful here
@@ -2926,9 +2950,10 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * modify the config file if a configpath is set.
    * 
    * @param key
-   *          - peerKey of the service .. e.g. "head" for InMoov's head peer
+   *                 - peerKey of the service .. e.g. "head" for InMoov's head
+   *                 peer
    * @param peerType
-   *          - desired shortname of the type
+   *                 - desired shortname of the type
    */
   public void updatePeerType(String key, String peerType) {
 

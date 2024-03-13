@@ -40,15 +40,17 @@ public class RandomTest extends AbstractTest {
 
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
 
-    assertTrue(String.format("random method 1 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
-    assertTrue(String.format("random method 1 should be %d <= 10000 values", clock.getInterval()), clock.getInterval() <= 10000);
+    assertTrue(String.format("random method 1 should be %d => 5000 values", clock.getInterval()),
+        5000 <= clock.getInterval());
+    assertTrue(String.format("random method 1 should be %d <= 10000 values", clock.getInterval()),
+        clock.getInterval() <= 10000);
 
     random.remove("clock.setInterval");
 
     assertTrue("should not have method", !random.getKeySet().contains("clock.setInterval"));
 
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
-    random.addRandom(0, 100, "clock", "startClock");
+    random.addRandom(0, 200, "clock", "startClock");
 
     sleep(500);
     assertTrue("clock should be started 1", clock.isClockRunning());
@@ -70,8 +72,10 @@ public class RandomTest extends AbstractTest {
     sleep(200);
     clock.setInterval(9999);
     assertTrue("clock should not be started 3", !clock.isClockRunning());
-    assertTrue(String.format("random method 2 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
-    assertTrue(String.format("random method 2 should be %d <= 10000 values", clock.getInterval()), clock.getInterval() <= 10000);
+    assertTrue(String.format("random method 2 should be %d => 5000 values", clock.getInterval()),
+        5000 <= clock.getInterval());
+    assertTrue(String.format("random method 2 should be %d <= 10000 values", clock.getInterval()),
+        clock.getInterval() <= 10000);
 
     // disable all
     random.disable();
@@ -85,8 +89,10 @@ public class RandomTest extends AbstractTest {
     random.enable();
     sleep(1000);
     assertTrue("clock should not be started 5", !clock.isClockRunning());
-    assertTrue(String.format("random method 3 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
-    assertTrue(String.format("random method 3 should be %d <= 10000 values", clock.getInterval()), clock.getInterval() <= 10000);
+    assertTrue(String.format("random method 3 should be %d => 5000 values", clock.getInterval()),
+        5000 <= clock.getInterval());
+    assertTrue(String.format("random method 3 should be %d <= 10000 values", clock.getInterval()),
+        clock.getInterval() <= 10000);
 
     clock.stopClock();
     random.purge();

@@ -2916,6 +2916,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     log.info("hostname {}", platform.getHostname());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getJvmBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
+    System.out.println(String.format("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild()));
     log.info("platform manifest {}", Platform.getManifest());
     log.info("platform [{}}]", platform);
     log.info("version [{}]", platform.getVersion());

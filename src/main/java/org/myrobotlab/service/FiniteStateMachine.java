@@ -197,7 +197,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       stateMachine.send(event);
       current = stateMachine.getCurrent();
 
-      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
+      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(),
+          current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
         StateChange stateChange = new StateChange(current.getName(), event);
