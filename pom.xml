@@ -215,7 +215,7 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
-      <version>1.5.7</version>
+      <version>1.5.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -1075,10 +1075,10 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacv-platform</artifactId>
-      <version>1.5.7</version>
+      <version>1.5.8</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Duplicate entry for org.bytedeco-javacpp-1.5.7 skipping -->
+    <!-- Duplicate entry for org.bytedeco-javacpp-1.5.8 skipping -->
     <!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
     <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
     <dependency>
@@ -1553,26 +1553,17 @@
     </dependency>
     <!-- Sphinx end -->
 
-    <!-- Tensorflow begin -->
-    <dependency>
-      <groupId>org.tensorflow</groupId>
-      <artifactId>tensorflow</artifactId>
-      <version>1.8.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Tensorflow end -->
-
     <!-- TesseractOcr begin -->
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>tesseract</artifactId>
-      <version>5.0.1-1.5.7</version>
+      <version>5.2.0-1.5.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>tesseract-platform</artifactId>
-      <version>5.0.1-1.5.7</version>
+      <version>5.2.0-1.5.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

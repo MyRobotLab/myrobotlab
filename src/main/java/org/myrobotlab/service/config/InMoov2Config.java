@@ -55,7 +55,7 @@ public class InMoov2Config extends ServiceConfig {
    * fire events to the FSM. Checks battery level and sends a heartbeat flash on
    * publishHeartbeat and onHeartbeat at a regular interval
    */
-  public boolean heartbeat = false;
+  public boolean heartbeat = true;
 
   /**
    * flashes the neopixel every time a health check is preformed. green == good
@@ -68,17 +68,17 @@ public class InMoov2Config extends ServiceConfig {
    */
   public long heartbeatInterval = 3000;
 
-  public boolean loadAppsScripts = true;
+  public boolean loadAppsScripts = false;
 
   /**
    * loads all python gesture files in the gesture directory
    */
-  public boolean loadGestures = true;
+  public boolean loadGestures = false;
 
   /**
    * executes all scripts in the init directory on startup
    */
-  public boolean loadInitScripts = true;
+  public boolean loadInitScripts = false;
 
   /**
    * default to null - allow the OS to set it, unless explicilty set
@@ -188,6 +188,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "openWeatherMap", "OpenWeatherMap", false);
     addDefaultPeerConfig(plan, name, "pid", "Pid", false);
     addDefaultPeerConfig(plan, name, "pir", "Pir", false);
+    addDefaultGlobalConfig(plan, "python", "python", "Python");
     addDefaultPeerConfig(plan, name, "py4j", "Py4j", false);
     addDefaultPeerConfig(plan, name, "random", "Random", false);
     addDefaultPeerConfig(plan, name, "right", "Arduino", false);
@@ -232,9 +233,17 @@ public class InMoov2Config extends ServiceConfig {
     }
 
     mouthControl.mouth = i01Name + ".mouth";
+    
+    UltrasonicSensorConfig ultrasonicLeft = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicLeft"));
+    ultrasonicLeft.triggerPin = 64;
+    ultrasonicLeft.echoPin = 63;
 
+    UltrasonicSensorConfig ultrasonicRight = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicRight"));
+    ultrasonicRight.triggerPin = 64;
+    ultrasonicRight.echoPin = 63;
+    
+    
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
-    chatBot.botDir = "resource/ProgramAB";
 
     chatBot.bots.add("resource/ProgramAB/Alice");
     chatBot.bots.add("resource/ProgramAB/Dr.Who");
@@ -267,8 +276,6 @@ public class InMoov2Config extends ServiceConfig {
       }
     }
 
-    chatBot.currentUserName = "human";
-
     chatBot.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
 
     Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
@@ -283,8 +290,7 @@ public class InMoov2Config extends ServiceConfig {
     // setup name references to different services
     MarySpeechConfig mouth = (MarySpeechConfig) plan.get(getPeerName("mouth"));
     mouth.voice = "Mark";
-    mouth.speechRecognizers = new String[] { name + ".ear" };
-
+    
     // == Peer - ear =============================
     // setup name references to different services
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
@@ -365,16 +371,17 @@ public class InMoov2Config extends ServiceConfig {
     // exists ?
     fsm.current = "boot";
     fsm.transitions.add(new Transition("boot", "wake", "wake"));
-    fsm.transitions.add(new Transition("wake", "idle", "idle"));
-    fsm.transitions.add(new Transition("first_init", "idle", "idle"));
+    // setup, nor sleep should be affected by idle
+    fsm.transitions.add(new Transition("setup", "setup_done", "idle"));
     fsm.transitions.add(new Transition("idle", "random", "random"));
     fsm.transitions.add(new Transition("random", "idle", "idle"));
     fsm.transitions.add(new Transition("idle", "sleep", "sleep"));
     fsm.transitions.add(new Transition("sleep", "wake", "wake"));
     fsm.transitions.add(new Transition("sleep", "power_down", "power_down"));
     fsm.transitions.add(new Transition("idle", "power_down", "power_down"));
-    fsm.transitions.add(new Transition("wake", "first_init", "first_init"));
-    fsm.transitions.add(new Transition("idle", "first_init", "first_init"));
+    fsm.transitions.add(new Transition("wake", "setup", "setup"));
+    fsm.transitions.add(new Transition("wake", "idle", "idle"));
+    fsm.transitions.add(new Transition("idle", "setup", "setup"));
     // power_down to shutdown
     // fsm.transitions.add(new Transition("systemCheck", "systemCheckFinished",
     // "awake"));
@@ -520,7 +527,11 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishPlayAudioFile", getPeerName("audioPlayer")));
     listeners.add(new Listener("publishPlayAnimation", getPeerName("neoPixel")));
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
-    listeners.add(new Listener("publishProcessMessage", getPeerName("py4j"), "onPythonMessage"));
+    // listeners.add(new Listener("publishProcessMessage",
+    // getPeerName("python"), "onPythonMessage"));
+    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
+    
+    listeners.add(new Listener("publishPython", getPeerName("python")));
 
     // InMoov2 --to--> InMoov2
     listeners.add(new Listener("publishMoveHead", getPeerName("head"), "onMove"));
@@ -533,6 +544,8 @@ public class InMoov2Config extends ServiceConfig {
     // service --to--> InMoov2
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+    
+    htmlFilter.listeners.add(new Listener("publishText", name));
 
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
     oakd.listeners.add(new Listener("publishClassification", name));
@@ -544,7 +557,11 @@ public class InMoov2Config extends ServiceConfig {
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
     // Needs upcoming pr
-    // fsm.listeners.add(new Listener("publishStateChange", name));
+    fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
+    
+    // peer --to--> peer
+    mouth.listeners.add(new Listener("publishStartSpeaking", getPeerName("ear")));
+    mouth.listeners.add(new Listener("publishEndSpeaking", getPeerName("ear")));
 
     return plan;
   }

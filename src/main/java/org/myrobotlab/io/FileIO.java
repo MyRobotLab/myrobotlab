@@ -58,8 +58,8 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
 import org.apache.commons.io.Charsets;
+import org.myrobotlab.config.ConfigUtils;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -854,8 +854,6 @@ public class FileIO {
       f = new File(uri);
       log.info("{} exists {}", uri, f.exists());
 
-      log.info("isJar : {}", isJar());
-
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -870,33 +868,22 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return byte array
    */
-  @Deprecated /* user Service.getResource(src) */
   static public final byte[] resourceToByteArray(String src) {
 
-    // this path assumes in a jar ?
-    // String filename = "/resource/" + src;
-    log.info("looking for Resource {}", src);
+    log.info("looking for resource {}", src);
     InputStream isr = null;
-    if (isJar()) {
-      // this path assumes in a jar ? ensure it's forward slashes
-      String filename = "/resource/" + src.replace("\\", "/");
-      isr = FileIO.class.getResourceAsStream(filename);
-    } else {
-      String localFilename = Service.getResourceRoot() + File.separator + src;
-      try {
-        isr = new FileInputStream(localFilename);
-      } catch (Exception e) {
-        Logging.logError(e);
-        log.error("File not found. {}", localFilename, e);
-        return null;
-      }
+    String resource = ConfigUtils.getResourceRoot();
+    String localFilename = resource + File.separator + src;
+    try {
+      isr = new FileInputStream(localFilename);
+    } catch (Exception e) {
+      Logging.logError(e);
+      log.error("file not found. {}", localFilename, e);
+      return null;
     }
+
     byte[] data = null;
     try {
-      if (isr == null) {
-        log.error("can not find resource [{}]", src);
-        return null;
-      }
       data = toByteArray(isr);
     } finally {
       try {
@@ -918,7 +905,6 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return string
    */
-  @Deprecated /* use Service.getResourceAsString(src) */
   static public final String resourceToString(String src) {
     byte[] bytes = resourceToByteArray(src);
     if (bytes == null) {

@@ -28,13 +28,13 @@ public class BlockingTest extends AbstractTest {
 
     Message msg = Message.createMessage("thower07", "catcher07", "onInt", 3);
     Integer ret = (Integer)thower07.sendBlocking(msg, null);
-    assertEquals(simpleName, 3, (int)ret);
+    assertEquals(3, (int)ret);
 
     long startTime = System.currentTimeMillis();
     msg = Message.createMessage("thower07", "catcher07", "waitForThis", new Object[] {7, 1000});
     ret = (Integer)thower07.sendBlocking(msg, null);
     assertTrue("1s process", System.currentTimeMillis() - startTime > 500);
-    assertEquals(simpleName, 7, (int)ret);
+    assertEquals(7, (int)ret);
 
     Runtime.release("catcher07");
     Runtime.release("thower07");

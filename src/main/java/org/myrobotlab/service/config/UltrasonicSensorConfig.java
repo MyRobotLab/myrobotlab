@@ -10,11 +10,13 @@ public class UltrasonicSensorConfig extends ServiceConfig {
   /**
    * pulse pin
    */
+  @Deprecated /* Pins need to be Strings eg "D64" */
   public Integer triggerPin;
   
   /**
    * listening pin
    */
+  @Deprecated /* Pins need to be Strings eg "D63" */
   public Integer echoPin;
   
   /**

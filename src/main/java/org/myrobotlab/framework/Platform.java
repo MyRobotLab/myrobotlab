@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
+import org.myrobotlab.config.ConfigUtils;
 // Do not pull in deps to this class !
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -64,13 +65,7 @@ public class Platform implements Serializable {
   String vmName;
   String vmVersion;
   String mrlVersion;
-  boolean isVirtual = false;
 
-  /**
-   * Static identifier to identify the "instance" of myrobotlab - similar to
-   * network ip of a device and used in a similar way
-   */
-  String id;
   String branch;
 
   String pid;
@@ -95,7 +90,7 @@ public class Platform implements Serializable {
    * All data should be accessed through public functions on the local instance.
    * If the local instance is desired. If its from a serialized instance, the
    * "getters" will be retrieving appropriate info for that serialized instance.
-   * 
+   *  
    * @return - return the local instance of the current platform
    */
   public static Platform getLocalInstance() {
@@ -121,7 +116,8 @@ public class Platform implements Serializable {
 
       // === ARCH ===
       String arch = System.getProperty("os.arch").toLowerCase();
-      if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
+      if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch)
+          || "amd64".equals(arch) || arch.startsWith("x86")) {
         platform.arch = "x86"; // don't care at the moment
       }
 
@@ -159,7 +155,8 @@ public class Platform implements Serializable {
         // tries very hard to hide this from running programs
         String procArch = System.getenv("PROCESSOR_ARCHITECTURE");
         String procArchWow64 = System.getenv("PROCESSOR_ARCHITEW6432");
-        platform.osBitness = (procArch != null && procArch.endsWith("64") || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
+        platform.osBitness = (procArch != null && procArch.endsWith("64")
+            || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
         switch (arch) {
           case "x86":
           case "i386":
@@ -461,32 +458,10 @@ public class Platform implements Serializable {
   }
 
   /**
-   * @return The instance identifier of the current running myrobotlab. Used for
-   *         connecting multiple myrobotlabs together
-   * 
-   */
-  public String getId() {
-    // null ids are not allowed
-    if (id == null) {
-      id = NameGenerator.getName();
-    }
-    return id;
-  }
-
-  /**
    * @return The Computer's hostname
    */
   public String getHostname() {
     return hostname;
-  }
-
-  /**
-   * @param newId
-   *          Set your own instance identifier
-   * 
-   */
-  public void setId(String newId) {
-    id = newId;
   }
 
   /**
@@ -495,20 +470,6 @@ public class Platform implements Serializable {
    */
   public Date getStartTime() {
     return startTime;
-  }
-
-  /**
-   * @return true if running in virtual mode
-   * 
-   */
-  public static boolean isVirtual() {
-    Platform p = getLocalInstance();
-    return p.isVirtual;
-  }
-
-  public static void setVirtual(boolean b) {
-    Platform p = getLocalInstance();
-    p.isVirtual = b;
   }
 
   public static void main(String[] args) {

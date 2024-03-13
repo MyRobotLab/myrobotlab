@@ -334,7 +334,8 @@
         <version>3.2.2</version>
         <configuration>
           <!-- critical for jacoco to have original argLine prefixed here-->
-          <argLine>${argLine} -Djava.library.path=libraries/native -Djna.library.path=libraries/native</argLine>
+          <argLine>${argLine} -Djava.library.path=libraries/native
+            -Djna.library.path=libraries/native</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>

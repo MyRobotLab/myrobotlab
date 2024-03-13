@@ -10,11 +10,9 @@ public class ProgramABConfig extends ServiceConfig {
   @Deprecated /* unused text filters */
   public String[] textFilters;
   
-  /**
-   * a directory ProgramAB will scan for new bots
-   */
+  @Deprecated /* unnecessary and unwanted - specify bots directly */
   public String botDir;
-
+  
   /**
    * explicit bot directories
    */

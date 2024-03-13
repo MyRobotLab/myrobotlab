@@ -16,7 +16,7 @@ public class OpenCVMeta extends MetaData {
 
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    String javaCvVersion = "1.5.7";
+    String javaCvVersion = "1.5.8";
     // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     addDependency("org.bytedeco", "javacpp", javaCvVersion);
