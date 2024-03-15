@@ -4576,6 +4576,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       Runtime.getInstance();
 
       if (options.install != null) {
+        // resetting log level to info
+        // for an install otherwise ivy 
+        // info will not be shown in the terminal
+        // during install of dependencies
+        // which makes users panic and hit ctrl+C
+        setLogLevel("info");
+        
         // we start the runtime so there is a status publisher which will
         // display status updates from the repo install
         log.info("requesting install");
