@@ -26,9 +26,7 @@ import picocli.CommandLine.Option;
  * </pre>
  */
 @Command(name = "java -jar myrobotlab.jar ")
-public class CmdOptions {  
-
-  public final String DEFAULT_CONNECT = "http://localhost:8888";
+public class CmdOptions {
 
   static boolean contains(List<String> l, String flag) {
     for (String f : l) {
@@ -39,60 +37,34 @@ public class CmdOptions {
     return false;
   }
 
-  // launcher ??
-  @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
-  public boolean autoUpdate = false;
-
   // launcher
   @Option(names = { "-c",
-      "--config" }, fallbackValue="default", description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config data/config/my-config-dir")
+      "--config" }, fallbackValue = "default", description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config my-config-dir to start the configuration stored in config data/config/my-config-dir")
   public String config = null;
-
-  @Option(names = {
-      "--connect" }, arity = "0..*", /*
-                                      * defaultValue = DEFAULT_CONNECT,
-                                      */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
-  public String connect = null;
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
-  
-  @Option(names = { "-r", "--config-root" }, description = "sets configuration root, the root for which all config directories are in")
-  public String configRoot = null;
-
-
-  @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+  @Option(names = {
+      "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
   public String id;
 
   @Option(names = { "-i",
       "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {serviceType} installs dependencies for a specific service, if no type is specified then all services are installed")
   public String install[];
 
-  @Option(names = { "-I",
-      "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
-  public String invoke[];
-
-  // for launcher
   @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
   public String jvm;
 
-  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting [debug info warn error]")
+  @Option(names = { "-l",
+      "--log-level" }, description = "log level - helpful for troubleshooting [debug info warn error]")
   public String logLevel = "info";
 
-  @Option(names = { "--log-file" }, description = "log file name [myrobotlab.log]")
-  public String logFile = "myrobotlab.log";
-
-  // FIXME - highlight or italics for examples !!
-  // launcher
   @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
   public String memory = null;
 
   @Option(names = { "-s", "--service",
       "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
   public List<String> services = new ArrayList<>();
-
-  @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
-  public boolean virtual = false;
 
   public CmdOptions() {
   }
@@ -133,32 +105,16 @@ public class CmdOptions {
    * 
    * @return the list of output command
    * @throws IOException
-   *           boom
+   *                     boom
    * 
    */
   public List<String> getOutputCmd() throws IOException {
 
     List<String> cmd = new ArrayList<>();
 
-    if (autoUpdate) {
-      cmd.add("-a");
-    }
-
     if (config != null) {
       cmd.add("--config");
       cmd.add(config);
-    }
-
-    if (connect != null) {
-      cmd.add("-c");
-      cmd.add(connect);
-    }
-
-    if (invoke != null) {
-      cmd.add("-I");
-      for (int i = 0; i < invoke.length; ++i) {
-        cmd.add(invoke[i]);
-      }
     }
 
     if (help) {
@@ -204,10 +160,6 @@ public class CmdOptions {
     cmd.add("-s");
     for (String s : services) {
       cmd.add(s);
-    }
-
-    if (virtual) {
-      cmd.add("-v");
     }
 
     return cmd;

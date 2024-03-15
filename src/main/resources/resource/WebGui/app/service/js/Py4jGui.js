@@ -10,7 +10,6 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
 
     // filesystem list of scripts
     $scope.scriptList = []
-    $scope.logs = []
 
     // this UI's currently active script
     $scope.activeKey = null
@@ -33,11 +32,11 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             $scope.$apply()
             break
         case 'onStdOut':
-            if (data !== "\n"){
-                $scope.logs.unshift(data)
-                if ($scope.logs.length > 100) {
-                    $scope.logs.pop()
-                }                
+            if (data !== "\n") {
+                $scope.service.logs.unshift(data)
+                if ($scope.service.logs.length > 300) {
+                    $scope.service.logs.pop()
+                }
                 $scope.$apply()
             }
             break
@@ -54,7 +53,7 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             break
         case 'onStatus':
             if (data.level == 'error') {
-                $scope.logs.unshift(data.detail)
+                $scope.service.logs.unshift(data.detail)
             }
             console.info("onStatus ", data)
             $scope.$apply()
@@ -105,11 +104,11 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             templateUrl: 'addScript.html',
             controller: function($scope, $uibModalInstance) {
                 $scope.ok = function() {
-                    if (!$scope.filename){
+                    if (!$scope.filename) {
                         console.error('filename cannot be null')
                         return
                     }
-                    
+
                     msg.send('addScript', $scope.filename, '# new awesome robot script\n')
                     $uibModalInstance.close($scope.filename)
                 }
@@ -138,47 +137,46 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
     }
 
     $scope.installPackage = function() {
-            var modalInstance = $uibModal.open({
-                templateUrl: 'installPackage.html',
-                controller: function($scope, $uibModalInstance) {
-                    $scope.ok = function() {
-                        if (!$scope.packageName){
-                            console.error('filename cannot be null')
-                            return
-                        }
-
-                        msg.send('installPipPackages', [$scope.packageName])
-                        $uibModalInstance.close($scope.packageName)
+        var modalInstance = $uibModal.open({
+            templateUrl: 'installPackage.html',
+            controller: function($scope, $uibModalInstance) {
+                $scope.ok = function() {
+                    if (!$scope.packageName) {
+                        console.error('filename cannot be null')
+                        return
                     }
 
-                    $scope.cancel = function() {
-                        $uibModalInstance.dismiss('cancel')
+                    msg.send('installPipPackages', [$scope.packageName])
+                    $uibModalInstance.close($scope.packageName)
+                }
+
+                $scope.cancel = function() {
+                    $uibModalInstance.dismiss('cancel')
+                }
+
+                $scope.checkEnterKey = function(event) {
+                    if (event.keyCode === 13) {
+                        $scope.ok()
                     }
+                }
 
-                    $scope.checkEnterKey = function(event) {
-                        if (event.keyCode === 13) {
-                            $scope.ok()
-                        }
-                    }
+            },
+            size: 'sm'
+        })
 
-                },
-                size: 'sm'
-            })
-
-            modalInstance.result.then(function(filename) {
-                // Do something with the filename
-                console.log("Filename: ", filename)
-            }, function() {
-                // Modal dismissed
-                console.log("Modal dismissed")
-            })
-        }
-
+        modalInstance.result.then(function(filename) {
+            // Do something with the filename
+            console.log("Filename: ", filename)
+        }, function() {
+            // Modal dismissed
+            console.log("Modal dismissed")
+        })
+    }
 
     $scope.openScript = function() {
-        
+
         msg.send('getScriptList')
-        
+
         var modalInstance = $uibModal.open({
             templateUrl: 'openScript.html',
             scope: $scope,
@@ -210,7 +208,10 @@ angular.module('mrlapp.service.Py4jGui', []).controller('Py4jGuiCtrl', ['$scope'
             console.log("Modal dismissed")
         })
     }
-    
+
+    $scope.clear = function() {
+        msg.send('clear')
+    }
 
     msg.subscribe('publishStdOut')
     msg.subscribe('publishAppend')

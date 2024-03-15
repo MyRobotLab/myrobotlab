@@ -192,7 +192,7 @@ public abstract class OpenCVFilter implements Serializable, CVFilter {
   /**
    * This will enable/disable the filter in the pipeline
    */
-  protected boolean enabled = true;
+  protected volatile boolean enabled = true;
 
   protected int height;
 

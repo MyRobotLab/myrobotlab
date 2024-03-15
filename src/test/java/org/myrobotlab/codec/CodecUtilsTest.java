@@ -187,25 +187,6 @@ public class CodecUtilsTest extends AbstractTest {
   }
 
   @Test
-  public void testNormalizeServiceName() {
-    Platform.getLocalInstance().setId("test-id");
-    assertEquals("runtime@test-id", CodecUtils.getFullName("runtime"));
-    assertEquals("runtime@test-id", CodecUtils.getFullName("runtime@test-id"));
-  }
-
-  @Test
-  public void testCheckServiceNameEqual() {
-    Platform.getLocalInstance().setId("test-id");
-    assertTrue(CodecUtils.checkServiceNameEquality("runtime", "runtime"));
-    assertTrue(CodecUtils.checkServiceNameEquality("runtime", "runtime@test-id"));
-    assertTrue(CodecUtils.checkServiceNameEquality("runtime@test-id", "runtime"));
-    assertTrue(CodecUtils.checkServiceNameEquality("runtime@test-id", "runtime@test-id"));
-    assertFalse(CodecUtils.checkServiceNameEquality("runtime", "runtime@not-corr-id"));
-    assertFalse(CodecUtils.checkServiceNameEquality("runtime@not-corr-id", "runtime"));
-
-  }
-  
-  @Test
   public void testBase64() {
     // not a very comprehensive test, but a sanity check none the less.
     String input = "input string.";

@@ -1,5 +1,5 @@
 package org.myrobotlab.framework.repo;
-
+import org.myrobotlab.service.Runtime;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -281,6 +281,8 @@ public class MavenWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
       
+      Runtime.getInstance();
+      
       File libraries = new File(ServiceData.LIBRARIES);
       libraries.mkdir();
       File cache = new File(ServiceData.LIBRARIES + File.separator + "serviceData.json");
@@ -309,8 +311,9 @@ public class MavenWrapper extends Repo implements Serializable {
       // repo.installTo(dir);
       // repo.install();
       // repo.installEach(); <-- TODO - test
-
+      Runtime.shutdown();
       log.info("done");
+      Runtime.shutdown();
 
     } catch (Exception e) {
       log.error(e.getMessage(), e);

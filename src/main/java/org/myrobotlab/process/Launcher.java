@@ -2,9 +2,6 @@ package org.myrobotlab.process;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -241,40 +238,14 @@ public class Launcher {
         return;
       }
 
-      boolean instanceAlreadyRunning = false;
-
-      try {
-        URI uri = new URI(options.connect);
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(uri.getHost(), uri.getPort()), 1000);
-        socket.close();
-        instanceAlreadyRunning = true;
-      } catch (Exception e) {
-        log.info("could not connect to {}", options.connect);
+      log.info("spawning new instance");
+      ProcessBuilder builder = createBuilder(options);
+      process = builder.start();
+      if (process.isAlive()) {
+        log.info("process is alive");
+      } else {
+        log.error("process died");
       }
-
-      if (instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CONNECT)) {
-        log.error("zombie instance already running at {}", options.DEFAULT_CONNECT);
-        return;
-      }
-
-      if (!instanceAlreadyRunning || !options.connect.equals(options.DEFAULT_CONNECT)) {
-        log.info("spawning new instance");
-        ProcessBuilder builder = createBuilder(options);
-        process = builder.start();
-        if (process.isAlive()) {
-          log.info("process is alive");
-        } else {
-          log.error("process died");
-        }
-      }
-
-      /*
-       * // FIXME - use wsclient for remote access if (options.client != null) {
-       * // FIXME - delay & auto connect Client.main(new String[] { "-c",
-       * options.client }); } else { // terminating - "if" runtime exists - if
-       * not no biggy Runtime.shutdown(); }
-       */
 
     } catch (Exception e) {
       log.error("main threw", e);

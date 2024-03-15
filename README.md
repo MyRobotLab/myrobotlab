@@ -140,6 +140,42 @@ type: Runtime
 virtual: false
 ```
 
+# Starting Flowchart
+```mermaid
+flowchart LR
+    CommandLine[CommandLine]
+    Runtime.main([Runtime.main])
+    install{install}
+    shutdown([shutdown])
+    checkForStartYml{start.yml
+    exists?}
+    startYmlEnabled{start.yml
+    enabled?}
+
+    CommandLine --> Runtime.main
+    Runtime.main --> checkForStartYml
+    checkForStartYml --> |yes| loadStartYml[load start.yml]
+    checkForStartYml --> |no| createDefaultStartYml[create default start.yml]
+    createDefaultStartYml --> loadStartYml
+    loadStartYml --> startYmlEnabled
+    startYmlEnabled --> |yes| Runtime.startConfig[config = start.yml config]
+    startYmlEnabled --> |no| default[config = default]
+    Runtime.startConfig --> loadRuntimeConfig[load runtime config]
+    default --> loadRuntimeConfig
+    loadRuntimeConfig --> startRuntime[start runtime]
+    startRuntime --> applyRuntimeConfig[apply runtime config
+    does not process registry]
+    applyRuntimeConfig --> install{install?}
+
+    install -->|yes| loadServiceData[loadServiceData]
+    install -->|no| Runtime.startConf[get runtime.startConfig config]
+
+    loadServiceData --> findUninstalledDependencies[find uninstallled dependencies]
+    findUninstalledDependencies -->installDependencies[install dependencies]
+    installDependencies --> shutdown
+```
+
+
 # Network Distributed Architecture
 
 ## Websockets - Default Response for New Connection

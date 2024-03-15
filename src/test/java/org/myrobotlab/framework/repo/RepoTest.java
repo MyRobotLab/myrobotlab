@@ -28,6 +28,10 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
     repo.clear();
     installed = false;
   }
+  
+  public String getName() {
+    return "RepoTest";
+  }
 
   @Override
   public void broadcastStatus(Status status) {

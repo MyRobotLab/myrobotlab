@@ -90,13 +90,19 @@
 <div class="row">
     <span>
         console 
-         <button ng-click="log = '';$apply()" class="btn btn-default">
+         <button ng-click="clear();service.logs = [];$apply();" class="btn btn-default">
             <span class="glyphicon glyphicon-remove"/>
         </button>
     </span>
-    <br/>
-    <pre>{{log}}</pre>
 </div>
+<br/>
+<table>
+    <tbody>
+        <tr ng-repeat="e in service.logs track by $index">
+            <td><small>{{e}}</small></td>
+        </tr>
+    </tbody>
+</table>
 
 <script type="text/ng-template" id="installPackage.html">
     <div class="modal-header">
@@ -147,3 +153,4 @@
       <button class="btn btn-default" ng-click="cancel()">Cancel</button>
     </div>
 </script>
+

@@ -378,12 +378,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void disable() {
+    super.disable();
     if (classifier == null) {
       // already disabled
       return;
     }
-    super.disable();
-    int waitTime = 0;
+    int waitTime = 0;    
     while (classifier != null && waitTime < 1000) {
       ++waitTime;
       Service.sleep(10);

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,6 +88,12 @@ public class OpenCVTest extends AbstractTest {
 
   @Rule
   public final TestName testName = new TestName();
+  
+  @Before
+  public void beforeTest() {
+    cv.reset();
+  }
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -222,8 +229,8 @@ public class OpenCVTest extends AbstractTest {
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
       log.warn("trying filter {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("FaceTraining") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
-        log.info("skipping {}", fn);
+      if ( fn.startsWith("FaceDetectDNN") || fn.startsWith("FaceRecognizer") || fn.startsWith("DL4J") || fn.startsWith("FaceTraining") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
+        log.warn("skipping {}", fn);
         continue;
       }
       cv.addFilter(fn);

@@ -1120,8 +1120,8 @@ public class Serial extends Service<SerialConfig> implements SerialControl, Queu
   }
 
   @Override
-  public void stopService() {
-    super.stopService();
+  public void releaseService() {
+    super.releaseService();
     disconnect();
     stopRecording();
   }

@@ -16,7 +16,7 @@ public class JMonkeyEngineMeta extends MetaData {
 
     addDescription("is a 3d game engine, used for simulators");
 
-    String jmeVersion = "3.3.2-stable";
+    String jmeVersion = "3.6.1-stable";
     addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     // addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
@@ -24,10 +24,8 @@ public class JMonkeyEngineMeta extends MetaData {
     addDependency("org.jmonkeyengine", "jme3-lwjgl3", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
 
-    addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
-    addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
-    
-    
+    addDependency("org.jmonkeyengine", "jme3-bullet", "3.3.2-stable");
+    addDependency("org.jmonkeyengine", "jme3-bullet-native", "3.3.2-stable");
 
     addDependency("org.jmonkeyengine", "jme3-plugins", jmeVersion);
 
@@ -35,13 +33,13 @@ public class JMonkeyEngineMeta extends MetaData {
     // "new" physics - ik forward kinematics ...
 
     // not really supposed to use blender models - export to j3o
-    addDependency("org.jmonkeyengine", "jme3-blender", jmeVersion);
+    addDependency("org.jmonkeyengine", "jme3-blender", "3.3.2-stable");
 
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
     // audio dependencies
     addDependency("de.jarnbjo", "j-ogg-all", "1.0.0");
-    addDependency("org.lwjgl", "lwjgl-opengl", "3.2.3");
-    addDependency("org.lwjgl", "lwjgl-glfw", "3.2.3");
+    addDependency("org.lwjgl", "lwjgl-opengl", "3.3.3");
+    addDependency("org.lwjgl", "lwjgl-glfw", "3.3.3");
 
     addCategory("simulator");
 

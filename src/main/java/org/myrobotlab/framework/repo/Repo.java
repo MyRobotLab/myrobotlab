@@ -324,10 +324,10 @@ public abstract class Repo {
           }
         }
       }
-      
+
       // Plan plan = ServiceConfig.getDefault(type.toLowerCase(), type);
       ServiceConfig sc = ServiceConfig.getDefaultServiceConfig(type);
-      
+
       Map<String, Peer> peers = sc.getPeers();
       if (peers != null) {
         for (String key : peers.keySet()) {
@@ -496,7 +496,7 @@ public abstract class Repo {
         }
 
       } else {
-        log.info("{} not found", getRepoPath());
+        log.info("{} not found", f.getAbsolutePath());
       }
 
     } catch (Exception e) {

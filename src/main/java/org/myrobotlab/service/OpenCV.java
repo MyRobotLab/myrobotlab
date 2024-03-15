@@ -1157,22 +1157,6 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return recording;
   }
 
-  @Deprecated /*
-               * was used in SwingGui - nice feature through .. ability to
-               * undock displays
-               */
-  public boolean isUndocked() {
-    return undockDisplay;
-  }
-
-  @Deprecated /* not implemented remove */
-  synchronized public void pauseCapture() {
-    // FIXME !!!
-    // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
-    // resetting frame-index
-
-  }
-
   /**
    * conversion from buffered image to base64 encoded jpg
    * 

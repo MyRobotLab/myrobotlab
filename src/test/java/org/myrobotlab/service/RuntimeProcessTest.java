@@ -21,11 +21,14 @@ public class RuntimeProcessTest extends AbstractTest {
 
   @Before
   public void setUp() {
-    // LoggingFactory.init("WARN");
   }
 
   public boolean contains(ByteArrayOutputStream out, String str) {
     return new String(out.toByteArray()).contains(str);
+  }
+  
+  public String getName() {
+    return "RuntimeProcessTest";
   }
 
   @Test

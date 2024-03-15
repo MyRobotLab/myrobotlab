@@ -1715,14 +1715,9 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     // FIXME - mute is not normalized
     if (!mute && isPeerStarted("mouth")) {
-      // sendToPeer("mouth", "speakBlocking", toSpeak);
-      // invokePeer("mouth", "speakBlocking", toSpeak);
-      // HEH, CANNOT DO THIS !! ITS NOT BLOCKING - NEED BLOCKING
-      // BECAUSE A GAZILLION GESTURES DEPEND ON BLOCKING SPEECH !!!
-      // sendToPeer("mouth", "speakBlocking", toSpeak);
       AbstractSpeechSynthesis mouth = (AbstractSpeechSynthesis) getPeer("mouth");
       if (mouth != null) {
-        mouth.speak(toSpeak);
+        mouth.speakBlocking(toSpeak);
       }
     }
   }
@@ -1877,7 +1872,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     broadcastState();
 
     speakBlocking(get("STARTINGMOUTH"));
-    if (Platform.isVirtual()) {
+    if (isVirtual()) {
       speakBlocking(get("STARTINGVIRTUALHARD"));
     }
     speakBlocking(get("WHATISTHISLANGUAGE"));
