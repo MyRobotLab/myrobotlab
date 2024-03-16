@@ -6,18 +6,15 @@ import java.util.List;
 import org.myrobotlab.framework.Plan;
 
 public class ProgramABConfig extends ServiceConfig {
-  
+
   @Deprecated /* unused text filters */
   public String[] textFilters;
-  
-  @Deprecated /* unnecessary and unwanted - specify bots directly */
-  public String botDir;
-  
+
   /**
    * explicit bot directories
    */
   public List<String> bots = new ArrayList<>();
-  
+
   /**
    * current sessions bot name, it must match a botname that was scanned
    * currently with ProgramAB Alice, Dr.Who, Mr. Turing and Ency
@@ -37,10 +34,16 @@ public class ProgramABConfig extends ServiceConfig {
    * current sleep/wake value
    */
   public boolean sleep = false;
-  
+
   /**
-   * topic to start with, if null then topic will be loaded from predicates of 
-   * a new session if available, this means a config/{username}.predicates.txt 
+   * Specific list of channels ProgramAB will respond to, if not defined, then
+   * ProgramAB will respond to all channels
+   */
+  public List<String> channels = new ArrayList<>();
+
+  /**
+   * topic to start with, if null then topic will be loaded from predicates of
+   * a new session if available, this means a config/{username}.predicates.txt
    * will need to exist with a topic field
    */
   public String startTopic = "unknown";
