@@ -279,7 +279,7 @@ public class FileIO {
       String finalDst = gluePathsForwardSlash(dst, src);
       File check = new File(finalDst);
       if (check.exists() && !overwrite) {
-        log.warn("{} aleady exists - not extracting", finalDst);
+        log.info("{} aleady exists - not extracting", finalDst);
         return false;
       }
 
