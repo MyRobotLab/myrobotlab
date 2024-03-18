@@ -209,4 +209,10 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    *          word filter to use
    */
   public void replaceWord(WordFilter filter);
+  
+  /**
+   * Stops speaking
+   */
+  public void stop();
+  
 }

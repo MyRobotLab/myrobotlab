@@ -212,6 +212,16 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
         executor.shutdownNow();
       }
       running = false;
+      
+      if (config.mouth != null) {
+        warn("mouth configuration not set");
+        SpeechSynthesis mouth = (SpeechSynthesis) Runtime.getService(config.mouth);
+        if (mouth != null) {
+          mouth.stop();
+        }
+        return;
+      }
+      
       invoke("publishGestureStopped", playingGesture);
     }
   }
@@ -940,11 +950,11 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
       // FIXME if blocking send(mouthName, "speak")
       // TODO - show multiple SpeechSynthesis select like Servos
       Boolean blocking = (Boolean) speechPart.get("blocking");
-      // if (blocking != null && blocking) {
-      mouth.speakBlocking((String) speechPart.get("text")); // default blocking
-      // } else {
-      // mouth.speak((String) speechPart.get("text"));
-      // }
+      if (blocking == null || !blocking) {
+        mouth.speak((String) speechPart.get("text"));
+      } else {
+        mouth.speakBlocking((String) speechPart.get("text"));
+      }
     } catch (Exception e) {
       error(e);
     }
