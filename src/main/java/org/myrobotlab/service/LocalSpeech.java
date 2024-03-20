@@ -130,7 +130,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
       args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
       args.add("$speak.speak('" + toSpeak + "')");
-      String ret = Runtime.execute("powershell.exe", args, null, null, true);
+      String ret = Runtime.execute(getWindowsPowerShell(), args, null, null, true);
 
       log.info("powershell returned : {}", ret);
 
@@ -179,6 +179,16 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
   public String getTtsPath() {
     return ttsPath;
   }
+  
+  /**
+   * Powershell is sometimes on the PATH, this will find it hopefully
+   * @return absolute evaluated path to powershell.exe
+   */
+  public String getWindowsPowerShell() {
+    String systemRoot = System.getenv("SYSTEMROOT");
+    String command = systemRoot + "\\system32\\WindowsPowerShell\\v1.0\\powershell.exe";
+    return command;
+  }
 
   /**
    * one of the few methods a SpeechSynthesis service must implement if derived
@@ -219,7 +229,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
         args.add("Select-Object  -Property * | ");
         // args.add("Select-Object -Property Culture, Name, Gender, Age");
         args.add("ConvertTo-Json ");
-        voicesText = Runtime.execute("powershell.exe", args, null, null, true);
+        voicesText = Runtime.execute(getWindowsPowerShell(), args, null, null, true);
 
         // voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\""
         // + " -V" + "\"");
@@ -571,7 +581,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
       arguments.add("Add-Type -AssemblyName System.Speech;");
       arguments.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
       arguments.add("$speak.speak('HELLO !!!!');");
-      Runtime.execute("powershell.exe", arguments, null, null, true);
+      Runtime.execute(mouth.getWindowsPowerShell(), arguments, null, null, true);
       // log.info(ret);
 
       mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");

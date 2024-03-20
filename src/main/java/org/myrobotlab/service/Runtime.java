@@ -893,12 +893,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           RuntimeConfig c = null;
           if (runtime == null) {
             c = ConfigUtils.loadRuntimeConfig(options);
-
             runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", c.id);
             runtime.startService();
             // klunky
             Runtime.register(new Registration(runtime));
-
           }
 
           runtime.getRepo().addStatusPublisher(runtime);
@@ -911,15 +909,18 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           }
 
           if (options.services != null && options.services.size() != 0) {
-            log.info("command line override for services created");
+            log.info("command line services were specified");
             createAndStartServices(options.services);
-          } else {
-            log.info("processing config.registry");
-            if (options.config != null) {
-              Runtime.startConfig(options.config);
-            } else if (startYml.enable) {
-              Runtime.startConfig(startYml.config);
-            }
+          }
+
+          if (options.config != null) {
+            log.info("command line -c config was specified");
+            Runtime.startConfig(options.config);
+          }
+
+          if (startYml.enable && startYml.config != null) {
+            log.info("start.yml is enabled and config is {}", startYml.config);
+            Runtime.startConfig(startYml.config);
           }
 
         } catch (Exception e) {
@@ -2916,7 +2917,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     log.info("hostname {}", platform.getHostname());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getJvmBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
-    System.out.println(String.format("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild()));
+    System.out.println(String.format("version %s branch %s commit %s build %s", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild()));
     log.info("platform manifest {}", Platform.getManifest());
     log.info("platform [{}}]", platform);
     log.info("version [{}]", platform.getVersion());
@@ -4550,6 +4551,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // initialize logging
       initLog();
 
+      // extract if necessary
+      FileIO.extractResources();
+
       // help and exit
       if (options.help) {
         mainHelp();
@@ -4573,6 +4577,13 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       Runtime.getInstance();
 
       if (options.install != null) {
+        // resetting log level to info
+        // for an install otherwise ivy
+        // info will not be shown in the terminal
+        // during install of dependencies
+        // which makes users panic and hit ctrl+C
+        setLogLevel("info");
+
         // we start the runtime so there is a status publisher which will
         // display status updates from the repo install
         log.info("requesting install");
@@ -5034,7 +5045,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * fs + configName. Static wrapper around setConfigName - so it can be used in
    * the same way as all the other common static service methods
    * 
-   * @param name - config dir name under data/config/{config}
+   * @param name
+   *          - config dir name under data/config/{config}
    * @return config dir name
    */
   public static String setConfig(String name) {

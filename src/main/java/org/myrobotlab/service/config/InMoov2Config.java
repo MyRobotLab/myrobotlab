@@ -68,17 +68,17 @@ public class InMoov2Config extends ServiceConfig {
    */
   public long heartbeatInterval = 3000;
 
-  public boolean loadAppsScripts = false;
+  public boolean loadAppsScripts = true;
 
   /**
    * loads all python gesture files in the gesture directory
    */
-  public boolean loadGestures = false;
+  public boolean loadGestures = true;
 
   /**
    * executes all scripts in the init directory on startup
    */
-  public boolean loadInitScripts = false;
+  public boolean loadInitScripts = true;
 
   /**
    * default to null - allow the OS to set it, unless explicilty set

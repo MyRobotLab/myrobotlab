@@ -40,8 +40,8 @@ public class ProgramABConfig extends ServiceConfig {
   public List<String> channels = new ArrayList<>();
 
   /**
-   * topic to start with, if null then topic will be loaded from predicates of a
-   * new session if available, this means a config/{username}.predicates.txt
+   * topic to start with, if null then topic will be loaded from predicates of
+   * a new session if available, this means a config/{username}.predicates.txt
    * will need to exist with a topic field
    */
   public String startTopic = "unknown";
