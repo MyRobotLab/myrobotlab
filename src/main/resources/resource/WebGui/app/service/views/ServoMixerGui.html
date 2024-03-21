@@ -19,9 +19,11 @@
           <option ng-repeat="x in gestureFiles" ng-value="{{x}}">{{x}}</option>
         </select>
         <span class="input-group-btn">
+          <!--
           <button class="btn btn-default" ng-click="removeGesture(state.selectedGestureFile)" title="Delete">
             <span class="glyphicon glyphicon-remove red"></span>
           </button>
+          -->
           <button class="btn btn-default" ng-click="msg.getGestureFiles()">
             <span class="glyphicon glyphicon-refresh"></span>
           </button>
