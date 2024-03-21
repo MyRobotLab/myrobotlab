@@ -271,8 +271,15 @@ public class ProgramAB extends Service<ProgramABConfig>
     // update the current session if we want to change which bot is at
     // attention.
     if (updateCurrentSession) {
+      
+      boolean sessionChanged =  (!userName.equals(config.currentUserName) || !botName.equals(config.currentBotName));
+      
       setCurrentUserName(userName);
       setCurrentBotName(botName);
+      
+      if (sessionChanged) {
+        invoke("publishSession", getSessionKey(userName, botName));
+      }
     }
 
     // Get the actual bots aiml based response for this session

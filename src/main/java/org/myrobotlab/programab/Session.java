@@ -95,7 +95,7 @@ public class Session {
     return chat;
   }
 
-  public void savePredicates() {
+  synchronized public void savePredicates() {
     StringBuilder sb = new StringBuilder();
     TreeSet<String> sort = new TreeSet<>();
     sort.addAll(getChat().predicates.keySet());
@@ -122,7 +122,7 @@ public class Session {
    * Get all current predicate names and values
    * @return
    */
-  public Map<String, String> getPredicates() {
+  synchronized public Map<String, String> getPredicates() {
     TreeMap<String, String> sort = new TreeMap<>();
     // copy keys, making this sort thread safe
     Set<String> keys = new HashSet(getChat().predicates.keySet());
