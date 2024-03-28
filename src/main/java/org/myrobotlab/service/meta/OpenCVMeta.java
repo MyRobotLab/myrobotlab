@@ -20,6 +20,7 @@ public class OpenCVMeta extends MetaData {
     // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     addDependency("org.bytedeco", "javacpp", javaCvVersion);
+    addDependency("org.bytedeco", "openblas", "0.3.21-" + javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {

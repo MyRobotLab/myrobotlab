@@ -96,8 +96,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.setConfig = function() {
         console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
-            $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
+            $scope.configName = $scope.selectedConfig[0]
+            msg.sendTo('runtime', 'setConfig', $scope.configName)
+            msg.sendTo('runtime', 'getConfigName')
         }
     }
 
@@ -233,6 +234,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             console.info("runtime - onRelease" + data)
             break
         case 'onConfigName':
+            $scope.configName = data
+            $scope.$apply()
             console.info("runtime - onConfigName" + data)
             break
         case 'onHeartbeat':
@@ -356,7 +359,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     $scope.getConfigName = function(){
-        return $scope.service.configName
+        return $scope.configName
     }
 
     $scope.setAutoStart = function(b) {
@@ -385,14 +388,14 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
           modalInstance.result.then(function(result) {
             // Handle 'OK' button click
-            console.log('Config Name: ' + $scope.service.configName)
+            console.log('Config Name: ' + $scope.configName)
             console.log('Selected Option: ' + $scope.service.selectedOption)
             console.log('includePeers Option: ' + $scope.service.includePeers)
             console.log('configType Option: ' + $scope.service.configType)
             if ($scope.service.selectedOption == 'default'){
-                msg.send('saveDefault', $scope.service.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+                msg.send('saveDefault', $scope.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
             } else {
-                msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+                msg.sendTo('runtime', 'saveConfig', $scope.configName)
             }
           }, function() {
             // Handle 'Cancel' button click or modal dismissal

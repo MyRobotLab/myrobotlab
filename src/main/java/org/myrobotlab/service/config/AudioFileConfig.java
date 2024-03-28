@@ -2,18 +2,21 @@ package org.myrobotlab.service.config;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class AudioFileConfig extends ServiceConfig {
 
   public boolean mute = false;
-  public String currentTrack = "default";
+
   public double volume = 1.0;
+  
   public String currentPlaylist = "default";
-  public Map<String, List<String>> playlists;
   
-  @Deprecated /* use regular "listeners" from ServiceConfig parent */
-  public String[] audioListeners;
-  
+  /**
+   * Named map of lists of files
+   */
+  public Map<String, List<String>> playlists = new TreeMap<>();
+    
   /**
    * a multiplier to scale amplitude of output waveform
    */

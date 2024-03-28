@@ -810,6 +810,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
   public void releaseService() {
     super.releaseService();
     clear();
+    worker.stop();
   }
 
   @Override
@@ -936,7 +937,7 @@ public class NeoPixel extends Service<NeoPixelConfig> implements NeoPixelControl
     // Runtime.getService(controller);
     ServiceInterface sc = Runtime.getService(controller);
     if (sc == null) {
-      error("controler %s not valid", controller);
+      error("controller %s not valid", controller);
       return;
     }
 

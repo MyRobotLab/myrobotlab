@@ -23,7 +23,7 @@ public class FiniteStateMachineConfig extends ServiceConfig {
 
   public List<Transition> transitions = new ArrayList<>();
 
-  public String current = null;
+  public String start = null;
   
 
 }

@@ -5,7 +5,9 @@ import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -93,7 +95,7 @@ public class Session {
     return chat;
   }
 
-  public void savePredicates() {
+  synchronized public void savePredicates() {
     StringBuilder sb = new StringBuilder();
     TreeSet<String> sort = new TreeSet<>();
     sort.addAll(getChat().predicates.keySet());
@@ -120,9 +122,14 @@ public class Session {
    * Get all current predicate names and values
    * @return
    */
-  public Map<String, String> getPredicates() {
+  synchronized public Map<String, String> getPredicates() {
     TreeMap<String, String> sort = new TreeMap<>();
-    sort.putAll(getChat().predicates);
+    // copy keys, making this sort thread safe
+    Set<String> keys = new HashSet(getChat().predicates.keySet());
+    for (String key: keys) {
+      String value = getChat().predicates.get(key);
+      sort.put(key, value);
+    }
     return sort;
   }
 

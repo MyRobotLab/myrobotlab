@@ -360,12 +360,6 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
     disable();
   }
 
-  @Override
-  public void releaseService() {
-    disable();
-    super.releaseService();
-  }
-
   public void rest() {
     // initial positions
     // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);

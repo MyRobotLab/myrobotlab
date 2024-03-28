@@ -197,7 +197,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
       stateMachine.send(event);
       current = stateMachine.getCurrent();
 
-      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(), current == null ? null : current.getName());
+      log.info("fired event ({}) -> ({}) moves to ({})", event, last == null ? null : last.getName(),
+          current == null ? null : current.getName());
 
       if (last != null && !last.equals(current)) {
         StateChange stateChange = new StateChange(current.getName(), event);
@@ -255,13 +256,6 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
   }
 
   @Override
-  public FiniteStateMachineConfig getConfig() {
-    super.getConfig();
-    config.current = getState();
-    return config;
-  }
-
-  @Override
   public FiniteStateMachineConfig apply(FiniteStateMachineConfig c) {
     super.apply(c);
 
@@ -280,8 +274,8 @@ public class FiniteStateMachine extends Service<FiniteStateMachineConfig> {
     }
 
     // setCurrent
-    if (c.current != null) {
-      setCurrent(c.current);
+    if (c.start != null) {
+      setCurrent(c.start);
     }
 
     return c;

@@ -567,20 +567,6 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
     return controllers;
   }
 
-  public void release() {
-    disable();
-  }
-
-  @Override
-  public void releaseService() {
-    try {
-      disable();
-      super.releaseService();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
   public void rest() {
     if (thumb != null)
       thumb.rest();

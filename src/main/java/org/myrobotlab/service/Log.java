@@ -54,6 +54,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     public String threadName;
     public String className;
     public String body;
+    public String src;
 
     public LogEntry(ILoggingEvent event) {
       ts = event.getTimeStamp();
@@ -61,6 +62,11 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
       threadName = event.getThreadName();
       className = event.getLoggerName();
       body = event.getFormattedMessage();
+    }
+
+    public LogEntry() {
+      ts = System.currentTimeMillis();
+      threadName = Thread.currentThread().getName();
     }
 
     @Override
@@ -132,6 +138,7 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
 
   @Override
   public void addError(String arg0, Throwable arg1) {
+    System.out.println("addError");
   }
 
   @Override
@@ -202,6 +209,18 @@ public class Log extends Service<LogConfig> implements Appender<ILoggingEvent> {
     if (buffer.size() > 0) {
       // bucket add to sliding window
       logs.addAll(buffer);
+      
+      List<LogEntry> errors = new ArrayList<>();
+      for(int i = 0; i < buffer.size(); ++i) {
+        LogEntry entry = buffer.get(i);
+        if ("ERROR".equals(entry.level)) {
+          errors.add(entry);
+        }
+      }
+      if (errors.size() > 0) {
+        invoke("publishErrors", errors);
+      }
+      
       invoke("publishLogEvents", buffer);
       buffer = new ArrayList<>(maxSize);
       lastPublishLogTimeTs = System.currentTimeMillis();
