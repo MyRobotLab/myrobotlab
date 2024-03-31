@@ -28,4 +28,9 @@ public class AudioFileConfig extends ServiceConfig {
    * delay to synchronize publishing of peak with actual sound in milliseconds
    */
   public Long peakDelayMs = null;
+  
+  /**
+   * resets the peak to 0 after this many milliseconds
+   */
+  public Long publishPeakResetDelayMs = 30L;
 }
