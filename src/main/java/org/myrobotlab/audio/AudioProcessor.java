@@ -239,14 +239,17 @@ public class AudioProcessor extends Thread {
             }
             
             final double value = peak * (double) audioFile.getPeakMultiplier();
-                
+            
+            // skew publish forwards in time 
             if (audioFile.getConfig().peakDelayMs == null) {
               audioFile.invoke("publishPeak", value);  
             } else {              
               delayScheduler.schedule(() -> audioFile.invoke("publishPeak", value), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);          
-              if (audioFile.getConfig().publishPeakResetDelayMs != null) {
-                delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs + audioFile.getConfig().publishPeakResetDelayMs, TimeUnit.MILLISECONDS);
-              }
+            }
+            
+            // reset to 0 after millis
+            if (audioFile.getConfig().publishPeakResetDelayMs != null) {
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs + audioFile.getConfig().publishPeakResetDelayMs, TimeUnit.MILLISECONDS);
             }
           }
         }
