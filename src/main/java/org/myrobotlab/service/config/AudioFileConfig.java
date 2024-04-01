@@ -20,15 +20,20 @@ public class AudioFileConfig extends ServiceConfig {
   /**
    * a multiplier to scale amplitude of output waveform
    */
-  public double peakMultiplier = 100.0;
+  public double peakMultiplier = 300.0;
   
   /**
    * sample interval for peak
    */
-  public double peakSampleInterval = 15;
+  public double peakSampleInterval = 2.0;
   
   /**
    * delay to synchronize publishing of peak with actual sound in milliseconds
    */
-  public Long peakDelayMs = null;
+  public Long peakDelayMs = 10L;
+  
+  /**
+   * resets the peak to 0 after this many milliseconds
+   */
+  public Long publishPeakResetDelayMs = 100L;
 }

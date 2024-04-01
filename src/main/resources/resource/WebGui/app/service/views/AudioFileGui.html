@@ -49,6 +49,22 @@
             <td>volume</td>
             <td>{{service.volume.toFixed(2) * 100}}</td>
         </tr>
+        <tr>
+            <td>peak volume multiplier</td>
+            <td>{{service.config.peakMultiplier }}</td>
+        </tr>        
+        <tr>
+            <td>peak volume sample interval</td>
+            <td>{{service.config.peakSampleInterval }}</td>
+        </tr>        
+        <tr>
+            <td>peak volume delay</td>
+            <td>{{service.config.peakDelayMs }}</td>
+        </tr>        
+        <tr>
+            <td>peak reset delay</td>
+            <td>{{service.config.publishPeakResetDelayMs }}</td>
+        </tr>        
     </table>
     <br/>
     <!--Selected playlist: {{service.currentPlaylist}}<br/>-->
