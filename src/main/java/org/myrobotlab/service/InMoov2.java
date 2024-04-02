@@ -44,14 +44,15 @@ import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
+import org.myrobotlab.service.interfaces.SpeechListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleListener, TextListener, TextPublisher,
-    JoystickListener, LocaleProvider, IKJointAngleListener {
+public class InMoov2 extends Service<InMoov2Config>
+    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -65,7 +66,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * This method will load a python file into the python interpreter.
    * 
    * @param file
-   *             file to load
+   *          file to load
    * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
@@ -170,15 +171,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
       random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
 
-      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0,
-          8.0, 25.0);
-      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0,
-          8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
 
-      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
-          130.0, 175.0);
-      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
-          5.0, 40.0);
+      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
 
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
       random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
@@ -227,15 +224,24 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected Set<String> gestures = new TreeSet<String>();
 
+  /**
+   * Prevents actions or events from happening when InMoov2 is first booted
+   */
+  protected boolean hasBooted = false;
+
+  protected long heartbeatCount = 0;
+
   protected transient HtmlFilter htmlFilter;
 
   protected transient ImageDisplay imageDisplay;
-  
-  protected String lastState = null;
+
+  protected boolean isSpeaking = false;
 
   protected String lastGestureExecuted;
 
   protected Long lastPirActivityTime;
+
+  protected String lastState = null;
 
   /**
    * supported locales
@@ -252,12 +258,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   protected transient Python python;
 
-  protected String voiceSelected;
-  
   /**
    * initial state - updated on any state change
    */
   protected String state = "boot";
+
+  protected String voiceSelected;
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -274,8 +280,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     super.apply(c);
     try {
 
-      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT",
-          "fi-FI", "pt-PT", "tr-TR");
+      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
 
       if (c.locale != null) {
         setLocale(c.locale);
@@ -298,7 +303,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       } else {
         stopHeartbeat();
       }
-
 
       // one way sync configuration into predicates
       configToPredicates();
@@ -518,6 +522,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("torso", "disable");
   }
 
+  public void disableRandom() {
+    Random random = (Random) getPeer("random");
+    if (random != null) {
+      random.disable();
+    }
+  }
+
   public void displayFullScreen(String src) {
     try {
       if (imageDisplay == null) {
@@ -530,6 +541,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     }
   }
 
+  public void enable() {
+    sendToPeer("head", "enable");
+    sendToPeer("rightHand", "enable");
+    sendToPeer("leftHand", "enable");
+    sendToPeer("rightArm", "enable");
+    sendToPeer("leftArm", "enable");
+    sendToPeer("torso", "enable");
+  }
+
   public void enableRandomHead() {
     Random random = (Random) getPeer("random");
     if (random != null) {
@@ -538,22 +558,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       random.enable(String.format("%s.moveHead", getName()));
       random.enable();
     }
-  }
-
-  public void disableRandom() {
-    Random random = (Random) getPeer("random");
-    if (random != null) {
-      random.disable();
-    }
-  }
-
-  public void enable() {
-    sendToPeer("head", "enable");
-    sendToPeer("rightHand", "enable");
-    sendToPeer("leftHand", "enable");
-    sendToPeer("rightArm", "enable");
-    sendToPeer("leftArm", "enable");
-    sendToPeer("torso", "enable");
   }
 
   /**
@@ -577,7 +581,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * This method will try to launch a python command with error handling
    * 
    * @param gesture
-   *                the gesture
+   *          the gesture
    * @return gesture result
    */
   public String execGesture(String gesture) {
@@ -612,7 +616,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * a filesystem file :P
    * 
    * @param someScriptName
-   *                       execute a resource script
+   *          execute a resource script
    * @return success or failure
    */
   public boolean execScript(String someScriptName) {
@@ -742,6 +746,22 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return null;
   }
 
+  public String getPredicate(String user, String key) {
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
+    if (chatBot != null) {
+      return chatBot.getPredicate(user, key);
+    } else {
+      error("no chatBot available");
+    }
+    return null;
+  }
+
+  /**
+   * getResponse from ProgramAB
+   * 
+   * @param text
+   * @return
+   */
   public Response getResponse(String text) {
     ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
@@ -759,6 +779,14 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   public InMoov2Hand getRightHand() {
     return (InMoov2Hand) getPeer("rightHand");
+  }
+
+  public String getState() {
+    FiniteStateMachine fsm = (FiniteStateMachine) getPeer("fsm");
+    if (fsm == null) {
+      return null;
+    }
+    return fsm.getState();
   }
 
   /**
@@ -791,10 +819,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return (InMoov2Torso) getPeer("torso");
   }
 
-  public InMoov2Config getTypedConfig() {
-    return (InMoov2Config) config;
-  }
-
   public void halfSpeed() {
     sendToPeer("head", "setSpeed", 25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
     sendToPeer("rightHand", "setSpeed", 30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
@@ -802,6 +826,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("rightArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("leftArm", "setSpeed", 25.0, 25.0, 25.0, 25.0);
     sendToPeer("torso", "setSpeed", 20.0, 20.0, 20.0);
+  }
+
+  /**
+   * If there have been any errors
+   * 
+   * @return
+   */
+  public boolean hasErrors() {
+    return errors.size() > 0;
   }
 
   public boolean isCameraOn() {
@@ -815,6 +848,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
   public boolean isMute() {
     return mute;
+  }
+
+  public boolean isSpeaking() {
+    return isSpeaking;
   }
 
   /**
@@ -837,7 +874,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * file should contain 1 method definition that is the same as the filename.
    * 
    * @param directory
-   *                  - the directory that contains the gesture python files.
+   *          - the directory that contains the gesture python files.
    * @return true/false
    */
   public boolean loadGestures(String directory) {
@@ -936,8 +973,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     invoke("publishMoveHand", which, thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
@@ -989,10 +1025,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     moveHand("left", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void moveRightArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -1003,10 +1037,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     moveHand("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void moveTorso(Double topStom, Double midStom, Double lowStom) {
@@ -1035,7 +1067,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * comes in from runtime which owns the config list
    * 
    * @param configList
-   *                   list of configs
+   *          list of configs
    */
   public void onConfigList(List<String> configList) {
     this.configList = configList;
@@ -1045,6 +1077,23 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   @Override
   public void onCreated(String fullname) {
     log.info("{} created", fullname);
+  }
+
+  @Override
+  public void onEndSpeaking(String utterance) {
+    processMessage("onEndSpeaking", utterance);
+    isSpeaking = false;
+  }
+
+  /**
+   * Centralized logging system will have all logging from all services,
+   * including lower level logs that do not propegate as statuses
+   * 
+   * @param log
+   *          - flushed log from Log service
+   */
+  public void onErrors(List<LogEntry> log) {
+    errors.addAll(log);
   }
 
   public void onFinishedConfig(String configName) {
@@ -1062,6 +1111,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     unsubscribe("python", "publishStatus", this.getName(), "onGestureStatus");
   }
 
+  /**
+   * Central hub of input motion control. Potentially, all input from joysticks,
+   * quest2 controllers and headset, or any IK service could be sent here
+   */
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     log.debug("onJointAngles {}", angleMap);
@@ -1087,7 +1140,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * including lower level logs that do not propegate as statuses
    * 
    * @param log
-   *            - flushed log from Log service
+   *          - flushed log from Log service
    */
   public void onLogEvents(List<LogEntry> log) {
     // scan for warn or errors
@@ -1127,11 +1180,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
    * @param volume
    */
   public void onPeak(double volume) {
-    if (config.neoPixelFlashWhenSpeaking && !configStarted) {
-      if (volume > 0.5) {
-        invoke("publishSpeakingFlash", "speaking");
-      }
-    }
+    processMessage("onPeak", volume);
+  }
+
+  public void onPirOff() {
+    log.info("onPirOff");
+    setPredicate(String.format("%s.pir_off", getName()), System.currentTimeMillis());
+    processMessage("onPirOff");
   }
 
   /**
@@ -1149,10 +1204,6 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         invoke("publishEvent", "WAKE");
       }
     }
-  }
-
-  public void onPirOff() {
-    log.info("onPirOff");
   }
 
   // GOOD GOOD GOOD - LOOPBACK - flexible and replacable by python
@@ -1191,6 +1242,15 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       invoke("publishEvent", "PIR OFF");
     }
     return b;
+  }
+
+  /**
+   * When a new session is started this will sync config with it
+   * 
+   * @param sessionKey
+   */
+  public void onSession(String sessionKey) {
+    configToPredicates();
   }
 
   /**
@@ -1279,7 +1339,14 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   @Override
+  public void onStartSpeaking(String utterance) {
+    processMessage("onStartSpeaking", utterance);
+    isSpeaking = true;
+  }
+
+  @Override
   public void onStopped(String name) {
+    log.info("service {} has stopped");
     // using release peer for peer releasing
     // FIXME - auto remove subscriptions of peers?
   }
@@ -1324,6 +1391,31 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     beginCheckingOnInactivity();
 
     python.execMethod("power_up");
+  }
+
+  public void processMessage(String method) {
+    processMessage(method, (Object[]) null);
+  }
+
+  /**
+   * Will publish processing messages to the processor(s) currently subscribed.
+   * 
+   * @param method
+   * @param data
+   */
+  public void processMessage(String method, Object... data) {
+    // User processing should not occur until after boot has completed
+    if (!state.equals("boot")) {
+      // FIXME - this needs to be in config
+      // FIXME - change peer name to "processor"
+      // String processor = getPeerName("py4j");
+      String processor = "python";
+
+      Message msg = Message.createMessage(getName(), processor, method, data);
+      // FIXME - is this too much abstraction .. to publish as well as
+      // configurable send ?
+      invoke("publishProcessMessage", msg);
+    }
   }
 
   /**
@@ -1398,8 +1490,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return msg;
   }
 
-  public HashMap<String, Double> publishMoveArm(String which, Double bicep, Double rotate, Double shoulder,
-      Double omoplate) {
+  public HashMap<String, Double> publishMoveArm(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     HashMap<String, Double> map = new HashMap<>();
     map.put("bicep", bicep);
     map.put("rotate", rotate);
@@ -1413,8 +1504,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
-  public HashMap<String, Object> publishMoveHand(String which, Double thumb, Double index, Double majeure,
-      Double ringFinger, Double pinky, Double wrist) {
+  public HashMap<String, Object> publishMoveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     HashMap<String, Object> map = new HashMap<>();
     map.put("which", which);
     map.put("thumb", thumb);
@@ -1431,8 +1521,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
-  public HashMap<String, Double> publishMoveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw,
-      Double rollNeck) {
+  public HashMap<String, Double> publishMoveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
     HashMap<String, Double> map = new HashMap<>();
     map.put("neck", neck);
     map.put("rothead", rothead);
@@ -1452,8 +1541,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
-  public HashMap<String, Double> publishMoveLeftHand(Double thumb, Double index, Double majeure, Double ringFinger,
-      Double pinky, Double wrist) {
+  public HashMap<String, Double> publishMoveLeftHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     HashMap<String, Double> map = new HashMap<>();
     map.put("thumb", thumb);
     map.put("index", index);
@@ -1473,8 +1561,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return map;
   }
 
-  public HashMap<String, Double> publishMoveRightHand(Double thumb, Double index, Double majeure, Double ringFinger,
-      Double pinky, Double wrist) {
+  public HashMap<String, Double> publishMoveRightHand(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     HashMap<String, Double> map = new HashMap<>();
     map.put("thumb", thumb);
     map.put("index", index);
@@ -1492,8 +1579,44 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     map.put("lowStom", lowStom);
     return map;
   }
-  
-  
+
+  public String publishPlayAudioFile(String filename) {
+    return filename;
+  }
+
+  /**
+   * One of the most important publishing point. Processing publishing point,
+   * where everything InMoov2 wants to be processed is turned into a message and
+   * published.
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishProcessMessage(Message msg) {
+    return msg;
+  }
+
+  /**
+   * Possible pub/sub way to interface with python - no blocking though
+   * 
+   * @param code
+   * @return
+   */
+  public String publishPython(String code) {
+    return code;
+  }
+
+  /**
+   * publishes a name for NeoPixel.onFlash to consume, in a seperate channel to
+   * potentially be used by "speaking only" leds
+   * 
+   * @param name
+   * @return
+   */
+  public String publishSpeakingFlash(String name) {
+    return name;
+  }
+
   /**
    * publishStateChange
    * 
@@ -1532,43 +1655,25 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     return stateChange;
   }
-  
-  public void processMessage(String method) {
-    processMessage(method, (Object[])null);
-  }
 
   /**
-   * Will publish processing messages to the processor(s) currently subscribed.
-   * 
-   * @param method
-   * @param data
+   * stop animation event
    */
-  public void processMessage(String method, Object... data) {
-    // User processing should not occur until after boot has completed
-    if (!state.equals("boot")) {
-      // FIXME - this needs to be in config
-      // FIXME - change peer name to "processor"
-      // String processor = getPeerName("py4j");
-      String processor = "python";
-
-      Message msg = Message.createMessage(getName(), processor, method, data);
-      // FIXME - is this too much abstraction .. to publish as well as
-      // configurable send ?
-      invoke("publishProcessMessage", msg);
-    }
+  public void publishStopAnimation() {
   }
-  
+
   /**
-   * One of the most important publishing point. Processing publishing point,
-   * where everything InMoov2 wants to be processed is turned into a message and
-   * published.
+   * event publisher for the fsm - although other services potentially can
+   * consume and filter this event channel
    * 
-   * @param msg
+   * @param event
    * @return
    */
-  public Message publishProcessMessage(Message msg) {
-    return msg;
-  }  
+  public String publishSystemEvent(String event) {
+    // well, it turned out underscore was a goofy selection, as underscore in
+    // aiml is wildcard ... duh
+    return String.format("SYSTEM_EVENT %s", event);
+  }
 
   /**
    * all published text from InMoov2 - including ProgramAB
@@ -1636,12 +1741,17 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("torso", "setAutoDisable", param);
   }
 
+  @Override
+  public void setConfigValue(String fieldname, Object value) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    super.setConfigValue(fieldname, value);
+    setPredicate(fieldname, value);
+  }
+
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
     if (hand == null) {
       warn("%s hand not started", which);
@@ -1651,14 +1761,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   @Deprecated
-  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger,
-      Double pinky) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
   @Deprecated
-  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
@@ -1674,8 +1782,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
   }
 
-  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed,
-      Double rollNeckSpeed) {
+  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     sendToPeer("head", "setSpeed", rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
@@ -1699,8 +1806,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   @Deprecated
-  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed,
-      Double rollNeckSpeed) {
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
@@ -1712,15 +1818,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setArmSpeed("left", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
-  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed("left", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   @Override
@@ -1758,12 +1861,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     sendToPeer("neopixel", "animation", red, green, blue, speed);
   }
 
-  public void setOpenCV(OpenCV opencv) {
-    this.opencv = opencv;
-  }
-
   public boolean setPirPlaySounds(boolean b) {
-    getTypedConfig().pirPlaySounds = b;
+    config.pirPlaySounds = b;
     return b;
   }
 
@@ -1789,15 +1888,12 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     setArmSpeed("right", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
-  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public boolean setSpeechType(String speechType) {
@@ -1835,6 +1931,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
 
     // updatePeerType("mouth" /* getPeerName("mouth") */, speechType);
     // return speechType;
+  }
+
+  public void setTopic(String topic) {
+    chatBot.setTopic(topic);
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -1960,8 +2060,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       chatBot.setPredicate("null", "");
       // load last user session
       if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")
-            || chatBot.getPredicate("lastUsername").equals("default")) {
+        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown") || chatBot.getPredicate("lastUsername").equals("default")) {
           chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
         }
       }
@@ -1977,8 +2076,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       // !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
       // chatBot.startSession(chatBot.getPredicate("lastUsername"));
       // }
-      if (chatBot.getPredicate("default", "firstinit").isEmpty()
-          || chatBot.getPredicate("default", "firstinit").equals("unknown")
+      if (chatBot.getPredicate("default", "firstinit").isEmpty() || chatBot.getPredicate("default", "firstinit").equals("unknown")
           || chatBot.getPredicate("default", "firstinit").equals("started")) {
         chatBot.startSession(chatBot.getPredicate("default", "lastUsername"));
         invoke("publishEvent", "FIRST INIT");
