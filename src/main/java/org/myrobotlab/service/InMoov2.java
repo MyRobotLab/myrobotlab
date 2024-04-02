@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,6 +28,8 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.programab.PredicateEvent;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.programab.Session;
+import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
@@ -227,6 +230,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected transient HtmlFilter htmlFilter;
 
   protected transient ImageDisplay imageDisplay;
+  
+  protected String lastState = null;
 
   protected String lastGestureExecuted;
 
@@ -248,6 +253,11 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   protected transient Python python;
 
   protected String voiceSelected;
+  
+  /**
+   * initial state - updated on any state change
+   */
+  protected String state = "boot";
 
   public InMoov2(String n, String id) {
     super(n, id);
@@ -273,6 +283,8 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
+      execScript();
+
       loadAppsScripts();
 
       loadInitScripts();
@@ -286,6 +298,10 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       } else {
         stopHeartbeat();
       }
+
+
+      // one way sync configuration into predicates
+      configToPredicates();
 
     } catch (Exception e) {
       error(e);
@@ -422,6 +438,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     return lastActivityTime;
   }
 
+  /**
+   * clear all errors
+   */
+  public void clearErrors() {
+    errors.clear();
+  }
+
   public void closeAllImages() {
     // FIXME - follow this pattern ?
     // CON npe possible although unlikely
@@ -429,6 +452,38 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     // PRO small easy to read - no clutter npe
     imageDisplay = (ImageDisplay) startPeer("imageDisplay");
     imageDisplay.closeAll();
+  }
+
+  /**
+   * Updates configuration into ProgramAB predicates.
+   */
+  public void configToPredicates() {
+    log.info("configToPredicates");
+    if (chatBot != null) {
+      Class<?> pojoClass = config.getClass();
+      Field[] fields = pojoClass.getDeclaredFields();
+      for (Field field : fields) {
+        try {
+          field.setAccessible(true);
+          Object value = field.get(config); // Requires handling
+          Map<String, Session> sessions = chatBot.getSessions();
+          if (sessions != null) {
+            for (Session session : sessions.values()) {
+              if (value != null) {
+                session.setPredicate(String.format("config.%s", field.getName()), value.toString());
+              } else {
+                session.setPredicate(String.format("config.%s", field.getName()), null);
+              }
+
+            }
+          }
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    } else {
+      log.info("chatbot not ready for config sync");
+    }
   }
 
   public void cycleGestures() {
@@ -472,6 +527,23 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       log.error("implement webgui.displayFullScreen");
     } catch (Exception e) {
       error("could not display picture %s", src);
+    }
+  }
+
+  public void enableRandomHead() {
+    Random random = (Random) getPeer("random");
+    if (random != null) {
+      random.disableAll();
+      random.enable(String.format("%s.setHeadSpeed", getName()));
+      random.enable(String.format("%s.moveHead", getName()));
+      random.enable();
+    }
+  }
+
+  public void disableRandom() {
+    Random random = (Random) getPeer("random");
+    if (random != null) {
+      random.disable();
     }
   }
 
@@ -521,6 +593,13 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
       return null;
     }
     return python.evalAndWait(gesture);
+  }
+
+  /**
+   * Reload the InMoov2.py script
+   */
+  public void execScript() {
+    execScript("InMoov2.py");
   }
 
   /**
@@ -1413,6 +1492,83 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
     map.put("lowStom", lowStom);
     return map;
   }
+  
+  
+  /**
+   * publishStateChange
+   * 
+   * The integration between the FiniteStateMachine (fsm) and the InMoov2
+   * service and potentially other services (Python, ProgramAB) happens here.
+   * 
+   * After boot all state changes get published here.
+   * 
+   * Some InMoov2 service methods will be called here for "default
+   * implemenation" of states. If a user doesn't want to have that default
+   * implementation, they can change it by changing the definition of the state
+   * machine, and have a new state which will call a Python inmoov2 library
+   * callback. Overriding, appending, or completely transforming the behavior is
+   * all easily accomplished by managing the fsm and python inmoov2 library
+   * callbacks.
+   * 
+   * Python inmoov2 callbacks ProgramAB topic switching
+   * 
+   * Depending on config:
+   * 
+   * @param stateChange
+   * @return
+   */
+  public StateChange publishStateChange(StateChange stateChange) {
+    log.info("publishStateChange {}", stateChange);
+
+    log.info("onStateChange {}", stateChange);
+
+    lastState = state;
+    state = stateChange.state;
+
+    setPredicate(String.format("%s.end", lastState), System.currentTimeMillis());
+    setPredicate(String.format("%s.start", state), System.currentTimeMillis());
+
+    processMessage("onStateChange", stateChange);
+
+    return stateChange;
+  }
+  
+  public void processMessage(String method) {
+    processMessage(method, (Object[])null);
+  }
+
+  /**
+   * Will publish processing messages to the processor(s) currently subscribed.
+   * 
+   * @param method
+   * @param data
+   */
+  public void processMessage(String method, Object... data) {
+    // User processing should not occur until after boot has completed
+    if (!state.equals("boot")) {
+      // FIXME - this needs to be in config
+      // FIXME - change peer name to "processor"
+      // String processor = getPeerName("py4j");
+      String processor = "python";
+
+      Message msg = Message.createMessage(getName(), processor, method, data);
+      // FIXME - is this too much abstraction .. to publish as well as
+      // configurable send ?
+      invoke("publishProcessMessage", msg);
+    }
+  }
+  
+  /**
+   * One of the most important publishing point. Processing publishing point,
+   * where everything InMoov2 wants to be processed is turned into a message and
+   * published.
+   * 
+   * @param msg
+   * @return
+   */
+  public Message publishProcessMessage(Message msg) {
+    return msg;
+  }  
 
   /**
    * all published text from InMoov2 - including ProgramAB
@@ -1994,8 +2150,7 @@ public class InMoov2 extends Service<InMoov2Config> implements ServiceLifeCycleL
   }
 
   public void systemCheck() {
-    log.error("systemCheck()");
-    Runtime runtime = Runtime.getInstance();
+    log.info("systemCheck()");
     int servoCount = 0;
     int servoAttachedCount = 0;
     for (ServiceInterface si : Runtime.getServices()) {
