@@ -3,6 +3,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
     var _self = this
     var msg = this.msg
     $scope.peak = 0
+    $scope.peakMax = 0
 
     // playing paused stopped
     $scope.activity = null
@@ -90,6 +91,9 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             break
         case 'onPeak':
             $scope.peak = Math.round(data/* * 100 */)
+            if ($scope.peak > $scope.peakMax){
+                $scope.peakMax = $scope.peak
+            }
             $scope.$apply()
             break
 

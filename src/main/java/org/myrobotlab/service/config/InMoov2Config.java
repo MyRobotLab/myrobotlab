@@ -124,6 +124,9 @@ public class InMoov2Config extends ServiceConfig {
    */
   public int sleepTimeoutMs = 300000;
 
+  /**
+   * Start sound
+   */
   public boolean startupSound = true;
 
   /**
