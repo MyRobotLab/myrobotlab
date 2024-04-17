@@ -52,6 +52,10 @@ public class ProgramABConfig extends ServiceConfig {
   public Plan getDefault(Plan plan, String name) {
     super.getDefault(plan, name);
     addDefaultPeerConfig(plan, name, "search", "Wikipedia");
+    bots.add("resource/ProgramAB/Alice");
+    bots.add("resource/ProgramAB/Dr.Who");
+    bots.add("resource/ProgramAB/Ency");
+    bots.add("resource/ProgramAB/Mr. Turing");
     return plan;
   }
 
