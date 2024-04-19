@@ -15,12 +15,6 @@ public class ImageDisplayMeta extends MetaData {
   public ImageDisplayMeta() {
     addDescription("IBus serial protocol");
     setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-
-    // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
-    // addDependency("orgId", "artifactId", "2.4.0");
-
-    setAvailable(false);
     addCategory("general");
 
   }
