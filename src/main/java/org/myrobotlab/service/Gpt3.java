@@ -109,6 +109,8 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
 
         HttpClient http = (HttpClient) startPeer("http");
 
+        log.info("curl {} -d '{}'", c.url, json);
+        
         String msg = http.postJson(c.token, c.url, json);
 
         Map<String, Object> payload = CodecUtils.fromJson(msg, new StaticType<>() {});

@@ -124,6 +124,9 @@ public class InMoov2Config extends ServiceConfig {
    */
   public int sleepTimeoutMs = 300000;
 
+  /**
+   * Start sound
+   */
   public boolean startupSound = true;
 
   /**
@@ -545,8 +548,6 @@ public class InMoov2Config extends ServiceConfig {
 
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-
-    htmlFilter.listeners.add(new Listener("publishText", name));
 
     htmlFilter.listeners.add(new Listener("publishText", name));
 
