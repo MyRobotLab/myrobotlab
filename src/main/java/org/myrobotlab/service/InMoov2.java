@@ -1096,11 +1096,22 @@ public class InMoov2 extends Service<InMoov2Config>
     errors.addAll(log);
   }
 
+  @Deprecated /* use onConfigFinished */
   public void onFinishedConfig(String configName) {
     log.info("onFinishedConfig");
-    // invoke("publishEvent", "configFinished");
     invoke("publishConfigFinished", configName);
   }
+
+  public void onConfigFinished(String configName) {
+    log.info("onConfigFinished");
+    invoke("publishConfigFinished", configName);
+  }
+
+  public void onConfigStarted(String configName) {
+    log.info("onConfigStarted");
+    invoke("publishConfigStarted", configName);
+  }
+
 
   public void onGestureStatus(Status status) {
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {

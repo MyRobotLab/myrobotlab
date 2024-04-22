@@ -5,6 +5,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     var statusMaxSize = 2500
 
+    // configName is static so it needs to be
+    // kept in sync on a subobject
+    $scope.selected = {
+        configName :"default"
+    }
+    
     this.updateState = function(service) {
         $scope.service = service
         $scope.locale.selected = service.locale.language
@@ -96,8 +102,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.setConfig = function() {
         console.info('setConfig')
         if ($scope.selectedConfig.length > 0) {
-            $scope.service.configName = $scope.selectedConfig[0]
-            msg.sendTo('runtime', 'setConfig', $scope.service.configName)
+            msg.sendTo('runtime', 'setConfig', $scope.selectedConfig[0])
+            msg.sendTo('runtime', 'getConfigName')
         }
     }
 
@@ -230,10 +236,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
             break
         case 'onReleased':
-            console.info("runtime - onRelease" + data)
+            console.info("runtime - onRelease " + data)
             break
         case 'onConfigName':
-            console.info("runtime - onConfigName" + data)
+            console.info("runtime - onConfigName " + data)
+            // is not part of service, because configName is static
+            $scope.selected.configName = data
+            $scope.$apply()
             break
         case 'onHeartbeat':
             let heartbeat = data
@@ -338,7 +347,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('saveConfig')
 
         let onOK = function() {
-            msg.sendTo('runtime', 'savePlan', $scope.service.configName)
+            msg.sendTo('runtime', 'savePlan', $scope.selected.configName)
             // msg.sendTo('runtime', 'save')
         }
 
@@ -355,10 +364,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         msg.send('saveDefaults', $scope.newType.simpleName)
     }
 
-    $scope.getConfigName = function(){
-        return $scope.service.configName
-    }
-
     $scope.setAutoStart = function(b) {
         console.info('setAutoStart')
         msg.send('setAutoStart', b)
@@ -367,7 +372,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
      $scope.saveConfig = function() {
         $scope.service.includePeers = false
         $scope.service.selectedOption = "current"
-         
+
+         $scope.selected.configName = $scope.selected.configName
           var modalInstance = $uibModal.open({
             templateUrl: 'saveConfig.html',
             scope: $scope,
@@ -385,15 +391,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
           modalInstance.result.then(function(result) {
             // Handle 'OK' button click
-            console.log('Config Name: ' + $scope.service.configName)
+            console.log('Config Name: ' + $scope.selected.configName)
             console.log('Selected Option: ' + $scope.service.selectedOption)
             console.log('includePeers Option: ' + $scope.service.includePeers)
             console.log('configType Option: ' + $scope.service.configType)
+            msg.send('setConfig', $scope.selected.configName)
             if ($scope.service.selectedOption == 'default'){
-                msg.send('saveDefault', $scope.service.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+                msg.send('saveDefault', $scope.selected.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
             } else {
-                msg.sendTo('runtime', 'saveConfig', $scope.service.configName)
+                msg.sendTo('runtime', 'saveConfig', $scope.selected.configName)
             }
+              msg.send('getConfigName')
           }, function() {
             // Handle 'Cancel' button click or modal dismissal
             console.log('Modal dismissed')
