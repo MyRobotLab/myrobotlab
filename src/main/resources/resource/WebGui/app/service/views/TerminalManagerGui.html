@@ -1,0 +1,102 @@
+<style>
+    .inline-buttons {
+        display: inline-block;
+        /* Or display: inline; */
+    }
+
+    .terminal2 {
+        background-color: black;
+        color: #33ff33;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8em;
+        border-radius: 0;
+        margin: 0;
+        /* Removes default margin */
+        padding: 10px;
+        /* Adjust based on your design needs */
+        border: none;
+        /* Removes border */
+        overflow: auto;
+    }
+
+    .terminal-wrapper {
+          max-height: 800px; /* Adjust based on your needs */
+  overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        /* Ensures child elements fill the container */
+    }
+
+    .terminal-input {
+        background-color: black;
+        color: #33ff33;
+        border: none;
+        /* Removes border */
+        outline: none;
+        /* Removes focus outline */
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8em;
+        padding: 10px;
+        /* Should match the <pre> padding for alignment */
+        width: 100%;
+        /* Ensures it takes up all available width */
+        box-sizing: border-box;
+        /* Includes padding in the width calculation */
+        margin: 0;
+        /* Removes default margin */
+    }
+</style>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>Name</th>
+            <th>PID</th>
+            <th>Shell</th>
+            <th>Command</th>
+            <th>Control</th>
+        </tr>
+    </thead>
+    <tr ng-repeat="(key, value) in service.terminals">
+        <td>
+            <input type="radio" name="selectedTerminal" ng-model="ctrl.selectedTerminal" ng-value="terminal"/>
+        </td>
+        <td>
+            <img src="TerminalManager.png" width="16"/>
+        </td>
+        <td>
+            <img ng-src="{{value.isRunning ? 'connected.png' : 'disconnected.png'}}" alt="Connection Status" width="16"/>
+        </td>
+        <td>
+            <small>{{key}}</small>
+        </td>
+        <td>
+            <small>{{value.pid}}</small>
+        </td>
+        <td>
+            <small>{{value.shellCommand}}</small>
+        </td>
+        <td>
+            <small>{{value.lastInput}}</small>
+        </td>
+        <td>
+            <span class="inline-buttons">
+                <button class="btn btn-sm" ng-click="startTerminal(key)">Start</button>
+                <button class="btn btn-sm" ng-click="terminateTerminal(key)">Terminate</button>
+                <button class="btn btn-sm" ng-click="saveTerminal(key)">Save</button>
+                <button class="btn btn-sm" ng-click="deleteTerminal(key)">Delete</button>
+            </span>
+        </td>
+    </tr>
+</table>
+
+<div class="terminal-wrapper" ng-repeat="(key, value) in service.terminals" data-terminal-id="{{key}}">
+    {{key}}<button class="btn btn-sm" ng-click="deleteTerminal(key)">Clear</button>
+    
+    <pre class="terminal2" id="terminal-{{key}}" >{{value.output}}</pre>
+    
+    <input class="terminal-input" type="text" class="form-control" ng-model="service.inputValue" ng-keyup="$event.keyCode == 13 ? processCommand(key, service.inputValue) : null" placeholder="type here...">
+</div>

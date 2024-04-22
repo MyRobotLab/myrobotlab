@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -43,20 +41,9 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
   public static final String journalFilename = "journal.txt";
 
   /**
-   * substitutions are phonetic substitutions for a specific instance of speech
-   * synthesis service
-   */
-  transient protected Map<String, String> substitutions = new ConcurrentHashMap<String, String>();
-
-  /**
    * generalized list of languages and their codes - if useful
    */
   protected Map<String, Locale> locales = new HashMap<>();
-
-  /**
-   * mute or unmute service
-   */
-  boolean mute = false;
 
   /**
    * replaces key with replacement
@@ -252,8 +239,6 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
 
   private List<Voice> voiceList = new ArrayList<>();
 
-  protected boolean blocking = false;
-
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
   // implementing service
@@ -291,7 +276,7 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
     // should hold off creating or starting peers until the service has started
     // audioFile = (AudioFile) createPeer("audioFile");
 
-//     getVoices();
+    // getVoices();
 
   }
 
@@ -571,65 +556,65 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
    * @return - list of audio data
    */
   public List<AudioData> parse(String toSpeak) {
-    
+
     // we generate a list of audio data to play to support
     // synthesizing this speech
     List<AudioData> playList = new ArrayList<AudioData>();
-    
+
     try {
 
-    // TODO - not sure if we want to support this notation
-    // but at the moment it seems useful
-    // splitting on sound effects ...
-    // TODO - use SSML speech synthesis markup language
+      // TODO - not sure if we want to support this notation
+      // but at the moment it seems useful
+      // splitting on sound effects ...
+      // TODO - use SSML speech synthesis markup language
 
-    log.info("{} processing {}", getName(), toSpeak);
+      log.info("{} processing {}", getName(), toSpeak);
 
-    // broadcast the original text to be processed/parsed
-    invoke("publishSpeechRequested", toSpeak);
+      // broadcast the original text to be processed/parsed
+      invoke("publishSpeechRequested", toSpeak);
 
-    // normalize to lower case
-    toSpeak = toSpeak.toLowerCase();
+      // normalize to lower case
+      toSpeak = toSpeak.toLowerCase();
 
-    // process substitutions
-    if (substitutions != null) {
-      for (String substitute : substitutions.keySet()) {
-        toSpeak = toSpeak.replace(substitute, substitutions.get(substitute));
-      }
-    }
-
-    List<String> spokenParts = parseEffects(toSpeak);
-
-    toSpeak = filterText(toSpeak);
-
-    for (String speak : spokenParts) {
-
-      AudioData audioData = null;
-      if (speak.startsWith("#") && speak.endsWith("#")) {
-        audioData = new AudioData(
-            System.getProperty("user.dir") + File.separator + "audioFile" + File.separator + "voiceEffects" + File.separator + speak.substring(1, speak.length() - 1) + ".mp3");
-      } else {
-        audioData = new AudioData(getLocalFileName(speak));
+      // process substitutions
+      if (config.substitutions != null) {
+        for (String substitute : config.substitutions.keySet()) {
+          toSpeak = toSpeak.replace(substitute, config.substitutions.get(substitute));
+        }
       }
 
-      if (speak.trim().length() == 0) {
-        continue;
+      List<String> spokenParts = parseEffects(toSpeak);
+
+      toSpeak = filterText(toSpeak);
+
+      for (String speak : spokenParts) {
+
+        AudioData audioData = null;
+        if (speak.startsWith("#") && speak.endsWith("#")) {
+          audioData = new AudioData(
+              System.getProperty("user.dir") + File.separator + "audioFile" + File.separator + "voiceEffects" + File.separator + speak.substring(1, speak.length() - 1) + ".mp3");
+        } else {
+          audioData = new AudioData(getLocalFileName(speak));
+        }
+
+        if (speak.trim().length() == 0) {
+          continue;
+        }
+
+        if (!config.mute) {
+          process(audioData, speak, config.blocking);
+        } else {
+          log.info("not producing audio for {} - currently we are mute", speak);
+        }
+
+        // effect files are handled differently from generated audio
+        playList.add(audioData);
       }
+      // FIXME - in theory "speaking" means generating audio from some text
+      // so starting speaking event is when the first audio is "started"
+      // and finished speaking is when the last audio is finished
 
-      if (!mute) {
-        process(audioData, speak, blocking);
-      } else {
-        log.info("not producing audio for {} - currently we are mute", speak);
-      }
-
-      // effect files are handled differently from generated audio
-      playList.add(audioData);
-    }
-    // FIXME - in theory "speaking" means generating audio from some text
-    // so starting speaking event is when the first audio is "started"
-    // and finished speaking is when the last audio is finished
-
-    } catch(Exception e) {
+    } catch (Exception e) {
       error(e);
     }
     return playList;
@@ -647,12 +632,12 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
    */
   @Override
   public void replaceWord(String key, String replacement) {
-    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
+    config.substitutions.put(key.toLowerCase(), replacement.toLowerCase());
   }
 
   @Override
   public void replaceWord(WordFilter filter) {
-    substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
+    config.substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
   }
 
   public Long publishGenerationTime(Long timeMs) {
@@ -706,10 +691,10 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
 
   @Override
   public List<AudioData> speakBlocking(String toSpeak) {
-    boolean prevValue = blocking;
-    blocking = true;
+    boolean prevValue = config.blocking;
+    config.blocking = true;
     List<AudioData> audioData = parse(toSpeak);
-    blocking = prevValue;
+    config.blocking = prevValue;
     return audioData;
   }
 
@@ -954,35 +939,34 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
     }
     return false;
   }
-  
 
   @Override
   public boolean setVoice(String name) {
-      if (voices == null) {
-          return false;
-      }
+    if (voices == null) {
+      return false;
+    }
 
-      SpeechSynthesisConfig config = (SpeechSynthesisConfig)this.config;
-      voice = voices.get(name);
-      
-      if (voice == null) {
-        voice = voiceKeyIndex.get(name);
-      }
-      
-      if (voice == null) {
-        voice = voiceProviderIndex.get(name);
-      }
-      
-      if (voice == null) {
-          error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
-          return false;
-      }
+    SpeechSynthesisConfig config = (SpeechSynthesisConfig) this.config;
+    voice = voices.get(name);
 
-      config.voice = name;
-      broadcastState();
-      return true;
+    if (voice == null) {
+      voice = voiceKeyIndex.get(name);
+    }
+
+    if (voice == null) {
+      voice = voiceProviderIndex.get(name);
+    }
+
+    if (voice == null) {
+      error("could not set voice %s - valid voices are %s", name, String.join(", ", getVoiceNames()));
+      return false;
+    }
+
+    config.voice = name;
+    broadcastState();
+    return true;
   }
-  
+
   public boolean setVoice(Integer index) {
     if (index > voiceList.size() || index < 0) {
       error("setVoice({}) not valid pick range 0 to {}", index, voiceList.size());
@@ -1102,47 +1086,28 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
 
   @Override
   public void setMute(boolean b) {
-    this.mute = b;
+    this.config.mute = b;
   }
 
   @Override
   public Boolean setBlocking(Boolean b) {
-    blocking = b;
+    config.blocking = b;
     return b;
   }
 
   public boolean isMute() {
-    return mute;
+    return config.mute;
   }
 
   @Override
   public C apply(C c) {
     super.apply(c);
-
-    setMute(c.mute);
-
-    setBlocking(c.blocking);
-
-    if (c.substitutions != null) {
-      for (String n : c.substitutions.keySet()) {
-        replaceWord(n, c.substitutions.get(n));
-      }
-    }
+    
     // some systems require querying set of voices
     getVoices();
-    
+
     if (c.voice != null) {
       setVoice(c.voice);
-    }
-
-    if (c.speechRecognizers != null) {
-      for (String name : c.speechRecognizers) {
-        try {
-          attachSpeechListener(name);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
     }
 
     return c;
@@ -1160,18 +1125,9 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
   @Override
   public C getConfig() {
     C c = super.getConfig();
-    c.mute = mute;
-    c.blocking = blocking;
-    if (substitutions != null && !substitutions.isEmpty()) {
-      c.substitutions = new HashMap<>();
-      c.substitutions.putAll(substitutions);
-    }
     if (voice != null) {
       c.voice = voice.name;
     }
-    Set<String> listeners = getAttached("publishStartSpeaking");
-    c.speechRecognizers = listeners.toArray(new String[0]);
-
     return c;
   }
 

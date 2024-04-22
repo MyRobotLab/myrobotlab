@@ -228,7 +228,7 @@ public class HarryTest extends AbstractTest {
     // if startInMoov:
     // i01.startAll(leftPort, rightPort)
     // else:
-    i01.mouth = mouth;
+    i01.startPeer("mouth");
 
     solr.attachAllInboxes();
     solr.attachAllOutboxes();

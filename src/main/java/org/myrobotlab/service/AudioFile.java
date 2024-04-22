@@ -115,17 +115,12 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   // https://stackoverflow.com/questions/25798200/java-record-mic-to-byte-array-and-play-sound
   //
 
-  String currentTrack = DEFAULT_TRACK;
+  /**
+   * status field, the current track being played
+   */
+  protected String currentTrack = DEFAULT_TRACK;
 
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
-
-  double volume = 1.0f;
-  // if set to true, playback will become a no-op
-  private boolean mute = false;
-
-  protected String currentPlaylist = "default";
-
-  protected Map<String, List<String>> playlists = new HashMap<>();
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
 
@@ -254,7 +249,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
       data.track = currentTrack;
     }
     setTrack(data.track);
-    processors.get(data.track).setVolume(volume);
+    processors.get(data.track).setVolume(config.volume);
     if (AudioData.MODE_QUEUED.equals(data.mode)) {
       // stick it on top of queue and let our default player play it
       return processors.get(data.track).add(data);
@@ -329,7 +324,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
    * 
    */
   public void setVolume(float volume) {
-    this.volume = volume;
+    config.volume = volume;
   }
 
   public void setVolume(double volume) {
@@ -337,7 +332,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   }
 
   public double getVolume() {
-    return this.volume;
+    return config.volume;
   }
 
   public String getTrack() {
@@ -384,6 +379,14 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     return new ArrayList<File>();
   }
 
+  @Override
+  public void releaseService() {
+    super.releaseService();
+    for (AudioProcessor processor: processors.values()) {
+      processor.stopPlaying();
+    }
+  }
+  
   public AudioData repeat(String filename) {
     return repeat(filename, -1);
   }
@@ -433,28 +436,28 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   }
 
   public boolean isMute() {
-    return mute;
+    return config.mute;
   }
 
   public void setMute(boolean mute) {
-    this.mute = mute;
+    config.mute = mute;
   }
 
   public void setPlaylist(String name) {
-    currentPlaylist = name;
+    config.currentPlaylist = name;
   }
 
   public void addPlaylist(String folderPath) {
-    addPlaylist(currentPlaylist, folderPath);
+    addPlaylist(config.currentPlaylist, folderPath);
   }
 
   public void addPlaylist(String name, String path) {
 
     List<String> list = null;
-    if (!playlists.containsKey(name)) {
+    if (!config.playlists.containsKey(name)) {
       list = new ArrayList<String>();
     } else {
-      list = playlists.get(name);
+      list = config.playlists.get(name);
     }
     File check = new File(path);
     if (!check.exists()) {
@@ -465,7 +468,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
       list.addAll(scanForMusicFiles(path));
     }
     int filecount = list.size();
-    playlists.put(name, list);
+    config.playlists.put(name, list);
     log.info("{} playlist added {} files", name, filecount);
   }
 
@@ -497,15 +500,15 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   }
 
   public List<String> getPlaylist(String name) {
-    return playlists.get(name);
+    return config.playlists.get(name);
   }
 
   public Map<String, List<String>> getPlaylists() {
-    return playlists;
+    return config.playlists;
   }
 
   public void startPlaylist() {
-    startPlaylist(currentPlaylist, false, false, currentPlaylist);
+    startPlaylist(config.currentPlaylist, false, false, DEFAULT_TRACK);
   }
 
   public void startPlaylist(String playlist) {
@@ -517,54 +520,17 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   }
 
   public void startPlaylist(String playlist, boolean shuffle, boolean repeat, String track) {
-    if (!playlists.containsKey(playlist)) {
+    if (!config.playlists.containsKey(playlist)) {
       error("cannot play playlist %s does not exists", playlist);
       return;
     }
-    playlistPlayer.start(playlists.get(playlist), shuffle, repeat, track);
+    playlistPlayer.start(config.playlists.get(playlist), shuffle, repeat, track);
   }
 
   public void stopPlaylist() {
     playlistPlayer.stop();
   }
 
-  @Override
-  public AudioFileConfig getConfig() {
-
-    AudioFileConfig c = (AudioFileConfig) super.getConfig();
-    // FIXME - remove members keep data in config !
-    // FIXME - the following is not needed nor desired
-    // useless self assignment
-    c.mute = mute;
-    c.currentTrack = currentTrack;
-    c.currentPlaylist = currentPlaylist;
-    // c.peakMultiplier = peakMultiplier;
-    c.volume = volume;
-    c.playlists = playlists;
-    // config.peakSampleInterval <- this one is done correctly no maintenance
-    c.audioListeners = getAttached("publishAudio").toArray(new String[0]);
-
-    return config;
-  }
-
-  public AudioFileConfig apply(AudioFileConfig config) {
-    super.apply(config);
-    setMute(config.mute);
-    setTrack(config.currentTrack);
-    setVolume(config.volume);
-    setPlaylist(config.currentPlaylist);
-    if (config.playlists != null) {
-      playlists = config.playlists;
-    }
-
-    if (config.audioListeners != null) {
-      for (String listener : config.audioListeners) {
-        attachAudioListener(listener);
-      }
-    }
-    
-    return config;
-  }
 
   public double publishPeak(double peak) {
     log.debug("publishPeak {}", peak);
