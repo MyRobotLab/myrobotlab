@@ -1486,7 +1486,9 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public String publishHeartbeat() {
-    invoke("publishFlash", "heartbeat");
+	if (config.heartbeatFlash) {
+		invoke("publishFlash", "heartbeat");
+	}
     return getName();
   }
 
@@ -2277,7 +2279,7 @@ public class InMoov2 extends Service<InMoov2Config>
     Platform platform = Runtime.getPlatform();
     setPredicate("system version", platform.getVersion());
     // ERROR buffer !!!
-    invoke("publishEvent", "systemCheckFinished");
+    // invoke("publishEvent", "systemCheckFinished");
   }
 
   // FIXME - if this is really desired it will drive local references for all
