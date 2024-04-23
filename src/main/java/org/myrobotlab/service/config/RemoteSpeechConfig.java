@@ -10,8 +10,7 @@ public class RemoteSpeechConfig extends SpeechSynthesisConfig {
   public String verb = "GET";
 
   /**
-   * Speech url {text} will be url encoded text that will be transformed to audio
-   * speech
+   * Speech url {text} will be url encoded text that will be transformed to audio speech
    */
   public String url = "http://localhost:5002/api/tts?text={text}";
 
@@ -19,7 +18,7 @@ public class RemoteSpeechConfig extends SpeechSynthesisConfig {
    * Template for POST body, usually JSON, not implemented yet
    */
   public String template = null;
-
+  
   /**
    * Default speech type
    */

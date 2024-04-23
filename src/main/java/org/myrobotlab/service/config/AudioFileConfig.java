@@ -11,6 +11,9 @@ public class AudioFileConfig extends ServiceConfig {
   public double volume = 1.0;
   
   public String currentPlaylist = "default";
+
+  @Deprecated /* use regular "listeners" from ServiceConfig parent */
+  public String[] audioListeners;
   
   /**
    * Named map of lists of files

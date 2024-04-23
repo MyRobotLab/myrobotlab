@@ -56,12 +56,10 @@ public class InMoov2 extends Service<InMoov2Config>
     IKJointAngleListener {
 
   public class Heart implements Runnable {
-    private final ReentrantLock lock = new ReentrantLock();
     private Thread thread;
 
     @Override
     public void run() {
-      if (lock.tryLock()) {
         try {
           while (!Thread.currentThread().isInterrupted()) {
             invoke("publishHeartbeat");
@@ -70,14 +68,12 @@ public class InMoov2 extends Service<InMoov2Config>
         } catch (InterruptedException ignored) {
           Thread.currentThread().interrupt();
         } finally {
-          lock.unlock();
           log.info("heart stopping");
           thread = null;
         }
-      }
     }
 
-    public void start() {
+    synchronized public void start() {
       if (thread == null) {
         log.info("starting heart");
         thread = new Thread(this, String.format("%s-heart", getName()));
@@ -88,7 +84,7 @@ public class InMoov2 extends Service<InMoov2Config>
       }
     }
 
-    public void stop() {
+    synchronized public void stop() {
       if (thread != null) {
         thread.interrupt();
         config.heartbeat = false;
@@ -274,12 +270,12 @@ public class InMoov2 extends Service<InMoov2Config>
 
       execScript();
 
-      loadAppsScripts();
+//      loadAppsScripts();
 
-      loadInitScripts();
+//      loadInitScripts();
 
       if (c.loadGestures) {
-        loadGestures();
+//        loadGestures();
       }
 
       if (c.heartbeat) {
@@ -1551,7 +1547,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * onHeartbeat at a regular interval
    */
   public Heartbeat publishHeartbeat() {
-    log.debug("publishHeartbeat");
+    log.info("publishHeartbeat");
     heartbeatCount++;
     Heartbeat heartbeat = new Heartbeat(this);
     try {

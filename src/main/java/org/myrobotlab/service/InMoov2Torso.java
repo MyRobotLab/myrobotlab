@@ -36,9 +36,25 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
   @Override
   public void startService() {
     super.startService();
+    
     topStom = (ServoControl) getPeer("topStom");
     midStom = (ServoControl) getPeer("midStom");
     lowStom = (ServoControl) getPeer("lowStom");
+  }
+
+  @Override
+  public void releaseService() {
+    try {
+      disable();
+
+      topStom = null;
+      midStom = null;
+      lowStom = null;
+
+      super.releaseService();
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void enable() {
@@ -77,7 +93,7 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
     if (lowStom != null)
       lowStom.disable();
   }
-
+  
   @Deprecated /* use onMove(map) */
   public void onMoveTorso(HashMap<String, Double> map) {
     onMove(map);
@@ -87,6 +103,7 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
     moveTo(map.get("topStom"), map.get("midStom"), map.get("lowStom"));
   }
 
+
   public long getLastActivityTime() {
     long minLastActivity = Math.max(topStom.getLastActivityTime(), midStom.getLastActivityTime());
     minLastActivity = Math.max(minLastActivity, lowStom.getLastActivityTime());
@@ -94,7 +111,8 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format("%s.moveTorso(%.0f,%.0f,%.0f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(), lowStom.getCurrentInputPos());
+    return String.format("%s.moveTorso(%.0f,%.0f,%.0f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(),
+        lowStom.getCurrentInputPos());
   }
 
   public void moveTo(Double topStomPos, Double midStomPos, Double lowStomPos) {

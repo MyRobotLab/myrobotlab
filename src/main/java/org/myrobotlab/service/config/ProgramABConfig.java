@@ -9,6 +9,7 @@ public class ProgramABConfig extends ServiceConfig {
 
   @Deprecated /* unused text filters */
   public String[] textFilters;
+
   /**
    * explicit bot directories
    */
@@ -21,15 +22,16 @@ public class ProgramABConfig extends ServiceConfig {
   public String currentBotName = "Alice";
 
   /**
-   * User name currently interacting with the bot. Setting it here will default
-   * it.
+   * User name currently interacting with the bot. Setting it here will
+   * default it.
    */
   public String currentUserName = "human";
 
   /**
    * sleep current state of the sleep if globalSession is used true : ProgramAB
    * is sleeping and wont respond false : ProgramAB is not sleeping and any
-   * response requested will be processed current sleep/wake value
+   * response requested will be processed
+   * current sleep/wake value
    */
   public boolean sleep = false;
 

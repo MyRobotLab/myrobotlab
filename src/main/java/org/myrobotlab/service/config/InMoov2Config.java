@@ -236,7 +236,7 @@ public class InMoov2Config extends ServiceConfig {
     }
 
     mouthControl.mouth = i01Name + ".mouth";
-
+    
     UltrasonicSensorConfig ultrasonicLeft = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicLeft"));
     ultrasonicLeft.triggerPin = 64;
     ultrasonicLeft.echoPin = 63;
@@ -244,7 +244,8 @@ public class InMoov2Config extends ServiceConfig {
     UltrasonicSensorConfig ultrasonicRight = (UltrasonicSensorConfig) plan.get(getPeerName("ultrasonicRight"));
     ultrasonicRight.triggerPin = 64;
     ultrasonicRight.echoPin = 63;
-
+    
+    
     ProgramABConfig chatBot = (ProgramABConfig) plan.get(getPeerName("chatBot"));
 
     chatBot.bots.add("resource/ProgramAB/Alice");
@@ -265,7 +266,7 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.bots.add("resource/ProgramAB/tr-TR");
 
     Runtime runtime = Runtime.getInstance();
-    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "pl-PL", "ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
+    String[] bots = new String[] { "cn-ZH", "en-US", "fi-FI", "hi-IN", "nl-NL", "pl-PL","ru-RU", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-PT", "tr-TR" };
     String tag = runtime.getLocaleTag();
     if (tag != null) {
       String[] tagparts = tag.split("-");
@@ -533,7 +534,7 @@ public class InMoov2Config extends ServiceConfig {
     // listeners.add(new Listener("publishProcessMessage",
     // getPeerName("python"), "onPythonMessage"));
     listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
-
+    
     listeners.add(new Listener("publishPython", getPeerName("python")));
 
     // InMoov2 --to--> InMoov2
@@ -545,7 +546,6 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
-
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
 
@@ -562,7 +562,7 @@ public class InMoov2Config extends ServiceConfig {
 
     // Needs upcoming pr
     fsm.listeners.add(new Listener("publishStateChange", name, "publishStateChange"));
-
+    
     // peer --to--> peer
     mouth.listeners.add(new Listener("publishStartSpeaking", name));
     mouth.listeners.add(new Listener("publishStartSpeaking", getPeerName("ear")));
