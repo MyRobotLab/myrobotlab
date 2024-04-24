@@ -1,4 +1,4 @@
-<h3> {{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} {{service.id}}</h3>
+<h3> {{service.platform.arch}}.{{service.platform.jvmBitness}}.{{service.platform.os}} {{service.platform.mrlVersion}} {{service.id}}</h3>
 <!-- {{locale}} -->
 <label>Language</label>
 <table>
@@ -6,7 +6,7 @@
         <td>
         <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
         <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-        <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+        <ui-select-choices repeat="(tag, localeData) in service.locales">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
         </ui-select>            
         </td>
         <td>&nbsp;

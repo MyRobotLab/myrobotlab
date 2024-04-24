@@ -898,6 +898,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             // klunky
             Runtime.register(new Registration(runtime));
           }
+          
+          runtime.locales = Locale.getDefaults();
 
           runtime.getRepo().addStatusPublisher(runtime);
           runtime.startService();

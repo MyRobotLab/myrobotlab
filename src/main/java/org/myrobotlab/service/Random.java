@@ -30,7 +30,7 @@ public class Random extends Service<RandomConfig> {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Random.class);
+  protected final static Logger log = LoggerFactory.getLogger(Random.class);
 
   transient private RandomProcessor processor = null;
 
@@ -75,7 +75,7 @@ public class Random extends Service<RandomConfig> {
   /**
    * all random message data is located here
    */
-  Map<String, RandomMessage> randomData = new HashMap<>();
+  protected Map<String, RandomMessage> randomData = new HashMap<>();
 
   /**
    * Java's random value generator
@@ -107,7 +107,7 @@ public class Random extends Service<RandomConfig> {
   public double getRandom(double min, double max) {
     return min + (Math.random() * (max - min));
   }
-  
+
   public RandomMessage getTask(String taskName) {
     return randomData.get(taskName);
   }
@@ -218,7 +218,9 @@ public class Random extends Service<RandomConfig> {
     data.data = ranges;
     data.enabled = true;
 
-    randomData.put(taskName, data);
+    synchronized (lock) {
+      randomData.put(taskName, data);
+    }
 
     log.info("add random message {} in {} to {} ms", taskName, data.minIntervalMs, data.maxIntervalMs);
     broadcastState();
@@ -237,11 +239,27 @@ public class Random extends Service<RandomConfig> {
           // and see if any random event needs processing
 
           sleep(config.rate);
-          for (String key : randomData.keySet()) {
+          
+          Map<String, RandomMessage> tasks = null;
+          synchronized (lock) {
+
+            // copy to avoid concurrent exceptions, avoid iterating over
+            // randomData
+            tasks = new HashMap<>();
+            Set<String> keySet = new HashSet<String>(randomData.keySet());
+            for (String k : keySet) {
+              RandomMessage rm = randomData.get(k);
+              if (rm != null) {
+                tasks.put(k, rm);
+              }
+            }
+          }
+
+          for (String key : tasks.keySet()) {
 
             long now = System.currentTimeMillis();
 
-            RandomMessage randomEntry = randomData.get(key);
+            RandomMessage randomEntry = tasks.get(key);
             if (!randomEntry.enabled) {
               continue;
             }
@@ -311,7 +329,7 @@ public class Random extends Service<RandomConfig> {
     super.getConfig();
 
     config.enabled = enabled;
-    
+
     if (config.randomMessages == null) {
       config.randomMessages = new HashMap<>();
     }
@@ -443,15 +461,15 @@ public class Random extends Service<RandomConfig> {
     }
     return MethodCache.getInstance().query(si.getClass().getCanonicalName(), methodName);
   }
-  
-  public Map<String, RandomMessage> getRandomEvents(){
+
+  public Map<String, RandomMessage> getRandomEvents() {
     return randomData;
   }
-  
+
   public RandomMessage getRandomEvent(String key) {
     return randomData.get(key);
   }
-  
+
   /**
    * disables all the individual tasks
    */
@@ -461,7 +479,7 @@ public class Random extends Service<RandomConfig> {
     }
     broadcastState();
   }
-  
+
   @Override
   public void releaseService() {
     disable();

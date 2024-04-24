@@ -24,7 +24,7 @@ public class RuntimeConfig extends ServiceConfig {
   /**
    * Log level debug, info, warn, error
    */
-  public String logLevel = "warn";
+  public String logLevel = "info";
   
   /**
    * Locale setting for the instance, initial default will be set by the default jvm/os
