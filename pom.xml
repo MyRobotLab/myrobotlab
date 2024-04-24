@@ -1995,6 +1995,8 @@
         <!-- do not upgrade this version jacoco will break -->
         <version>3.2.2</version>
         <configuration>
+          <forkCount>1</forkCount>  <!-- Use one JVM -->
+          <reuseForks>true</reuseForks>  <!-- Reuse this JVM for all tests -->        
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native
             -Djna.library.path=libraries/native</argLine>
