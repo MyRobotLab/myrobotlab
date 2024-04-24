@@ -943,7 +943,7 @@ public class WebGui extends Service<WebGuiConfig>
       String json = CodecUtils.toJsonMsg(msg);
 
       if (json.length() > maxMsgSize) {
-        log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
+        log.info(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
         /*
          * debugging large msgs try {
          * FileIO.toFile(String.format("too-big-%s-%d.json", msg.method,

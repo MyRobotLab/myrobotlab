@@ -1,5 +1,12 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', 'mrl', 'statusSvc', '$timeout', '$uibModal', 'modalService', function($scope, mrl, statusSvc, $timeout, $uibModal, modalService) {
-    console.info('RuntimeGuiCtrl')
+angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
+  "$scope",
+  "mrl",
+  "statusSvc",
+  "$timeout",
+  "$uibModal",
+  "modalService",
+  function ($scope, mrl, statusSvc, $timeout, $uibModal, modalService) {
+    console.info("RuntimeGuiCtrl")
     var _self = this
     var msg = this.msg
 
@@ -8,17 +15,16 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     // configName is static so it needs to be
     // kept in sync on a subobject
     $scope.selected = {
-        configName :"default"
+      configName: "default",
     }
-    
-    this.updateState = function(service) {
-        $scope.service = service
-        $scope.locale.selected = service.locale.language
-        $scope.localeTag.selected = service.locale
+
+    this.updateState = function (service) {
+      $scope.service = service
+      $scope.locale.selected = service.locale.language
+      $scope.localeTag.selected = service.locale
     }
 
     $scope.locales = {}
-    $scope.platform = $scope.service.platform
     $scope.status = ""
     $scope.cmd = ""
     $scope.registry = {}
@@ -26,28 +32,28 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.newName = null
     $scope.newType = ""
     $scope.heartbeatTs = null
-    $scope.hosts = []    
+    $scope.hosts = []
     // $scope.selectedOption = "current"
 
     $scope.languages = {
-        'en': {
-            'language': 'en',
-            'displayLanguage': 'English'
-        }
+      en: {
+        language: "en",
+        displayLanguage: "English",
+      },
     }
 
     $scope.locale = {
-        selected: null
+      selected: null,
     }
 
     $scope.localeTag = {
-        'selected': {
-            'tag': 'en-US'
-        }
+      selected: {
+        tag: "en-US",
+      },
     }
 
     $scope.category = {
-        selected: null
+      selected: null,
     }
 
     $scope.categoryServiceTypes = null
@@ -61,354 +67,336 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     // $scope.categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
 
-    $scope.filterServices = function() {
-        var result = {}
-        // console.debug('$scope.category.selected is ' + $scope.category.selected)
-        const entries = Object.entries($scope.service.serviceData.serviceTypes)
+    $scope.filterServices = function () {
+      var result = {}
+      // console.debug('$scope.category.selected is ' + $scope.category.selected)
+      const entries = Object.entries($scope.service.serviceData.serviceTypes)
 
-        if ($scope.category.selected != null && ($scope.category.selected == 'show all')) {
-            return $scope.service.serviceData.serviceTypes
+      if ($scope.category.selected != null && $scope.category.selected == "show all") {
+        return $scope.service.serviceData.serviceTypes
+      }
+
+      for (const [fullTypeName, metaData] of entries) {
+        // if (metaData.simpleName.toLowerCase().includes($scope.newType)) {
+
+        if ($scope.category.selected != null) {
+          categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
+        } else {
+          categoryServiceTypes = null
         }
 
-        for (const [fullTypeName,metaData] of entries) {
-            // if (metaData.simpleName.toLowerCase().includes($scope.newType)) {
-
-            if ($scope.category.selected != null) {
-                categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
-            } else {
-                categoryServiceTypes = null
-            }
-
-            if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */
-            categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
-                result[fullTypeName] = metaData
-            }
+        if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */ categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
+          result[fullTypeName] = metaData
         }
-        return result
+      }
+      return result
     }
 
     // FIXME - maintain contextPath !!!
-    $scope.sendToCli = function(cmd) {
-        console.log("sendToCli " + cmd)
-        $scope.cmd = ""
-        contextPath = null
-        msg.send("sendToCli", "runtime@" + mrl.getId(), cmd)
+    $scope.sendToCli = function (cmd) {
+      console.log("sendToCli " + cmd)
+      $scope.cmd = ""
+      contextPath = null
+      msg.send("sendToCli", "runtime@" + mrl.getId(), cmd)
     }
 
-    $scope.setServiceType = function(serviceType) {
-        $scope.newType = serviceType
+    $scope.setServiceType = function (serviceType) {
+      $scope.newType = serviceType
     }
 
-    $scope.setConfig = function() {
-        console.info('setConfig')
-        if ($scope.selectedConfig.length > 0) {
-            msg.sendTo('runtime', 'setConfig', $scope.selectedConfig[0])
-            msg.sendTo('runtime', 'getConfigName')
-        }
+    $scope.setConfig = function () {
+      console.info("setConfig")
+      if ($scope.selectedConfig.length > 0) {
+        msg.sendTo("runtime", "setConfig", $scope.selectedConfig[0])
+        msg.sendTo("runtime", "getConfigName")
+      }
     }
 
-    $scope.start = function() {
+    $scope.start = function () {
+      if ($scope.newName == null) {
+        mrl.error("name of service is required")
+        return
+      }
+      if ($scope.newType == null) {
+        mrl.error("type of service is required")
+        return
+      }
 
-        if ($scope.newName == null) {
-            mrl.error("name of service is required")
-            return
-        }
-        if ($scope.newType == null) {
-            mrl.error("type of service is required")
-            return
-        }
+      if (typeof $scope.newType == "object") {
+        $scope.newType = $scope.newType.simpleName
+      }
+      msg.send("start", $scope.newName, $scope.newType)
 
-        if (typeof $scope.newType == 'object') {
-            $scope.newType = $scope.newType.simpleName
-        }
-        msg.send('start', $scope.newName, $scope.newType)
-
-        $scope.newName = null
-        $scope.newType = null
+      $scope.newName = null
+      $scope.newType = null
     }
 
-    this.onMsg = function(inMsg) {
-        let data = null
-        if (inMsg.data) {
-            data = inMsg.data[0]
-        }
+    this.onMsg = function (inMsg) {
+      let data = null
+      if (inMsg.data) {
+        data = inMsg.data[0]
+      }
 
-        switch (inMsg.method) {
-        case 'onState':
-            _self.updateState(data)
+      switch (inMsg.method) {
+        case "onState":
+          _self.updateState(data)
+          $scope.$apply()
+          break
+        case "onPlan":
+          $scope.plan = data
+          $scope.$apply()
+          break
+        case "onLocalServices":
+          $scope.registry = data
+          //  $scope.$apply()
+          break
+        case "onLocale":
+          $scope.locale.selected = data.language
+          $scope.$apply()
+          break
+        case "onConfigList":
+          if (data) {
+            $scope.service.configList = data.sort()
             $scope.$apply()
-            break
-        case 'onPlan':
-            $scope.plan = data
+          }
+          break
+
+        case "onStartYml":
+          $scope.startYml = data
+          $scope.$apply()
+          break
+
+        case "onSaveDefaults":
+          if (data.length > 0) {
+            $scope.defaultsSaved = "saved defaults to " + data
+            msg.send("publishConfigList")
             $scope.$apply()
-            break
-        case 'onLocalServices':
-            $scope.registry = data
-            //  $scope.$apply()
-            break
-        case 'onLocale':
-            $scope.locale.selected = data.language
-            $scope.$apply()
-            break
-        case 'onLocales':
-            ls = data
-            unique = {}
-            $scope.service.locales = {}
-            // new Set()
-            for (const key in ls) {
-                if (ls[key].displayLanguage) {
-                    // unique.add(ls[key].displayLanguage)
-                    // unique.push(ls[key].language)
-                    unique[ls[key].language] = {
-                        'language': ls[key].language,
-                        'displayLanguage': ls[key].displayLanguage
-                    }
-                }
-                // $scope.service.locales[key] =ls[key] 
-            }
-            // $scope.languages = Array.from(unique)
-            $scope.languages = unique
-            $scope.locales = ls
-            // it is transient in java to reduce initial registration payload
-            // $scope.service.locales = ls
-            $scope.$apply()
-            break
+          } else {
+            ;("service does not have defaults")
+          }
+          break
 
-        case 'onConfigList':
-            if (data) {
-                $scope.service.configList = data.sort()
-                $scope.$apply()
-            }
-            break
+        case "onInterfaceToNames":
+          $scope.interfaceToPossibleServices = data
+          mrl.interfaceToPossibleServices = data
+          break
 
-        case 'onStartYml':
-            $scope.startYml = data
-            $scope.$apply()
-            break
+        case "onServiceTypes":
+          $scope.serviceTypes = data
+          mrl.setPossibleServices($scope.serviceTypes)
+          break
 
-        case 'onSaveDefaults':
-            if (data.length > 0) {
-                $scope.defaultsSaved = 'saved defaults to ' + data
-                msg.send('publishConfigList')
-                $scope.$apply()
-            } else {
-                'service does not have defaults'
-            }
-            break
+        case "onRegistered":
+          console.log("onRegistered")
+          break
 
-        case 'onInterfaceToNames':
-            $scope.interfaceToPossibleServices = data
-            mrl.interfaceToPossibleServices = data
-            break
-
-        case 'onServiceTypes':
-            $scope.serviceTypes = data
-            mrl.setPossibleServices($scope.serviceTypes)
-            break
-
-        case 'onRegistered':
-            console.log("onRegistered")
-            break
-
-        case 'onConnections':
-            $scope.connections = data
-            $scope.$apply()
-            break
-        case 'onHosts':
-            $scope.hosts = data
-            $scope.$apply()
-            break
-        case 'onStatus':
-            $scope.status = data.name + ' ' + data.level + ' ' + data.detail + "\n" + $scope.status
+        case "onConnections":
+          $scope.connections = data
+          $scope.$apply()
+          break
+        case "onHosts":
+          $scope.hosts = data
+          $scope.$apply()
+          break
+        case "onStatus":
+          $scope.status = data.name + " " + data.level + " " + data.detail + "\n" + $scope.status
+          if ($scope.status.length > 300) {
+            $scope.status = $scope.status.substring(0, statusMaxSize)
+          }
+          break
+        case "onCli":
+          if (data != null) {
+            $scope.status = JSON.stringify(data, null, 2) + "\n" + $scope.status
             if ($scope.status.length > 300) {
-                $scope.status = $scope.status.substring(0, statusMaxSize)
+              $scope.status = $scope.status.substring(0, statusMaxSize)
             }
-            break
-        case 'onCli':
-            if (data != null) {
-                $scope.status = JSON.stringify(data, null, 2) + "\n" + $scope.status
-                if ($scope.status.length > 300) {
-                    $scope.status = $scope.status.substring(0, statusMaxSize)
-                }
-                $scope.$apply()
-            } else {
-                $scope.status += "null\n"
-            }
-            break
-        case 'onReleased':
-            console.info("runtime - onRelease " + data)
-            break
-        case 'onConfigName':
-            console.info("runtime - onConfigName " + data)
-            // is not part of service, because configName is static
-            $scope.selected.configName = data
             $scope.$apply()
-            break
-        case 'onHeartbeat':
-            let heartbeat = data
-            let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - '
-            $scope.heartbeatTs = heartbeat.ts
-            $scope.$apply()
+          } else {
+            $scope.status += "null\n"
+          }
+          break
+        case "onReleased":
+          console.info("runtime - onRelease " + data)
+          break
+        case "onConfigName":
+          console.info("runtime - onConfigName " + data)
+          // is not part of service, because configName is static
+          $scope.selected.configName = data
+          $scope.$apply()
+          break
+        case "onHeartbeat":
+          let heartbeat = data
+          let hb = heartbeat.name + "@" + heartbeat.id + " sent onHeartbeat - "
+          $scope.heartbeatTs = heartbeat.ts
+          $scope.$apply()
 
-            for (let i in heartbeat.serviceList) {
-                let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
-                hb += serviceName + ' '
+          for (let i in heartbeat.serviceList) {
+            let serviceName = heartbeat.serviceList[i].name + "@" + heartbeat.serviceList[i].id
+            hb += serviceName + " "
 
-                // FIXME - 'merge' ie remove missing services
+            // FIXME - 'merge' ie remove missing services
 
-                // FIXME - want to maintain "local" registry ???
-                // currently maintaining JS process registry - should the RuntimeGui also maintain
-                // its 'own' sub-registry ???
-                if (!serviceName in mrl.getRegistry()) {
-                    // 
-                    console.warn(serviceName + ' not defined in registry - sending registration request')
-                }
-                // else already registered
+            // FIXME - want to maintain "local" registry ???
+            // currently maintaining JS process registry - should the RuntimeGui also maintain
+            // its 'own' sub-registry ???
+            if (!serviceName in mrl.getRegistry()) {
+              //
+              console.warn(serviceName + " not defined in registry - sending registration request")
             }
+            // else already registered
+          }
 
-            console.info(hb)
+          console.info(hb)
 
-            // CHECK REGISTRY
-            // SYNC SERVICES
-            // REQUEST REGISTRATIONS !!!!
-            break
+          // CHECK REGISTRY
+          // SYNC SERVICES
+          // REQUEST REGISTRATIONS !!!!
+          break
         default:
-            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
-            break
+          console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+          break
+      }
+    }
+
+    $scope.shutdown = function (type) {
+      var modalInstance = $uibModal.open({
+        //animation: true,
+        // templateUrl: 'nav/shutdown.html',
+        // template: '<div class="modal-header"> HELLO ! </div>',
+        // controller: $scope.doShutdown,
+        // controller: 'RuntimeGuiCtrl',
+        scope: $scope,
+        // controller: 'ModalController',
+
+        animation: true,
+        templateUrl: "nav/shutdown.html",
+        controller: "shutdownCtrl2",
+
+        resolve: {
+          type: function () {
+            return type
+          },
+        },
+      })
+      console.info("shutdown " + modalInstance)
+    }
+
+    $scope.setAllLocales = function (locale) {
+      console.info(locale)
+    }
+
+    $scope.loadConfig = function () {
+      console.info("loadConfig")
+      if ($scope.selectedConfig.length) {
+        for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+          // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+          msg.sendTo("runtime", "setConfig", $scope.selectedConfig[i])
+          msg.sendTo("runtime", "load", "runtime")
         }
+      }
     }
 
-    $scope.shutdown = function(type) {
-        var modalInstance = $uibModal.open({
-            //animation: true,
-            // templateUrl: 'nav/shutdown.html',
-            // template: '<div class="modal-header"> HELLO ! </div>',
-            // controller: $scope.doShutdown,
-            // controller: 'RuntimeGuiCtrl',
-            scope: $scope,
-            // controller: 'ModalController',
-
-            animation: true,
-            templateUrl: 'nav/shutdown.html',
-            controller: 'shutdownCtrl2',
-
-            resolve: {
-                type: function() {
-                    return type
-                }
-            }
-        })
-        console.info('shutdown ' + modalInstance)
+    $scope.unsetConfig = function () {
+      console.info("unsetConfig")
+      msg.sendTo("runtime", "unsetConfig")
     }
 
-    $scope.setAllLocales = function(locale) {
-        console.info(locale)
-    }
-
-    $scope.loadConfig = function() {
-        console.info('loadConfig')
-        if ($scope.selectedConfig.length) {
-            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'setConfig', $scope.selectedConfig[i])
-                msg.sendTo('runtime', 'load', 'runtime')
-            }
+    $scope.startConfig = function () {
+      console.info("startConfig")
+      if ($scope.selectedConfig.length) {
+        for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+          // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+          msg.sendTo("runtime", "startConfig", $scope.selectedConfig[i])
         }
+      }
     }
 
-    $scope.unsetConfig = function() {
-        console.info('unsetConfig')
-        msg.sendTo('runtime', 'unsetConfig')
-    }
-
-    $scope.startConfig = function() {
-        console.info('startConfig')
-        if ($scope.selectedConfig.length) {
-            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                // msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
-                msg.sendTo('runtime', 'startConfig', $scope.selectedConfig[i])
-            }
+    $scope.releaseConfig = function () {
+      console.info("releaseConfig")
+      if ($scope.selectedConfig && $scope.selectedConfig.length) {
+        for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+          msg.sendTo("runtime", "releaseConfig", $scope.selectedConfig[i])
+          // msg.sendTo('runtime', 'releaseConfig', 'runtime')
         }
+      } else {
+        msg.sendTo("runtime", "releaseConfig")
+      }
     }
 
-    $scope.releaseConfig = function() {
-        console.info('releaseConfig')
-        if ($scope.selectedConfig && $scope.selectedConfig.length) {
-            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
-                msg.sendTo('runtime', 'releaseConfig', $scope.selectedConfig[i])
-                // msg.sendTo('runtime', 'releaseConfig', 'runtime')
-            }
-        } else {
-            msg.sendTo('runtime', 'releaseConfig')
+    $scope.savePlan = function () {
+      console.info("saveConfig")
+
+      let onOK = function () {
+        msg.sendTo("runtime", "savePlan", $scope.selected.configName)
+        // msg.sendTo('runtime', 'save')
+      }
+
+      let onCancel = function () {
+        console.info("save config cancelled")
+      }
+
+      let ret = modalService.openOkCancel(
+        "widget/modal-dialog.view.html",
+        "Save Plan Configuration",
+        "Save your current configuration in a directory named",
+        onOK,
+        onCancel,
+        $scope
+      )
+      console.info("ret " + ret)
+    }
+
+    $scope.saveDefaults = function () {
+      console.info("saveDefaults")
+      msg.send("saveDefaults", $scope.newType.simpleName)
+    }
+
+    $scope.setAutoStart = function (b) {
+      console.info("setAutoStart")
+      msg.send("setAutoStart", b)
+    }
+
+    $scope.saveConfig = function () {
+      $scope.service.includePeers = false
+      $scope.service.selectedOption = "current"
+
+      $scope.selected.configName = $scope.selected.configName
+      var modalInstance = $uibModal.open({
+        templateUrl: "saveConfig.html",
+        scope: $scope,
+        controller: function ($scope, $uibModalInstance) {
+          $scope.ok = function () {
+            $uibModalInstance.close()
+          }
+
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss("cancel")
+          }
+        },
+      })
+
+      modalInstance.result.then(
+        function (result) {
+          // Handle 'OK' button click
+          console.log("Config Name: " + $scope.selected.configName)
+          console.log("Selected Option: " + $scope.service.selectedOption)
+          console.log("includePeers Option: " + $scope.service.includePeers)
+          console.log("configType Option: " + $scope.service.configType)
+          msg.send("setConfig", $scope.selected.configName)
+          if ($scope.service.selectedOption == "default") {
+            msg.send("saveDefault", $scope.selected.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
+          } else {
+            msg.sendTo("runtime", "saveConfig", $scope.selected.configName)
+          }
+          msg.send("getConfigName")
+        },
+        function () {
+          // Handle 'Cancel' button click or modal dismissal
+          console.log("Modal dismissed")
         }
+      )
     }
 
-    $scope.savePlan = function() {
-        console.info('saveConfig')
-
-        let onOK = function() {
-            msg.sendTo('runtime', 'savePlan', $scope.selected.configName)
-            // msg.sendTo('runtime', 'save')
-        }
-
-        let onCancel = function() {
-            console.info('save config cancelled')
-        }
-
-        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Plan Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope)
-        console.info('ret ' + ret)
-    }
-
-    $scope.saveDefaults = function() {
-        console.info('saveDefaults')
-        msg.send('saveDefaults', $scope.newType.simpleName)
-    }
-
-    $scope.setAutoStart = function(b) {
-        console.info('setAutoStart')
-        msg.send('setAutoStart', b)
-    }
-
-     $scope.saveConfig = function() {
-        $scope.service.includePeers = false
-        $scope.service.selectedOption = "current"
-
-         $scope.selected.configName = $scope.selected.configName
-          var modalInstance = $uibModal.open({
-            templateUrl: 'saveConfig.html',
-            scope: $scope,
-            controller: function($scope, $uibModalInstance) {
-
-              $scope.ok = function() {
-                $uibModalInstance.close()
-              }
-
-              $scope.cancel = function() {
-                $uibModalInstance.dismiss('cancel')
-              }
-            }
-          })
-
-          modalInstance.result.then(function(result) {
-            // Handle 'OK' button click
-            console.log('Config Name: ' + $scope.selected.configName)
-            console.log('Selected Option: ' + $scope.service.selectedOption)
-            console.log('includePeers Option: ' + $scope.service.includePeers)
-            console.log('configType Option: ' + $scope.service.configType)
-            msg.send('setConfig', $scope.selected.configName)
-            if ($scope.service.selectedOption == 'default'){
-                msg.send('saveDefault', $scope.selected.configName, $scope.service.defaultServiceName, $scope.service.configType, $scope.service.includePeers)
-            } else {
-                msg.sendTo('runtime', 'saveConfig', $scope.selected.configName)
-            }
-              msg.send('getConfigName')
-          }, function() {
-            // Handle 'Cancel' button click or modal dismissal
-            console.log('Modal dismissed')
-          })
-        }
-    
-    // $scope.serviceTypes = Object.values(mrl.getPossibleServices())
     msg.subscribe("getStartYml")
     msg.subscribe("saveDefaults")
     msg.subscribe("getConfigName")
@@ -417,24 +405,19 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("registered")
     msg.subscribe("getConnections")
     msg.subscribe("getLocale")
-    msg.subscribe("getLocales")
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
-    msg.subscribe('publishConfigList')
-    msg.subscribe('publishInterfaceToNames')
-    // msg.subscribe("getPlan")
+    msg.subscribe("publishConfigList")
+    msg.subscribe("publishInterfaceToNames")
 
-    //msg.send("getLocalServices")
     msg.send("getStartYml")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
-    msg.send("getLocales")
     msg.send("publishInterfaceToNames")
     msg.send("getConfigName")
-    // msg.send("getPlan")
 
     // msg.send("getHosts")
     msg.subscribe(this)
-}
+  },
 ])

@@ -222,14 +222,14 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     }
 
-    log.info("----------------------------------------------");
-    log.info("Service Report");
-    log.info("Number of Services:           {}", numServices);
-    log.info("Number of Startable Services: {}", numStartable);
-    log.info("Number of Services Pages      {}", numServicePages);
-    log.info("Number of Scripts:            {}", numScripts);
-    log.info("Number of Scripts Worky:      {}", numScriptsWorky);
-    log.info("----------------------------------------------");
+    System.out.println("----------------------------------------------");
+    System.out.println("Service Report");
+    System.out.println(String.format("Number of Services:           %d", numServices));
+    System.out.println(String.format("Number of Startable Services: %d", numStartable));
+    System.out.println(String.format("Number of Services Pages      %d", numServicePages));
+    System.out.println(String.format("Number of Scripts:            %d", numScripts));
+    System.out.println(String.format("Number of Scripts Worky:      %d", numScriptsWorky));
+    System.out.println("----------------------------------------------");
 
     for (String s : servicesThatDontStartProperly) {
       log.warn("FAILED ON START:" + s);
