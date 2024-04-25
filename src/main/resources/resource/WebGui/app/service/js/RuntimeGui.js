@@ -56,6 +56,12 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
       selected: null,
     }
 
+    $scope.deleteConfig = function () {
+      console.info("deleteConfig", $scope.selected.configName)
+      msg.send("deleteConfig", $scope.selected.configName)
+      $scope.selected.configName = null
+    }
+
     $scope.categoryServiceTypes = null
 
     $scope.disabled = undefined

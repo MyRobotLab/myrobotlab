@@ -62,6 +62,6 @@ else
     "${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --install
 fi
 
-"${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --log-level warn -s log Log webgui WebGui intro Intro python Python
+"${JAVA}" ${JAVA_OPTIONS} -cp ${CLASSPATH} org.myrobotlab.service.Runtime --log-level info -s log Log security Security webgui WebGui intro Intro python Python
 
 echo $# $@

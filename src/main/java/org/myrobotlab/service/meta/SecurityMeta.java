@@ -15,7 +15,7 @@ public class SecurityMeta extends MetaData {
   public SecurityMeta() {
 
     addDescription("used as a general template");
-    setAvailable(false); // false if you do not want it viewable in a gui
+    setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
     // addDependency("org.coolproject", "1.0.0");
     addCategory("general");
