@@ -1,4 +1,4 @@
-<h3> {{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} {{service.id}}</h3>
+<h3> {{service.platform.arch}}.{{service.platform.jvmBitness}}.{{service.platform.os}} {{service.platform.mrlVersion}} {{service.id}}</h3>
 <!-- {{locale}} -->
 <label>Language</label>
 <table>
@@ -6,7 +6,7 @@
         <td>
         <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
         <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-        <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+        <ui-select-choices repeat="(tag, localeData) in service.locales">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
         </ui-select>            
         </td>
         <td>&nbsp;
@@ -67,17 +67,21 @@
     </div>
 </div>
 <div class="form-inline">
-    <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
+    <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">Save Config</button>
     <!-- <button class="btn btn-default" title="This will load a config module" ng-click="loadConfig()">load</button>
     <button class="btn btn-default" title="This will unset current config set" ng-click="savePlan()">save plan</button>
     <button class="btn btn-default" title="This will unset current config set" ng-click="unsetConfig()">unset</button>
     -->
-    <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">start</button>
-    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
+    <button class="btn btn-default" title="This will start a config set" ng-click="startConfig()">Start</button>
+    <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">Release</button>
+
+    <button class="btn btn-default" title="This will release a config set"
+    ng-click="deleteConfig()">Delete</button>
+
     <button class="btn btn-default" ng-show="!startYml.enable" title="This will auto start config on next start"
-        ng-click="setAutoStart(true)">auto start off</button>
+        ng-click="setAutoStart(true)">Auto Start Off</button>
     <button class="btn btn-info" ng-show="startYml.enable" title="This will auto start config on next start"
-        ng-click="setAutoStart(false)">auto start on</button>
+        ng-click="setAutoStart(false)">Auto Start On</button>
     
 </div>                                    
 

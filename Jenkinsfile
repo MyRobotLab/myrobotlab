@@ -31,6 +31,7 @@ pipeline {
          MOTD = 'you know, for robots !'
          VERSION_PREFIX = "1.1"
          VERSION = "${VERSION_PREFIX}" + ".${BUILD_NUMBER}"
+         // MAVEN_OPTS = '-Xmx4096m -XX:MaxPermSize=256m -XX:+ExitOnOutOfMemoryError'
    // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
    // JAVA_HOME = "${JDK_HOME}"
    // PATH="${env.JAVA_HOME}/bin:${env.PATH}"

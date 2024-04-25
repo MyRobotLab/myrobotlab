@@ -25,7 +25,6 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
     }
 
     $scope.locales = {}
-    $scope.platform = $scope.service.platform
     $scope.status = ""
     $scope.cmd = ""
     $scope.registry = {}
@@ -55,6 +54,12 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
 
     $scope.category = {
       selected: null,
+    }
+
+    $scope.deleteConfig = function () {
+      console.info("deleteConfig", $scope.selected.configName)
+      msg.send("deleteConfig", $scope.selected.configName)
+      $scope.selected.configName = null
     }
 
     $scope.categoryServiceTypes = null
@@ -155,30 +160,6 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
           $scope.locale.selected = data.language
           $scope.$apply()
           break
-        case "onLocales":
-          ls = data
-          unique = {}
-          $scope.service.locales = {}
-          // new Set()
-          for (const key in ls) {
-            if (ls[key].displayLanguage) {
-              // unique.add(ls[key].displayLanguage)
-              // unique.push(ls[key].language)
-              unique[ls[key].language] = {
-                language: ls[key].language,
-                displayLanguage: ls[key].displayLanguage,
-              }
-            }
-            // $scope.service.locales[key] =ls[key]
-          }
-          // $scope.languages = Array.from(unique)
-          $scope.languages = unique
-          $scope.locales = ls
-          // it is transient in java to reduce initial registration payload
-          // $scope.service.locales = ls
-          $scope.$apply()
-          break
-
         case "onConfigList":
           if (data) {
             $scope.service.configList = data.sort()
@@ -422,7 +403,6 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
       )
     }
 
-    // $scope.serviceTypes = Object.values(mrl.getPossibleServices())
     msg.subscribe("getStartYml")
     msg.subscribe("saveDefaults")
     msg.subscribe("getConfigName")
@@ -431,22 +411,17 @@ angular.module("mrlapp.service.RuntimeGui", []).controller("RuntimeGuiCtrl", [
     msg.subscribe("registered")
     msg.subscribe("getConnections")
     msg.subscribe("getLocale")
-    msg.subscribe("getLocales")
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
     msg.subscribe("publishConfigList")
     msg.subscribe("publishInterfaceToNames")
-    // msg.subscribe("getPlan")
 
-    //msg.send("getLocalServices")
     msg.send("getStartYml")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
-    msg.send("getLocales")
     msg.send("publishInterfaceToNames")
     msg.send("getConfigName")
-    // msg.send("getPlan")
 
     // msg.send("getHosts")
     msg.subscribe(this)
