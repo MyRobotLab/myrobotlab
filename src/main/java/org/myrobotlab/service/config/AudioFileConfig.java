@@ -12,6 +12,16 @@ public class AudioFileConfig extends ServiceConfig {
   
   public String currentPlaylist = "default";
   
+  /**
+   * randomly shuffles a play list
+   */
+  public boolean shuffle = false;
+  
+  /**
+   * repeats a playlist
+   */
+  public boolean repeat = false;
+  
   @Deprecated /* temporal variable */
   public String currentTrack = null;  
 

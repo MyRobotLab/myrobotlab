@@ -25,8 +25,7 @@ public class PlaylistPlayer implements Runnable {
   }
 
   @Override
-  public void run() {
-
+  public void run() {    
     while (!done) {
 
       List<String> list = playlist;
@@ -54,9 +53,24 @@ public class PlaylistPlayer implements Runnable {
 
   public synchronized void stop() {
     done = true;
+    audioFile.stop();
+    if (player != null) {
+      player.interrupt();
+    }
+  }
+  
+  public synchronized void skip() {
+    if (player != null) {
+      audioFile.stop();
+    }
   }
 
+
   public synchronized void start(List<String> playlist, boolean shuffle, boolean repeat, String track) {
+    
+    audioFile.getConfig().repeat = repeat;
+    audioFile.getConfig().shuffle = shuffle;
+    
     if (player != null) {
       audioFile.warn("playlist player already playing a list - stop before starting a new playlist");
       return;
