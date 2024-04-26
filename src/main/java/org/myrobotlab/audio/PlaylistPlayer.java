@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.AudioFile;
+import org.slf4j.Logger;
 
 public class PlaylistPlayer implements Runnable {
 
+  static final Logger log = LoggerFactory.getLogger(PlaylistPlayer.class);
+  
   private transient AudioFile audioFile = null;
   private transient Thread player;
   private boolean shuffle;
@@ -34,6 +38,7 @@ public class PlaylistPlayer implements Runnable {
         audioFile.play(list.get(i), true, null, track);
       }
       if (!repeat) {
+        log.info("finished playing playlist");
         done = true;
       }
     }

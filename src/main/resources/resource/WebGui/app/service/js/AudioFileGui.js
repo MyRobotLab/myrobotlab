@@ -8,19 +8,9 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
     // playing paused stopped
     $scope.activity = null
 
-    // $scope.playFile = function() {        
-    //     msg.send('playFile', $scope.selectedFile)
-    // }
-
     $scope.play = function() {
-        // if (blah){
-        // $scope.selectedFile = selectedFiles[0]    
-        // } else {
-        //     $scope.selectedFile = selectedFiles[0]    
-        // }
         let playFile = $scope.selectedFile
         msg.send('play', $scope.selectedFile)
-
     }
 
     $scope.setSelectedFileFromTrack = function(selected) {
@@ -29,7 +19,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
 
     $scope.startPlaylist = function() {
         if ($scope.selectedPlaylist) {
-            msg.send('startPlaylist', $scope.selectedPlaylist[0])
+            msg.send('startPlaylist', $scope.selectedPlaylist)
         } else {
             msg.send('startPlaylist')
         }
@@ -37,7 +27,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
 
     $scope.stopPlaylist = function() {
         if ($scope.selectedPlaylist) {
-            msg.send('stopPlaylist', $scope.selectedPlaylist[0])
+            msg.send('stopPlaylist', $scope.selectedPlaylist)
             msg.send('stop')
         } else {
             msg.send('stopPlaylist')
