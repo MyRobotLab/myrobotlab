@@ -17,11 +17,10 @@ import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 /**
- * A generalized "remote" speech synthesis interface service. I can be used for
- * potentially many remote TTS services, however, the first one will be
- * MozillaTTS, which we will assume is working locally with docker. See
- * https://github.com/synesthesiam/docker-mozillatts. Example GET:
- * http://localhost:5002/api/tts?text=Hello%20I%20am%20a%20speech%20synthesis%20system%20version%202
+ * A generalized "remote" speech synthesis interface service.  I can be used for potentially many
+ * remote TTS services, however, the first one will be MozillaTTS, which we will assume is 
+ * working locally with docker. See https://github.com/synesthesiam/docker-mozillatts.
+ * Example GET: http://localhost:5002/api/tts?text=Hello%20I%20am%20a%20speech%20synthesis%20system%20version%202
  * 
  * @author GroG
  *
@@ -36,7 +35,7 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
    * HttpClient peer for GETs and POSTs
    */
   public transient HttpClient<HttpClientConfig> http = null;
-
+  
   /**
    * Currently only support MozillaTTS
    */
@@ -45,12 +44,12 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
   public RemoteSpeech(String n, String id) {
     super(n, id);
   }
-
+  
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void startService() {
     super.startService();
-    http = (HttpClient) startPeer("http");
+    http = (HttpClient)startPeer("http");
   }
 
   public static void main(String[] args) {

@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Message;
@@ -52,25 +51,24 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 public class InMoov2 extends Service<InMoov2Config>
-    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider,
-    IKJointAngleListener {
+    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public class Heart implements Runnable {
     private Thread thread;
 
     @Override
     public void run() {
-        try {
-          while (!Thread.currentThread().isInterrupted()) {
-            invoke("publishHeartbeat");
-            Thread.sleep(config.heartbeatInterval);
-          }
-        } catch (InterruptedException ignored) {
-          Thread.currentThread().interrupt();
-        } finally {
-          log.info("heart stopping");
-          thread = null;
+      try {
+        while (!Thread.currentThread().isInterrupted()) {
+          invoke("publishHeartbeat");
+          Thread.sleep(config.heartbeatInterval);
         }
+      } catch (InterruptedException ignored) {
+        Thread.currentThread().interrupt();
+      } finally {
+        log.info("heart stopping");
+        thread = null;
+      }
     }
 
     synchronized public void start() {
@@ -179,21 +177,11 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   protected int bootCount = 0;
 
-  protected transient ProgramAB chatBot;
-
   protected List<String> configList;
 
   protected transient SpeechRecognizer ear;
 
   protected List<LogEntry> errors = new ArrayList<>();
-
-  /**
-   * The finite state machine is core to managing state of InMoov2. There is
-   * very little benefit gained in having the interactions pub/sub. Therefore,
-   * there will be a direct reference to the fsm. If different state graph is
-   * needed, then the fsm can provide that service.
-   */
-  private transient FiniteStateMachine fsm;
 
   // waiting controable threaded gestures we warn user
   protected boolean gestureAlreadyStarted = false;
@@ -243,8 +231,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
   public InMoov2(String n, String id) {
     super(n, id);
-    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI",
-        "pt-PT", "tr-TR");
+    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
   }
 
   // should be removed in favor of general listeners
@@ -257,39 +244,16 @@ public class InMoov2 extends Service<InMoov2Config>
   public InMoov2Config apply(InMoov2Config c) {
     super.apply(c);
     try {
-
-      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
-
+      
       if (c.locale != null) {
         setLocale(c.locale);
       } else {
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
-      // one way sync configuration into predicates
-      configToPredicates();
-
-      execScript();
-
-//      loadAppsScripts();
-
-//      loadInitScripts();
-
-      if (c.loadGestures) {
-//        loadGestures();
-      }
-
-      if (c.heartbeat) {
-        startHeartbeat();
-      } else {
-        stopHeartbeat();
-      }
-
-      // one way sync configuration into predicates
-      configToPredicates();
 
     } catch (Exception e) {
       error(e);
-    } 
+    }
     return c;
   }
 
@@ -350,15 +314,42 @@ public class InMoov2 extends Service<InMoov2Config>
         log.warn("will not boot again");
         return;
       }
+      
+      if (bootCount == 0) {
+        info("%s BOOTING ....", getName());
+      }
 
       bootCount++;
-      log.info("boot count {}", bootCount);
+      log.info("BOOT count {}", bootCount);
 
-      // config has not finished processing yet..
       if (runtime.isProcessingConfig()) {
-        log.warn("runtime still processing config set {}, waiting ....", runtime.getConfigName());
+        info("BOOT runtime still processing config set %s, waiting ....", runtime.getConfigName());
         return;
       }
+      
+      if (!isReady()) {
+        info("BOOT %s is not yet ready, waiting ....", getName());
+        return;
+      }
+      
+      info("BOOT starting mandatory services");
+      
+      try {
+        // This is required the core of InMoov is
+        // a FSM ProgramAB and some form of Python/Jython
+        startPeer("fsm");
+
+        // Chatbot is a required part of InMoov2
+        ProgramAB chatBot = (ProgramAB)startPeer("chatBot");
+        chatBot = (ProgramAB) startPeer("chatBot");
+        chatBot.startSession();
+        chatBot.setPredicate("robot", getName());
+      } catch (IOException e) {
+        error(e);
+      }
+      
+      // InMoov2 is now "ready" for mandatory synchronous processing
+      info("BOOT starting scripts");
 
       // check all required services are completely started - or
       // wait/return until they are
@@ -390,7 +381,9 @@ public class InMoov2 extends Service<InMoov2Config>
        */
 
       // load the InMoov2.py and publish it for Python/Jython or Py4j to consume
-      execScript();
+      if (config.execScript) {
+        execScript();
+      }
 
       // TODO - MAKE BOOT REPORT !!!! deliver it on a heartbeat
       runtime.invoke("publishConfigList");
@@ -582,6 +575,7 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public void configToPredicates() {
     log.info("configToPredicates");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
       Class<?> pojoClass = config.getClass();
       Field[] fields = pojoClass.getDeclaredFields();
@@ -686,10 +680,16 @@ public class InMoov2 extends Service<InMoov2Config>
    * @param pythonCode
    * @return
    */
+  @Deprecated /* should publishProcessing or publishPython - no direct handle */
   public boolean exec(String pythonCode) {
     try {
-      Python p = (Python) Runtime.start("python", "Python");
-      return p.exec(pythonCode, true);
+      Python p = (Python) Runtime.getService("python");
+      if (p != null) {
+        return p.exec(pythonCode, true);
+      } else {
+        warn("python not available");
+        return false;
+      }
     } catch (Exception e) {
       error("unable to execute script %s", pythonCode);
       return false;
@@ -763,9 +763,12 @@ public class InMoov2 extends Service<InMoov2Config>
    * @param event
    */
   public void fire(String event) {
-    // Should this be sent to chatbot too ?
-    // invoke("publishEvent", event);
-    fsm.fire(event);
+    FiniteStateMachine fsm =(FiniteStateMachine)getPeer("fsm");
+    if (fsm != null) {
+      fsm.fire(event);
+    } else {
+      log.warn("cannot fire event %s fsm not ready", event);
+    }
   }
 
   public void fullSpeed() {
@@ -813,18 +816,11 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public Long getLastActivityTime() {
     Long head = (InMoov2Head) getPeer("head") != null ? ((InMoov2Head) getPeer("head")).getLastActivityTime() : null;
-    Long leftArm = (InMoov2Arm) getPeer("leftArm") != null ? ((InMoov2Arm) getPeer("leftArm")).getLastActivityTime()
-        : null;
-    Long rightArm = (InMoov2Arm) getPeer("rightArm") != null ? ((InMoov2Arm) getPeer("rightArm")).getLastActivityTime()
-        : null;
-    Long leftHand = (InMoov2Hand) getPeer("leftHand") != null
-        ? ((InMoov2Hand) getPeer("leftHand")).getLastActivityTime()
-        : null;
-    Long rightHand = (InMoov2Hand) getPeer("rightHand") != null
-        ? ((InMoov2Hand) getPeer("rightHand")).getLastActivityTime()
-        : null;
-    Long torso = (InMoov2Torso) getPeer("torso") != null ? ((InMoov2Torso) getPeer("torso")).getLastActivityTime()
-        : null;
+    Long leftArm = (InMoov2Arm) getPeer("leftArm") != null ? ((InMoov2Arm) getPeer("leftArm")).getLastActivityTime() : null;
+    Long rightArm = (InMoov2Arm) getPeer("rightArm") != null ? ((InMoov2Arm) getPeer("rightArm")).getLastActivityTime() : null;
+    Long leftHand = (InMoov2Hand) getPeer("leftHand") != null ? ((InMoov2Hand) getPeer("leftHand")).getLastActivityTime() : null;
+    Long rightHand = (InMoov2Hand) getPeer("rightHand") != null ? ((InMoov2Hand) getPeer("rightHand")).getLastActivityTime() : null;
+    Long torso = (InMoov2Torso) getPeer("torso") != null ? ((InMoov2Torso) getPeer("torso")).getLastActivityTime() : null;
 
     Long lastActivityTime = null;
 
@@ -865,11 +861,24 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public String getPredicate(String key) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
     return getPredicate(chatBot.getConfig().currentUserName, key);
+    } else {
+      log.info("chatBot not ready");
+      return null;
+    }
   }
 
   public String getPredicate(String user, String key) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+
     return chatBot.getPredicate(user, key);
+    } else {
+      log.info("chatBot not ready");
+      return null;
+    }
   }
 
   /**
@@ -879,8 +888,15 @@ public class InMoov2 extends Service<InMoov2Config>
    * @return
    */
   public Response getResponse(String text) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+
     Response response = chatBot.getResponse(text);
     return response;
+    } else {
+      log.info("chatBot not ready");
+      return null;      
+    }
   }
 
   public InMoov2Arm getRightArm() {
@@ -1058,7 +1074,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
       if (files != null) {
         for (File file : files) {
-          Python p = (Python) Runtime.start("python", "Python");
+          
+          Python p = (Python) Runtime.getService("python");
           if (p != null) {
             p.execFile(file.getAbsolutePath());
           }
@@ -1200,7 +1217,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * including lower level logs that do not propegate as statuses
    * 
    * @param log
-   *            - flushed log from Log service
+   *          - flushed log from Log service
    */
   public void onErrors(List<LogEntry> log) {
     errors.addAll(log);
@@ -1221,7 +1238,6 @@ public class InMoov2 extends Service<InMoov2Config>
     log.info("onConfigStarted");
     invoke("publishConfigStarted", configName);
   }
-
 
   public void onGestureStatus(Status status) {
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
@@ -1426,6 +1442,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   // TODO FIX/CHECK this, migrate from python land
+  @Deprecated /* these are fsm states and should be implemented in python callbacks */
   public void powerDown() {
 
     rest();
@@ -1444,6 +1461,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
   // TODO FIX/CHECK this, migrate from python land
   // FIXME - defaultPowerUp switchable + override
+  @Deprecated /* these are fsm states and should be implemented in python callbacks */
   public void powerUp() {
     enable();
     rest();
@@ -1577,8 +1595,7 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       // interval event firing
-      if (config.stateRandomInterval != null
-          && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
+      if (config.stateRandomInterval != null && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
         // fsm.fire("random");
         stateLastRandomTime = System.currentTimeMillis();
       }
@@ -2008,6 +2025,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public Object setPredicate(String key, Object data) {
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
     if (data == null) {
       chatBot.setPredicate(key, null); // "unknown" "null" other sillyness ?
     } else {
@@ -2072,7 +2090,12 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public void setTopic(String topic) {
-    chatBot.setTopic(topic);
+    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    if (chatBot != null) {
+      chatBot.setTopic(topic);
+    } else {
+      log.info("chatBot not ready");
+    }
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -2160,22 +2183,6 @@ public class InMoov2 extends Service<InMoov2Config>
   public void startService() {
     super.startService();
 
-    // This is required the core of InMoov is
-    // a FSM ProgramAB and some form of Python/Jython
-    fsm = (FiniteStateMachine) startPeer("fsm");
-
-    // Chatbot is a required part of InMoov2
-    chatBot = (ProgramAB) startPeer("chatBot");
-    try {
-      chatBot.startSession();
-      chatBot.setPredicate("robot", getName());
-    } catch (IOException e) {
-      error(e);
-    }
-
-    // A python process is required - should be defined as a peer
-    // of Type Python or Py4j
-
     // just for comparing config with current "default"
     // debugging only
     Runtime runtime = Runtime.getInstance();
@@ -2192,7 +2199,6 @@ public class InMoov2 extends Service<InMoov2Config>
     // "subscriptions" in config too ?
     subscribe("runtime", "shutdown");
     subscribe("runtime", "publishConfigList");
-
     runtime.invoke("publishConfigList");
 
     if (config.heartbeat) {

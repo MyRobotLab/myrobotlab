@@ -31,6 +31,7 @@
 package org.myrobotlab.io;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -38,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -1424,5 +1426,35 @@ public class FileIO {
       return dirPath.replace("\\", "/");
     }
   }
+  
+  public static boolean isExecutableAvailable(String command) {
+    try {
+        // Attempt to execute the command
+        Process process = java.lang.Runtime.getRuntime().exec(command);
+
+        // Check the exit value of the process
+        // If the process has terminated correctly, the command is available
+        if (process.waitFor() == 0) {
+            return true;
+        }
+
+        // Read any errors from the attempted command
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+
+        return false;
+    } catch (IOException e) {
+        log.info("IOException: " + e.getMessage());
+        return false;
+    } catch (InterruptedException e) {
+        log.info("InterruptedException: " + e.getMessage());
+        return false;
+    }
+}
+  
 
 }
