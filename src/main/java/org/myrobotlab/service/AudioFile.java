@@ -167,6 +167,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
       p.stopPlaying();
       p.interrupt();
     }
+    playlistPlayer.stop();
   }
 
   public AudioData play(String filename) {
@@ -531,6 +532,9 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     playlistPlayer.stop();
   }
 
+  public void skip() {
+    playlistPlayer.skip();
+  }
 
   public double publishPeak(double peak) {
     log.debug("publishPeak {}", peak);

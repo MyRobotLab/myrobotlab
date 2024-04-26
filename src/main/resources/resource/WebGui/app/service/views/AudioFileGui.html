@@ -1,3 +1,10 @@
+    <style>
+        .active-toggle {
+            background-color: #286090; /* Blue color for active state */
+            color: white;
+        }
+    </style>
+
 <div class="col-md-6">
     <table border="1" class="table table-hover table-condensed table-striped table-bordered">
         <tr>
@@ -81,15 +88,27 @@
                     <label>select playlist:</label>
                     {{selectedPlaylist}}
                     
-                    <select size="8" class="form-control vertical-menu" ng-change="msg.send('setPlaylist', name)" ng-model="selectedPlaylist" id="service.config.playlists" title="select your playlist">
+                    <select size="8" class="form-control vertical-menu" ng-change="setPlaylist(selectedPlaylist)" ng-model="selectedPlaylist" id="service.config.playlists" title="select your playlist">
                         <option ng-repeat="(name, fileset) in service.config.playlists" ng-value="{{name}}">{{name}}</option>
                     </select>
                 </div>
                 <button class="btn btn-default" ng-click="startPlaylist()">
-                    <span class="glyphicon glyphicon-play" title="play list"/>
+                    <span class="glyphicon glyphicon-play" title="Start Play List"/>
                 </button>
                 <button class="btn btn-default" ng-click="stopPlaylist()">
-                    <span class="glyphicon glyphicon-stop" title="stop play list"/>
+                    <span class="glyphicon glyphicon-stop" title="Stop Play List"/>
+                </button>
+
+                <button class="btn btn-default" title="Skip" ng-click="skip()">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </button>                
+                <button class="btn btn-default" ng-click="service.config.shuffle = !service.config.shuffle" 
+                        ng-class="{'active-toggle': service.config.shuffle}">
+                    <span class="glyphicon glyphicon-random" title="Shuffle Playlist"></span> 
+                </button>
+                <button class="btn btn-default" ng-click="service.config.repeat = !service.config.repeat"
+                        ng-class="{'active-toggle': service.config.repeat}">
+                    <span class="glyphicon glyphicon-refresh" title="Repeat Playlist"></span>
                 </button>
                 <div ng-show="service.config.playlists" class="form-group">
                     <label>select file:</label>
