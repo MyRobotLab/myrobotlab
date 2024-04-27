@@ -54,8 +54,7 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 public class InMoov2 extends Service<InMoov2Config>
-    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider,
-    IKJointAngleListener {
+    implements ServiceLifeCycleListener, SpeechListener, TextListener, TextPublisher, JoystickListener, LocaleProvider, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
@@ -74,7 +73,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * This method will load a python file into the python interpreter.
    * 
    * @param file
-   *             file to load
+   *          file to load
    * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
@@ -182,19 +181,16 @@ public class InMoov2 extends Service<InMoov2Config>
 
   /**
    * Generalized memory, used for normalizing data from different services into
-   * one centralized
-   * place. Not the same as configuration, as this definition is owned by what the
-   * user
-   * needs vs configuration is what the service needs and understands.
-   * Python, ProgramAB and the InMoov2 service can all normalize their data here
-   * with one way or two way bindings
+   * one centralized place. Not the same as configuration, as this definition is
+   * owned by what the user needs vs configuration is what the service needs and
+   * understands. Python, ProgramAB and the InMoov2 service can all normalize
+   * their data here with one way or two way bindings
    */
   protected Map<String, Object> memory = new TreeMap<>();
 
   public InMoov2(String n, String id) {
     super(n, id);
-    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI",
-        "pt-PT", "tr-TR");
+    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
   }
 
   // should be removed in favor of general listeners
@@ -442,7 +438,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * This method will try to launch a python command with error handling
    * 
    * @param gesture
-   *                the gesture
+   *          the gesture
    * @return gesture result
    */
   public String execGesture(String gesture) {
@@ -485,7 +481,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * a filesystem file :P
    * 
    * @param someScriptName
-   *                       execute a resource script
+   *          execute a resource script
    * @return success or failure
    */
   public void execScript(String someScriptName) {
@@ -538,8 +534,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
-   * Generalized memory get/set
-   * will probably need to save at some point as well
+   * Generalized memory get/set will probably need to save at some point as well
    * 
    * @param key
    * @return
@@ -601,18 +596,11 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public Long getLastActivityTime() {
     Long head = (InMoov2Head) getPeer("head") != null ? ((InMoov2Head) getPeer("head")).getLastActivityTime() : null;
-    Long leftArm = (InMoov2Arm) getPeer("leftArm") != null ? ((InMoov2Arm) getPeer("leftArm")).getLastActivityTime()
-        : null;
-    Long rightArm = (InMoov2Arm) getPeer("rightArm") != null ? ((InMoov2Arm) getPeer("rightArm")).getLastActivityTime()
-        : null;
-    Long leftHand = (InMoov2Hand) getPeer("leftHand") != null
-        ? ((InMoov2Hand) getPeer("leftHand")).getLastActivityTime()
-        : null;
-    Long rightHand = (InMoov2Hand) getPeer("rightHand") != null
-        ? ((InMoov2Hand) getPeer("rightHand")).getLastActivityTime()
-        : null;
-    Long torso = (InMoov2Torso) getPeer("torso") != null ? ((InMoov2Torso) getPeer("torso")).getLastActivityTime()
-        : null;
+    Long leftArm = (InMoov2Arm) getPeer("leftArm") != null ? ((InMoov2Arm) getPeer("leftArm")).getLastActivityTime() : null;
+    Long rightArm = (InMoov2Arm) getPeer("rightArm") != null ? ((InMoov2Arm) getPeer("rightArm")).getLastActivityTime() : null;
+    Long leftHand = (InMoov2Hand) getPeer("leftHand") != null ? ((InMoov2Hand) getPeer("leftHand")).getLastActivityTime() : null;
+    Long rightHand = (InMoov2Hand) getPeer("rightHand") != null ? ((InMoov2Hand) getPeer("rightHand")).getLastActivityTime() : null;
+    Long torso = (InMoov2Torso) getPeer("torso") != null ? ((InMoov2Torso) getPeer("torso")).getLastActivityTime() : null;
 
     Long lastActivityTime = null;
 
@@ -769,7 +757,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * file should contain 1 method definition that is the same as the filename.
    * 
    * @param directory
-   *                  - the directory that contains the gesture python files.
+   *          - the directory that contains the gesture python files.
    * @return true/false
    */
   public boolean loadGestures(String directory) {
@@ -866,8 +854,7 @@ public class InMoov2 extends Service<InMoov2Config>
     moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     HashMap<String, Double> map = new HashMap<>();
     Optional.ofNullable(thumb).ifPresent(value -> map.put("thumb", value));
     Optional.ofNullable(index).ifPresent(value -> map.put("index", value));
@@ -942,10 +929,8 @@ public class InMoov2 extends Service<InMoov2Config>
     moveHand("left", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void moveLeftHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void moveRightArm(Double bicep, Double rotate, Double shoulder, Double omoplate) {
@@ -956,10 +941,8 @@ public class InMoov2 extends Service<InMoov2Config>
     moveHand("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void moveRightHand(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    moveHand("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void moveTorso(Double topStom, Double midStom, Double lowStom) {
@@ -997,7 +980,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * comes in from runtime which owns the config list
    * 
    * @param configList
-   *                   list of configs
+   *          list of configs
    */
   public void onConfigList(List<String> configList) {
     this.configList = configList;
@@ -1027,8 +1010,8 @@ public class InMoov2 extends Service<InMoov2Config>
   protected long heartbeatCount = 0;
 
   /**
-   * Allows or prevents sensor input from processing.
-   * Initial boot prevents sensor data from interfering with booting.
+   * Allows or prevents sensor input from processing. Initial boot prevents
+   * sensor data from interfering with booting.
    */
   protected boolean allowSensorInput = false;
 
@@ -1075,8 +1058,7 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       // interval event firing
-      if (config.stateRandomInterval != null
-          && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
+      if (config.stateRandomInterval != null && System.currentTimeMillis() > stateLastRandomTime + (config.stateRandomInterval * 1000)) {
         // fire("random");
         stateLastRandomTime = System.currentTimeMillis();
       }
@@ -1213,7 +1195,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * including lower level logs that do not propegate as statuses
    * 
    * @param log
-   *            - flushed log from Log service
+   *          - flushed log from Log service
    */
   public void onLogEvents(List<LogEntry> log) {
     // scan for warn or errors
@@ -1730,8 +1712,7 @@ public class InMoov2 extends Service<InMoov2Config>
       }
 
       if (config.startupSound && getPeer("audioPlayer") != null) {
-        ((AudioFile) getPeer("audioPlayer"))
-            .playBlocking(FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3"));
+        ((AudioFile) getPeer("audioPlayer")).playBlocking(FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3"));
       }
 
       if (config.systemEventsOnBoot) {
@@ -2040,8 +2021,7 @@ public class InMoov2 extends Service<InMoov2Config>
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
     if (hand == null) {
       warn("%s hand not started", which);
@@ -2051,14 +2031,12 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   @Deprecated
-  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger,
-      Double pinky) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
   @Deprecated
-  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
@@ -2074,8 +2052,7 @@ public class InMoov2 extends Service<InMoov2Config>
     setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
   }
 
-  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed,
-      Double rollNeckSpeed) {
+  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     sendToPeer("head", "setSpeed", rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
@@ -2099,8 +2076,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   @Deprecated
-  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed,
-      Double rollNeckSpeed) {
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
     setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
@@ -2112,15 +2088,12 @@ public class InMoov2 extends Service<InMoov2Config>
     setArmSpeed("left", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
-  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setLeftHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed("left", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void setLeftHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("left", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   @Override
@@ -2189,15 +2162,12 @@ public class InMoov2 extends Service<InMoov2Config>
     setArmSpeed("right", (double) bicep, (double) rotate, (double) shoulder, (double) omoplate);
   }
 
-  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky,
-      Double wrist) {
+  public void setRightHandSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed("right", thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky,
-      Integer wrist) {
-    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky,
-        (double) wrist);
+  public void setRightHandSpeed(Integer thumb, Integer index, Integer majeure, Integer ringFinger, Integer pinky, Integer wrist) {
+    setHandSpeed("right", (double) thumb, (double) index, (double) majeure, (double) ringFinger, (double) pinky, (double) wrist);
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -2689,15 +2659,11 @@ public class InMoov2 extends Service<InMoov2Config>
       random.addRandom(3000, 8000, "i01", "moveLeftArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
       random.addRandom(3000, 8000, "i01", "moveRightArm", 0.0, 5.0, 85.0, 95.0, 25.0, 30.0, 10.0, 15.0);
 
-      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0,
-          8.0, 25.0);
-      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0,
-          8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setLeftHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
+      random.addRandom(3000, 8000, "i01", "setRightHandSpeed", 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0, 8.0, 25.0);
 
-      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
-          130.0, 175.0);
-      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0,
-          5.0, 40.0);
+      random.addRandom(3000, 8000, "i01", "moveRightHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 130.0, 175.0);
+      random.addRandom(3000, 8000, "i01", "moveLeftHand", 10.0, 160.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 10.0, 60.0, 5.0, 40.0);
 
       random.addRandom(200, 1000, "i01", "setHeadSpeed", 8.0, 20.0, 8.0, 20.0, 8.0, 20.0);
       random.addRandom(200, 1000, "i01", "moveHead", 70.0, 110.0, 65.0, 115.0, 70.0, 110.0);
@@ -2730,8 +2696,8 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
-   * Rebroadcasted topic change with source changed to this robot,
-   * python will consume it.
+   * Rebroadcasted topic change with source changed to this robot, python will
+   * consume it.
    * 
    * @param topicChange
    * @return the topic change
