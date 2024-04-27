@@ -244,7 +244,7 @@ public class InMoov2 extends Service<InMoov2Config>
   public InMoov2Config apply(InMoov2Config c) {
     super.apply(c);
     try {
-      
+
       if (c.locale != null) {
         setLocale(c.locale);
       } else {
@@ -314,7 +314,7 @@ public class InMoov2 extends Service<InMoov2Config>
         log.warn("will not boot again");
         return;
       }
-      
+
       if (bootCount == 0) {
         info("%s BOOTING ....", getName());
       }
@@ -326,28 +326,28 @@ public class InMoov2 extends Service<InMoov2Config>
         info("BOOT runtime still processing config set %s, waiting ....", runtime.getConfigName());
         return;
       }
-      
+
       if (!isReady()) {
         info("BOOT %s is not yet ready, waiting ....", getName());
         return;
       }
-      
+
       info("BOOT starting mandatory services");
-      
+
       try {
         // This is required the core of InMoov is
         // a FSM ProgramAB and some form of Python/Jython
         startPeer("fsm");
 
         // Chatbot is a required part of InMoov2
-        ProgramAB chatBot = (ProgramAB)startPeer("chatBot");
+        ProgramAB chatBot = (ProgramAB) startPeer("chatBot");
         chatBot = (ProgramAB) startPeer("chatBot");
         chatBot.startSession();
         chatBot.setPredicate("robot", getName());
       } catch (IOException e) {
         error(e);
       }
-      
+
       // InMoov2 is now "ready" for mandatory synchronous processing
       info("BOOT starting scripts");
 
@@ -763,7 +763,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * @param event
    */
   public void fire(String event) {
-    FiniteStateMachine fsm =(FiniteStateMachine)getPeer("fsm");
+    FiniteStateMachine fsm = (FiniteStateMachine) getPeer("fsm");
     if (fsm != null) {
       fsm.fire(event);
     } else {
@@ -861,9 +861,9 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public String getPredicate(String key) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
-    return getPredicate(chatBot.getConfig().currentUserName, key);
+      return getPredicate(chatBot.getConfig().currentUserName, key);
     } else {
       log.info("chatBot not ready");
       return null;
@@ -871,10 +871,10 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public String getPredicate(String user, String key) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
 
-    return chatBot.getPredicate(user, key);
+      return chatBot.getPredicate(user, key);
     } else {
       log.info("chatBot not ready");
       return null;
@@ -888,14 +888,14 @@ public class InMoov2 extends Service<InMoov2Config>
    * @return
    */
   public Response getResponse(String text) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
 
-    Response response = chatBot.getResponse(text);
-    return response;
+      Response response = chatBot.getResponse(text);
+      return response;
     } else {
       log.info("chatBot not ready");
-      return null;      
+      return null;
     }
   }
 
@@ -1074,7 +1074,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
       if (files != null) {
         for (File file : files) {
-          
+
           Python p = (Python) Runtime.getService("python");
           if (p != null) {
             p.execFile(file.getAbsolutePath());
@@ -1442,7 +1442,10 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   // TODO FIX/CHECK this, migrate from python land
-  @Deprecated /* these are fsm states and should be implemented in python callbacks */
+  @Deprecated /*
+               * these are fsm states and should be implemented in python
+               * callbacks
+               */
   public void powerDown() {
 
     rest();
@@ -1461,7 +1464,10 @@ public class InMoov2 extends Service<InMoov2Config>
 
   // TODO FIX/CHECK this, migrate from python land
   // FIXME - defaultPowerUp switchable + override
-  @Deprecated /* these are fsm states and should be implemented in python callbacks */
+  @Deprecated /*
+               * these are fsm states and should be implemented in python
+               * callbacks
+               */
   public void powerUp() {
     enable();
     rest();
@@ -2025,7 +2031,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public Object setPredicate(String key, Object data) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (data == null) {
       chatBot.setPredicate(key, null); // "unknown" "null" other sillyness ?
     } else {
@@ -2090,7 +2096,7 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public void setTopic(String topic) {
-    ProgramAB chatBot = (ProgramAB)getPeer("chatBot");
+    ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
       chatBot.setTopic(topic);
     } else {
@@ -2298,7 +2304,7 @@ public class InMoov2 extends Service<InMoov2Config>
   public void foundPerson(String name) {
     foundPerson(name, 1.0);
   }
-  
+
   public void foundPerson(String name, Double confidence) {
     if (confidence == null) {
       confidence = 1.0;
@@ -2308,11 +2314,9 @@ public class InMoov2 extends Service<InMoov2Config>
     data.put("confidence", confidence);
     invoke("publishFoundPerson", data);
   }
-  
-  
+
   public Map<String, Object> publishFoundPerson(Map<String, Object> data) {
     return data;
   }
-  
-  
+
 }
