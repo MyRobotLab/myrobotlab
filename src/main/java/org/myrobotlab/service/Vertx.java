@@ -78,7 +78,8 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
      * </pre>
      */
 
-    // vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setWorkerPoolSize(125).setBlockedThreadCheckInterval(100000));    vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setBlockedThreadCheckInterval(100000));
+    // vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setWorkerPoolSize(125).setBlockedThreadCheckInterval(100000));
+    vertx = io.vertx.core.Vertx.vertx(new VertxOptions().setBlockedThreadCheckInterval(100000));
     vertx.deployVerticle(new ApiVerticle(this));
 
     if (config.autoStartBrowser) {
