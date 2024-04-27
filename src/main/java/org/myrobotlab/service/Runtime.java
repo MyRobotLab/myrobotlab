@@ -3687,10 +3687,10 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         // TODO This is incorrect, will not work when unplugged
         // and acpitool output is different than expected,
         // at least on Ubuntu 22.04 - consider oshi library
-        if (FileIO.isExecutableAvailable("acpi")) {
+        if (FileIO.isExecutableAvailable("acpi")) {          
           String ret = Runtime.execute("acpi");
           int pos0 = ret.indexOf("%");
-
+  
           if (pos0 != -1) {
             int pos1 = ret.lastIndexOf(" ", pos0);
             // int pos1 = ret.indexOf("%", pos0);
