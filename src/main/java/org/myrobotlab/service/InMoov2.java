@@ -1112,7 +1112,6 @@ public class InMoov2 extends Service<InMoov2Config>
     invoke("publishConfigStarted", configName);
   }
 
-
   public void onGestureStatus(Status status) {
     if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
       error("I cannot execute %s, please check logs", lastGestureExecuted);
@@ -1486,9 +1485,9 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   public String publishHeartbeat() {
-	if (config.heartbeatFlash) {
-		invoke("publishFlash", "heartbeat");
-	}
+    if (config.heartbeatFlash) {
+      invoke("publishFlash", "heartbeat");
+    }
     return getName();
   }
 
