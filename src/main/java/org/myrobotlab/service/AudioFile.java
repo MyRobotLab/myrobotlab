@@ -356,8 +356,10 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     // dump the current song
 
     // pause the next one if queued
-    ap.pause(false); // FIXME me shouldn't it be true ?
-    ap.stopPlaying();
+    if (ap != null) {
+      ap.pause(false); // FIXME me shouldn't it be true ?
+      ap.stopPlaying();
+    }
   }
 
   // FIXME - implement ???
