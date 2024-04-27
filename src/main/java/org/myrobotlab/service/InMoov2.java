@@ -1565,7 +1565,7 @@ public class InMoov2 extends Service<InMoov2Config>
    * onHeartbeat at a regular interval
    */
   public Heartbeat publishHeartbeat() {
-    log.info("publishHeartbeat");
+    log.debug("publishHeartbeat");
     heartbeatCount++;
     Heartbeat heartbeat = new Heartbeat(this);
     try {
@@ -2295,4 +2295,24 @@ public class InMoov2 extends Service<InMoov2Config>
     sendToPeer("torso", "waitTargetPos");
   }
 
+  public void foundPerson(String name) {
+    foundPerson(name, 1.0);
+  }
+  
+  public void foundPerson(String name, Double confidence) {
+    if (confidence == null) {
+      confidence = 1.0;
+    }
+    Map<String, Object> data = new HashMap<>();
+    data.put("name", name);
+    data.put("confidence", confidence);
+    invoke("publishFoundPerson", data);
+  }
+  
+  
+  public Map<String, Object> publishFoundPerson(Map<String, Object> data) {
+    return data;
+  }
+  
+  
 }

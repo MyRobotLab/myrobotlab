@@ -154,7 +154,10 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean virtual = false;
 
-  public boolean execScript = true;
+  /**
+   * false for now to not interfere
+   */
+  public boolean execScript = false;
 
   public InMoov2Config() {
   }
