@@ -85,8 +85,7 @@ public class Vertx extends Service<VertxConfig> implements Gateway {
 
     if (config.autoStartBrowser) {
       log.info("auto starting default browser");
-      String startUrl = (String.format((config.ssl) ? "https:" : "http:")
-          + String.format("//localhost:%d/index.html", config.port));
+      String startUrl = (String.format((config.ssl) ? "https:" : "http:") + String.format("//localhost:%d/index.html", config.port));
       BareBonesBrowserLaunch.openURL(startUrl);
     }
     listening = true;
