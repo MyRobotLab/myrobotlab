@@ -550,8 +550,6 @@ public class InMoov2Config extends ServiceConfig {
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
 
     htmlFilter.listeners.add(new Listener("publishText", name));
-    
-    htmlFilter.listeners.add(new Listener("publishText", name));
 
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
     oakd.listeners.add(new Listener("publishClassification", name));
