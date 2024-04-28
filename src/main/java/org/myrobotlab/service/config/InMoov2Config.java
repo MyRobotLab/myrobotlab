@@ -153,7 +153,10 @@ public class InMoov2Config extends ServiceConfig {
   public String unlockInsult = "forgive me";
 
   public boolean virtual = false;
-
+  
+  /**
+   * Prevent InMoov2.py from executing until ready for release
+   */
   public boolean execScript = false;
 
   public InMoov2Config() {
