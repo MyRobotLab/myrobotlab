@@ -288,7 +288,9 @@ public class InMoov2 extends Service<InMoov2Config>
         setLocale(getSupportedLocale(Runtime.getInstance().getLocale().toString()));
       }
 
-      execScript();
+      if (c.execScript) {
+        execScript();
+      }
 
       loadAppsScripts();
 
