@@ -46,6 +46,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
 
         if (firstUpdate){
             $scope.selectedPlaylist = $scope.service.config.currentPlaylist
+            
             firstUpdate = false
         }
         
@@ -65,9 +66,8 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             $scope.activity = 'playing'
         }
 
-        if (!$scope.inputSelectedFile){
-            $scope.inputSelectedFile = $scope.selectedFile
-        }
+        $scope.selectedFile = service.lastPlayed.filename;
+        
 
     }
 
@@ -81,13 +81,18 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
         case 'onAudioStart':
             $scope.playing = data.filename
             $scope.activity = 'playing'
+            if (!$scope.selectedFile || $scope.selectedFile == ""){
+                $scope.selectedFile = data.filename
+            }
             $scope.$apply()
             break
         case 'onAudioEnd':
             $scope.playing = data.filename
             $scope.activity = 'stopped'
+            if (!$scope.selectedFile || $scope.selectedFile == ""){
+                $scope.selectedFile = data.filename
+            }
             $scope.$apply()
-            $scope.service.lastPlayed = data.filename
             break
         case 'onPeak':
             $scope.peak = Math.round(data/* * 100 */)

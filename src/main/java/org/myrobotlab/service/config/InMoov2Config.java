@@ -111,6 +111,9 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean reportOnBoot = true;
 
+  /**
+   * script related config - idea is good, but shouldn't be implemented with global scripts
+   */
   public boolean robotCanMoveHeadWhileSpeaking = false;
 
   /**

@@ -123,6 +123,11 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   transient Map<String, AudioProcessor> processors = new HashMap<String, AudioProcessor>();
 
   final private transient PlaylistPlayer playlistPlayer = new PlaylistPlayer(this);
+  
+  /**
+   * last file played
+   */
+  protected String lastPlayed;
 
   public void attach(Attachable attachable) {
     if (attachable instanceof AudioListener) {
@@ -418,6 +423,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   @Override
   public AudioData publishAudioEnd(AudioData data) {
     log.debug("Audio File publishAudioEnd");
+    lastPlayed = data.getFileName();
     return data;
   }
 

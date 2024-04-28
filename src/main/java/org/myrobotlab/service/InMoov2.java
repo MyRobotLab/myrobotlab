@@ -1417,7 +1417,7 @@ public class InMoov2 extends Service<InMoov2Config>
    */
   public void processMessage(String method, Object... data) {
     // User processing should not occur until after boot has completed
-    if (!state.equals("boot")) {
+    if (!state.equals("boot") && config.execScript) {
       // FIXME - this needs to be in config
       // FIXME - change peer name to "processor"
       // String processor = getPeerName("py4j");
