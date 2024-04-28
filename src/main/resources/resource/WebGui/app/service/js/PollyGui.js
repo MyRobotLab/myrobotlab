@@ -33,6 +33,10 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer'
             $scope.spoken = data
             $scope.$apply()
             break
+        case 'onStatus':
+            $scope.status = data
+            $scope.$apply()
+            break            
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break

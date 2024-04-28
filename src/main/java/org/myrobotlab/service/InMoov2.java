@@ -36,6 +36,7 @@ import org.myrobotlab.service.FiniteStateMachine.StateChange;
 import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -229,6 +230,8 @@ public class InMoov2 extends Service<InMoov2Config>
 
   protected String voiceSelected;
 
+  protected boolean pirActive = false;
+
   public InMoov2(String n, String id) {
     super(n, id);
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
@@ -402,7 +405,7 @@ public class InMoov2 extends Service<InMoov2Config>
 
       if (config.startupSound) {
         String startupsound = FileIO.gluePaths(getResourceDir(), "/system/sounds/startupsound.mp3");
-        invoke("publishPlayAudioFile", startupsound);
+        playAudioFile(startupsound);
       }
 
       List<ServiceInterface> services = Runtime.getServices();
@@ -979,6 +982,11 @@ public class InMoov2 extends Service<InMoov2Config>
   public boolean isSpeaking() {
     return isSpeaking;
   }
+  
+  public boolean isPirActive() {
+    return pirActive;
+  }
+
 
   /**
    * execute python scripts in the app directory on startup of the service
@@ -1189,6 +1197,23 @@ public class InMoov2 extends Service<InMoov2Config>
     // do defaults ?
     return event;
   }
+  
+  /**
+   * Subscription for audioPlayer starting to play a file.
+   * @param data
+   */
+  public void onAudioStart(AudioData data) {
+    processMessage("onAudioStart", data);
+  }
+  
+  /**
+   * Subscription for audioPlayer stopping an audio file.
+   * @param data
+   */
+  public void onAudioEnd(AudioData data) {
+    processMessage("onAudioEnd", data);
+  }
+
 
   /**
    * comes in from runtime which owns the config list
@@ -1371,6 +1396,12 @@ public class InMoov2 extends Service<InMoov2Config>
     } else {
       invoke("publishEvent", "PIR OFF");
     }
+    
+    // Better - processed through a potentially configured "processor"
+    // "named" message since sender is this service
+    processMessage("onSense", b);
+    pirActive = b;
+    
     return b;
   }
 
@@ -1440,6 +1471,11 @@ public class InMoov2 extends Service<InMoov2Config>
     log.info("onText - {}", text);
     invoke("publishText", text);
   }
+  
+  public void playAudioFile(String filename) {
+    log.info("playAudioFile {}", filename);
+    invoke("publishPlayAudioFile", filename);
+  }
 
   // TODO FIX/CHECK this, migrate from python land
   @Deprecated /*
@@ -1483,6 +1519,34 @@ public class InMoov2 extends Service<InMoov2Config>
 
   public void processMessage(String method) {
     processMessage(method, (Object[]) null);
+  }
+  
+  public void playMusic() {
+    AudioFile af = (AudioFile) getPeer("audioPlayer");
+    if (af != null) {
+      af.startPlaylist();
+    }
+  }
+  
+  public void nextPlay() {
+    AudioFile af = (AudioFile) getPeer("audioPlayer");
+    if (af != null) {
+      af.skip();
+    }
+  }
+  
+  public void searchPlay(String requestedSong) {
+    AudioFile af = (AudioFile) getPeer("audioPlayer");
+    if (af != null) {
+      Map<String, List<String>> pls = af.getPlaylists();
+      for(String playlist: pls.keySet()) {
+        for (String song : pls.get(playlist)) {
+          if (song.contains(requestedSong)) {
+            af.play(song);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -2009,6 +2073,18 @@ public class InMoov2 extends Service<InMoov2Config>
     // super.setLocale(code);
     for (ServiceInterface si : Runtime.getLocalServices().values()) {
       if (!si.equals(this)) {
+        // by default, InMoov2 tries to set all Locales on all services
+        // from its configured Locale, or a default Locale set on the OS.
+        // This works ok when ProgramAB is providing translations, however,
+        // in the case of "brain" translation will be provided at a different
+        // layer, therefore resetting chatBot to en-US bot from configured "brain" bot
+        // is prevented
+        if (si instanceof ProgramAB) {
+          ProgramAB chatbot = (ProgramAB)si;
+          if ("brain".equals(chatbot.getCurrentBotName())){
+            continue;
+          }
+        }
         si.setLocale(code);
       }
     }

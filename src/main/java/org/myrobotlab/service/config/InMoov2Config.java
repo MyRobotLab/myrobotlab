@@ -154,9 +154,6 @@ public class InMoov2Config extends ServiceConfig {
 
   public boolean virtual = false;
 
-  /**
-   * false for now to not interfere
-   */
   public boolean execScript = false;
 
   public InMoov2Config() {
@@ -538,8 +535,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
     // listeners.add(new Listener("publishProcessMessage",
     // getPeerName("python"), "onPythonMessage"));
-    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
-    
+    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));    
     listeners.add(new Listener("publishPython", getPeerName("python")));
 
     // InMoov2 --to--> InMoov2
@@ -551,6 +547,10 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
+    AudioFileConfig audioPlayer = (AudioFileConfig) plan.get(getPeerName("audioPlayer"));
+    audioPlayer.listeners.add(new Listener("publishAudioStart", name));
+    audioPlayer.listeners.add(new Listener("publishAudioEnd", name));
+
     AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
     mouth_audioFile.listeners.add(new Listener("publishPeak", name));
 
