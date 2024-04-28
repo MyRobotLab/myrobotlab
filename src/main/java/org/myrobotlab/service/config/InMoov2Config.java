@@ -111,7 +111,7 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean reportOnBoot = true;
 
-  public boolean robotCanMoveHeadWhileSpeaking = true;
+  public boolean robotCanMoveHeadWhileSpeaking = false;
 
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
