@@ -1734,7 +1734,7 @@ public class InMoov2 extends Service<InMoov2Config>
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
-      warn("%s arm not started", which);
+      info("%s arm not started", which);
       return;
     }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
@@ -1768,7 +1768,7 @@ public class InMoov2 extends Service<InMoov2Config>
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
     if (hand == null) {
-      warn("%s hand not started", which);
+      info("%s hand not started", which);
       return;
     }
     hand.setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
