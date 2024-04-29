@@ -813,8 +813,6 @@ public class ProgramAB extends Service<ProgramABConfig>
 
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
-
-      broadcastState();
     } else {
       error("invalid bot path %s - a bot must be a directory with a subdirectory named \"aiml\"", path);
       return null;
@@ -1115,10 +1113,11 @@ public class ProgramAB extends Service<ProgramABConfig>
   public ProgramABConfig apply(ProgramABConfig c) {
     super.apply(c);
     if (c.bots != null && c.bots.size() > 0) {
-      // bots.clear();
+      bots.clear();
       for (String botPath : c.bots) {
         addBotPath(botPath);
       }
+      broadcastState();
     }
 
     if (c.currentUserName != null) {
