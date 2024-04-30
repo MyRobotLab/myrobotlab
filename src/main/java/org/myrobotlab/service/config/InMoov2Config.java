@@ -111,7 +111,10 @@ public class InMoov2Config extends ServiceConfig {
    */
   public boolean reportOnBoot = true;
 
-  public boolean robotCanMoveHeadWhileSpeaking = true;
+  /**
+   * script related config - idea is good, but shouldn't be implemented with global scripts
+   */
+  public boolean robotCanMoveHeadWhileSpeaking = false;
 
   /**
    * startup and shutdown will pause inmoov - set the speed to this value then
@@ -527,9 +530,6 @@ public class InMoov2Config extends ServiceConfig {
     log.listeners.add(new Listener("publishErrors", name));
     // service --to--> InMoov2
 
-    // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
-    // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
-
     // InMoov2 --to--> service
     listeners.add(new Listener("publishEvent", getPeerName("chatBot"), "getResponse"));
     listeners.add(new Listener("publishFlash", getPeerName("neoPixel")));
@@ -554,9 +554,6 @@ public class InMoov2Config extends ServiceConfig {
     audioPlayer.listeners.add(new Listener("publishAudioStart", name));
     audioPlayer.listeners.add(new Listener("publishAudioEnd", name));
 
-    AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
-    mouth_audioFile.listeners.add(new Listener("publishPeak", name));
-
     htmlFilter.listeners.add(new Listener("publishText", name));
 
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));
@@ -565,6 +562,15 @@ public class InMoov2Config extends ServiceConfig {
 
     webxr.listeners.add(new Listener("publishJointAngles", name));
 
+    // service --to--> service
+    AudioFileConfig mouth_audioFile = (AudioFileConfig) plan.get(getPeerName("mouth.audioFile"));
+    mouth_audioFile.listeners.add(new Listener("publishPeak", name));
+    mouth_audioFile.listeners.add(new Listener("publishPeak", name + ".head.jaw", "moveTo"));
+    mouth_audioFile.peakDelayMs = 150L;
+    mouth_audioFile.peakMultiplier = 200.0;
+    mouth_audioFile.peakSampleInterval = 2.0;
+    mouth_audioFile.publishPeakResetDelayMs = 100L;
+        
     // mouth_audioFile.listeners.add(new Listener("publishAudioEnd", name));
     // mouth_audioFile.listeners.add(new Listener("publishAudioStart", name));
 
