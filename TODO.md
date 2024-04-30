@@ -1,5 +1,7 @@
 ## TODO
 
+- neopixel when attached doesn't show the attached controller
+- Implement robotCanMoveHeadWhileSpeaking with guards in a state (idle ?)
 - Make list of Input yolo, camera cv filters, pir, finger sensors ... into a context - the context construct a prompt -> perception
 - Convert all JukeBox or AudioFile.py to InMoov2
 - Make LanguageModel
