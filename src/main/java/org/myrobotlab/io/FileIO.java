@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -1427,34 +1428,61 @@ public class FileIO {
     }
   }
   
-  public static boolean isExecutableAvailable(String command) {
-    try {
-        // Attempt to execute the command
-        Process process = java.lang.Runtime.getRuntime().exec(command);
-
-        // Check the exit value of the process
-        // If the process has terminated correctly, the command is available
-        if (process.waitFor() == 0) {
-            return true;
-        }
-
-        // Read any errors from the attempted command
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-
-        return false;
-    } catch (IOException e) {
-        log.info("IOException: " + e.getMessage());
-        return false;
-    } catch (InterruptedException e) {
-        log.info("InterruptedException: " + e.getMessage());
-        return false;
-    }
-}
+  /**
+   * Checks if a specific executable command is available in the system.
+   * This function attempts to execute the command with a timeout of 3 seconds to ensure
+   * that the check does not hang indefinitely. The process is considered available
+   * if it can be started without throwing an exception and completes successfully
+   * within the specified timeout.
+   * 
+   * @param command the command to check for availability.
+   * @return true if the command is available and completes successfully within the timeout, false otherwise.
+   */
   
+  public static boolean isExecutableAvailable(String command) {
+    return isExecutableAvailable(command, 3);
+  }
+  
+  /**
+   * Checks if a specific executable command is available in the system.
+   * This function attempts to execute the command with a timeout to ensure
+   * that the check does not hang indefinitely. The process is considered available
+   * if it can be started without throwing an exception and completes successfully
+   * within the specified timeout.
+   * 
+   * @param command the command to check for availability.
+   * @param timeoutSeconds the maximum time in seconds to wait for the command to complete.
+   * @return true if the command is available and completes successfully within the timeout, false otherwise.
+   */
+  public static boolean isExecutableAvailable(String command, int timeoutSeconds) {
+      try {
+          // Attempt to execute the command
+          Process process = java.lang.Runtime.getRuntime().exec(command);
+
+          // Wait for the process to complete with a timeout
+          if (process.waitFor(timeoutSeconds, TimeUnit.SECONDS) && process.exitValue() == 0) {
+              return true;
+          }
+
+          // Read and log any errors from the attempted command
+          try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+              String line;
+              while ((line = reader.readLine()) != null) {
+                  log.info(line);
+              }
+          }
+
+          return false;
+      } catch (IOException e) {
+          log.info("IOException: " + e.getMessage());
+          return false;
+      } catch (InterruptedException e) {
+          log.info("InterruptedException: " + e.getMessage());
+          // Restore interrupted state
+          Thread.currentThread().interrupt();
+          return false;
+      }
+  }
+
 
 }
