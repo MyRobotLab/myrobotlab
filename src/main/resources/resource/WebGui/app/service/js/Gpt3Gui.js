@@ -50,6 +50,11 @@ angular.module('mrlapp.service.Gpt3Gui', []).controller('Gpt3GuiCtrl', ['$scope'
         }
     }
 
+    $scope.saveValues = function(){
+        msg.send("apply", $scope.service.config)
+        msg.send("save")
+    }
+
     msg.subscribe('publishRequest')
     msg.subscribe('publishUtterance')
     msg.subscribe(this)

@@ -14,6 +14,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.config.Gpt3Config;
+import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.data.Utterance;
 import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -103,13 +104,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
         + temp
         + "   }";
 
-//      completions
-//      String json =        
-//      "{\r\n" + "  \"model\": \"" + c.engine + "\",\r\n" + "  \"prompt\": \"" + text + "\",\r\n" + "  \"temperature\": " + c.temperature + ",\r\n" + "  \"max_tokens\": "
-//      + c.maxTokens + ",\r\n" + "  \"top_p\": 1,\r\n" + "  \"frequency_penalty\": 0,\r\n" + "  \"presence_penalty\": 0\r\n" + "}";
-
-
-        HttpClient http = (HttpClient) startPeer("http");
+        HttpClient<HttpClientConfig> http = (HttpClient) startPeer("http");
 
         log.info("curl {} -d '{}'", c.url, json);
         
