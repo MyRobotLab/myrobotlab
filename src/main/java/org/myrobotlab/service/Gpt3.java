@@ -93,7 +93,7 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
 
       if (!c.sleeping) {
                 
-        String temp = String.format("\ttemperature\": %f\r\n", c.temperature);
+        String temp = String.format("\t\"temperature\": %f\r\n", c.temperature);
 
         // chat completions
         String json =        
