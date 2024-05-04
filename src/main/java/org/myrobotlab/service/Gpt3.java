@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -93,8 +94,8 @@ public class Gpt3 extends Service<Gpt3Config> implements TextListener, TextPubli
       }
 
       if (!c.sleeping) {
-                
-        String temp = String.format("\t\"temperature\": %f\r\n", c.temperature);
+        // avoid 0,8000000
+        String temp = String.format(Locale.US, "\t\"temperature\": %f\r\n", c.temperature);        
 
         // chat completions
         String json =        
