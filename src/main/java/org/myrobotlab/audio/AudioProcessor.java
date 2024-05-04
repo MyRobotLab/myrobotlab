@@ -3,9 +3,8 @@ package org.myrobotlab.audio;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +35,9 @@ public class AudioProcessor extends Thread {
   // it seems to make sense - some how the file gets decoded enough - so that
   // a audio decoder can be slected from some
   // internal registry ... i think
-  
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);  transient private final ScheduledExecutorService delayScheduler = Executors.newScheduledThreadPool(1);
+
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  transient private final ScheduledExecutorService delayScheduler = Executors.newScheduledThreadPool(1);
 
   protected int currentTrackCount = 0;
 
@@ -154,7 +154,6 @@ public class AudioProcessor extends Thread {
         audioFile.invoke("publishAudioStart", data);
         AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
 
-
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
           ++cnt;
           // byte[] goofy = new byte[4096];
@@ -237,19 +236,20 @@ public class AudioProcessor extends Thread {
                 peak = abs;
               }
             }
-            
+
             final double value = peak * (double) audioFile.getPeakMultiplier();
-            
-            // skew publish forwards in time 
+
+            // skew publish forwards in time
             if (audioFile.getConfig().peakDelayMs == null) {
-              audioFile.invoke("publishPeak", value);  
-            } else {              
-              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", value), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);          
+              audioFile.invoke("publishPeak", value);
+            } else {
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", value), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
             }
-            
+
             // reset to 0 after millis
             if (audioFile.getConfig().publishPeakResetDelayMs != null) {
-              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs + audioFile.getConfig().publishPeakResetDelayMs, TimeUnit.MILLISECONDS);
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs + audioFile.getConfig().publishPeakResetDelayMs,
+                  TimeUnit.MILLISECONDS);
             }
           }
         }
@@ -267,11 +267,11 @@ public class AudioProcessor extends Thread {
         // System.gc();
 
         if (audioFile.getConfig().peakDelayMs == null) {
-          audioFile.invoke("publishPeak", 0);  
-        } else {              
+          audioFile.invoke("publishPeak", 0);
+        } else {
           delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
         }
-        
+
         audioFile.invoke("publishPeak", 0);
         audioFile.invoke("publishAudioEnd", data);
 

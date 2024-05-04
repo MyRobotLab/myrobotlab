@@ -102,7 +102,7 @@ public class InMoov2Config extends ServiceConfig {
    * data/InMoov2/sounds/pir-activated.mp3 sound located in
    * data/InMoov2/sounds/pir-deactivated.mp3
    */
-  public boolean pirPlaySounds = true;
+  public boolean pirPlaySounds = false;
 
   public boolean pirWakeUp = true;
 

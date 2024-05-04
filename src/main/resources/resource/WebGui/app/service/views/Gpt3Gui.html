@@ -37,7 +37,13 @@
             <td>prefix</td><td><textarea rows="7" class="form-control" ng-model="service.config.prefix"></textarea></td>
         </tr>
         <tr>
-            <td>token</td><td><input type="password" class="form-control" ng-model="service.config.token" /></td>
+            <td>wake word</td><td><input type="text" class="form-control" ng-model="service.config.wakeWord" /></td>
+        </tr>
+        <tr>
+            <td>sleep word</td><td><input type="text" class="form-control" ng-model="service.config.sleepWord" /></td>
+        </tr>
+        <tr>
+            <td>api key</td><td><input type="password" class="form-control" ng-model="service.config.token" /></td>
         </tr>
         <tr>
             <td>
@@ -48,6 +54,7 @@
     </table> 
 </div>
 </div>
+<!--
 <div class="row">
     <form class="form-inline">
         token<br/>
@@ -55,6 +62,7 @@
         <button class="btn btn-default" ng-click="msg.setToken(service.config.token);msg.save()">set token</button>
     </form>
 </div>
+-->
 <div class="row" ng-show="service.config.token">
     <form class="form-inline">
         text<br/>

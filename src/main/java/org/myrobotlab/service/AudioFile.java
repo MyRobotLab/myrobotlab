@@ -312,6 +312,9 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     play(getResourceDir() + File.separator + filename, isBlocking);
   }
 
+  /**
+   * Stops all tracks stops all audio processing
+   */
   public void silence() {
     // stop all tracks
     for (Map.Entry<String, AudioProcessor> entry : processors.entrySet()) {
@@ -356,6 +359,9 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     return data;
   }
 
+  /**
+   * Stops the current track and audio processor
+   */
   public void stop() {
     AudioProcessor ap = processors.get(currentTrack);
     // dump the current song
@@ -593,6 +599,14 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
   
   @Override
   public void onPlayRandomAudioFile(String dir) {
+    playRandom(dir);
+  }
+
+  /**
+   * Plays a random audio file
+   * @param dir
+   */
+  public void playRandom(String dir) {
     File test = new File(dir);
     if (!test.exists() || !test.isDirectory()) {
       error("%s is not a valid dir");
@@ -611,8 +625,7 @@ public class AudioFile extends Service<AudioFileConfig> implements AudioPublishe
     play(randomFile.getAbsolutePath());
     
   }
-
-
+  
   public double getPeakMultiplier() {
     return ((AudioFileConfig)config).peakMultiplier;
   }
