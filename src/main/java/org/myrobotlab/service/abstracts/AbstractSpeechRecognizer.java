@@ -564,8 +564,6 @@ public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig>
     C c = super.getConfig();
     c.listening = isListening();
     c.wakeWord = getWakeWord();
-    Set<String> listeners = getAttached("publishText");
-    c.textListeners = listeners.toArray(new String[0]);
     return c;
   }
 
@@ -585,11 +583,6 @@ public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig>
       stopRecording();
     }
 
-    if (c.textListeners != null) {
-      for (String listener : c.textListeners) {
-        addListener("publishText", listener);
-      }
-    }
     return c;
   }
 

@@ -307,8 +307,6 @@ public class InMoov2Config extends ServiceConfig {
     WebkitSpeechRecognitionConfig ear = (WebkitSpeechRecognitionConfig) plan.get(getPeerName("ear"));
     ear.listeners.add(new Listener("publishText", name + ".chatBot", "onText"));
     ear.listening = true;
-    // remove, should only need ServiceConfig.listeners
-    ear.textListeners = new String[] { name + ".chatBot" };
 
     JMonkeyEngineConfig simulator = (JMonkeyEngineConfig) plan.get(getPeerName("simulator"));
 
