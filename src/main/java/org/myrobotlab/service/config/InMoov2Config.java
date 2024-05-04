@@ -536,8 +536,7 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishStopAnimation", getPeerName("neoPixel")));
     // listeners.add(new Listener("publishProcessMessage",
     // getPeerName("python"), "onPythonMessage"));
-    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));
-    
+    listeners.add(new Listener("publishProcessMessage", getPeerName("python"), "onPythonMessage"));    
     listeners.add(new Listener("publishPython", getPeerName("python")));
 
     // InMoov2 --to--> InMoov2
@@ -549,6 +548,10 @@ public class InMoov2Config extends ServiceConfig {
     listeners.add(new Listener("publishMoveTorso", getPeerName("torso"), "onMove"));
 
     // service --to--> InMoov2
+    AudioFileConfig audioPlayer = (AudioFileConfig) plan.get(getPeerName("audioPlayer"));
+    audioPlayer.listeners.add(new Listener("publishAudioStart", name));
+    audioPlayer.listeners.add(new Listener("publishAudioEnd", name));
+
     htmlFilter.listeners.add(new Listener("publishText", name));
 
     OakDConfig oakd = (OakDConfig) plan.get(getPeerName("oakd"));

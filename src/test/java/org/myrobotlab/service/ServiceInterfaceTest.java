@@ -56,7 +56,7 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   private boolean serviceInterfaceTest(String service) throws IOException {
     // see if we can start/stop and release the service.
-    
+
     // set a configuration path
     Runtime.setConfig("serviceInterfaceTest");
 
@@ -65,9 +65,9 @@ public class ServiceInterfaceTest extends AbstractTest {
       log.warn("Runtime Create returned a null service for {}", service);
       return false;
     }
-    System.out.println("Service Test:" + service);
+    System.out.println("ServiceInterface Test:" + service);
 
-    if (service.equals("As5048AEncoder")){
+    if (service.equals("As5048AEncoder")) {
       log.info("here");
     }
 
@@ -85,7 +85,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     foo.startService();
     foo.save();
     // foo.load(); SHOULD NOT BE USED !
-    // foo.apply(); <-  THIS SHOULD BE IMPLEMENTED
+    // foo.apply(); <- THIS SHOULD BE IMPLEMENTED
     foo.stopService();
 
     foo.releaseService();
@@ -103,9 +103,9 @@ public class ServiceInterfaceTest extends AbstractTest {
     ArrayList<String> servicesNotInServiceDataJson = new ArrayList<String>();
 
     HashSet<String> blacklist = new HashSet<String>();
-    blacklist.add("OpenNi");    
-    blacklist.add("As5048AEncoder");    
-    blacklist.add("IntegratedMovement");    
+    blacklist.add("OpenNi");
+    blacklist.add("As5048AEncoder");
+    blacklist.add("IntegratedMovement");
     blacklist.add("VirtualDevice");
     blacklist.add("Joystick");
     blacklist.add("GoogleAssistant");
@@ -145,8 +145,9 @@ public class ServiceInterfaceTest extends AbstractTest {
     // FIXME - must have different thread (prefix script) which runs a timer -
     // script REQUIRED to complete in 4 minutes ... or BOOM it fails
 
-    // sts.clear();
-    // sts.add(sd.getServiceType("org.myrobotlab.service.InMoov"));
+    // USEFUL FOR DEBUGGING SINGLE SERVICE
+//    sts.clear();
+//    sts.add(ServiceData.getMetaData("org.myrobotlab.service.NeoPixel"));
 
     for (MetaData serviceType : sts) {
       // test single service
@@ -164,7 +165,7 @@ public class ServiceInterfaceTest extends AbstractTest {
         continue;
       }
       // log.info("Testing Service: {}", service);
-      
+
       System.out.println("testing " + service);
 
       MetaData st = ServiceData.getMetaData("org.myrobotlab.service." + service);

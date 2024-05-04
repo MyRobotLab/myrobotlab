@@ -3684,24 +3684,26 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         }
 
       } else if (platform.isLinux()) {
-        // TODO This is incorrect, will not work when unplugged
-        // and acpitool output is different than expected,
-        // at least on Ubuntu 22.04 - consider oshi library
-        String ret = Runtime.execute("acpi");
-        int pos0 = ret.indexOf("%");
-
-        if (pos0 != -1) {
-          int pos1 = ret.lastIndexOf(" ", pos0);
-          // int pos1 = ret.indexOf("%", pos0);
-          String dble = ret.substring(pos1, pos0).trim();
-          try {
-            r = Double.parseDouble(dble);
-          } catch (Exception e) {
-            log.error("no Battery detected by system");
+          // TODO This is incorrect, will not work when unplugged
+          // and acpitool output is different than expected,
+          // at least on Ubuntu 22.04 - consider oshi library
+          if (FileIO.isExecutableAvailable("acpi")) {
+          String ret = Runtime.execute("acpi");
+          int pos0 = ret.indexOf("%");
+  
+          if (pos0 != -1) {
+            int pos1 = ret.lastIndexOf(" ", pos0);
+            // int pos1 = ret.indexOf("%", pos0);
+            String dble = ret.substring(pos1, pos0).trim();
+            try {
+              r = Double.parseDouble(dble);
+            } catch (Exception e) {
+              log.error("no Battery detected by system");
+            }
+            return r;
           }
-          return r;
+          log.info(ret);
         }
-        log.info(ret);
       } else if (platform.isMac()) {
         String ret = Runtime.execute("pmset -g batt");
         int pos0 = ret.indexOf("Battery-0");
