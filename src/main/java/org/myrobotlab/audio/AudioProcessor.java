@@ -284,7 +284,6 @@ public class AudioProcessor extends Thread {
         log.error("line is null !");
       }
     } catch (Exception e) {
-      audioFile.warn("%s - %s output audio line was not found - is audio enabled?", e.getClass().getSimpleName(), e.getMessage());
       if (data != null) {
         synchronized (data) {
           log.debug("notifying others");
@@ -292,7 +291,11 @@ public class AudioProcessor extends Thread {
         }
       }
       if (audioFile != null) {
-        audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+        audioFile.error(e);
+        audioFile.warn("%s - %s output audio line was not found - is audio enabled?", e.getClass().getSimpleName(), e.getMessage());
+        if (data != null) {
+          audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+        }
       }
     } finally {
       if (din != null) {
