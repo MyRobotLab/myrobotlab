@@ -12,6 +12,7 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
     $scope.openaiModels = ["gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
     $scope.ollamaModels = ["llama3", "llama2", "phi3", "mistral", "jemma", "mixtral", "llava"]
     var first = true
+    $scope.dirty = false
 
     $scope.systems = [
       "You are InMoov a humanoid robot assistant. Your answers are short and polite. The current date is {{Date}}. The current time is {{Time}}. You have a PIR sensor which determines if someone else is present, it is currently {{pirActive}}",
@@ -37,6 +38,7 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
 
       if (!service.config.url || service.config.url == "") {
         service.config.url = "http://localhost:11434/v1/chat/completions"
+        $scope.dirty = true
       }
     }
 
@@ -80,6 +82,7 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
 
     $scope.onTypeChange = function () {
       console.log("Type changed to:", $scope.type)
+      $scope.dirty = true
       if (
         !$scope.service.config.url ||
         $scope.service.config.url == "" ||
@@ -103,10 +106,12 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
     }
 
     $scope.onSystemChange = function () {
+      $scope.dirty = true
       $scope.service.config.system = $scope.systems[$scope.systemIndex]
     }
 
     $scope.onModelChange = function () {
+      $scope.dirty = true
       console.log("Model changed to:", $scope.selectedModel)
       $scope.service.config.model = $scope.selectedModel
     }
