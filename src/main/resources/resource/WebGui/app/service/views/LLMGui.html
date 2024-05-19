@@ -1,0 +1,155 @@
+<div class="row">
+    How to obtain an OpenAi api key
+    <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
+    <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
+</div>
+<div class="row" ng-show="showInstructions">
+
+    <ul>
+        <li>Go to <a href="https://beta.openai.com/account/api-keys">https://beta.openai.com/account/api-keys</a></li>
+        <li>Sign up</li>
+        <li>Create a new key by clicking the "Create new secret key" button</li>
+    </ul>
+
+    Official Documentation : <a href="https://beta.openai.com/account/api-keys">OpenAi Api Keys</a>
+    <br />
+</div>
+<div class="row">
+    <img ng-show="service.config.password" src="/connected.png" />
+    <img ng-show="!service.config.password" src="/disconnected.png" />
+</div>
+<div class="row">
+    &nbsp;
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-striped table-hover">
+            <tr>
+                <td>url</td>
+                <td><input class="form-control" ng-model="service.config.url" /></td>
+                <td>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="type" value="Ollama" ng-change="onTypeChange()"><img
+                                src="/Ollama.png" width="16" /> Ollama
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="type" value="OpenAI" ng-change="onTypeChange()"><img
+                                src="/OpenAI.png" width="16" /> OpenAI
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>model</td>
+                <td><input class="form-control" ng-model="service.config.model" /></td>
+                <td>
+                    <div class="form-group">
+
+                        <select id="modelSelect" class="form-control" ng-model="selectedModel"
+                            ng-change="onModelChange()">
+                            <option ng-repeat="model in modelSelect" value="{{model}}">{{model}}</option>
+                        </select>
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td>temperature</td>
+                <td><input class="form-control" ng-model="service.config.temperature" /></td>
+                <td>Temperature is how creative the responses should be.</td>
+            </tr>
+            <tr>
+                <td>history</td>
+                <td><input class="form-control" ng-model="service.config.history" /></td>
+                <td>The number of responses saved for context.</td>
+            </tr>
+            <tr>
+                <td>system prompt</td>
+                <td><textarea rows="7" class="form-control" ng-model="service.config.system"></textarea></td>
+                <td> The system prompt gives the LLM context for the query.<br />
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="systemIndex" value="0" ng-change="onSystemChange()"> Original
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="systemIndex" value="1" ng-change="onSystemChange()"> InMoov
+                            Robot
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="systemIndex" value="2" ng-change="onSystemChange()"> PirateBot
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="systemIndex" value="3" ng-change="onSystemChange()"> ButlerBot
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="systemIndex" value="4" ng-change="onSystemChange()">
+                            SarcasticBot
+                        </label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>wake word</td>
+                <td><input type="text" class="form-control" ng-model="service.config.wakeWord" /></td>
+                <td>Will wake the bot if sleeping.</td>
+            </tr>
+            <tr>
+                <td>sleep word</td>
+                <td><input type="text" class="form-control" ng-model="service.config.sleepWord" /></td>
+                <td>Will put the bot in sleep mode, non responsive, until the wake word is heard</td>
+            </tr>
+            <tr>
+                <td>api key</td>
+                <td><input type="password" class="form-control" ng-model="service.config.password" /></td>
+                <td>Password for OpenAI or just Ollama if Ollama is used</td>
+            </tr>
+            <tr>
+                <td>
+
+                </td>
+                <td><button class="btn btn-default" ng-click="saveValues()">save</button></td>
+                <td>Save current configuration</td>
+            </tr>
+
+            <tr>
+                <td colspan="3">
+                    <form class="form-inline">
+                        <input class="form-control" type="text" ng-model="text" placeholder="send text"
+                            title="send text">
+                        <button class="btn btn-default" ng-click="getResponse(text)">send text</button><br />
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <table class="table table-striped table-hover">
+                        <tbody>
+                            <tr ng-repeat="e in utterances">
+                                <td>
+                                    <small>{{e.username}}</small>
+                                </td>
+                                <td>
+                                    <small>{{e.channel}}</small>
+                                </td>
+                                <td>
+                                    <small>[{{e.text}}]</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
