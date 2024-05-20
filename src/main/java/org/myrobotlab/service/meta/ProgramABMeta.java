@@ -31,12 +31,10 @@ public class ProgramABMeta extends MetaData {
     addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
-    addDependency("org.apache.lucene", "lucene-analysis-common", "9.4.2");
-    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.4.2");
+    addDependency("org.apache.lucene", "lucene-analysis-common", "9.10.0");
+    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.10.0");
     addCategory("ai", "control");
 
   }
-
-
 
 }

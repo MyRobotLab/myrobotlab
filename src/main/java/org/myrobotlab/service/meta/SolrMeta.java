@@ -16,8 +16,8 @@ public class SolrMeta extends MetaData {
 
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "9.2.0";
-    String luceneVersion = "9.4.2";
+    String solrVersion = "9.6.0";
+    String luceneVersion = "9.10.0";
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
     exclude("org.slf4j", "*");
