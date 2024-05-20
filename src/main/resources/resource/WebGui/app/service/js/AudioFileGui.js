@@ -66,7 +66,7 @@ angular.module('mrlapp.service.AudioFileGui', []).controller('AudioFileGuiCtrl',
             $scope.activity = 'playing'
         }
 
-        $scope.selectedFile = service.lastPlayed.filename;
+        $scope.selectedFile = service.lastPlayed?.filename;
         
 
     }

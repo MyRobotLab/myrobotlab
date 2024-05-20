@@ -2,9 +2,9 @@ package org.myrobotlab.service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.config.RemoteSpeechConfig;
+import org.myrobotlab.service.config.RemoteSpeechConfig.Endpoint;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -36,11 +37,6 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
    */
   public transient HttpClient<HttpClientConfig> http = null;
   
-  /**
-   * Currently only support MozillaTTS
-   */
-  protected Set<String> types = new HashSet<>(Arrays.asList("MozillaTTS"));
-
   public RemoteSpeech(String n, String id) {
     super(n, id);
   }
@@ -59,11 +55,22 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
 
       Runtime.start("webgui", "WebGui");
       Runtime.start("python", "Python");
-      Runtime.start("mouth", "RemoteSpeech");
+      Runtime.start("mouth12", "RemoteSpeech");
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+  
+  public void setSpeechType(String type) {
+    RemoteSpeechConfig.Endpoint  endpoint = config.speechTypes.get(type);
+    if (endpoint == null) {
+      error("SpeechType %s not found", type);
+      return;
+    }
+    config.speechType = type;
+    info("Setting speech type to %s", type);
+    broadcastState();
   }
 
   @Override
@@ -73,15 +80,58 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
       // IF GET must url encode .. use replace tags like {urlEncodedText}
       String localFileName = getLocalFileName(toSpeak);
       // merge template with text and/or config
-      String url = config.url.replace("{text}", URLEncoder.encode(toSpeak, StandardCharsets.UTF_8.toString()));
-      byte[] bytes = http.getBytes(url);
-      FileIO.toFile(localFileName, bytes);
-      return new AudioData(localFileName);
+      RemoteSpeechConfig.Endpoint endpoint = config.speechTypes.get(config.speechType);
+      if (endpoint == null) {
+        error("Remote speech requires an endpoint");
+        return null;
+      }
+      if (endpoint.verb == null) {
+        error("An HTTP verb is required in the endpoint.");
+        return null;
+      }
+      
+      Map<String,String> headers = null;
+      
+      if (endpoint.authToken != null) {
+        headers = new HashMap<>();
+        headers.put("Authorization", String.format("Bearer %s", endpoint.authToken));
+        headers.put("Content-Type", "application/json");
+      }
+      
+ 
+      String body = null;
+      if (endpoint.template != null) {
+        body = endpoint.template.replace("{{text}}", toSpeak.replace("\n", " ").replace("\"", "").replace("'", ""));
+      }
+      
+      if ("post".equals(endpoint.verb.toLowerCase())) {
+        byte[] bytes = http.postBytes(endpoint.url, headers, body.getBytes());        
+        FileIO.toFile(localFileName, bytes);
+        return new AudioData(localFileName);        
+      } else {
+        // FIXME add Authorization header if available
+        String urlEncodedText = URLEncoder.encode(toSpeak, StandardCharsets.UTF_8.toString());
+        String url = endpoint.url.replace("{{text}}", urlEncodedText);
+        byte[] bytes = http.getBytes(url);
+        FileIO.toFile(localFileName, bytes);
+        return new AudioData(localFileName);        
+      }
+      
     } catch (Exception e) {
       error(e);
     }
 
     return null;
+  }
+  
+  public void addSpeechType(String name, LinkedHashMap<String, Object> endpoint) {
+    Endpoint ep = new Endpoint();
+    ep.url = (String)endpoint.get("url");
+    ep.verb = (String)endpoint.get("verb");
+    ep.template = (String)endpoint.get("template");
+    ep.authToken = (String)endpoint.get("authToken");
+    config.speechTypes.put(name, ep);
+    broadcastState();
   }
 
   @Override

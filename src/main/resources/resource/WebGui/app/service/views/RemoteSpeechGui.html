@@ -1,31 +1,81 @@
 <div class="row">
-  <div class="col-md-4">
-    <br />
-    <br />
-    <b>type</b>
-    <br />
-    {{service.config.speechType}}
-
-    <select ng-model="service.config.speechType" ng-change="setType(service.config.speechType)" class="form-control" title="select a type of local voice control">
-      <option ng-repeat="type in service.types" ng-value="{{type}}">{{type}}</option>
-    </select>
-    <div ng-show="service.config.speechType === 'Pico2Wav'">
-      <b>Install pico2wave</b>
-      <br />
-      https://doc.ubuntu-fr.org/svoxpico
-      <br />
-      <pre>sudo apt install libttspico-utils</pre>
+    <div class="col-md-8">
+        <br /><br />
+        <div ng-show="!isEditing">
+            <b>type</b>
+            <br />
+            <select ng-model="service.config.speechType" ng-change="setType()" class="form-control"
+                title="select a type of local voice control">
+                <option ng-repeat="(key, value) in service.config.speechTypes" ng-value="key">
+                    {{ key }}
+                </option>
+            </select>
+            <div ng-show="service.config.speechType === 'OpenAI'">
+                <b>OpenAI requires an OpenAI API Key</b>
+                <br />
+                You can get it here. <a href="https://platform.openai.com/api-keys">OpenAI Keys</a>
+            </div>
+            <br />
+            <p>
+                <strong>Type:</strong>
+                {{ service.config.speechType }}
+            </p>
+            <p>
+                <strong>URL:</strong>
+                {{ getUrl(service) }}
+            </p>
+            <p>
+                <strong>Verb:</strong>
+                {{ getVerb(service) }}
+            </p>
+            <p>
+                <strong>Template:</strong>
+                {{ getTemplate(service) }}
+            </p>
+            <!--
+            <p>
+                <strong>Auth Token:</strong>
+                **********************
+            </p>
+            -->
+        </div>
+        <div ng-show="isEditing">
+            <b>type</b>
+            <br />
+            <input type="text" class="form-control" ng-model="editableSpeechType"
+                placeholder="Enter a type of local voice control" />
+            <div ng-show="editableSpeechType === 'OpenAI'">
+                <b>OpenAI requires an OpenAI API Key</b>
+                <br />
+                You can get it here. <a href="https://platform.openai.com/api-keys">OpenAI Keys</a>
+            </div>
+            <br />
+            <p>
+                <strong>URL:</strong>
+                <input type="text" class="form-control" ng-model="editableUrl" />
+            </p>
+            <p>
+                <strong>Verb:</strong>
+                <input type="text" class="form-control" ng-model="editableVerb" />
+            </p>
+            <p>
+                <strong>Template:</strong>
+                <input type="text" class="form-control" ng-model="editableTemplate" />
+            </p>
+            <p>
+                <strong>Auth Token:</strong>
+                <input type="password" class="form-control" ng-model="editableAuthToken" />
+            </p>
+            <br />
+            <button class="btn btn-success" ng-click="handleSave()">Save</button>
+            <button class="btn btn-danger" ng-click="cancelEdit()">Cancel</button>
+        </div>
+        <br />
+        <textarea type="text" class="form-control" placeholder="type here" ng-model="text"
+            ng-keypress="checkEnter($event)"></textarea>
+        <br />
+        <button class="btn btn-primary" ng-click="toggleEdit()">Edit</button>
+        <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+        <button class="btn btn-default" ng-click="text=''">Clear</button>
     </div>
-    <br />
-    <b>voice</b>
-    <br />
-    <select ng-model="service.voice.name" ng-change="setVoice(voice)" class="form-control" title="select a voice">
-      <option ng-repeat="(key, voice) in service.voices" ng-value="{{voice.name}}">{{voice.name}}</option>
-    </select>
-    <br />
-    <textarea type="text" class="form-control" placeholder="type here" ng-model="text" />
-    <br />
-    <button class="btn btn-default" ng-click="speak(text)">speak</button>
-    <button class="btn btn-default" ng-click="text=''">clear</button>
-  </div>
 </div>
