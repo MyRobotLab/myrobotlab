@@ -105,18 +105,18 @@ public class MavenWrapper extends Repo implements Serializable {
 
   public String getRepositories() {
 
-    StringBuilder ret = new StringBuilder("     <repositories>\n");
+    StringBuilder ret = new StringBuilder("  <repositories>\n");
     for (RemoteRepo repo : remotes) {
       StringBuilder sb = new StringBuilder();
-      sb.append("        <!-- " + repo.comment + "  -->\n");
-      sb.append("        <repository>\n");
-      sb.append("          <id>" + repo.id + "</id>\n");
-      sb.append("          <name>" + repo.id + "</name>\n");
-      sb.append("          <url>" + repo.url + "</url>\n");
-      sb.append("        </repository>\n");
+      sb.append("    <!-- " + repo.comment + " -->\n");
+      sb.append("    <repository>\n");
+      sb.append("      <id>" + repo.id + "</id>\n");
+      sb.append("      <name>" + repo.id + "</name>\n");
+      sb.append("      <url>" + repo.url + "</url>\n");
+      sb.append("    </repository>\n");
       ret.append(sb);
     }
-    ret.append("     </repositories>\n");
+    ret.append("  </repositories>\n");
     return ret.toString();
   }
 
@@ -195,28 +195,28 @@ public class MavenWrapper extends Repo implements Serializable {
       }
 
       StringBuilder dep = new StringBuilder();
-      dep.append(String.format("<!-- %s begin -->\n", service.getSimpleName()));
+      dep.append(String.format("    <!-- %s begin -->\n", service.getSimpleName()));
       for (ServiceDependency dependency : dependencies) {
         String depKey = dependency.getOrgId() + "-" + dependency.getArtifactId() + "-" + dependency.getVersion();
         if (dependency.isSkipped()) {
-          dep.append("<!-- Duplicate entry for ").append(depKey).append(" skipping -->\n");
+          dep.append("    <!-- Duplicate entry for ").append(depKey).append(" skipping -->\n");
           continue;
         }
         if (dependency.getVersion() == null) {
-          dep.append("<!-- skipping ").append(dependency.getOrgId()).append(" ").append(dependency.getArtifactId()).append(" ").append(depKey).append(" null version/latest -->\n");
+          dep.append("    <!-- skipping ").append(dependency.getOrgId()).append(" ").append(dependency.getArtifactId()).append(" ").append(depKey).append(" null version/latest -->\n");
           continue;
         }
 
-        dep.append("  <dependency>\n");
-        dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
-        dep.append(String.format("    <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
+        dep.append("    <dependency>\n");
+        dep.append(String.format("      <groupId>%s</groupId>\n", dependency.getOrgId()));
+        dep.append(String.format("      <artifactId>%s</artifactId>\n", dependency.getArtifactId()));
         // optional - means latest ???
-        dep.append(String.format("    <version>%s</version>\n", dependency.getVersion()));
+        dep.append(String.format("      <version>%s</version>\n", dependency.getVersion()));
         if (!service.includeServiceInOneJar()) {
-          dep.append("    <scope>provided</scope>\n");
+          dep.append("      <scope>provided</scope>\n");
         }
         if (dependency.getExt() != null) {
-          dep.append(String.format("    <type>%s</type>\n", dependency.getExt()));
+          dep.append(String.format("      <type>%s</type>\n", dependency.getExt()));
         }
         List<ServiceExclude> excludes = dependency.getExcludes();
 
@@ -240,11 +240,11 @@ public class MavenWrapper extends Repo implements Serializable {
           dep.append(ex);
         }
 
-        dep.append("  </dependency>\n");
+        dep.append("    </dependency>\n");
 
         // exclusions end ---
       } // for each dependency
-      dep.append(String.format("<!-- %s end -->\n\n", service.getSimpleName()));
+      dep.append(String.format("    <!-- %s end -->\n\n", service.getSimpleName()));
 
       if (dependencies.size() > 0) {
         deps.append(dep);

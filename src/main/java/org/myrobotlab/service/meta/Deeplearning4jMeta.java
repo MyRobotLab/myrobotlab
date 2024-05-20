@@ -26,7 +26,7 @@ public class Deeplearning4jMeta extends MetaData {
     addDependency("org.bytedeco", "javacpp", "1.5.8");
 
     // REMOVED FOR COLLISION
-    addDependency("org.bytedeco", "openblas", "0.3.21-" + "1.5.8");
+    // addDependency("org.bytedeco", "openblas", "0.3.21-" + "1.5.8");
 
     // dl4j deps.
     addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
