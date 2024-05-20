@@ -314,8 +314,11 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
   }
 
   public byte[] postBytes(String url, Map<String, String> headers, byte[] data) throws ClientProtocolException, IOException {
-    
-    HttpRequestData rd = new HttpRequestData("POST", url, new String(data));
+    String strData = null;
+    if (data != null) {
+      strData = new String(data); 
+    }
+    HttpRequestData rd = new HttpRequestData("POST", url, strData);
     invoke("publishHttpRequestData", rd);
 
     HttpPost request = new HttpPost(url);
