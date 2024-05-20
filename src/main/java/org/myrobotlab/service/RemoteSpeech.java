@@ -55,7 +55,7 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
 
       Runtime.start("webgui", "WebGui");
       Runtime.start("python", "Python");
-      Runtime.start("mouth9", "RemoteSpeech");
+      Runtime.start("mouth12", "RemoteSpeech");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -69,7 +69,6 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
       return;
     }
     config.speechType = type;
-    config.endpoint = endpoint;
     info("Setting speech type to %s", type);
     broadcastState();
   }
@@ -81,7 +80,7 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
       // IF GET must url encode .. use replace tags like {urlEncodedText}
       String localFileName = getLocalFileName(toSpeak);
       // merge template with text and/or config
-      RemoteSpeechConfig.Endpoint endpoint = config.endpoint;
+      RemoteSpeechConfig.Endpoint endpoint = config.speechTypes.get(config.speechType);
       if (endpoint == null) {
         error("Remote speech requires an endpoint");
         return null;
@@ -95,14 +94,14 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
       
       if (endpoint.authToken != null) {
         headers = new HashMap<>();
-        headers.put("Authorization:", String.format("Bearer %s", endpoint.authToken));
-        headers.put("Content-Type:", "application/json");
+        headers.put("Authorization", String.format("Bearer %s", endpoint.authToken));
+        headers.put("Content-Type", "application/json");
       }
       
  
       String body = null;
       if (endpoint.template != null) {
-        body = endpoint.template.replace("{{text}}", toSpeak);
+        body = endpoint.template.replace("{{text}}", toSpeak.replace("\n", " ").replace("\"", "").replace("'", ""));
       }
       
       if ("post".equals(endpoint.verb.toLowerCase())) {

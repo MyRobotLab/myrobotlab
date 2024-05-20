@@ -28,19 +28,7 @@ public class RemoteSpeechConfig extends SpeechSynthesisConfig {
   public String verb = "GET";
 
   /**
-   * Speech url {text} will be url encoded text that will be transformed to
-   * audio speech
-   */
-  // public String url = null;
-  public Endpoint endpoint = null;
-
-  /**
-   * Template for POST body, usually JSON, not implemented yet
-   */
-  public String template = null;
-
-  /**
-   * Default speech type
+   * Current speech type
    */
   public String speechType = null;
 
