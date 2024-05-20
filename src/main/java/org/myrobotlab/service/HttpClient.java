@@ -81,6 +81,20 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
   private static final long serialVersionUID = 1L;
 
   transient CloseableHttpClient client;
+  
+  /**
+   * simple pojo for request data
+   */
+  public class HttpRequestData {
+    public String url;
+    public String verb;
+    public String body;
+    public HttpRequestData(String verb, String url, String body) {
+      this.verb = verb;
+      this.url = url;
+      this.body = body;      
+    }
+  }
 
   public HttpClient(String n, String id) {
     super(n, id);
@@ -129,6 +143,8 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
    */
   public String get(String url) throws ClientProtocolException, IOException {
     HttpData response = processResponse(new HttpGet(url));
+    HttpRequestData rd = new HttpRequestData("GET", url, null);
+    invoke("publishHttpRequestData", rd);
     if (response.data != null) {
       return new String(response.data);
     }
@@ -196,6 +212,8 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
    */
   public String postJson(String auth, String url, String json) throws IOException {
     HttpPost request = new HttpPost(url);
+    HttpRequestData rd = new HttpRequestData("POST", url, json);
+    invoke("publishHttpRequestData", rd);
     StringEntity params = new StringEntity(json);
     if (auth != null) {
       request.addHeader("Authorization", "Bearer " + auth);
@@ -323,7 +341,6 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
   public HttpData processResponse(HttpUriRequest request) throws IOException {
     String url = request.getURI().toString();
     HttpData data = new HttpData(url);
-
     invoke("publishUrl", url);
 
     log.info("url [{}]", url);
@@ -349,6 +366,11 @@ public class HttpClient<C extends HttpClientConfig> extends Service<C> implement
       invoke("publishText", text);
     }
 
+    return data;
+  }
+  
+  
+  public HttpRequestData publishHttpRequestData(HttpRequestData data) {
     return data;
   }
 

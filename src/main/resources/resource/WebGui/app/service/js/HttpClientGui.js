@@ -4,6 +4,7 @@ angular.module('mrlapp.service.HttpClientGui', []).controller('HttpClientGuiCtrl
     var msg = this.msg
 
     $scope.urls = []
+    $scope.data = []
     $scope.text = ""
 
     // GOOD TEMPLATE TO FOLLOW
@@ -22,6 +23,10 @@ angular.module('mrlapp.service.HttpClientGui', []).controller('HttpClientGuiCtrl
             $scope.urls.push(data)
             $scope.$apply()
             break
+        case 'onHttpRequestData':
+            $scope.data.push(data)
+            $scope.$apply()
+            break
         case 'onText':
             $scope.text = data
             $scope.$apply()
@@ -32,7 +37,8 @@ angular.module('mrlapp.service.HttpClientGui', []).controller('HttpClientGuiCtrl
         }
     }
 
-    msg.subscribe('publishUrl')
+    // msg.subscribe('publishUrl')
+    msg.subscribe('publishHttpRequestData')
     msg.subscribe('publishText')
     msg.subscribe(this)
 }

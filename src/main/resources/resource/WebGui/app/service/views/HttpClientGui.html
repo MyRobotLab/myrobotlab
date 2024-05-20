@@ -1,10 +1,14 @@
 <div class="row" >
     <table class="table table-striped">
         <tr>
-            <th>url</th>
+            <th>Action</th>
+            <th>URL</th>
+            <th>Data</th>
         </tr>
-        <tr ng-repeat="url in urls track by $index">
-            <td>{{url}}</td>
+        <tr ng-repeat="d in data track by $index">
+            <td>{{d.verb}}</td>
+            <td>{{d.url}}</td>
+            <td>{{d.body}}</td>
         </tr>
     </table>
 </div>
