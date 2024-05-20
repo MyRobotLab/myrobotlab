@@ -7,7 +7,7 @@ import org.myrobotlab.framework.Plan;
 
 public class RemoteSpeechConfig extends SpeechSynthesisConfig {
 
-  public class Endpoint {
+  static public class Endpoint {
     public String url;
     public String verb;
     public String template;

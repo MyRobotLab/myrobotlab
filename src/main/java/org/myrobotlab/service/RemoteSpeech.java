@@ -2,11 +2,9 @@ package org.myrobotlab.service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -15,6 +13,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.config.RemoteSpeechConfig;
+import org.myrobotlab.service.config.RemoteSpeechConfig.Endpoint;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -56,7 +55,7 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
 
       Runtime.start("webgui", "WebGui");
       Runtime.start("python", "Python");
-      Runtime.start("mouth8", "RemoteSpeech");
+      Runtime.start("mouth9", "RemoteSpeech");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -124,6 +123,16 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
     }
 
     return null;
+  }
+  
+  public void addSpeechType(String name, LinkedHashMap<String, Object> endpoint) {
+    Endpoint ep = new Endpoint();
+    ep.url = (String)endpoint.get("url");
+    ep.verb = (String)endpoint.get("verb");
+    ep.template = (String)endpoint.get("template");
+    ep.authToken = (String)endpoint.get("authToken");
+    config.speechTypes.put(name, ep);
+    broadcastState();
   }
 
   @Override
