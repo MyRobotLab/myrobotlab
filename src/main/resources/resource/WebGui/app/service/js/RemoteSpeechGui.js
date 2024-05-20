@@ -29,7 +29,7 @@ angular.module("mrlapp.service.RemoteSpeechGui", []).controller("RemoteSpeechGui
     }
 
     $scope.setType = function () {
-      msg.send("setSpeechType", $scope.speechType)
+      msg.send("setSpeechType", $scope.service.config.speechType)
     }
 
     $scope.speak = function (text) {
@@ -42,6 +42,12 @@ angular.module("mrlapp.service.RemoteSpeechGui", []).controller("RemoteSpeechGui
     }
 
     $scope.getEndpoint = function (key) {
+      if (!$scope.service.config.speechType){
+        return null
+      }
+      if (!key){
+        return null
+      }
       return $scope.service.config.speechTypes[$scope.service.config.speechType][key]
     }
 
@@ -69,7 +75,7 @@ angular.module("mrlapp.service.RemoteSpeechGui", []).controller("RemoteSpeechGui
         $scope.editableVerb = $scope.getVerb($scope.service)
         $scope.editableTemplate = $scope.getTemplate($scope.service)
         $scope.editableAuthToken = $scope.getAuthToken($scope.service)
-        $scope.editableSpeechType = $scope.speechType
+        $scope.editableSpeechType = $scope.service.config.speechType
       }
     }
 
@@ -92,9 +98,11 @@ angular.module("mrlapp.service.RemoteSpeechGui", []).controller("RemoteSpeechGui
       //$scope.service.config.endpoint.class = "org.myrobotlab.service.config.RemoteSpeechConfig$Endpoint"
 
       // Update the speechType and send the updated type to the backend
-      $scope.speechType = $scope.editableSpeechType
-      msg.send("addSpeechType", $scope.speechType, newEndpoint)
+      $scope.service.config.speechType = $scope.editableSpeechType
+      msg.send("addSpeechType", $scope.service.config.speechType, newEndpoint)
       $scope.setType()
+      msg.send("save")
+      msg.send("broadcastState")
 
       // Toggle back to view mode
       $scope.isEditing = false

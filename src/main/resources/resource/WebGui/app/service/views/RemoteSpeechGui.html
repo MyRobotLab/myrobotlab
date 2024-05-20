@@ -4,7 +4,7 @@
         <div ng-show="!isEditing">
             <b>type</b>
             <br />
-            <select ng-model="speechType" ng-change="setType()" class="form-control"
+            <select ng-model="service.config.speechType" ng-change="setType()" class="form-control"
                 title="select a type of local voice control">
                 <option ng-repeat="(key, value) in service.config.speechTypes" ng-value="key">
                     {{ key }}
