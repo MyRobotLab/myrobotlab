@@ -13,18 +13,17 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.programab.Response;
 
-@Ignore
 public class SolrTest extends AbstractServiceTest {
+
   // @Test
   public void testImageStoreFetch() throws SolrServerException, IOException {
-    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
     String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
     solr.startEmbedded(solrHome);
     solr.deleteEmbeddedIndex();
@@ -38,11 +37,6 @@ public class SolrTest extends AbstractServiceTest {
     // solr.
     IplImage img = solr.fetchImage("id:" + docId);
     Assert.assertNotNull(img);
-
-    // System.out.println("Press the any key");
-    // System.out.flush();
-    // System.in.read();
-
   }
 
   private SolrInputDocument makeImageDoc(Solr solr, String docId, IplImage image) throws IOException {
