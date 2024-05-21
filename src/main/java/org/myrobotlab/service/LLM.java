@@ -93,77 +93,64 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
 
   public String createChatCompletionPayload(String model, String systemContent, String userContent, int n, float temperature, int maxTokens) {
     try {
-      // Create the map to hold the request parameters
-      LinkedHashMap<String, Object> requestPayload = new LinkedHashMap<>();
+        // Create the map to hold the request parameters
+        LinkedHashMap<String, Object> requestPayload = new LinkedHashMap<>();
+        requestPayload.put("model", model);
 
-      // Add model to the map
-      requestPayload.put("model", model);
+        // Create and format date and time strings
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+        DateTimeFormatter fullDateFormatter = DateTimeFormatter.ofPattern("EEEE MMMM d'th' yyyy h:mm a");
+        
+        inputs.put("Date", currentDateTime.format(dateFormatter));
+        inputs.put("Time", currentDateTime.format(timeFormatter));
+        inputs.put("DateTime", currentDateTime.format(fullDateFormatter));
 
-      // Create the messages array
-      LinkedHashMap<String, Object> systemMessage = new LinkedHashMap<>();
-      systemMessage.put("role", "system");
-
-      // Get the current date
-      LocalDate currentDate = LocalDate.now();
-      // Get the current time
-      LocalTime currentTime = LocalTime.now();
-      // Get the current date and time
-      LocalDateTime currentDateTime = LocalDateTime.now();
-
-      // Format the date as a string
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-      String dateString = currentDate.format(dateFormatter);
-
-      // Format the time as a string in 12-hour format with AM/PM
-      DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
-      String timeString = currentTime.format(timeFormatter);
-
-      // Format the full date with day of the week
-      DateTimeFormatter fullDateFormatter = DateTimeFormatter.ofPattern("EEEE MMMM d'th' yyyy h:mm a");
-      String fullDateString = currentDateTime.format(fullDateFormatter);
-
-      inputs.put("Date", dateString);
-      inputs.put("Time", timeString);
-      inputs.put("DateTime", fullDateString);
-      
-      for (String inputKey : inputs.keySet()) {
-        Object objectValue = inputs.get(inputKey);
-        if (objectValue != null) {
-          systemContent = systemContent.replace(String.format("{{%s}}", inputKey), objectValue.toString());
+        // Replace placeholders in system content
+        for (Map.Entry<String, Object> entry : inputs.entrySet()) {
+            if (entry.getValue() != null) {
+                systemContent = systemContent.replace(String.format("{{%s}}", entry.getKey()), entry.getValue().toString());
+            }
         }
-      }
-      systemMessage.put("content", systemContent);
 
-      if (config.maxHistory == 0) {
-        // history is disabled
-        userMessages.clear();
-      } else if (userMessages.size() > config.maxHistory) {
-        userMessages.remove(0);
-      }
-      LinkedHashMap<String, Object> userMessage = new LinkedHashMap<>();
-      userMessage.put("role", "user");
-      userMessage.put("content", userContent);
-      userMessages.add(userMessage);
-      
-      List<LinkedHashMap<String,Object>>  allMessages = new ArrayList<>();
-      allMessages.add(systemMessage);
-      allMessages.addAll(userMessages);
+        // Create system message
+        LinkedHashMap<String, Object> systemMessage = new LinkedHashMap<>();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", systemContent);
 
-      // make history
-      requestPayload.put("messages", allMessages);
+        // Handle message history
+        LinkedHashMap<String, Object> userMessage = new LinkedHashMap<>();
+        userMessage.put("role", "user");
+        userMessage.put("content", userContent);
+        userMessages.add(userMessage);
 
-      // Add n, temperature, and max_tokens to the map
-      requestPayload.put("n", n);
-      requestPayload.put("temperature", temperature);
-      requestPayload.put("max_tokens", maxTokens);
+        if (config.maxHistory > 0) {
+            while (userMessages.size() > config.maxHistory) {
+                userMessages.remove(0);
+            }
+        } else {
+            userMessages.clear();
+        }
 
-      return CodecUtils.toJson(requestPayload);
+        // Combine messages
+        List<LinkedHashMap<String, Object>> allMessages = new ArrayList<>();
+        allMessages.add(systemMessage);
+        allMessages.addAll(userMessages);
+        requestPayload.put("messages", allMessages);
+
+        // Add other parameters
+        requestPayload.put("n", n);
+        requestPayload.put("temperature", temperature);
+        requestPayload.put("max_tokens", maxTokens);
+
+        return CodecUtils.toJson(requestPayload);
 
     } catch (Exception e) {
-      error(e);
-      return null;
+        error(e);
+        return null;
     }
-  }
+}
 
   public LinkedHashMap<String, Object> createFunctionDefinition(String name, String description, LinkedHashMap<String, Object> parameters) {
     LinkedHashMap<String, Object> functionDefinition = new LinkedHashMap<>();
@@ -211,6 +198,9 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
         log.info("curl {} -d '{}'", config.url, json);
 
         String msg = http.postJson(config.password, config.url, json);
+        log.error("url: {}", config.url);
+        log.error("json: {}", json);
+        System.out.print(json);
 
         Map<String, Object> payload = CodecUtils.fromJson(msg, new StaticType<>() {
         });

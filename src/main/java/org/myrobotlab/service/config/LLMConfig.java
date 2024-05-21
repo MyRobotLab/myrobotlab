@@ -14,10 +14,7 @@ public class LLMConfig extends ServiceConfig {
 
   public int maxTokens = 256;
   public float temperature = 0.7f;
-  /**
-   * number of history items to keep when re-submitting
-   */
-  public int history = 5;
+
   // public String url = "https://api.openai.com/v1/chat/completions";
   // http://localhost:11434/v1/chat/completions
   public String url = null;
