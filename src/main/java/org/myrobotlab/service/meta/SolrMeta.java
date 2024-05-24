@@ -16,8 +16,8 @@ public class SolrMeta extends MetaData {
 
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "9.2.0";
-    String luceneVersion = "9.4.2";
+    String solrVersion = "9.6.0";
+    String luceneVersion = "9.10.0";
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
     exclude("org.slf4j", "*");
@@ -40,7 +40,7 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*");
 
-    addDependency("commons-io", "commons-io", "2.7");
+    addDependency("commons-io", "commons-io", "2.15.1");
 
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
@@ -50,6 +50,8 @@ public class SolrMeta extends MetaData {
     // force correct version of netty
     addDependency("io.netty", "netty-all", "4.1.82.Final");
 
+    addDependency("org.glassfish.jersey.core", "jersey-server","3.1.5");
+    
     // Dependencies issue
     setAvailable(true);
 

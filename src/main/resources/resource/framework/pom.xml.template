@@ -63,7 +63,7 @@
     # jpackage
     jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
   
-   -->  
+   -->
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
   <artifactId>mrl</artifactId>
@@ -71,43 +71,43 @@
   <name>MyRobotLab</name>
   <description>Open Source Creative Machine Control</description>
   <properties>
-      <dependency.locations.enabled>false</dependency.locations.enabled>
-      <!-- begin env vars -->
-      <!-- 
+    <dependency.locations.enabled>false</dependency.locations.enabled>
+    <!-- begin env vars -->
+    <!--
         global build number comes either from a local build.properties file,
         or the build.properties is replaced by a curl command
         curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
         maven or jenkins can do this
-        
+
        -->
-      <!-- force overriding property at command line, use ${maven.build.timestamp}-->
-      <timestamp>${maven.build.timestamp}</timestamp>
-      <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>      
-      <version>${version}</version>   
-      <GitBranch>${git.branch}</GitBranch>
-      <username>${NODE_NAME}</username>      
-      <platform>${NODE_LABELS}</platform>      
-      <!-- end env vars -->
-      <!-- echoproperties / -->
-      
+    <!-- force overriding property at command line, use ${maven.build.timestamp} -->
+    <timestamp>${maven.build.timestamp}</timestamp>
+    <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+    <version>${version}</version>
+    <GitBranch>${git.branch}</GitBranch>
+    <username>${NODE_NAME}</username>
+    <platform>${NODE_LABELS}</platform>
+    <!-- end env vars -->
+    <!-- echoproperties / -->
+
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
   </properties>
-  
+
 {{repositories}}  
-  
+
   <dependencies>
 {{dependencies}}
-  	<dependency>
-	    <groupId>org.mockito</groupId>
-	    <artifactId>mockito-core</artifactId>
-	    <version>3.12.4</version>
-	    <scope>test</scope>
-	</dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>3.12.4</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-  
+
   <build>
     <resources>
       <resource>
@@ -147,116 +147,115 @@
     </testResources>
 
     <!-- define the plugin -->
-      <pluginManagement>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>properties-maven-plugin</artifactId>
-            <version>1.0.0</version>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>3.1.0</version>
-         </plugin>
-        </plugins>
-      </pluginManagement>
-  
-          <!-- use plugin -->
+    <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>1.0.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <!-- use plugin -->
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
-            <execution>
-                <id>no-duplicate-declared-dependencies</id>
-                <goals>
-                    <goal>enforce</goal>
-                </goals>
-                <configuration>
-                    <rules>
-                        <banDuplicatePomDependencyVersions />
-                    </rules>
-                </configuration>
-            </execution>
+          <execution>
+            <id>no-duplicate-declared-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <banDuplicatePomDependencyVersions />
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>myrobotlab</finalName>
-                            <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>myrobotlab-full</shadedClassifierName>
-                            <minimizeJar>false</minimizeJar>
-                           <!--  <artifactSet>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>myrobotlab</finalName>
+              <!-- finalName>myrobotlab-${git.branch}-${version}</finalName -->
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>myrobotlab-full</shadedClassifierName>
+              <minimizeJar>false</minimizeJar>
+              <!--  <artifactSet>
                                 <excludes>
                                     <exclude>edu.stanford.nlp:*</exclude>
                                 </excludes>
-                            </artifactSet>  -->
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <manifestEntries>
-                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
-                                          <Major-Version>${version}</Major-Version>
-                                          <Implementation-Version>${version}</Implementation-Version>                               
-              
-                        <Build-Version>${version}</Build-Version>
-                        <Build-Time>${maven.build.timestamp}</Build-Time>
-                        <Build-Host>${agent.name}</Build-Host>
-                        <Build-User>${user.name}</Build-User>
-                        
+              </artifactSet>  -->
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
+                    <Major-Version>${version}</Major-Version>
+                    <Implementation-Version>${version}</Implementation-Version>
+
+                    <Build-Version>${version}</Build-Version>
+                    <Build-Time>${maven.build.timestamp}</Build-Time>
+                    <Build-Host>${agent.name}</Build-Host>
+                    <Build-User>${user.name}</Build-User>
+
                     <!-- maven git plugin id info -->
-                      <GitTags>${git.tags}</GitTags>
-                      <GitBranch>${git.branch}</GitBranch>
-                      <GitDirty>${git.dirty}</GitDirty>
-                      <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
-                      <GitCommitId>${git.commit.id}</GitCommitId>
-                      <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
-                      <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
-                      <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
-                      <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
-                      <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
-                      <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
-                      <!-- removed because multi-line value can break manifest
-                        GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull                         
-                      <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
-                      -->
-                      <GitCommitTime>${git.commit.time}</GitCommitTime>
-                      <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
-                      <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
-                      <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
-                      <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
-                      <GitBuildTime>${git.build.time}</GitBuildTime>
-                      <GitBuildVersion>${git.build.version}</GitBuildVersion>                        
-                        
-                                        </manifestEntries>                                    
-                                </transformer>
-                            </transformers>
-                             <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>module-info.class</exclude>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                    <GitTags>${git.tags}</GitTags>
+                    <GitBranch>${git.branch}</GitBranch>
+                    <GitDirty>${git.dirty}</GitDirty>
+                    <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
+                    <GitCommitId>${git.commit.id}</GitCommitId>
+                    <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
+                    <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
+                    <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
+                    <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
+                    <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
+                    <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
+                    <!-- removed because multi-line value can break manifest
+                    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull
+                    <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
+                    -->
+                    <GitCommitTime>${git.commit.time}</GitCommitTime>
+                    <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
+                    <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
+                    <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
+                    <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
+                    <GitBuildTime>${git.build.time}</GitBuildTime>
+                    <GitBuildVersion>${git.build.version}</GitBuildVersion>
+
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>module-info.class</exclude>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -275,10 +274,10 @@
             <goals>
               <goal>single</goal>
             </goals>
-         </execution>
-       </executions>
+          </execution>
+        </executions>
       </plugin>
-      
+
       <plugin>
         <inherited>true</inherited>
         <groupId>org.apache.maven.plugins</groupId>
@@ -289,7 +288,7 @@
           <target>11</target>
           <optimize>true</optimize>
           <debug>true</debug>
-          <compilerArgument>-parameters</compilerArgument>          
+          <compilerArgument>-parameters</compilerArgument>
         </configuration>
       </plugin>
 
@@ -300,32 +299,32 @@
       </plugin>
 
       <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
-          <version>4.9.10</version>
-          <executions>
-              <execution>
-                  <phase>initialize</phase>
-                  <id>get-the-git-infos</id>
-                  <goals>
-                      <goal>revision</goal>
-                  </goals>
-              </execution>
-          </executions>
-          <configuration>
-              <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-              <prefix>git</prefix>
-              <verbose>false</verbose>
-              <generateGitPropertiesFile>true</generateGitPropertiesFile>
-              <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <!-- format>json</format -->
-              <gitDescribe>
-                  <skip>false</skip>
-                  <always>false</always>
-                  <dirty>-dirty</dirty>
-              </gitDescribe>
-          </configuration>
-      </plugin>          
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>4.9.10</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <prefix>git</prefix>
+          <verbose>false</verbose>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+          <!-- format>json</format -->
+          <gitDescribe>
+            <skip>false</skip>
+            <always>false</always>
+            <dirty>-dirty</dirty>
+          </gitDescribe>
+        </configuration>
+      </plugin>
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -333,6 +332,8 @@
         <!-- do not upgrade this version jacoco will break -->
         <version>3.2.2</version>
         <configuration>
+          <forkCount>1</forkCount>  <!-- Use one JVM -->
+          <reuseForks>true</reuseForks>  <!-- Reuse this JVM for all tests -->
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native
             -Djna.library.path=libraries/native</argLine>
@@ -356,47 +357,47 @@
               <!-- Additional configurations for the test execution -->
             </configuration>
           </execution>
-        </executions>        
+        </executions>
       </plugin>
       <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.3</version>
-                <configuration>
-                  <filesets>
-                    <fileset>
-                      <directory>data/.myrobotlab</directory>
-                      <followSymlinks>false</followSymlinks>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>data/.myrobotlab</directory>
+              <followSymlinks>false</followSymlinks>
             </fileset>
-          <fileset>
-            <directory>libraries</directory>
-            <includes>
-              <include>**</include>
-            </includes>
-            <followSymlinks>false</followSymlinks>
-          </fileset>
-          <fileset>
-            <directory>data</directory>
-            <includes>
-            <include>**</include>
-            </includes>
-          </fileset>
-          <fileset>
-            <directory>resource</directory>
-            <includes>
-            <include>**</include>
-            </includes>
-          </fileset>
-          <fileset>
-            <directory>src/main/resources/resource/framework</directory>
-            <includes>
-              <include>**/serviceData.json</include>
-            </includes>
-            <followSymlinks>false</followSymlinks>
-          </fileset>
-                  </filesets>
-                </configuration>
+            <fileset>
+              <directory>libraries</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+            <fileset>
+              <directory>data</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>resource</directory>
+              <includes>
+                <include>**</include>
+              </includes>
+            </fileset>
+            <fileset>
+              <directory>src/main/resources/resource/framework</directory>
+              <includes>
+                <include>**/serviceData.json</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -407,7 +408,7 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
-          </execution>          
+          </execution>
           <execution>
             <id>report</id>
             <phase>test</phase>
@@ -419,7 +420,7 @@
       </plugin>
     </plugins>
   </build>
-    <reporting>    
+  <reporting>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -432,13 +433,13 @@
         <version>3.0.1</version>
       </plugin>
     </plugins>
-    </reporting>
+  </reporting>
   <organization>
     <name>myrobotlab</name>
     <url>http://myrobotlab.org</url>
   </organization>
   <issueManagement>
-      <system>github</system>
-      <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
+    <system>github</system>
+    <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
   </issueManagement>
 </project>

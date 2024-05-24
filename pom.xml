@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <!-- 
     # configure jvm and javac
@@ -15,8 +14,7 @@
     mvn -DskipTests package -o 
 
     # execute
-    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro
-  Intro python Python"
+    mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro Intro python Python"
 
     # specific test
     mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
@@ -45,36 +43,25 @@
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 
     # single dep
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get
-  -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get
-  -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
 
     # doclets
-    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet
-  org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java
-  minus-show-comments/show-elements
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
     # specific test
     mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
 
     # doclets
-    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet
-  org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java
-  minus-show-comments/show-elements
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
   
     # how to mount sshfs from a raspi and maintain a single build
     usermod -a -G i2c xxxxx
     usermod -a -G gpio xxxxx
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
-    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime
-  &#45;&#45;from-launcher -s webgui WebGui python Python
+    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
     # jpackage
-    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar
-  myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options
-  '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native
-  -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates
-  &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
+    jpackage &#45;&#45;verbose &#45;&#45;name myrobotlab &#45;&#45;input target &#45;&#45;main-jar myrobotlab.jar &#45;&#45;main-class org.myrobotlab.service.Runtime &#45;&#45;java-options '-Xmx512m -Xms512m -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8' &#45;&#45;arguments "&#45;&#45;from-launcher &#45;&#45;id historical-gates &#45;&#45;log-level info -s webgui WebGui intro Intro python Python" &#45;&#45;type app-image
   
    -->
   <modelVersion>4.0.0</modelVersion>
@@ -86,14 +73,14 @@
   <properties>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <!-- begin env vars -->
-    <!-- 
+    <!--
         global build number comes either from a local build.properties file,
         or the build.properties is replaced by a curl command
         curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
         maven or jenkins can do this
-        
+
        -->
-    <!-- force overriding property at command line, use ${maven.build.timestamp}-->
+    <!-- force overriding property at command line, use ${maven.build.timestamp} -->
     <timestamp>${maven.build.timestamp}</timestamp>
     <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
     <version>${version}</version>
@@ -110,37 +97,37 @@
   </properties>
 
   <repositories>
-    <!-- the mother load  -->
+    <!-- the mother load -->
     <repository>
       <id>central</id>
       <name>central</name>
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
-    <!-- all other mrl deps  -->
+    <!-- all other mrl deps -->
     <repository>
       <id>myrobotlab</id>
       <name>myrobotlab</name>
       <url>https://repo.myrobotlab.org/artifactory/myrobotlab</url>
     </repository>
-    <!-- for sarxos webcam  -->
+    <!-- for sarxos webcam -->
     <repository>
       <id>sarxos</id>
       <name>sarxos</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
-    <!-- null  -->
+    <!-- null -->
     <repository>
       <id>eclipse-release</id>
       <name>eclipse-release</name>
       <url>https://repo.eclipse.org/content/groups/releases</url>
     </repository>
-    <!-- sphinx  -->
+    <!-- sphinx -->
     <repository>
       <id>oss-snapshots-repo</id>
       <name>oss-snapshots-repo</name>
       <url>https://oss.sonatype.org/content/groups/public</url>
     </repository>
-    <!-- Discord Bot - m2-dv8tion  -->
+    <!-- Discord Bot - m2-dv8tion -->
     <repository>
       <id>dv8tion</id>
       <name>dv8tion</name>
@@ -1079,6 +1066,12 @@
       <scope>provided</scope>
     </dependency>
     <!-- Duplicate entry for org.bytedeco-javacpp-1.5.8 skipping -->
+    <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>openblas</artifactId>
+      <version>0.3.21-1.5.8</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
     <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
     <dependency>
@@ -1254,17 +1247,17 @@
       <scope>provided</scope>
     </dependency>
     <!-- Duplicate entry for org.json-json-20230227 skipping -->
-    <!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
+    <!-- Duplicate entry for commons-io-commons-io-2.15.1 skipping -->
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-analysis-common</artifactId>
-      <version>9.4.2</version>
+      <version>9.10.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-analysis-kuromoji</artifactId>
-      <version>9.4.2</version>
+      <version>9.10.0</version>
       <scope>provided</scope>
     </dependency>
     <!-- ProgramAB end -->
@@ -1371,7 +1364,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
+      <version>4.5.14</version>
     </dependency>
     <dependency>
       <groupId>info.picocli</groupId>
@@ -1436,13 +1429,13 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
-      <version>9.4.2</version>
+      <version>9.10.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>9.2.0</version>
+      <version>9.6.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1470,7 +1463,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-test-framework</artifactId>
-      <version>9.2.0</version>
+      <version>9.6.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1498,7 +1491,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>9.2.0</version>
+      <version>9.6.0</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1526,7 +1519,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.7</version>
+      <version>2.15.1</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1536,6 +1529,12 @@
       </exclusions>
     </dependency>
     <!-- Duplicate entry for io.netty-netty-all-4.1.82.Final skipping -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>3.1.5</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Solr end -->
 
     <!-- Sphinx begin -->
@@ -1573,6 +1572,7 @@
       <scope>provided</scope>
       <type>zip</type>
     </dependency>
+    <!-- Duplicate entry for org.bytedeco-openblas-0.3.21-1.5.8 skipping -->
     <!-- TesseractOcr end -->
 
     <!-- Test begin -->
@@ -1863,10 +1863,9 @@
                                 <excludes>
                                     <exclude>edu.stanford.nlp:*</exclude>
                                 </excludes>
-                            </artifactSet>  -->
+              </artifactSet>  -->
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
                     <Major-Version>${version}</Major-Version>
@@ -1890,9 +1889,9 @@
                     <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
                     <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
                     <!-- removed because multi-line value can break manifest
-                        GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull                         
-                      <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
-                      -->
+                    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull
+                    <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
+                    -->
                     <GitCommitTime>${git.commit.time}</GitCommitTime>
                     <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
                     <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
@@ -1996,7 +1995,7 @@
         <version>3.2.2</version>
         <configuration>
           <forkCount>1</forkCount>  <!-- Use one JVM -->
-          <reuseForks>true</reuseForks>  <!-- Reuse this JVM for all tests -->        
+          <reuseForks>true</reuseForks>  <!-- Reuse this JVM for all tests -->
           <!-- critical for jacoco to have original argLine prefixed here-->
           <argLine>${argLine} -Djava.library.path=libraries/native
             -Djna.library.path=libraries/native</argLine>
@@ -2022,8 +2021,7 @@
           </execution>
         </executions>
       </plugin>
-      <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous
-      builds -->
+      <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>

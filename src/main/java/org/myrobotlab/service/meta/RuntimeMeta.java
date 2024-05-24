@@ -38,7 +38,7 @@ public class RuntimeMeta extends MetaData {
 
     // apache 2.0 license - REMOVE in favor of okhttp
     // FIXME - replace apache with okhttp
-    addDependency("org.apache.httpcomponents", "httpclient", "4.5.13");
+    addDependency("org.apache.httpcomponents", "httpclient", "4.5.14");
 
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
