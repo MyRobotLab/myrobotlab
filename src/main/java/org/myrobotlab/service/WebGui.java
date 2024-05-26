@@ -1169,7 +1169,7 @@ public class WebGui extends Service<WebGuiConfig>
   public WebGuiConfig apply(WebGuiConfig c) {
     super.apply(c);
 
-    if (c.port != null && (port != null && c.port.intValue() != port.intValue())) {
+    if (c.port != null) {
       setPort(c.port);
     }
     autoStartBrowser(c.autoStartBrowser);
@@ -1184,7 +1184,7 @@ public class WebGui extends Service<WebGuiConfig>
 
     try {
 
-      Runtime.main(new String[] { "--log-level", "warn", "-s", "log", "Log", "webgui", "WebGui", "intro", "Intro", "python", "Python" });
+      Runtime.main(new String[] { "--log-level", "warn", "-s", "webgui", "WebGui"});
       // Runtime.main(new String[] { "--install" });
 
       boolean done = true;
