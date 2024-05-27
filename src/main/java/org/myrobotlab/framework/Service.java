@@ -885,8 +885,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   }
 
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     invoke("publishState");
+    return this;
   }
 
   @Override

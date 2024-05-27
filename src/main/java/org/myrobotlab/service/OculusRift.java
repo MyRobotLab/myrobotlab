@@ -100,12 +100,13 @@ public class OculusRift extends Service<OculusRiftConfig>  implements PointPubli
 
   // Boradcast the state of the peers to notify the gui.
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     // notify the gui
     if (leftOpenCV != null)
       leftOpenCV.broadcastState();
     if (rightOpenCV != null)
       rightOpenCV.broadcastState();
+    return this;
   }
 
   private void setupRift() {

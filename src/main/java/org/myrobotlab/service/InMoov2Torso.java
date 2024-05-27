@@ -76,13 +76,14 @@ public class InMoov2Torso extends Service<InMoov2TorsoConfig> {
   }
 
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     if (topStom != null)
       topStom.broadcastState();
     if (midStom != null)
       midStom.broadcastState();
     if (lowStom != null)
       lowStom.broadcastState();
+    return this;
   }
 
   public void disable() {

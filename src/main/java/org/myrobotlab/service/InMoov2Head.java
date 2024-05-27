@@ -87,7 +87,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
   }
 
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     if (rothead != null)
       rothead.broadcastState();
     if (rollNeck != null)
@@ -104,6 +104,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
       eyelidLeft.broadcastState();
     if (eyelidRight != null)
       eyelidRight.broadcastState();
+    return this;
   }
 
   public void stop() {

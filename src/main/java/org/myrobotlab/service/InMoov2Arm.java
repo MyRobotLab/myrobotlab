@@ -134,7 +134,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   }
 
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     super.broadcastState();
     if (bicep != null)
       bicep.broadcastState();
@@ -144,6 +144,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
       shoulder.broadcastState();
     if (omoplate != null)
       omoplate.broadcastState();
+    return this;
   }
 
   public void disable() {

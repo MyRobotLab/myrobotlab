@@ -135,7 +135,7 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
   }
 
   @Override
-  public void broadcastState() {
+  public Service broadcastState() {
     if (thumb != null)
       thumb.broadcastState();
     if (index != null)
@@ -148,6 +148,7 @@ public class InMoov2Hand extends Service<InMoov2HandConfig> implements LeapDataL
       pinky.broadcastState();
     if (wrist != null)
       wrist.broadcastState();
+    return this;
   }
 
   public void close() {
