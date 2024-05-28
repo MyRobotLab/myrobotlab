@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.myrobotlab.io.FileIO;
@@ -124,12 +123,12 @@ public class RemoteSpeech extends AbstractSpeechSynthesis<RemoteSpeechConfig> {
     return null;
   }
   
-  public void addSpeechType(String name, LinkedHashMap<String, Object> endpoint) {
+  public void addSpeechType(String name, Endpoint endpoint) {
     Endpoint ep = new Endpoint();
-    ep.url = (String)endpoint.get("url");
-    ep.verb = (String)endpoint.get("verb");
-    ep.template = (String)endpoint.get("template");
-    ep.authToken = (String)endpoint.get("authToken");
+    ep.url = endpoint.url;
+    ep.verb = endpoint.verb;
+    ep.template = endpoint.template;
+    ep.authToken = endpoint.authToken;
     config.speechTypes.put(name, ep);
     broadcastState();
   }
