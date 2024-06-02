@@ -134,4 +134,9 @@ public class BotInfo {
     return String.format("%s - %s", name, path);
   }
 
+
+  public org.alicebot.ab.Properties getBotProperties(){
+    return botProperties;
+  }
+  
 }

@@ -1461,4 +1461,24 @@ public class ProgramAB extends Service<ProgramABConfig>
     return oobProcessor;
   }
 
+  public Object getBotProperty(String key) {
+    BotInfo botInfo = getBotInfo();
+    if (botInfo != null) {
+      org.alicebot.ab.Properties props = botInfo.getBotProperties();
+      if (props != null) {
+        return props.get(key);
+      }
+    }
+    return null;
+  }
+  
+  public Object getBotProperties() {
+    BotInfo botInfo = getBotInfo();
+    if (botInfo != null) {
+      org.alicebot.ab.Properties props = botInfo.getBotProperties();
+      return props;
+    }
+    return null;
+  }
+  
 }
