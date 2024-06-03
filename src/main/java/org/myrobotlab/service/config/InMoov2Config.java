@@ -180,7 +180,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
     addDefaultGlobalConfig(plan, "log", "log", "Log", true);
-    addDefaultPeerConfig(plan, name, "llm", "Llm", false);
+    addDefaultPeerConfig(plan, name, "llm", "LLM", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
