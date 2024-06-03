@@ -180,7 +180,7 @@ public class InMoov2Config extends ServiceConfig {
     addDefaultPeerConfig(plan, name, "eyeTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "fsm", "FiniteStateMachine", false);
     addDefaultGlobalConfig(plan, "log", "log", "Log", true);
-    addDefaultPeerConfig(plan, name, "gpt3", "Gpt3", false);
+    addDefaultPeerConfig(plan, name, "llm", "Llm", false);
     addDefaultPeerConfig(plan, name, "head", "InMoov2Head", false);
     addDefaultPeerConfig(plan, name, "headTracking", "Tracking", false);
     addDefaultPeerConfig(plan, name, "htmlFilter", "HtmlFilter", true);
@@ -290,8 +290,8 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.listeners.add(new Listener("publishText", getPeerName("htmlFilter"), "onText"));
     chatBot.listeners.add(new Listener("publishSession", name));
 
-    Gpt3Config gpt3 = (Gpt3Config) plan.get(getPeerName("gpt3"));
-    gpt3.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
+    LLMConfig llm = (LLMConfig) plan.get(getPeerName("llm"));
+    llm.listeners.add(new Listener("publishText", name + ".htmlFilter", "onText"));
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     htmlFilter.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
