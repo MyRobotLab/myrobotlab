@@ -82,12 +82,12 @@
                                 <td colspan="2">{{getBotPath()}}</td>
                             </tr>
                             <tr><td><h4>Use Language Model Fallback</h4></td><td>
-                                <button class="btn btn-default" ng-show="predicates['gpt3'] != 'enabled'" 
-                                    ng-click="msg.setPredicate('gpt3', 'enabled');msg.getPredicates()">off</button>
-                                <button class="btn btn-info" ng-show="predicates['gpt3'] == 'enabled'"
-                                    ng-click="msg.setPredicate('gpt3', '');msg.getPredicates()">on</button>
-                                <span ng-show="peer.isPeerStarted(service, 'gpt3')">
-                                    <img src="settings.png" width="30" title="Open" ng-click="mrl.changeTab(peer.getActualName(service, 'gpt3'))"/>
+                                <button class="btn btn-default" ng-show="predicates['llm'] != 'enabled'" 
+                                    ng-click="msg.setPredicate('llm', 'enabled');msg.getPredicates()">off</button>
+                                <button class="btn btn-info" ng-show="predicates['llm'] == 'enabled'"
+                                    ng-click="msg.setPredicate('llm', '');msg.getPredicates()">on</button>
+                                <span ng-show="peer.isPeerStarted(service, 'llm')">
+                                    <img src="settings.png" width="30" title="Open" ng-click="mrl.changeTab(peer.getActualName(service, 'llm'))"/>
                                 </span>
                                     </td></tr>
                             <tr>
