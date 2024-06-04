@@ -39,7 +39,7 @@ public class DocumentPipelineMeta extends MetaData {
     addDependency("com.thoughtworks.xstream", "xstream", "1.4.19");
 
     // FIXME - add service page, python script, give example of how to use
-    setAvailable(false);
+    setAvailable(true);
 
   }
 

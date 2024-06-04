@@ -12,7 +12,6 @@ angular.module('mrlapp.service.SolrGui', []).controller('SolrGuiCtrl', ['$scope'
     $scope.filters = [];
     // TODO: maybe some other fields..
     // TODO: support range facets
-    $scope.facetFields = ['type', 'artist_facet', 'album_facet', 'genre_facet', 'year_facet', 'sender_type', 'sender','method'];
     $scope.facetFields = ['type', 'artist_facet', 'album_facet', 'genre_facet', 'year_facet', 'sender_type', 'sender','method', 'content_type_facet'];
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {

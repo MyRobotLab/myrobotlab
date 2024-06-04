@@ -42,6 +42,7 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public void startCrawling() {
     state = ConnectorState.RUNNING;
+    setStart(System.currentTimeMillis());
     Path startPath = Paths.get(((FileConnectorConfig)config).directory);
     log.info("Started Crawling {}", startPath);
     try {
@@ -74,9 +75,11 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
     if (interrupted) {
+      log.info("Interrupted, terminating crawl.");
       state = ConnectorState.INTERRUPTED;
       return FileVisitResult.TERMINATE;
     }
+    log.info("Crawling {} Feed Count {}" , file.toFile().getAbsolutePath(), getFeedCount());;
     String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
     Document doc = new Document(docId);
     doc.setField("last_modified", new Date(attrs.lastModifiedTime().toMillis()));
@@ -93,9 +96,11 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
     if (interrupted) {
+      log.info("Interrupted, terminating crawl.");
       state = ConnectorState.INTERRUPTED;
       return FileVisitResult.TERMINATE;
     }
+    log.warn("Failed Crawling {} Feed Count {}" , file.toFile().getAbsolutePath(), getFeedCount());
     String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
     Document doc = new Document(docId);
     doc.setField("type", "file");

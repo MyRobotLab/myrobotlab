@@ -147,4 +147,16 @@ public abstract class AbstractConnector <C extends AbstractConnectorConfig> exte
     this.docIdPrefix = docIdPrefix;
   }
 
+  public Integer getFeedCount() {
+    return feedCount;
+  }
+
+  public long getStart() {
+    return start;
+  }
+
+  public void setStart(long start) {
+    this.start = start;
+  }
+
 }

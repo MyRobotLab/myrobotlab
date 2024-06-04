@@ -1,81 +1,80 @@
 <div>
-    <!-- for debugging  Data: {{service}} <br/>  -->
-    <div class="form-group">
+  <!-- for debugging  Data: {{service}} <br/>  -->
+  <div class="form-group">
     <form>
-     <label>QueryString</label>
-     <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched" ng-submit="execNewSearch()"/>
-     <input type="submit" ng-click="execNewSearch()" value="Search" />
-     </form>
-    </div>
-    <br/>
-    <span ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </span>
-    <br/>
-    
-    <!-- Query String: {{queryString}} <br/>   -->
-    Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
-    
-     <a ng-click="prevPage()">Previous</a> <a ng-click="nextPage()">Next</a> 
-    <br/>
-    
-    <table class="facetAndSearchResults">
+      <label>QueryString</label>
+      <input type="text" ng-model="queryString" class="form-control typeHereField ng-pristine ng-valid ng-empty ng-touched" ng-submit="execNewSearch()"/>
+      <input type="submit" ng-click="execNewSearch()" value="Search" />
+    </form>
+  </div>
+  <br/>
+  <span ng-repeat="filter in filters">{{filter}} <a ng-click="removeFilter(filter)">[x]</a> </span>
+  <br/>
+  <!-- {{solrResults}}  -->
+  <!-- Query String: {{queryString}} <br/>   -->
+  Displaying search results {{startOffset+1}} to {{endOffset}} of {{numFound}} in {{solrResults.responseHeader.QTime}} milliseconds.
+  <br/>
+  <table class="facetAndSearchResults">
     <tr VALIGN=TOP>
-    <td>
-      <table class="facetResults">
-        <tr ng-repeat="(field, buckets) in solrResults.facet_counts.facet_fields track by $index">
-          <td >
-            <table class="facetResult">
-              <tr>
-                <th>{{field}}</th>
-              </tr>
-              <tr>
-                <td><li ng-repeat="(bucket, count) in buckets"><a ng-click="filter(field, bucket)">{{bucket}}</a> ({{count}})</li></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-    <td>
-    <table class="table table-striped">
-      <tr ng-repeat="result in solrResults.response track by $index" class="ng-scope">
-		<td>
-	      <!-- we want to conditionally render a different template depending on the type of doc it is. -->
-	      <div ng-if="result.content_type == 'audio/mpeg'">
-			  <!-- here we can render specific fields like artist/album/song.. -->
-			  <div ng-if="result.title[0]"><a ng-click="playFile(result.filepath)">{{result.title[0]}}</a></div>
-			  <div ng-if="!result.title[0]"><a ng-click="playFile(result.filepath)">{{result.filepath[0]}}</a></div>
-			  <div ng-if="result.artist[0]">Artist: {{result.artist[0]}}</div>
-			  <div ng-if="result.album[0]">Album: {{result.album[0]}}</div> 
-			  <div ng-if="result.year[0]">Year: {{result.year[0]}}</div>
-			  <div ng-if="result.genre[0]">Genre: {{result.genre[0]}}</div>
-			  Filepath:  {{result.filepath[0]}}
-		  </div>
-		  <!-- unknown result type... render all fields. -->
-		  <div ng-if="result.content_type != 'audio/mpeg'">
-			  <!-- this is not a song.. -->
-          <b>Doc: {{$index + startOffset + 1}}</b>
-          
-          <table class="searchResult" class>
-            <tr ng-repeat="(key, value) in result">
-              <td><strong>{{key}}</strong></td>
-              <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>
-              <td ng-if="key == 'filepath'"><a ng-click="playFile(value)">{{value}}</a></td>
-              <td ng-if="key != 'bytes' && key != 'filepath'">{{value}}</td> 
-            </tr>
-          </table>
-         
-         </div>
-        </td>
-      </tr>
-    </table>
-    </td>
+      <td>
+        <table class="facetResults">
+          <tr ng-repeat="(field, buckets) in solrResults.facet_counts.facet_fields track by $index">
+            <td >
+              <table class="facetResult">
+                <tr>
+                  <th>{{field}}</th>
+                </tr>
+                <tr>
+                  <td><li ng-repeat="(bucket, count) in buckets"><a ng-click="filter(field, bucket)">{{bucket}}</a> ({{count}})</li></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>
+        <table class="table table-striped">
+	      <tr><td><a ng-click="prevPage()">Previous</a> <a ng-click="nextPage()">Next</a></td></tr>
+            <tr ng-repeat="result in solrResults.response.docs track by $index" class="ng-scope">
+	  	      <td>
+	            <!-- we want to conditionally render a different template depending on the type of doc it is. -->
+                <div ng-if="result.content_type[0] == 'audio/mpeg'">
+			      <!-- <b>Doc: {{$index + startOffset + 1}}</b> -->
+			      <!-- here we can render specific fields like artist/album/song.. -->
+			      <div ng-if="result.title[0]"><a ng-click="playFile(result.filepath)">{{result.title[0]}}</a></div>
+  	              <div ng-if="!result.title[0]"><a ng-click="playFile(result.filepath)">{{result.filepath[0]}}</a></div>
+	              <div ng-if="result.artist[0]">Artist: {{result.artist[0]}}</div>
+		          <div ng-if="result.album[0]">Album: {{result.album[0]}}</div> 
+                  <div ng-if="result.year[0]">Year: {{result.year[0]}}</div>
+	              <div ng-if="result.genre[0]">Genre: {{result.genre[0]}}</div>
+	  	          Filepath:  {{result.filepath[0]}}
+  		        </div>
+	  	        <!-- unknown result type... render all fields. -->
+	           <div ng-if="result.content_type[0] != 'audio/mpeg'">
+		  	     <!-- this is not a song.. -->
+                 <!-- <b>Doc: {{$index + startOffset + 1}}</b> -->
+                 <table class="searchResult" class>
+                   <tr ng-repeat="(key, value) in result">
+                     <td><strong>{{key}}</strong></td>
+                    <td ng-if="key == 'bytes'"><img height="100" ng-src="{{value}}"/></td>
+                    <td ng-if="key == 'filepath'"><a ng-click="playFile(value)">{{value}}</a></td>
+                    <td ng-if="key != 'bytes' && key != 'filepath'">{{value}}</td> 
+                   </tr>
+                 </table>
+               </div>
+            </td>
+          </tr>
+          <!-- bottom pagination link -->
+          <tr><td><a ng-click="prevPage()">Previous</a> <a ng-click="nextPage()">Next</a></td></tr>
+        </table>
+      </td>
     </tr>
-    </table>
-    
-    <div ng-switch on="size">
-        <div class="animate-switch" ng-switch-when="small">Small view</div>
-        <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
-        <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
-        <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
-    </div>
+  </table>
+  
+  <div ng-switch on="size">
+    <div class="animate-switch" ng-switch-when="small">Small view</div>
+    <div class="animate-switch" ng-switch-when="medium">Medium view<br>mevi</div>
+    <div class="animate-switch" ng-switch-when="large">Large view<br>lavi<br>lavi</div>
+    <div class="animate-switch" ng-switch-when="full">Full view<br>fuvi<br>fuvi<br>fuvi</div>
+  </div>
 </div>
