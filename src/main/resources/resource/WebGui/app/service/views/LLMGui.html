@@ -1,4 +1,21 @@
 <div class="row">
+    <img ng-show="service.config.password" src="/connected.png" />
+    <img ng-show="!service.config.password" src="/disconnected.png" />
+</div>
+
+<div class="row">
+    How to install Ollama
+    <a href="" ng-show="!showOllama" ng-click="showOllama=true">show</a>
+    <a href="" ng-show="showOllama" ng-click="showOllama=false">hide</a>
+</div>
+<div class="row" ng-show="showOllama">
+
+    <ul>
+        <li>Go to <a href="https://ollama.com/download">https://ollama.com/download</a></li>
+        <li>Follow the instructions for your operating system</li>
+    </ul>
+</div>
+<div class="row">
     How to obtain an OpenAi api key
     <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
     <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
@@ -14,10 +31,8 @@
     Official Documentation : <a href="https://beta.openai.com/account/api-keys">OpenAi Api Keys</a>
     <br />
 </div>
-<div class="row">
-    <img ng-show="service.config.password" src="/connected.png" />
-    <img ng-show="!service.config.password" src="/disconnected.png" />
-</div>
+
+
 <div class="row">
     &nbsp;
 </div>
