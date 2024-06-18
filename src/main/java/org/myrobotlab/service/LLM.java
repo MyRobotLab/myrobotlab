@@ -1,9 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -356,6 +354,10 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     } else {
       log.error("don't know how to attach a {}", attachable.getName());
     }
+  }
+  
+  public void clearHistory() {
+    userMessages.clear();
   }
 
   public static void main(String[] args) {

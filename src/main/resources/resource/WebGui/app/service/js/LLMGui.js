@@ -121,6 +121,10 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
       msg.send("save")
     }
 
+    $scope.clearHistory = function () {
+      msg.send("clearHistory")
+    }
+
     $scope.getResponse = function () {
       $scope.saveValues()
       msg.send("getResponse", $scope.text)
