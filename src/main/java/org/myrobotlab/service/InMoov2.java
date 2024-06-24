@@ -36,7 +36,6 @@ import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
-import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -2294,6 +2293,31 @@ public class InMoov2 extends Service<InMoov2Config>
     sendToPeer("rightArm", "waitTargetPos");
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
+  }
+  
+  public Double getUltrasonicRightDistance() {
+    UltrasonicSensor uss = (UltrasonicSensor)getPeer("ultrasonicRight");
+    if (uss != null) {
+      return uss.range();
+    }
+    else
+    {
+      warn("No ultrasonicRight attached");
+      return 0.0;
+    }
+  }
+  
+  
+  public Double getUltrasonicLeftDistance() {
+    UltrasonicSensor uss = (UltrasonicSensor)getPeer("ultrasonicLeft");
+    if (uss != null) {
+      return uss.range();
+    }
+    else
+    {
+      warn("No ultrasonicLeft attached");
+      return 0.0;
+    }
   }
   
   public Map publishClassification(Map<String, Object> c) {

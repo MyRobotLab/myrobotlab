@@ -190,7 +190,7 @@ public class InMoov2Head extends Service<InMoov2HeadConfig> {
 
     StringBuilder head = new StringBuilder(String.format("%s.moveHead(%.0f,%.0f,%.0f,%.0f,%.0f,%.0f)\n", inmoovName, neck, rothead, eyeX, eyeY, jaw, rollNeck));
     if (eyelidLeft != null && eyelidRight != null) {
-      head.append(String.format("%s.moveEyelids(%.0f,%.0f)\n", inmoovName, eyelidLeft, eyelidRight));
+      head.append(String.format("  %s.moveEyelids(%.0f,%.0f)\n", inmoovName, eyelidLeft, eyelidRight));
     }
 
     return head.toString();
