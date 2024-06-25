@@ -148,6 +148,8 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   int vpId = 0;
 
   transient CanvasFrame canvasFrame = null;
+  
+  private final Set<String> removeFilters = new HashSet<>();
 
   class VideoProcessor implements Runnable {
 
@@ -209,6 +211,29 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
           }
 
           processVideo(data);
+          
+          // process removal/release of filters
+          if (removeFilters.size()> 0) {
+            Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
+            // create new filter set for thread safety
+            for (OpenCVFilter filter: filters.values()) {
+              if (removeFilters.contains(filter.name)) {
+                continue;
+              }
+              newFilters.put(filter.name, filter);
+            }
+            
+            // stop/release filters to be removed
+            for(String removeMe: removeFilters) {
+              log.warn("releasing {}", removeMe);
+              filters.get(removeMe).release();
+            }
+            
+            // assign the new set of filters w/o the removed ones
+            filters = newFilters;
+            removeFilters.clear();
+            broadcastState();
+          }
 
           if (lengthInFrames > 1 && loop && frameIndex > lengthInFrames - 2) {
             grabber.setFrameNumber(0);
@@ -1634,7 +1659,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     invoke("publishImage", image);
     return image;
   }
-
+  
   /**
    * @param name
    *          remove a filter by name
@@ -1642,12 +1667,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   @Override
   synchronized public void removeFilter(String name) {
     if (filters.containsKey(name)) {
-      Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
-      newFilters.putAll(filters);
-      OpenCVFilter removed = newFilters.remove(name);
-      removed.release();
-      filters = newFilters;
-      broadcastState();
+      removeFilters.add(name);
     }
   }
 
@@ -1656,10 +1676,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
    */
   @Override
   synchronized public void removeFilters() {
-    for (OpenCVFilter filter : filters.values()) {
-      filter.release();
-    }
-    filters = new LinkedHashMap<>();
+    removeFilters.addAll(filters.keySet());
     broadcastState();
   }
 
