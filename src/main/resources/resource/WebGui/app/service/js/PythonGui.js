@@ -95,7 +95,7 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
 
     $scope.saveScript = function () {
       activeScript = $scope.service.openedScripts[$scope.activeKey]
-      msg.send("saveScript", activeScript.file, activeScript.code)
+      msg.send("saveScript", "data/Python/" + $scope.service.name + "/" + activeScript.file, activeScript.code)
     }
 
     $scope.getPossibleServices = function (item) {
