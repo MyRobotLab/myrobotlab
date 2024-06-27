@@ -497,6 +497,11 @@ public class InMoov2Config extends ServiceConfig {
     neoPixel.blue = 212;
     neoPixel.pixelCount = 16;
     neoPixel.currentAnimation = "Ironman";
+    
+    PythonConfig python = (PythonConfig) plan.get("python");
+    if (python != null) {
+      python.scriptRootDir = "data/InMoov/";
+    }
 
     // remove undesired defaults from our default
     // FIXME getPeerName(key) -

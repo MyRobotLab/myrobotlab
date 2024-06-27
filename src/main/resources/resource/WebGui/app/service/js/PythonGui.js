@@ -35,26 +35,26 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
           _self.updateState(data)
           $scope.$apply()
           break
-        case 'onStdOut':
-            if (data !== "\n") {
-                $scope.service.logs.unshift(data)
-                if ($scope.service.logs.length > 300) {
-                    $scope.service.logs.pop()
-                }
-                $scope.$apply()
+        case "onStdOut":
+          if (data !== "\n") {
+            $scope.service.logs.unshift(data)
+            if ($scope.service.logs.length > 300) {
+              $scope.service.logs.pop()
             }
-            break
+            $scope.$apply()
+          }
+          break
         case "onScriptList":
           $scope.scriptList = data
           $scope.$apply()
           break
         case "onStatus":
-            if (data.level == 'error') {
-                $scope.service.logs.unshift(data.detail)
-            }
-            console.info("onStatus ", data)
-            $scope.$apply()
-            break
+          if (data.level == "error") {
+            $scope.service.logs.unshift(data.detail)
+          }
+          console.info("onStatus ", data)
+          $scope.$apply()
+          break
         default:
           console.error("ERROR - unhandled method " + msg.method)
           break
@@ -95,7 +95,7 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
 
     $scope.saveScript = function () {
       activeScript = $scope.service.openedScripts[$scope.activeKey]
-      msg.send("saveScript", "data/Python/" + $scope.service.name + "/" + activeScript.file, activeScript.code)
+      msg.send("saveScript", activeScript.file, activeScript.code)
     }
 
     $scope.getPossibleServices = function (item) {
@@ -179,10 +179,10 @@ angular.module("mrlapp.service.PythonGui", []).controller("PythonGuiCtrl", [
       )
     }
 
-    $scope.clear = function() {
-        msg.send('clear')
+    $scope.clear = function () {
+      msg.send("clear")
     }
-    
+
     msg.subscribe("publishStdOut")
     msg.subscribe("getClients")
     msg.subscribe("getScriptList")

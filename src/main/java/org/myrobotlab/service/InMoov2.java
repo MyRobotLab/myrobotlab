@@ -35,6 +35,7 @@ import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
@@ -2220,6 +2221,16 @@ public class InMoov2 extends Service<InMoov2Config>
 
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
+    
+    ServiceInterface p = getPeer("python");
+    if (p != null) {
+      try {
+        PythonConfig c = (PythonConfig)p.getConfig();
+        c.scriptRootDir = "data" + fs + "InMoov2";
+      } catch(Exception e) {
+        log.error("setting python scriptRootDir failed", e);
+      }
+    }
 
     runtime.invoke("publishConfigList");
   }

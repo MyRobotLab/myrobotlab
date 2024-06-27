@@ -24,7 +24,6 @@ import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Log.LogEntry;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.interfaces.Processor;
@@ -802,7 +801,7 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
     super.startService();
     
     if (config.scriptRootDir == null) {
-        config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+        config.scriptRootDir = new File(System.getProperty("user.dir")).getAbsolutePath();
     }
     File dataDir = new File(config.scriptRootDir);
     dataDir.mkdirs();    
@@ -998,9 +997,9 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
     if (config.scriptRootDir == null) {
-      config.scriptRootDir = new File(getDataInstanceDir()).getAbsolutePath();
+      config.scriptRootDir = new File(System.getProperty("user.dir")).getAbsolutePath();
     }    
-    List<File> files = FileIO.getFileList(config.scriptRootDir, true);
+    List<File> files = FileIO.getFileList(config.scriptRootDir, false);
     for (File file : files) {
       if (file.toString().endsWith(".py")) {
         sorted.add(file.toString().substring(config.scriptRootDir.length() + 1));
@@ -1022,6 +1021,12 @@ public class Python extends Service<PythonConfig> implements ServiceLifeCycleLis
    * @throws IOException
    */
   public void addScript(String scriptName, String code) throws IOException {
+    if (!scriptName.contains(fs)) {
+      // prepend script root dir if no prefix is used
+      if (config.scriptRootDir != null) {
+        scriptName = config.scriptRootDir + fs + scriptName;
+      }
+    }
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
