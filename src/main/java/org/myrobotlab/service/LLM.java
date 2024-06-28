@@ -286,15 +286,15 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     return null;
   }
 
-  Response getImageResponse(String base64Image) {
+  public Response getImageResponse(String base64Image) {
     return getImageResponse(base64Image, null, null);
   }
 
-  Response getImageResponse(String base64Image, String prompt) {
+  public Response getImageResponse(String base64Image, String prompt) {
     return getImageResponse(base64Image, prompt, null);
   }
   
-  Response getImageResponse(String base64Image, String prompt, String model) {
+  public Response getImageResponse(String base64Image, String prompt, String model) {
     try {
 
       if (prompt == null) {
