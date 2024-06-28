@@ -20,7 +20,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.config.LLMConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Utterance;
+import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ResponsePublisher;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -55,7 +57,7 @@ import org.slf4j.Logger;
  *
  */
 
-public class LLM extends Service<LLMConfig> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher {
+public class LLM extends Service<LLMConfig> implements TextListener, TextPublisher, UtterancePublisher, UtteranceListener, ResponsePublisher, ImageListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -89,66 +91,92 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     inputs.clear();
   }
 
+  public String createImagePrompt(String model, String prompt, List<String> images) {
+
+    if (model == null) {
+      model = config.model;
+    }
+
+    if (prompt == null) {
+      prompt = config.defaultImagePrompt;
+    }
+
+    if (images == null || images.size() == 0) {
+      error("no images in image request");
+      return null;
+    }
+
+    LinkedHashMap<String, Object> msg = new LinkedHashMap<>();
+    msg.put("model", model);
+    msg.put("prompt", prompt);
+    msg.put("images", images);
+    msg.put("stream", false);
+    msg.put("n", 1);
+
+    return CodecUtils.toJson(msg);
+
+  }
+
   public String createChatCompletionPayload(String model, String systemContent, String userContent, int n, float temperature, int maxTokens) {
     try {
-        // Create the map to hold the request parameters
-        LinkedHashMap<String, Object> requestPayload = new LinkedHashMap<>();
-        requestPayload.put("model", model);
+      // Create the map to hold the request parameters
+      LinkedHashMap<String, Object> requestPayload = new LinkedHashMap<>();
+      requestPayload.put("model", model);
 
-        // Create and format date and time strings
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
-        DateTimeFormatter fullDateFormatter = DateTimeFormatter.ofPattern("EEEE MMMM d'th' yyyy h:mm a");
-        
-        inputs.put("Date", currentDateTime.format(dateFormatter));
-        inputs.put("Time", currentDateTime.format(timeFormatter));
-        inputs.put("DateTime", currentDateTime.format(fullDateFormatter));
+      // Create and format date and time strings
+      LocalDateTime currentDateTime = LocalDateTime.now();
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+      DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+      DateTimeFormatter fullDateFormatter = DateTimeFormatter.ofPattern("EEEE MMMM d'th' yyyy h:mm a");
 
-        // Replace placeholders in system content
-        for (Map.Entry<String, Object> entry : inputs.entrySet()) {
-            if (entry.getValue() != null) {
-                systemContent = systemContent.replace(String.format("{{%s}}", entry.getKey()), entry.getValue().toString());
-            }
+      inputs.put("Date", currentDateTime.format(dateFormatter));
+      inputs.put("Time", currentDateTime.format(timeFormatter));
+      inputs.put("DateTime", currentDateTime.format(fullDateFormatter));
+
+      // Replace placeholders in system content
+      for (Map.Entry<String, Object> entry : inputs.entrySet()) {
+        if (entry.getValue() != null) {
+          systemContent = systemContent.replace(String.format("{{%s}}", entry.getKey()), entry.getValue().toString());
         }
+      }
 
-        // Create system message
-        LinkedHashMap<String, Object> systemMessage = new LinkedHashMap<>();
-        systemMessage.put("role", "system");
-        systemMessage.put("content", systemContent);
+      // Create system message
+      LinkedHashMap<String, Object> systemMessage = new LinkedHashMap<>();
+      systemMessage.put("role", "system");
+      systemMessage.put("content", systemContent);
 
-        // Handle message history
-        LinkedHashMap<String, Object> userMessage = new LinkedHashMap<>();
-        userMessage.put("role", "user");
-        userMessage.put("content", userContent);
-        userMessages.add(userMessage);
+      // Handle message history
+      LinkedHashMap<String, Object> userMessage = new LinkedHashMap<>();
+      userMessage.put("role", "user");
+      userMessage.put("content", userContent);
+      userMessages.add(userMessage);
 
-        if (config.maxHistory > 0) {
-            while (userMessages.size() > config.maxHistory) {
-                userMessages.remove(0);
-            }
-        } else {
-            userMessages.clear();
+      if (config.maxHistory > 0) {
+        while (userMessages.size() > config.maxHistory) {
+          userMessages.remove(0);
         }
+      } else {
+        userMessages.clear();
+      }
 
-        // Combine messages
-        List<LinkedHashMap<String, Object>> allMessages = new ArrayList<>();
-        allMessages.add(systemMessage);
-        allMessages.addAll(userMessages);
-        requestPayload.put("messages", allMessages);
+      // Combine messages
+      List<LinkedHashMap<String, Object>> allMessages = new ArrayList<>();
+      allMessages.add(systemMessage);
+      allMessages.addAll(userMessages);
+      requestPayload.put("messages", allMessages);
 
-        // Add other parameters
-        requestPayload.put("n", n);
-        requestPayload.put("temperature", temperature);
-        requestPayload.put("max_tokens", maxTokens);
+      // Add other parameters
+      requestPayload.put("n", n);
+      requestPayload.put("temperature", temperature);
+      requestPayload.put("max_tokens", maxTokens);
 
-        return CodecUtils.toJson(requestPayload);
+      return CodecUtils.toJson(requestPayload);
 
     } catch (Exception e) {
-        error(e);
-        return null;
+      error(e);
+      return null;
     }
-}
+  }
 
   public LinkedHashMap<String, Object> createFunctionDefinition(String name, String description, LinkedHashMap<String, Object> parameters) {
     LinkedHashMap<String, Object> functionDefinition = new LinkedHashMap<>();
@@ -258,6 +286,61 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     return null;
   }
 
+  Response getImageResponse(String base64Image) {
+    return getImageResponse(base64Image, null, null);
+  }
+
+  Response getImageResponse(String base64Image, String prompt, String model) {
+    try {
+
+      if (prompt == null) {
+        prompt = config.defaultImagePrompt;
+      }
+      // String.format("data:image/%s;base64,%s",
+      invoke("publishImageRequest", new ImageRequest(base64Image, prompt));
+
+      List<String> images = new ArrayList<>();
+      images.add(base64Image);
+      String json = createImagePrompt(model, prompt, images);
+
+      HttpClient<HttpClientConfig> http = (HttpClient) startPeer("http");
+
+      // log.info("curl {} -d '{}'", config.url, json);
+
+      String msg = http.postJson(config.password, config.url, json);
+      log.error("url: {}", config.url);
+
+      Map<String, Object> payload = CodecUtils.fromJson(msg, new StaticType<>() {
+      });
+
+      Response response = null;
+
+      if (payload.get("response") != null) {
+        String responseText = payload.get("response").toString();
+        response = new Response("friend", getName(), responseText, null);
+        Utterance utterance = new Utterance();
+        utterance.username = getName();
+        utterance.text = responseText;
+        utterance.isBot = true;
+        utterance.channel = currentChannel;
+        utterance.channelType = currentChannelType;
+        utterance.channelBotName = currentBotName;
+        utterance.channelName = currentChannelName;
+        if (responseText != null && responseText.length() > 0) {
+          invoke("publishUtterance", utterance);
+          invoke("publishResponse", response);
+          invoke("publishText", responseText);
+        }
+      }
+
+      return response;
+
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
+
   /**
    * Overridden error to also publish the errors probably would be a better
    * solution to self subscribe to errors and have the subscriptions publish
@@ -277,6 +360,21 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
 
   public String publishRequest(String text) {
     return text;
+  }
+
+  public static class ImageRequest {
+    public String base64Image;
+    public String prompt;
+
+    public ImageRequest(String base64Image, String prompt) {
+      this.base64Image = base64Image;
+      this.prompt = prompt;
+
+    }
+  }
+
+  public ImageRequest publishImageRequest(ImageRequest request) {
+    return request;
   }
 
   public void setToken(String password) {
@@ -355,9 +453,14 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
       log.error("don't know how to attach a {}", attachable.getName());
     }
   }
-  
+
   public void clearHistory() {
     userMessages.clear();
+  }
+
+  @Override
+  public void onImage(ImageData img) {
+    getImageResponse(img.src);
   }
 
   public static void main(String[] args) {
@@ -365,26 +468,36 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
 
       LoggingFactory.init(Level.INFO);
 
-      // Runtime runtime = Runtime.getInstance();
-      // Runtime.startConfig("gpt3-01");
-      Runtime.start("llm", "LLM");
+      Response response = null;
+      LLM llm = (LLM) Runtime.start("llm", "LLM");
+      LLM imagellm = (LLM) Runtime.start("imagellm", "LLM");
+
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      cv.capture();
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      /*
-       * Gpt3 i01_chatBot = (Gpt3) Runtime.start("i01.chatBot", "Gpt3");
-       * 
-       * bot.attach("i01.chatBot"); i01_chatBot.attach("bot");
-       * 
-       * i01_chatBot.getResponse("hi, how are you?");
-       * 
-       * Runtime.start("webgui", "WebGui");
-       */
+      // llm.config.url = "http://fast:11434/v1/chat/completions";
+      // response = llm.getResponse("Hello, why is the sky blue?");
+      // System.out.println(response.msg);
+      for (int i = 0; i < 100; ++i) {
+
+        while (cv.getBase64Image() == null) {
+          Service.sleep(1000);
+        }
+
+        String base64Image = cv.getBase64Image();
+        imagellm.config.url = "http://fast:11434/api/generate";
+        imagellm.config.model = "bakllava";
+        response = imagellm.getImageResponse(base64Image);
+        System.out.println(response.msg);
+      }
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
+
 }

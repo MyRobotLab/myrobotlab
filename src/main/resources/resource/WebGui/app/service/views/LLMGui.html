@@ -58,6 +58,25 @@
                 </td>
             </tr>
             <tr>
+                <td>Request Type</td>
+                <td></td>
+                <td>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="service.config.requestType" value="ChatCompletion" ng-change="onQueryTypeChange()">
+                            Chat Completion
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" ng-model="service.config.requestType" value="ImageDescription" ng-change="onQueryTypeChange()">
+                            Image Description
+                        </label>
+                    </div>
+                </td>
+            </tr>
+             
+            <tr>
                 <td>Model</td>
                 <td><input class="form-control" ng-model="service.config.model" /></td>
                 <td>
@@ -160,6 +179,7 @@
                                     <small>{{e.channel}}</small>
                                 </td>
                                 <td>
+                                    <img ng-src="{{e.img}}" alt="" width="250"><br/>
                                     <small>[{{e.text}}]</small>
                                 </td>
                             </tr>

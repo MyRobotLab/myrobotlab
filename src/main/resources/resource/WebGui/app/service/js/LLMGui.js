@@ -70,6 +70,15 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
           }
           $scope.$apply()
           break
+        case "onImageRequest":
+          request = { username: "friend", text: data.prompt, img: 'data:image/jpeg;base64,' + data.base64Image }
+          $scope.utterances.push(request)
+          // remove the beginning if we are at maxRecords
+          if ($scope.utterances.length > $scope.maxRecords) {
+            $scope.utterances.shift()
+          }
+          $scope.$apply()
+          break
         case "onEpoch":
           $scope.onEpoch = data
           $scope.$apply()
@@ -131,6 +140,7 @@ angular.module("mrlapp.service.LLMGui", []).controller("LLMGuiCtrl", [
     }
 
     msg.subscribe("publishRequest")
+    msg.subscribe("publishImageRequest")
     msg.subscribe("publishUtterance")
     msg.subscribe(this)
   },

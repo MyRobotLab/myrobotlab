@@ -818,6 +818,9 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   }
 
   public BufferedImage getDisplay() {
+    if (data == null) {
+      return null;
+    }
     return data.getDisplay();
   }
 
@@ -1091,6 +1094,22 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public IplImage getImage() {
     return lastImage;
   }
+  
+  public String getBase64Image() {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      String imgType = "jpg";
+      BufferedImage bi = getDisplay();
+      if (bi != null) {
+        ImageIO.write(bi, imgType, os);
+        os.close();
+        return String.format(CodecUtils.toBase64(os.toByteArray()));
+      }
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
 
   /**
    * "Easy" Base64 web image from display last frame
@@ -1246,6 +1265,11 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
           // latency use the original ts from before fetch image and the filters
           // !
           webImage.ts = data.getTs();
+//          try {
+//          FileIO.toFile(String.format("image-%s-%d-base64.txt", getName(), frameIndex), webImage.data);
+//          } catch(Exception e) {
+//            error(e);
+//          }
           broadcast("publishWebDisplay", webImage);
         }
 

@@ -16,6 +16,7 @@ public class LLMConfig extends ServiceConfig {
   public float temperature = 0.7f;
   // public String url = "https://api.openai.com/v1/chat/completions";
   // http://localhost:11434/v1/chat/completions
+  // http://localhost:11434/api/generate : for image completion or I'd imagine https://api.openai.com/v1/api/generate
   public String url = null;
   public String password = null;
   public String model = "llama3"; //"gpt-3.5-turbo"; // "text-davinci-003"
@@ -33,6 +34,8 @@ public class LLMConfig extends ServiceConfig {
    * e.g. " talk like a pirate when responding, "
    */
   public String system = "You are a helpful robot."; 
+  
+  public String defaultImagePrompt = "What is this image?";
   
   @Override
   public Plan getDefault(Plan plan, String name) {
