@@ -148,7 +148,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   int vpId = 0;
 
   transient CanvasFrame canvasFrame = null;
-  
+
   private final Set<String> removeFilters = new HashSet<>();
 
   class VideoProcessor implements Runnable {
@@ -211,24 +211,24 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
           }
 
           processVideo(data);
-          
+
           // process removal/release of filters
-          if (removeFilters.size()> 0) {
+          if (removeFilters.size() > 0) {
             Map<String, OpenCVFilter> newFilters = new LinkedHashMap<>();
             // create new filter set for thread safety
-            for (OpenCVFilter filter: filters.values()) {
+            for (OpenCVFilter filter : filters.values()) {
               if (removeFilters.contains(filter.name)) {
                 continue;
               }
               newFilters.put(filter.name, filter);
             }
-            
+
             // stop/release filters to be removed
-            for(String removeMe: removeFilters) {
+            for (String removeMe : removeFilters) {
               log.warn("releasing {}", removeMe);
               filters.get(removeMe).release();
             }
-            
+
             // assign the new set of filters w/o the removed ones
             filters = newFilters;
             removeFilters.clear();
@@ -1094,12 +1094,20 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public IplImage getImage() {
     return lastImage;
   }
-  
+
   public String getBase64Image() {
+    return getBase64Image(3500);
+  }
+
+  public String getBase64Image(int timeout) {
     try {
       final ByteArrayOutputStream os = new ByteArrayOutputStream();
       String imgType = "jpg";
-      BufferedImage bi = getDisplay();
+      OpenCVData d = getOpenCVData(timeout);
+      if (d == null) {
+        return null;
+      }
+      BufferedImage bi = d.getDisplay();
       if (bi != null) {
         ImageIO.write(bi, imgType, os);
         os.close();
@@ -1265,11 +1273,12 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
           // latency use the original ts from before fetch image and the filters
           // !
           webImage.ts = data.getTs();
-//          try {
-//          FileIO.toFile(String.format("image-%s-%d-base64.txt", getName(), frameIndex), webImage.data);
-//          } catch(Exception e) {
-//            error(e);
-//          }
+          // try {
+          // FileIO.toFile(String.format("image-%s-%d-base64.txt", getName(),
+          // frameIndex), webImage.data);
+          // } catch(Exception e) {
+          // error(e);
+          // }
           broadcast("publishWebDisplay", webImage);
         }
 
@@ -1683,7 +1692,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     invoke("publishImage", image);
     return image;
   }
-  
+
   /**
    * @param name
    *          remove a filter by name

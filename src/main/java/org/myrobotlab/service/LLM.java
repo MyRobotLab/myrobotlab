@@ -483,9 +483,15 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       // llm.config.url = "http://fast:11434/v1/chat/completions";
       // response = llm.getResponse("Hello, why is the sky blue?");
       // System.out.println(response.msg);
+      
       for (int i = 0; i < 100; ++i) {
 
         while (cv.getBase64Image() == null) {
