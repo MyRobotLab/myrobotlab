@@ -118,7 +118,7 @@ public class ServoMixer extends Service<ServoMixerConfig> implements ServiceLife
                 if (servo == null || !servo.isMoving()) {
                   log.debug("not moving {}", servoName);
                 } else {
-                  log.error("still moving {}", servoName);
+                  log.debug("still moving {}", servoName);
                   anyServoMoving = true;
                 }
               }
