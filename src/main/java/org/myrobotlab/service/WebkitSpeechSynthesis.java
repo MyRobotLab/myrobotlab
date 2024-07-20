@@ -46,7 +46,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis<SpeechSynthes
      * We start this service as mute until the user presses the unmute button
      */
 
-    setMute(true);
+    // setMute(true);
   }
 
   /**

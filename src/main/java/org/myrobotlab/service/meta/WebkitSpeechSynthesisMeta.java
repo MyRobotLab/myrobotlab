@@ -14,7 +14,7 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
    */
   public WebkitSpeechSynthesisMeta() {
     addDescription("Web speech api using Chrome or Firefox speech synthesis");
-    setAvailable(true); // false if you do not want it viewable in a
+    setAvailable(false); // false if you do not want it viewable in a
     addCategory("speech", "sound");
   }
 
