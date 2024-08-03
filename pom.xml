@@ -107,7 +107,7 @@
     <repository>
       <id>myrobotlab</id>
       <name>myrobotlab</name>
-      <url>https://repo.myrobotlab.org/artifactory/myrobotlab</url>
+      <url>https://myrobotlab-repo.s3.amazonaws.com/artifactory/myrobotlab</url>
     </repository>
     <!-- for sarxos webcam -->
     <repository>
