@@ -113,6 +113,7 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
         display.frame.dispose();
         display.frame = null;
       }
+      display.name = name;
       // displays.remove(src);
       return name;
     }
@@ -157,7 +158,8 @@ public class ImageDisplay extends Service<ImageDisplayConfig> implements ImageLi
   public String display(String name, String src) {
     Display display = getDisplay(name);
     display.src = src;
-    displayInternal(display.name);
+    display.name = name;
+    displayInternal(name);
     return name;
   }
 

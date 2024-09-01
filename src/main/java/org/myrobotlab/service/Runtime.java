@@ -895,6 +895,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
           if (runtime == null) {
             c = ConfigUtils.loadRuntimeConfig(options);
             runtime = (Runtime) createService(RUNTIME_NAME, "Runtime", c.id);
+            runtime.platform = Platform.getLocalInstance();
             runtime.startService();
             // klunky
             Runtime.register(new Registration(runtime));
@@ -2845,13 +2846,8 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     setLocale(Locale.getDefault().getTag());
     locales = Locale.getDefaults();
-
-    if (runtime.platform == null) {
-      runtime.platform = Platform.getLocalInstance();
-    }
-
-    // setting the id and the platform
-    platform = Platform.getLocalInstance();
+    
+    Platform platform = Platform.getLocalInstance();
 
     String libararyPath = System.getProperty("java.library.path");
     String userDir = System.getProperty("user.dir");
