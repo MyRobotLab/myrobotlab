@@ -3,8 +3,8 @@
 name: Java CI
 
 on:
-  # push:
-  pull_request:
+  push:
+  # pull_request:
 
 jobs:
   build:
@@ -84,4 +84,3 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           body_path: ./release-template.md
-
