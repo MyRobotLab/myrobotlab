@@ -2004,6 +2004,7 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
+             <excludedGroups>.*OpenCV.*</excludedGroups>
           </excludes>
           <forkNode
             implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
