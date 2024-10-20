@@ -225,12 +225,12 @@ public class OculusDisplay implements Runnable {
     // Let LWJGL know to use this current context.
     GL.createCapabilities();
     // Setup the framebuffer resize callback.
-    glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
-      @Override
-      public void invoke(long window, int width, int height) {
-        onResize(width, height);
-      }
-    }));
+//    glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
+//      @Override
+//      public void invoke(long window, int width, int height) {
+//        onResize(width, height);
+//      }
+//    }));
     // TODO: set location and vsync?! Do we need to update these for lwjgl3?
     // Display.setLocation(left, right);
     // TODO: vsync enabled?
@@ -418,7 +418,7 @@ public class OculusDisplay implements Runnable {
     // Initialize GLFW.
     glfwInit();
     // Setup an error callback to print GLFW errors to the console.
-    glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
+    // glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
 
     // contextAttributes = new ContextAttribs(4,
     // 1).withProfileCore(true).withDebug(true);
