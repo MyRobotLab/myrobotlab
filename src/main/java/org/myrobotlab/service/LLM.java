@@ -1,6 +1,7 @@
 package org.myrobotlab.service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,6 +30,10 @@ import org.myrobotlab.service.interfaces.TextPublisher;
 import org.myrobotlab.service.interfaces.UtteranceListener;
 import org.myrobotlab.service.interfaces.UtterancePublisher;
 import org.slf4j.Logger;
+
+import io.github.ollama4j.OllamaAPI;
+import io.github.ollama4j.models.OllamaResult;
+import io.github.ollama4j.utils.OptionsBuilder;
 
 /**
  * https://beta.openai.com/account/api-keys
@@ -73,6 +78,8 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
 
   protected Map<String, Object> inputs = new LinkedHashMap<>();
 
+  OllamaAPI ollamaAPI;
+
   List<LinkedHashMap<String, Object>> userMessages = new ArrayList<>();
 
   public void addInput(String key, Object value) {
@@ -110,11 +117,16 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     msg.put("model", model);
     msg.put("prompt", prompt);
     msg.put("images", images);
-    msg.put("stream", false);
+    msg.put("stream", true);
     msg.put("n", 1);
 
     return CodecUtils.toJson(msg);
 
+  }
+
+  OllamaAPI getOllamaApi() {
+    ollamaAPI = new OllamaAPI(config.url);
+    return ollamaAPI;
   }
 
   public String createChatCompletionPayload(String model, String systemContent, String userContent, int n, float temperature, int maxTokens) {
@@ -190,6 +202,72 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
     super(n, id);
   }
 
+  public Response getResponseStream(String text) {
+    try {
+
+      if (config.sleepWord != null && text.contains(config.sleepWord) && !config.sleeping) {
+        sleep();
+      }
+
+      if (config.sleeping) {
+        return null;
+      }
+
+      if (ollamaAPI == null) {
+        // ollamaAPI = new OllamaAPI("http://192.168.0.24:11434");
+        // ollama api wants "host" .. which really isn't host, its protocol +
+        // host +
+        // port ie "base url"
+        URL url = new URL(config.url);
+        ollamaAPI = new OllamaAPI(String.format("%s://%s:%d", url.getProtocol(), url.getHost(), url.getPort()));
+      }
+
+      final StringBuilder[] sentenceBuilder = { new StringBuilder() };
+      final int[] lastProcessedLength = { 0 }; // Track the length of already
+                                               // processed text
+
+      OllamaResult result = ollamaAPI.generate("llama3", text, false, new OptionsBuilder().build(), (s) -> {
+        // Append only the new portion of the text
+        String newText = s.substring(lastProcessedLength[0]);
+        sentenceBuilder[0].append(newText);
+
+        // Update the last processed length
+        lastProcessedLength[0] = s.length();
+
+        // Check for completed sentences in the accumulated text
+        int lastPeriodIndex = sentenceBuilder[0].lastIndexOf(".");
+        if (lastPeriodIndex != -1) {
+          // Extract and print the last completed sentence
+          String completeSentence = sentenceBuilder[0].substring(0, lastPeriodIndex + 1).trim();
+
+          invoke("publishText", completeSentence);
+
+          Utterance utterance = new Utterance();
+          utterance.username = getName();
+          utterance.text = completeSentence;
+          utterance.isBot = true;
+          utterance.channel = currentChannel;
+          utterance.channelType = currentChannelType;
+          utterance.channelBotName = currentBotName;
+          utterance.channelName = currentChannelName;
+          invoke("publishUtterance", utterance);
+
+          // Keep any remaining text after the last period
+          sentenceBuilder[0] = new StringBuilder(sentenceBuilder[0].substring(lastPeriodIndex + 1));
+        }
+      });
+
+      Response response = new Response("friend", getName(), result.toString(), null);
+      invoke("publishResponse", response);
+      return response;
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    return null;
+  }
+
   public Response getResponse(String text) {
 
     try {
@@ -199,6 +277,10 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
       if (text == null || text.trim().length() == 0) {
         log.info("emtpy text, not responding");
         return null;
+      }
+
+      if (config.stream) {
+        return getResponseStream(text);
       }
 
       String responseText = "";
@@ -293,7 +375,7 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
   public Response getImageResponse(String base64Image, String prompt) {
     return getImageResponse(base64Image, prompt, null);
   }
-  
+
   public Response getImageResponse(String base64Image, String prompt, String model) {
     try {
 
@@ -476,8 +558,13 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
       LLM llm = (LLM) Runtime.start("llm", "LLM");
       LLM imagellm = (LLM) Runtime.start("imagellm", "LLM");
 
-      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-      cv.capture();
+      llm.config.url = "http://192.168.0.24:11434/v1/chat/completions";
+      llm.config.stream = true;
+      // response = llm.getResponse("Hello, why is the sky blue?");
+      response = llm.getResponse("Tell me a very long story about 3 dragons");
+      if (response != null) {
+        System.out.println(response.msg);
+      }
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -487,11 +574,10 @@ public class LLM extends Service<LLMConfig> implements TextListener, TextPublish
       if (done) {
         return;
       }
-      
-      // llm.config.url = "http://fast:11434/v1/chat/completions";
-      // response = llm.getResponse("Hello, why is the sky blue?");
-      // System.out.println(response.msg);
-      
+
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      cv.capture();
+
       for (int i = 0; i < 100; ++i) {
 
         while (cv.getBase64Image() == null) {

@@ -134,7 +134,7 @@
       <url>https://m2.dv8tion.net/releases</url>
     </repository>
   </repositories>
-
+  
 
   <dependencies>
     <!-- AudioFile begin -->
@@ -538,13 +538,13 @@
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
-      <version>3.3.3</version>
+      <version>3.2.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-glfw</artifactId>
-      <version>3.3.3</version>
+      <version>3.2.3</version>
       <scope>provided</scope>
     </dependency>
     <!-- JMonkeyEngine end -->
@@ -582,6 +582,15 @@
       <scope>provided</scope>
     </dependency>
     <!-- Keyboard end -->
+
+    <!-- LLM begin -->
+    <dependency>
+      <groupId>io.github.ollama4j</groupId>
+      <artifactId>ollama4j</artifactId>
+      <version>1.0.79</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- LLM end -->
 
     <!-- LeapMotion begin -->
     <dependency>
@@ -2004,7 +2013,6 @@
           </includes>
           <excludes>
             <exclude>**/integration/*</exclude>
-            <exclude>**/*OpenCV*.java</exclude>
           </excludes>
           <forkNode
             implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />

@@ -23,6 +23,8 @@ public class LLMConfig extends ServiceConfig {
   public String wakeWord = "wake";
   public String sleepWord = "sleep";
   
+  public boolean stream = true;
+  
   /**
    * maximum history of chats to re-submit
    */

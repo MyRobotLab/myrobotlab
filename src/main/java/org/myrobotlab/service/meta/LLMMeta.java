@@ -17,6 +17,8 @@ public class LLMMeta extends MetaData {
 
     // add a cool description
     addDescription("Ollama or OpenApi inteface service");
+    
+    addDependency("io.github.ollama4j", "ollama4j", "1.0.79");
 
     // add it to one or many categories
     addCategory("AI");
