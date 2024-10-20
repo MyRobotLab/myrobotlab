@@ -65,30 +65,26 @@ pipeline {
         } // stage build
 
    
-      // stage('dependencies') {
-      //    when {
-      //          expression { params.verify == 'true' }
-      //    }
-      //    steps {
-      //       script {
-      //             sh '''
-      //                mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
-      //             '''
-      //       }
-      //    }
-      // } // stage dependencies      
 
       // --fail-fast
       // -DargLine="-Xmx1024m"
       stage('maven package') {
          steps {
             script {
+               if (params.verify) {
+                  // If the verify parameter is true, skip the tests
+                  sh '''
+                     mvn -Dfile.encoding=UTF-8 -Dversion=${VERSION} clean package -DskipTests=true -q
+                  '''
+               } else {
+                  // Otherwise, run the default command with tests
                   sh '''
                      mvn -Dfile.encoding=UTF-8 -Dversion=${VERSION} clean package jacoco:report -q
                   '''
+               }
             }
          }
-      } // stage package
+      }
 
       stage('javadoc') {
          when {
