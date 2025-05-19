@@ -1696,14 +1696,17 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
       angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
-      log.info("Angle : {}", angle);
+      // log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
 
     EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
     // log.info("Publish Encoder Data Raw {}", data);
-
+    // TODO: how do i publish the data from the encoder?
+   // ec.publishEncoderData(data);
+    ((As5048AEncoder)ec).updateEncoderData(data);
+    //     invoke("publishEncoderData", data);
     // TODO: all this code needs to move out of here!
     return data;
   }

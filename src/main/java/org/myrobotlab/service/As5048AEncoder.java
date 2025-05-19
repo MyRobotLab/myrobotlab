@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -40,6 +42,22 @@ public class As5048AEncoder extends AbstractPinEncoder<ServiceConfig> implements
     Thread.sleep(10000);
     encoder.setZeroPoint();
     log.info("Here we are..");
+  }
+
+  // TODO: move to base class / interface?
+  void attachEncoderListener(EncoderListener service) {
+    // TODO: move this to the EncoderPublisher interface.
+    if (service == null) {
+      log.warn("{}.attachEncoderListener(null)", getName());
+      return;
+    }
+    log.info("Adding listener for encoder data {}", service.getName());
+    addListener("publishEncoderData", service.getName());    
+  }
+  
+  void updateEncoderData(EncoderData data) {
+    // publish the updated encoder data (this is updated from the arduino..)
+    invoke("publishEncoderData", data); 
   }
 
 }

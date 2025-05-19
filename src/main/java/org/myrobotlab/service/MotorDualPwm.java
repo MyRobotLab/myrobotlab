@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.util.Arrays;
 import java.util.List;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;

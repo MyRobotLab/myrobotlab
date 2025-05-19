@@ -290,6 +290,25 @@ abstract public class AbstractMotor<C extends GeneralMotorConfig> extends Servic
   @Override
   public void onEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
+    log.info("Encoder Data (to motor): {}", data);
+    // TODO: this should probably not be here.. but rather in a DiyServo service instead.
+    if (false) {
+    double target = 180.0;
+    double delta = data.angle - target;
+    
+    if (Math.abs(delta) > 0.5) {
+      // move the motor a bit.
+      // TODO: this hsould be controlled by a PID algorithm.
+      if (delta > 0) {
+        this.move(0.5);
+      } else {
+        this.move(0.5);
+      }
+      
+    } else {
+      this.move(0);
+    }
+    }
 
   }
 

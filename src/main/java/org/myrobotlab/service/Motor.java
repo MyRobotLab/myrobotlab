@@ -4,7 +4,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.config.MotorConfig;
-import org.myrobotlab.service.config.ServiceConfig;
 
 /**
  * A general motor implementation with a "simple H-bridge" where one control
@@ -99,18 +98,18 @@ public class Motor extends AbstractMotor<MotorConfig> {
 
     try {
 
-      Runtime.start("gui", "SwingGui");
+      Runtime.start("python", "Python");
       Runtime.start("webgui", "WebGui");
-      Runtime.start("motor", "Motor");
+      Runtime.start("m1", "MotorDualPwm");
       Runtime.start("arduino", "Arduino");
-      boolean done = true;
+      boolean done = false;
       if (done) {
         return;
       }
 
       // FIXME - all testing or replacing of main code should be new JUnit
       // tests - with virtual arduino !!!)
-      String port = "COM15";
+      String port = "COM3";
 
       // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       // Runtime.createAndStart("gui", "SwingGui");
@@ -137,19 +136,27 @@ public class Motor extends AbstractMotor<MotorConfig> {
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect(port);
 
-      arduino.pinMode(6, Arduino.OUTPUT);
-      arduino.pinMode(7, Arduino.OUTPUT);
+      
+      
+    
 
-      arduino.digitalWrite(7, 1);
+     // arduino.pinMode(6, Arduino.OUTPUT);
+     // arduino.pinMode(7, Arduino.OUTPUT);
+//
+//      arduino.digitalWrite(7, 1);
       // arduino.digitalWrite(6, 1);
 
-      arduino.analogWrite(6, 255);
-      arduino.analogWrite(6, 200);
-      arduino.analogWrite(6, 100);
-      arduino.analogWrite(6, 0);
+ //     arduino.analogWrite(6, 255);
+   //   arduino.analogWrite(6, 200);
+     // arduino.analogWrite(6, 100);
+  //    arduino.analogWrite(6, 0);
 
-      Motor m1 = (Motor) Runtime.start("m1", "Motor");
+      MotorDualPwm m1 = (MotorDualPwm) Runtime.start("m1", "Motor");
+      m1.setPwmPins(6, 7);
+     
+      
 
+      
       /*
        * m1.setType2Pwm(leftPwm, rightPwm); m1.setTypeStepper();
        * m1.setTypePulseStep(pwmPin, dirPin);
@@ -160,14 +167,30 @@ public class Motor extends AbstractMotor<MotorConfig> {
       // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
       m1.attachMotorController(arduino);
 
-      m1.move(1.0);
-      m1.move(-1.0);
+      As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
+      encoder.setPin(10);
+      arduino.attachEncoderControl(encoder);
 
-      arduino.enableBoardInfo(true);
-      arduino.enableBoardInfo(false);
-      m1.stop();
-      m1.move(0.5);
-      m1.stop();
+      // attach the motor as an encoder listener?
+       encoder.attachEncoderListener(m1);
+//      for (int i = 0; i < 1; i++) {
+//        m1.move(1.0);
+//        Thread.sleep(1000);
+//        m1.move(-1.0);
+//        Thread.sleep(1000);
+//        m1.move(1.0);
+//        Thread.sleep(1000);
+//        m1.move(-1.0);
+//        Thread.sleep(1000);
+//        m1.stop();
+//
+//        Thread.sleep(1000);
+//      }
+    //#  arduino.enableBoardInfo(true);
+    //#  arduino.enableBoardInfo(false);
+    //  m1.stop();
+    //  m1.move(0.5);
+    //  m1.stop();
 
       // Runtime.start("webgui", "WebGui");
 
