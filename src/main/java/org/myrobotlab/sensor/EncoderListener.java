@@ -1,9 +1,27 @@
 package org.myrobotlab.sensor;
 
-import org.myrobotlab.framework.interfaces.Attachable;
+public interface EncoderListener {  
+  
+  public String getName();
 
-public interface EncoderListener extends Attachable {
+  public void onEncoderData(EncoderData encoderData);
+  
+  default public void attachEncoderPublisher(EncoderPublisher publisher) {
+    attachEncoderPublisher(publisher.getName());
+  }
 
-  void onEncoderData(EncoderData data);
+  default public void attachEncoderPublisher(String name) {
+    send(name, "attachEncoderListener", getName());
+  }
+
+  default public void detachEncoderPublisher(EncoderPublisher publisher) {
+    detachEncoderPublisher(publisher.getName());
+  }
+
+  default public void detachEncoderPublisher(String name) {
+    send(name, "detachEncoderListener", getName());
+  }
+
+  public void send(String name, String method, Object... data);
 
 }
