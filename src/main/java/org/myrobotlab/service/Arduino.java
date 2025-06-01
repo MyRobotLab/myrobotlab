@@ -1700,12 +1700,13 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
-
+    // TODO: figure out how to handle analog pin data as encoder data.. 
     EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
     // log.info("Publish Encoder Data Raw {}", data);
     // TODO: how do i publish the data from the encoder?
    // ec.publishEncoderData(data);
-    ((As5048AEncoder)ec).updateEncoderData(data);
+    // This will pass the encoder data to the encoder and the encoder will publish it to listeners.
+    ((EncoderControl)ec).updateEncoderData(data);
     //     invoke("publishEncoderData", data);
     // TODO: all this code needs to move out of here!
     return data;
