@@ -2371,4 +2371,3 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   }
 
 }
-
