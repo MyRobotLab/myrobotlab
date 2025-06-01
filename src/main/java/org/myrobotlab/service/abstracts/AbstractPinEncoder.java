@@ -2,11 +2,11 @@ package org.myrobotlab.service.abstracts;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
-import org.myrobotlab.sensor.EncoderListener;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
-public class AbstractPinEncoder extends Service implements EncoderControl {
+public abstract class AbstractPinEncoder<C extends ServiceConfig> extends Service<C> implements EncoderControl {
 
   private static final long serialVersionUID = 1L;
   public String pin;
@@ -24,12 +24,13 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     super(n, id);
   }
 
-  public void attach(EncoderController controller) throws Exception {
+  @Override
+  public void attachEncoderController(EncoderController controller) {
     if (this.controller == controller) {
       log.info("{} already attached to controller {}", getName(), controller.getName());
     }
     this.controller = controller;
-    controller.attach(this);
+    controller.attachEncoderControl(this);
     lastUpdate = System.currentTimeMillis();
   }
 
@@ -42,28 +43,31 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     return angle;
   }
 
-  // This is used to relay the data being broadcast from a controller (such as
-  // an arduino)
+  // FIXME - remove this ...
   public void onEncoderData(EncoderData data) {
-    // TODO: maybe the raw pin data from the arduino comes in here instead..
-    // current timestamp / delta since last update.
+    // this is getting published from the arduino and updated here when it comes
+    // in..
+    // TODO: shoudl the messaging be setup differently?
+    // TODO: compare with ultrasonic sensor and see that we're following the
+    // same pattern
+    // TODO: maybe use nanoTime? how accurate is this.
     long now = System.currentTimeMillis();
     long delta = now - lastUpdate;
+    Double angle = 360.0 * data.angle / resolution;
+    log.info("Angle : {}", angle);
     if (delta > 0) {
       // we can compute velocity since the last update
       // This computes the change in degrees per second that the encoder is
       // currently moving at.
-      velocity = (data.angle - this.lastPosition) / delta * 1000.0;
+      velocity = (angle - this.lastPosition) / delta * 1000.0;
     } else {
       // no position update since the last tick.
       velocity = 0.0;
     }
     // update the previous values
-    this.lastPosition = data.angle;
+    this.lastPosition = angle;
     this.lastUpdate = now;
-    // log.info("Encoder Data : {} Angle : {}", data, lastPosition);
-    // now that we've updated our state.. we can publish along the data.
-    broadcast("publishEncoderData", data);
+    log.info("Encoder Data : {} Angle : {}", data, lastPosition);
   }
 
   public void setZeroPoint() {
@@ -102,11 +106,5 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   @Override
   public Double getPos() {
     return lastPosition;
-  }
-
-  @Override
-  public void attachEncoderListener(EncoderListener listener) {
-    // TODO: should this be full name?
-    addListener("publishEncoderData", listener.getName());
   }
 }
