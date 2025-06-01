@@ -5,26 +5,27 @@
     <div ng-if="status == 'waitingforinformation'">
         <div class="media">
             <span class="media-body">
-                don't panic, our team of crack engineers will evaluate your log file...
+                Don't panic, our team of crack engineers will evaluate your log file...
             </span>
             <span class="media-right">
-                <img src="../expert.jpg" alt="an expert developer"/>
+                <img src="../expert.jpg" alt="an expert developer" />
             </span>
             <br>
         </div>
-        <div class="input-group">
-            <input type="text" class="form-control" ng-model="userId" placeholder="user id">
-            <span class="input-group-btn">
-                <button type="button" class="btn btn-primary" ng-click='noWorky(userId);' tooltip="send log file" tooltip-placement="bottom">send no worky</button>
-            </span>
+        <div class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="userId" placeholder="user id">
+                <button type="button" class="btn btn-primary" ng-click='noWorky(userId);' tooltip="send log file"
+                    tooltip-placement="bottom">send no worky</button>
+            </div>
         </div>
     </div>
     <div ng-if="status == 'sendingnoworky'">
         sending ...
     </div>
     <div ng-if="status == 'success'">
-        noWorky sent !
-        <button class="btn btn-primary" ng-click="close();">close modal</button>
+        Success noWorky sent !
+        <button class="btn btn-primary" ng-click="close();">close</button>
     </div>
     <div ng-if="status == 'error'">
         the noWorky did not worky !<br>

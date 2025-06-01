@@ -8,7 +8,7 @@
 ############################################################################
 
 # Start the OpenNi service
-openni = Runtime.start("openni", "OpenNi")
+openni = runtime.start("openni", "OpenNi")
 python = Runtime.getService("python")
 
 # define a method for your callback..  here it passed the full openni data object that contains the skeleton info.

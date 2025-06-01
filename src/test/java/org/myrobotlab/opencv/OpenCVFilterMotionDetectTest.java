@@ -8,7 +8,7 @@ import java.util.List;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterMotionDetectTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterMotionDetectTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

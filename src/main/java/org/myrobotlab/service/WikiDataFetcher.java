@@ -7,11 +7,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WikiDataFetcherConfig;
 import org.slf4j.Logger;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.QuantityValue;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
@@ -23,7 +23,7 @@ import org.wikidata.wdtk.datamodel.json.jackson.JacksonValueSnak;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
-public class WikiDataFetcher extends Service {
+public class WikiDataFetcher extends Service<WikiDataFetcherConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -50,6 +50,10 @@ public class WikiDataFetcher extends Service {
       desc = wdf.getDescription(query);
       log.info(query + " is " + desc);
 
+      query = "Joe Biden";
+      desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
+
       query = "the pyramids";
       desc = wdf.getDescription(query);
       log.info(query + " is " + desc);
@@ -67,6 +71,9 @@ public class WikiDataFetcher extends Service {
       log.info(getData("eiffel tower", "P2048"));
 
       log.info(getData("nothing to test", "P2048"));
+
+      Runtime.start("python", "Python");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -262,7 +269,7 @@ public class WikiDataFetcher extends Service {
             dataType = ((JacksonValueSnak) s.getClaim().getMainSnak()).getDatatype().toString();
             // TODO Add all snaks instead of only the main snak
             al.add(dataType);
-            al.add((JacksonValueSnak) s.getClaim().getMainSnak());
+            al.add(s.getClaim().getMainSnak());
 
           }
 
@@ -286,25 +293,25 @@ public class WikiDataFetcher extends Service {
       // TODO put switch in a function out of getData()
       switch (dataType) {
         case "wikibase-item"://
-          String info = (String) data.toString();
+          String info = data.toString();
           int beginIndex = info.indexOf('Q');
           int endIndex = info.indexOf("(");
           info = info.substring(beginIndex, endIndex - 1);
           answer = getLabelById(info);
           break;
         case "time"://
-          data = (TimeValue) data;
+          data = data;
           answer = String.valueOf(((TimeValue) data).getDay()) + "/" + String.valueOf(((TimeValue) data).getMonth()) + "/" + String.valueOf(((TimeValue) data).getYear());
           break;
         case "globe-coordinate":
           answer = ((GlobeCoordinatesValue) data).toString();
           break;
         case "monolingualtext"://
-          data = (MonolingualTextValue) data;
+          data = data;
           answer = data.toString();
           break;
         case "quantity"://
-          data = (QuantityValue) data;
+          data = data;
           String quantity = String.valueOf(((QuantityValue) data).getNumericValue());
           String unit = String.valueOf(((QuantityValue) data).getUnit());
           // String unit = data.toString();

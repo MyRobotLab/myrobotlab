@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,20 +13,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.generics.SlidingWindowList;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.interfaces.Processor;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
-import org.python.core.PyDictionary;
 import org.python.core.PyException;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -47,19 +51,19 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  */
-public class Python extends Service {
-
+public class Python extends Service<PythonConfig> implements ServiceLifeCycleListener, MessageListener, Processor {
+  
   /**
    * this thread handles all callbacks to Python process all input and sets msg
    * handles
    * 
    */
-  public class InputQueueThread extends Thread {
+  public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
+    transient protected Thread myThread = null;
 
-    public InputQueueThread(Python python) {
-      super(String.format("python.%s.input", python.getName()));
+    public InputQueue(Python python) {
       this.python = python;
     }
 
@@ -109,7 +113,7 @@ public class Python extends Service {
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            log.error("InputQueueThread threw", e);
+            log.error("InputQueueThread threw msg: {}", msg, e);
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
         }
@@ -119,6 +123,26 @@ public class Python extends Service {
         } else {
           log.error("InputQueueThread while loop threw", e);
         }
+      }
+      log.info("shutting down python queue");
+    }
+    
+    
+
+    synchronized public void stop() {
+      if (myThread != null) {
+        running = false;
+        myThread.interrupt();
+        myThread = null;
+      }
+    }
+
+    synchronized public void start() {
+      if (myThread == null) {
+        myThread = new Thread(this, String.format("python.%s.input", python.getName()));
+        myThread.start();
+      } else {
+        log.warn("python input queue already running");
       }
     }
   }
@@ -146,27 +170,7 @@ public class Python extends Service {
       } catch (Exception e) {
         log.error("python exec threw", e);
         String error = Logging.stackToString(e);
-        if (error.contains("KeyboardInterrupt")) {
-          warn("Python process killed !");
-        } else {
-          error(e);
-          String filtered = error;
-          filtered = filtered.replace("'", "");
-          filtered = filtered.replace("\"", "");
-          filtered = filtered.replace("\n", "");
-          filtered = filtered.replace("\r", "");
-          filtered = filtered.replace("<", "");
-          filtered = filtered.replace(">", "");
-          if (interp != null) {
-            interp.exec(String.format("print '%s'", filtered));
-          }
-          log.error("following script errored \n{}", code);
-          log.error("interp.exec threw", e);
-          if (filtered.length() > 40) {
-            filtered = filtered.substring(0, 40);
-          }
-        }
-
+        error(error);
       } finally {
         executing = false;
         log.info("script completed");
@@ -174,15 +178,27 @@ public class Python extends Service {
       }
     }
   }
-
+  
   public final static transient Logger log = LoggerFactory.getLogger(Python.class);
   // TODO this needs to be moved into an actual cache if it is to be used
   // Cache of compile python code
-  private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
+  private final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * a sliding window of logs
+   */
+  protected List<String> logs = new SlidingWindowList<>(300);
+  
 
   protected int newScriptCnt = 0;
+
+  /**
+   * Any script executed is put in a openedScripts map... Helpful in IDE
+   * displays
+   */
+  protected boolean openOnExecute = true;
 
   /**
    * Get a compiled version of the python call.
@@ -192,7 +208,7 @@ public class Python extends Service {
    * @param interp
    * @return
    */
-  private static synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
+  private synchronized PyObject getCompiledMethod(String name, String code, PythonInterpreter interp) {
     // TODO change this from a synchronized method to a few blocks to
     // improve concurrent performance
     if (objectCache.containsKey(name)) {
@@ -207,34 +223,41 @@ public class Python extends Service {
     objectCache.put(name, compiled);
     return compiled;
   }
+
   /**
-   * Set a Python variable with a value from Java
-   * e.g.  python.set("my_var", 5)
+   * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
+   * 
+   * @param pythonRefName
+   *          python variable name
+   * @param o
+   *          value to set
    */
   public void set(String pythonRefName, Object o) {
     interp.set(pythonRefName, o);
   }
 
   /**
-   * Get a Python value from Python into Java
-   * return type is PyObject wrapper around the value
+   * Get a Python value from Python into Java return type is PyObject wrapper
+   * around the value
    * 
-   * @param pythonRefName - name of variable
+   * @param pythonRefName
+   *          - name of variable
    * @return the PyObject wrapper
    */
-  public PyObject get(String pythonRefName) {
+  public PyObject getPyObject(String pythonRefName) {
     return interp.get(pythonRefName);
   }
 
   /**
-   * Get the value of the Python variable
-   * e.g. Integer x = (Integer)python.getValue("my_var")
+   * Get the value of the Python variable e.g. Integer x =
+   * (Integer)python.getValue("my_var")
    * 
    * @param pythonRefName
-   * @return
+   *          the reference name for the python object
+   * @return the python object
    */
-  public Object getValue(String pythonRefName) {
-    PyObject o = get(pythonRefName);
+  public Object get(String pythonRefName) {
+    PyObject o = getPyObject(pythonRefName);
     if (o == null) {
       return null;
     }
@@ -256,10 +279,10 @@ public class Python extends Service {
    */
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
-  transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  transient InputQueueThread inputQueueThread;
+  final transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
+  final transient InputQueue inputQueueThread = new InputQueue(this);
   transient PythonInterpreter interp = null;
-  transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
+  final transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
   int interpreterThreadCount = 0;
 
@@ -275,13 +298,6 @@ public class Python extends Service {
   List<String> localPythonFiles = new ArrayList<String>();
 
   /**
-   * default location for python modules
-   */
-  String modulesDir = "pythonModules";
-
-  boolean pythonConsoleInitialized = false;
-
-  /**
    * opened scripts
    */
   HashMap<String, Script> openedScripts = new HashMap<String, Script>();
@@ -290,80 +306,50 @@ public class Python extends Service {
 
   public Python(String n, String id) {
     super(n, id);
-
-    log.info("created python {}", getName());
-
-    log.info("creating module directory pythonModules");
-    new File("pythonModules").mkdir();
-
-    // I love ServiceData !
-    ServiceData sd = ServiceData.getLocalInstance();
-    // I love Platform !
-    Platform p = Platform.getLocalInstance();
-    List<MetaData> sdt = sd.getAvailableServiceTypes();
-    for (int i = 0; i < sdt.size(); ++i) {
-      MetaData st = sdt.get(i);
-      // FIXME - cache in "data" dir Or perhaps it should be pulled into
-      // resource directory during build time and packaged with jar
-      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
-      exampleFiles.put(st.getSimpleName(), file);
-    }
-
-    localPythonFiles = getFileListing();
-
-    createPythonInterpreter();
-    attachPythonConsole();
-
-    //////// was in startService
-
-    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
-        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
-        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
-    // service :(
-    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
-    interp.exec(compiled);
-
-    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
-    StringBuffer initScript = new StringBuffer();
-    initScript.append("from time import sleep\n");
-    initScript.append("from org.myrobotlab.service import Runtime\n");
-
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
+    // for scripts saved or opened by the user
+    new File(getDataDir()).mkdirs();    
   }
 
-  public void newScript() {
-    if (!openedScripts.containsKey("script.py")) {
-      openScript("script.py", "");
-    }
-  }
+  /**
+   * Opens an existing script. All file operations will be relative to the
+   * data/Py4j/{serviceName} directory.
+   * 
+   * @param scriptName
+   *          - name of the script file relatie to scriptRootDir
+   *          data/Py4j/{serviceName}/
+   * @throws IOException
+   */
+  public void openScript(String scriptName) throws IOException {
+    File script = new File(config.scriptRootDir + fs + scriptName);
 
-  public void openScript(String scriptName, String code) {
-    activeScript = scriptName;
-    openedScripts.put(scriptName, new Script(scriptName, code));
+    if (!script.exists()) {
+      error("file %s not found", script.getAbsolutePath());
+      return;
+    }
+
+    openedScripts.put(scriptName, new Script(scriptName, FileIO.toString(script.getAbsoluteFile())));
     broadcastState();
   }
+  
 
-  public void closeScript(String scriptName) {
-    openedScripts.remove(scriptName);
-    broadcastState();
+  public void closeScript(String file) {
+    if (openedScripts.containsKey(file)) {
+      openedScripts.remove(file);
+      broadcastState();
+    }
   }
 
   /**
    * append more Python to the current script
    * 
-   * @param data
+   * @param code
    *          the code to append
    * @return the resulting concatenation
    */
-  public Script appendScript(String data) {
-    return new Script("append", data);
+  @Deprecated /* wtf is this for? */
+  public String appendScript(String code) {
+    invoke("publishAppend", code);
+    return code;
   }
 
   /**
@@ -372,14 +358,12 @@ public class Python extends Service {
    * SwingGui
    */
   public void attachPythonConsole() {
-    if (!pythonConsoleInitialized) {
       // FIXME - this console script has hardcoded globals to
       // reference this service that will break with more than on python service
       // !
       String consoleScript = getResourceAsString("pythonConsole.py");
-      exec(consoleScript, false);
-      pythonConsoleInitialized = true;
-    }
+      // block, don't use queue on different thread (before python is initialized)
+      exec(consoleScript, true);
   }
 
   /**
@@ -413,24 +397,32 @@ public class Python extends Service {
 
     /*
      * don't respect java accessibility, so that we can access protected members
-     * on subclasses
+     * on subclasses - NO ! - future versions of java will not allow this !
+     * removing (GroG 20210404)
      */
-    props.put("python.security.respectJavaAccessibility", "false");
+    // props.put("python.security.respectJavaAccessibility", "false");
     props.put("python.import.site", "false");
 
     Properties preprops = System.getProperties();
 
     PythonInterpreter.initialize(preprops, props, new String[0]);
-
+    
     interp = new PythonInterpreter();
+    
+    addModulePath(getResourceDir() + fs + "modules");
 
-    PySystemState sys = Py.getSystemState();
+  }
 
-    if (modulesDir != null) {
-      sys.path.append(new PyString(modulesDir));
+  public void addModulePath(String path) {
+    if (config.modulePaths != null) {
+      config.modulePaths.add(path);
     }
-    log.info("Python System Path: {}", sys.path);
-
+    
+    if (interp != null) {
+      PySystemState sys = Py.getSystemState();
+      sys.path.append(new PyString(path));
+      log.info("Python System Path: {}", sys.path);
+    }    
   }
 
   public String eval(String method) {
@@ -441,10 +433,15 @@ public class Python extends Service {
   }
 
   /**
-   * execute code
+   * execute code (blocking)
+   * 
+   * @param code
+   *          string of code to run
+   * @return true/false
    */
-  public void exec(String code) {
-    exec(code, true);
+  @Override
+  public boolean exec(String code) {
+    return exec(code, true);
   }
 
   /**
@@ -474,19 +471,18 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
-
-      // FIXME - TOO MANY DIFFERENT CODE-PATHS TO interp.exec ...
-      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN
-      // INVOKE(finishedExecutingScript) !!! HERE ???
-
       return true;
-
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
       invoke("publishStdError", pe.toString());
     } catch (Exception e) {
+      log.error(code);
       error(e);
+    } finally {
+      if (blocking) {
+        invoke("finishedExecutingScript");
+      }
     }
     return false;
   }
@@ -526,14 +522,37 @@ public class Python extends Service {
     exec(code, true);
   }
 
-  /*
+  /**
    * executes an external Python file
    * 
-   * @param filename the full path name of the python file to execute
+   * @param filename
+   *          the full path name of the python file to execute
+   * @return true/false
+   * @throws IOException
+   *           boom
    */
-  public void execFile(String filename) throws IOException {
+  public boolean execFile(String filename) throws IOException {
+    return execFile(filename, true);
+  }
+
+  /**
+   * executes an external Python file
+   * 
+   * @param filename
+   *          file to exec
+   * @param block
+   *          true if blocking exec
+   * @return true/false
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public boolean execFile(String filename, boolean block) throws IOException {
     String script = FileIO.toString(filename);
-    exec(script);
+    if (openOnExecute) {
+      addScript(filename, script);
+    }
+    return exec(script);
   }
 
   /**
@@ -573,14 +592,13 @@ public class Python extends Service {
    * @return list of python examples
    */
   public List<File> getExampleListing() {
-    List<File> r = null;
-    try {
-      // expensive method - searches through entire jar
-      r = FileIO.listResourceContents("Python/examples");
-    } catch (Exception e) {
-      Logging.logError(e);
+    List<File> files = new ArrayList<>();
+
+    for (String f : exampleFiles.values()) {
+      String filename = getResourceRoot() + fs + f;
+      files.add(new File(filename));
     }
-    return r;
+    return files;
   }
 
   /**
@@ -609,8 +627,10 @@ public class Python extends Service {
    * load a official "service" script maintained in myrobotlab
    * 
    * @param serviceType
+   *          the type of service
    */
   public void loadServiceScript(String serviceType) {
+    try {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
     String serviceScript = null;
     try {
@@ -619,7 +639,10 @@ public class Python extends Service {
       error("%s.py not  found", serviceType);
       log.error("getting service file script example threw {}", e);
     }
-    openScript(filename, serviceScript);
+    addScript(filename, serviceScript);
+    } catch(Exception e) {
+      error(e);
+    }
   }
 
   @Deprecated
@@ -638,9 +661,10 @@ public class Python extends Service {
   public void openScriptFromFile(String filename) throws IOException {
     log.info("loadScriptFromFile {}", filename);
     String data = FileIO.toString(filename);
-    openScript(filename, data);
+    addScript(filename, data);
   }
 
+  @Override
   public void onStarted(String serviceName) {
     ServiceInterface s = Runtime.getService(serviceName);
     if (s == null) {
@@ -659,7 +683,12 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
+  }
+
+  @Override
+  public void onReleased(String serviceName) {
+    String registerScript = String.format("%s = None\n", CodecUtils.getSafeReferenceName(CodecUtils.getShortName(serviceName)));
+    exec(registerScript, false);
   }
 
   /**
@@ -667,8 +696,8 @@ public class Python extends Service {
    * before being processed/invoked in the Service.
    * 
    * Here all messages allowed to go and effect the Python service will be let
-   * through. However, all messsages not found in this filter will go "into"
-   * they Python script. There they can be handled in the scripted users code.
+   * through. However, all messages not found in this filter will go "into" they
+   * Python script. There they can be handled in the scripted users code.
    * 
    * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
    */
@@ -693,13 +722,19 @@ public class Python extends Service {
     inputQueue.add(msg);
     return false;
   }
-
-  public String publishStdOut(String data) {
-    return data;
+  
+  public String publishAppend(String code) {
+    return code;
   }
 
-  public String publishStdError(String data) {
-    return data;
+  public String publishStdOut(String msg) {
+    logs.add(msg);
+    return msg;
+  }
+
+  public String publishStdError(String msg) {
+    logs.add(msg);
+    return msg;
   }
 
   public void setLocalScriptDir(String path) {
@@ -715,11 +750,81 @@ public class Python extends Service {
     broadcastState();
   }
 
-  /*
-   * no longer needed
+  /**
+   * Saves a script to the file system 
    * 
-   * @Override public void startService() { super.startService(); }
+   * @param scriptName
+   * @param code
+   * @throws IOException
    */
+  public void saveScript(String scriptName, String code) throws IOException {
+    if (scriptName != null && !scriptName.toLowerCase().endsWith(".py")) {
+      scriptName = scriptName + ".py";
+    }
+    // FileIO.toFile(config.scriptRootDir + fs + scriptName, code);
+    FileIO.toFile(scriptName, code);
+    info("saved file %s", scriptName);
+  }
+
+  
+  /**
+   * upserts a script in memory
+   * @param file
+   * @param code
+   */
+  public void updateScript(String file, String code) {
+      if (openedScripts.containsKey(file)) {
+        Script script = openedScripts.get(file);
+        script.code = code;
+      } else {
+        openedScripts.put(file, new Script(file, code));
+        broadcastState();
+      }
+  }
+
+
+  // @Override /* FIXME - make interface for it */
+  public void defaultInvokeMethod(String method, Object... params) {
+    if (interp == null) {
+      createPythonInterpreter();
+    }
+    Message msg = Message.createMessage(getName(), getName(), method, params);
+    // handling call-back input needs to be
+    // done by another thread - in case its doing blocking
+    // or is executing long tasks - the inbox thread needs to
+    // be freed of such tasks - it has to do all the inbound routing
+    inputQueue.add(msg);
+  }
+
+  @Override
+  synchronized public void startService() {
+    super.startService();
+    
+    if (config.scriptRootDir == null) {
+        config.scriptRootDir = new File(System.getProperty("user.dir")).getAbsolutePath();
+    }
+    File dataDir = new File(config.scriptRootDir);
+    dataDir.mkdirs();    
+    
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface s : services.values()) {
+      onStarted(s.getName());
+    }
+    // register runtime life cycle events for other services
+    Runtime.getInstance().attachServiceLifeCycleListener(getName());
+    
+    // run start scripts if there are any
+    if (config.startScripts != null) {
+      for (String script : config.startScripts) {
+        // i think in this context its safer to block
+        try {
+          execFile(script, true);
+        } catch (IOException e) {
+          log.error("starting scripts threw", e);
+        }
+      }
+    }
+  }
 
   @Override
   public void releaseService() {
@@ -731,21 +836,15 @@ public class Python extends Service {
       interp = null;
     }
 
-    if (inputQueueThread != null) {
-      // let thread exit normally
-      inputQueueThread.running = false;
-      inputQueueThread = null;
-    }
-
+    inputQueueThread.stop();
     thread.interruptAllThreads();
-    Py.getSystemState()._systemRestart = true;
   }
 
   /**
    * stop all scripts (not sure the pros/cons of this management vs
    * thread.interruptAllThreads())
    * 
-   * @return
+   * @return false
    */
   public boolean stop() {
     log.info("stopping all scripts");
@@ -763,92 +862,216 @@ public class Python extends Service {
    */
   @Override
   public void stopService() {
+    // run any stop scripts
+    for (String script : config.stopScripts) {
+      // i think in this context its safer to block
+      try {
+        execFile(script, true);
+      } catch (IOException e) {
+        log.error("stopping scripts threw", e);
+      }
+    }
+    // shutdown inbox/outbox
     super.stopService();
-    stop();// release the interpeter
+    // release the interpeter
+    stop();
+  }
+  
+  /**
+   * Initialize the Jython interpreter including all the jython/python which needs to
+   * run in order to interface correctly with mrl. 
+   */
+  public void init() {
+    
+    log.info("created python {}", getName());
+    createPythonInterpreter();
+    sleep(250);
+   
+    // I love ServiceData !
+    ServiceData sd = ServiceData.getLocalInstance();
+    List<MetaData> sdt = sd.getAvailableServiceTypes();
+    for (int i = 0; i < sdt.size(); ++i) {
+      MetaData st = sdt.get(i);
+      // FIXME - cache in "data" dir Or perhaps it should be pulled into
+      // resource directory during build time and packaged with jar
+      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
+      exampleFiles.put(st.getSimpleName(), file);
+    }
+
+    localPythonFiles = getFileListing();
+
+    String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
+        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
+        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
+    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
+    interp.exec(compiled);
+
+    attachPythonConsole();
+    
+    // initialize all the pre-existing service before python was created
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface service : services.values()) {
+      if (service.isRunning()) {
+        onStarted(service.getName());
+      }
+    }
+
+    log.info("starting python {}", getName());
+    inputQueueThread.start();
+    log.info("started python {}", getName());
+  }
+
+  public boolean isOpenOnExecute() {
+    return openOnExecute;
+  }
+
+  public void setOpenOnExecute(boolean openOnExecute) {
+    this.openOnExecute = openOnExecute;
   }
 
   @Override
-  public String exportAll() throws IOException {
-    String filename = getRootDataDir() + fs + getId() + ".py";
-    String script = super.exportAll(filename);
-    openScript(filename, script);
-    return script;
+  public void onCreated(String name) {
+    log.info("onCreated {}", name);
+  }
+  
+  public void onPython(String code) {
+    log.info("onPython {}", code);
+    exec(code);
+  }
+  
+
+  @Override
+  public void onRegistered(Registration registration) {
+    log.info("onCreated {}", registration);
+  }
+
+  @Override
+  public void onStopped(String fullname) {
+    log.info("onCreated {}", fullname);
+  }
+
+
+  public PythonConfig apply(PythonConfig c) {
+    super.apply(c);
+    
+    // apply is the first method called after construction,
+    // since we offer the capability of executing scripts specified in config
+    // the interpreter must be configured and created here
+    init();
+    
+    if (c.startScripts != null && c.startScripts.size() > 0) {
+
+      if (isRunning()) {
+        for (String script : c.startScripts) {
+          try {
+            execFile(script);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+    }
+
+    PySystemState sys = Py.getSystemState();
+
+    if (c.modulePaths != null) {
+      for (String path : c.modulePaths) {
+        sys.path.append(new PyString(path));
+      }
+    }
+
+    log.info("Python System Path: {}", sys.path);
+
+    return c;
+  }
+  
+  /**
+   * get listing of filesystem files location will be data/Py4j/{serviceName}
+   * 
+   * @return
+   * @throws IOException
+   */
+  public List<String> getScriptList() throws IOException {
+    List<String> sorted = new ArrayList<>();
+    if (config.scriptRootDir == null) {
+      config.scriptRootDir = new File(System.getProperty("user.dir")).getAbsolutePath();
+    }    
+    List<File> files = FileIO.getFileList(config.scriptRootDir, false);
+    for (File file : files) {
+      if (file.toString().endsWith(".py")) {
+        sorted.add(file.toString().substring(config.scriptRootDir.length() + 1));
+      }
+    }
+    Collections.sort(sorted);
+    return sorted;
+  }
+  
+
+  /**
+   * Add a new script to Py4j default location will be in
+   * data/Py4j/{serviceName}
+   * 
+   * @param scriptName
+   *          - name of the script
+   * @param code
+   *          - code block
+   * @throws IOException
+   */
+  public void addScript(String scriptName, String code) throws IOException {
+    if (!scriptName.contains(fs)) {
+      // prepend script root dir if no prefix is used
+      if (config.scriptRootDir != null) {
+        scriptName = config.scriptRootDir + fs + scriptName;
+      }
+    }
+    openedScripts.put(scriptName, new Script(scriptName, code));
+    broadcastState();
+  }
+  
+  /**
+   * Opens an example "service" script maintained in myrobotlab
+   * 
+   * @param serviceType
+   *          the type of service
+   * @throws IOException
+   */
+  public void openExampleScript(String serviceType) throws IOException {
+    String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
+    String serviceScript = null;
+    try {
+      serviceScript = FileIO.toString(filename);
+    } catch (Exception e) {
+      error("%s.py not  found", serviceType);
+      log.error("getting service file script example threw {}", e);
+    }
+    addScript(serviceType + ".py", serviceScript);
+  }
+  
+
+  @Override
+  public void onMessage(Message msg) {
+    // TODO Auto-generated method stub
+
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    Python python = (Python) Runtime.start("python", "Python");
-
-    python.exec("a = 12");
-    PyObject pyobject = python.get("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyInteger) pyobject).getValue());
-
-    python.exec("a = 12.7");
-    pyobject = python.get("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyFloat) pyobject).getValue());
-
-    python.exec("a = ['foo','bar']");
-    pyobject = python.get("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyList) pyobject).getArray());
-
-    python.exec("a = {'foo':1, 'bar':2}");
-    pyobject = python.get("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyDictionary) pyobject));
-    
-    python.exec("b = 7.356");
-    Double b = (Double)python.getValue("b");
-    log.info("b = {}", b);
-
-    python.exec("c = [1,2,3]");
-    Object[] c = (Object[])python.getValue("c");
-    log.info("c = {}", c);
-
-    python.exec("d = {'foo':True, 'bar':False}");
-    Map d = (Map)python.getValue("d");
-    log.info("foo = {}", d.get("foo"));
-    
-    // Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "SwingGui");
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
     try {
+      LoggingFactory.init("INFO");
 
-      File test = new File("file:/D:/local");
-      File example = new File("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/develop/service/Clock.py");
+      // Runtime.start("i01.head.rothead", "Servo");
+      // Runtime.start("i01.head.neck", "Servo");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      Python python = (Python) Runtime.start("python", "Python");
+      
+      // Py4j py4j = (Py4j) Runtime.start("py4j", "Py4j");
+      // python.execFile("data/adafruit.py");
 
-      log.info("{}", test.toURI().toURL());
-      log.info("{}", example.toURI().toURL());
-
-      // Runtime.start("gui", "SwingGui");
-      // String f = "C:\\Program Files\\blah.1.py";
-      // log.info(getName(f));
-
-      // python.error("this is an error");
-      // python.loadScriptFromResource("VirtualDevice/Arduino.py");
-      // python.execAndWait();
-      // python.releaseService();
-
-      /*
-       * python.load(); python.save();
-       * 
-       * FileOutputStream fos = new FileOutputStream("python.dat");
-       * ObjectOutputStream out = new ObjectOutputStream(fos);
-       * out.writeObject(python); out.close();
-       * 
-       * FileInputStream fis = new FileInputStream("python.dat");
-       * ObjectInputStream in = new ObjectInputStream(fis); Object x =
-       * in.readObject(); in.close();
-       * 
-       * Runtime.createAndStart("gui", "SwingGui");
-       */
+      // Runtime.start("i01", "InMoov2");
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -856,4 +1079,13 @@ public class Python extends Service {
 
   }
 
+  @Override
+  public PythonConfig getConfig() {
+    return config;
+  }
+
+  public void clear() {
+    logs = new SlidingWindowList<>(300);
+  }
+  
 }

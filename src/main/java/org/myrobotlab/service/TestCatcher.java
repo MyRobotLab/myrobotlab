@@ -30,9 +30,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +46,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
+import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
+import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -55,7 +61,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener, PinArrayListener, PinListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -65,6 +71,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * data to hold the incoming messages
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
+
+  transient public Map<String, Object[]> methodsCalled = new HashMap<>();
 
   public static class Ball {
     public String name;
@@ -77,20 +85,35 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   boolean isLocal = true;
 
-  public Set<String> onCreated = new HashSet<>();
+  public Set<String> onCreated = ConcurrentHashMap.newKeySet();
 
   public Map<String, Registration> onRegistered = new HashMap<String, Registration>();
 
-  public Set<String> onStarted = new HashSet<>();
+  public Set<String> onStarted = ConcurrentHashMap.newKeySet();
 
-  public Set<String> onReleased = new HashSet<>();
+  public Set<String> onReleased = ConcurrentHashMap.newKeySet();
 
-  public Set<String> onStopped = new HashSet<>();
+  public Set<String> onStopped = ConcurrentHashMap.newKeySet();
+
+  public List<Long> longs = new ArrayList<>();
+
+  public Set<PinData[]> pinSet = ConcurrentHashMap.newKeySet();
+
+  public String[] activePins = null;
+
+  public PinData pinData = null;
+
+  public String pin;
+
+  public BlockingQueue<Integer> integers = new LinkedBlockingDeque<>();
+
+  public BlockingQueue<String> strings = new LinkedBlockingDeque<>();
 
   /**
    * awesome override to simulate remote services - e.g. in
    * Serial.addByteListener
    */
+  @Override
   public boolean isLocal() {
     return isLocal;
   }
@@ -104,6 +127,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * but use a callback thread from the other service as an optimization onByte
    * is one of those methods
    */
+  @Override
   public void onBytes(byte[] b) {
     // NoOp
   }
@@ -136,8 +160,15 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     }
   }
 
+  /**
+   * put all recv structures here to clear
+   */
   public void clear() {
     msgs.clear();
+    pinData = null;
+    pinSet.clear();
+    methodsCalled.clear();
+    longs.clear();
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -200,11 +231,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public void onConnect(String portName) {
     info("connected to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   @Override
   public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
+    methodsCalled.put(Thread.currentThread().getStackTrace()[1].getMethodName(), new Object[] { portName });
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {
@@ -273,6 +306,19 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public Integer onInteger(Integer data) {
     log.info("onInteger {}", data);
+    integers.add(data);
+    return data;
+  }
+
+  public String onString(String data) {
+    log.info("onString {}", data);
+    strings.add(data);
+    return data;
+  }
+
+  public Long onLong(Long data) {
+    log.info("onInteger {}", data);
+    longs.add(data);
     return data;
   }
 
@@ -283,6 +329,12 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public double onDouble(double data) {
     log.info("onDouble {}", data);
+    return data;
+  }
+
+  public int waitForThis(int data, long sleep) {
+    sleep(sleep);
+    log.info("waitForThis {}", data);
     return data;
   }
 
@@ -457,11 +509,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public void onRegistered(Registration registration) {
     if (onRegistered != null) {
-      onRegistered.put(registration.getName(), registration);
+      onRegistered.put(registration.getFullName(), registration);
     }
   }
 
   public void onStarted(String serviceName) {
+    String info = String.format("notified --> %s  %s has started", getName(), serviceName);
+    log.info(info);
     onStarted.add(serviceName);
   }
 
@@ -471,6 +525,69 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public void onReleased(String serviceName) {
     onReleased.add(serviceName);
+  }
+
+  @Override
+  public void onPinArray(PinData[] pindata) {
+    log.info("onPinArray {}", pinData);
+    pinSet.add(pindata);
+  }
+
+  public void setActivePins(String[] activePins) {
+    this.activePins = activePins;
+  }
+
+  @Override
+  public String[] getActivePins() {
+    return activePins;
+  }
+
+  @Override
+  public void onPin(PinData pinData) {
+    log.info("onPin {}", pinData);
+    this.pinData = pinData;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
+  public boolean containsPinArrayFromPin(String pin) {
+    for (PinData[] pa : pinSet) {
+      for (PinData pd : pa) {
+        if (pin.equals(pd.pin)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public void verifyCallback(String method, Object... params) throws IOException {
+    if (!methodsCalled.containsKey(method)) {
+      throw new IOException(String.format("callback %s not found", method));
+    }
+    Object[] recvdParams = methodsCalled.get(method);
+    if (recvdParams.length != params.length) {
+      throw new IOException(String.format("parameter misalignment for method %s - expecting %d got %d", method, params.length, recvdParams.length));
+    }
+    for (int i = 0; i < params.length; ++i) {
+      Object verify = params[i];
+      Object recvd = params[i];
+      if (verify == null && recvd != null) {
+        throw new IOException(String.format("parameter invalid for method %s - expecting null got %s", method, recvd));
+      }
+
+      if (!verify.equals(recvd)) {
+        throw new IOException(String.format("parameter incorrect for method %s - expecting %s got %s", method, verify, recvd));
+      }
+    }
   }
 
 }

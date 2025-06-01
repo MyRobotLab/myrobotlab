@@ -1,0 +1,6 @@
+!!org.myrobotlab.service.config.PidConfig
+data: {
+  }
+listeners: null
+peers: null
+type: Pid

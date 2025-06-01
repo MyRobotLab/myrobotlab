@@ -2,9 +2,6 @@ package org.myrobotlab.process;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +45,7 @@ public class Launcher {
 
     // command line to be returned
     List<String> cmd = new ArrayList<String>();
-    
+
     // prepare exe
     String fs = File.separator;
     String ps = File.pathSeparator;
@@ -60,13 +57,13 @@ public class Launcher {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
-    
+
     cmd.add(javaExe);
 
     if (options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", options.memory, options.memory);
     }
-    
+
     cmd.add(jvmArgs);
 
     if (options.jvm != null) {
@@ -90,9 +87,7 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-    
-    options.fromLauncher = true;
-    
+
     cmd.addAll(options.getOutputCmd());
 
     // FIXME - daemonize? does that mean handle stream differently?
@@ -103,7 +98,7 @@ public class Launcher {
     System.out.println(toString(cmd));
     ProcessBuilder builder = new ProcessBuilder(cmd);
     builder.redirectErrorStream(true);
-    builder.inheritIO();
+    // builder.inheritIO(); # LAME - JDK BUG FIXED THEN NOT FIXED ...
 
     // one of the nastiest bugs had to do with std out, or std err not
     // being consumed ... now we don't bother with it - instead
@@ -124,7 +119,8 @@ public class Launcher {
     }
 
     builder.directory(spawnDir);
-    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmd));
+    log.info("WORKING DIR {}", spawnDir.getAbsolutePath());
+    log.info("SPAWNING ! -->{}", toString(cmd));
 
     // environment variables setup
     setEnv(builder.environment());
@@ -155,6 +151,8 @@ public class Launcher {
 
   /**
    * prints help to the console
+   * 
+   * @return the help
    */
   static public String mainHelp() {
     String help = new CommandLine(new CmdOptions()).getUsageMessage();
@@ -207,6 +205,7 @@ public class Launcher {
    * an interface to the spawned instance
    * 
    * @param args
+   *          args
    */
   public static void main(String[] args) {
     try {
@@ -239,40 +238,14 @@ public class Launcher {
         return;
       }
 
-      boolean instanceAlreadyRunning = false;
-
-      try {
-        URI uri = new URI(options.connect);
-        Socket socket = new Socket();
-        socket.connect(new InetSocketAddress(uri.getHost(), uri.getPort()), 1000);
-        socket.close();
-        instanceAlreadyRunning = true;
-      } catch (Exception e) {
-        log.info("could not connect to {}", options.connect);
+      log.info("spawning new instance");
+      ProcessBuilder builder = createBuilder(options);
+      process = builder.start();
+      if (process.isAlive()) {
+        log.info("process is alive");
+      } else {
+        log.error("process died");
       }
-
-      if (instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CONNECT)) {
-        log.error("zombie instance already running at {}", options.DEFAULT_CONNECT);
-        return;
-      }
-
-      if (!instanceAlreadyRunning || !options.connect.equals(options.DEFAULT_CONNECT)) {
-        log.info("spawning new instance");
-        ProcessBuilder builder = createBuilder(options);
-        process = builder.start();
-        if (process.isAlive()) {
-          log.info("process is alive");
-        } else {
-          log.error("process died");
-        }
-      }
-
-      /*
-       * // FIXME - use wsclient for remote access if (options.client != null) {
-       * // FIXME - delay & auto connect Client.main(new String[] { "-c",
-       * options.client }); } else { // terminating - "if" runtime exists - if
-       * not no biggy Runtime.shutdown(); }
-       */
 
     } catch (Exception e) {
       log.error("main threw", e);

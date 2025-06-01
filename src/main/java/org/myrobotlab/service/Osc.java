@@ -14,6 +14,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.OscConfig;
 import org.slf4j.Logger;
 
 import com.illposed.osc.OSCListener;
@@ -21,7 +22,7 @@ import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 
-public class Osc extends Service implements OSCListener {
+public class Osc extends Service<OscConfig> implements OSCListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -58,6 +59,7 @@ public class Osc extends Service implements OSCListener {
       return address;
     }
 
+    @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append("osc ");
@@ -148,6 +150,7 @@ public class Osc extends Service implements OSCListener {
     invoke("publishOscMessage", new Date().getTime(), message);
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stopListening();

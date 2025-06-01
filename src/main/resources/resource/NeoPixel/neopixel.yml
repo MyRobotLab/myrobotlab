@@ -1,0 +1,17 @@
+!!org.myrobotlab.service.config.NeoPixelConfig
+autoClear: true
+blue: 0
+brightness: 255
+controller: null
+currentAnimation: null
+fill: false
+green: 0
+idleTimeout: 1000
+listeners: null
+peers: null
+pin: null
+pixelCount: null
+pixelDepth: 3
+red: 0
+speed: 10
+type: NeoPixel

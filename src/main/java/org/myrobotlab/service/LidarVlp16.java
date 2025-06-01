@@ -12,9 +12,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.LidarConfig;
 import org.slf4j.Logger;
 
-public class LidarVlp16 extends Service {
+public class LidarVlp16 extends Service<LidarConfig> {
 
   private static final long serialVersionUID = 1L;
 

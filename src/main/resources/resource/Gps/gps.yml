@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.GpsConfig
+listeners: null
+peers:
+  serial:
+    autoStart: true
+    name: gps.serial
+    type: Serial
+type: Gps

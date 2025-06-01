@@ -8,6 +8,7 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
+import org.myrobotlab.service.config.RSSConnectorConfig;
 
 import com.sun.syndication.feed.synd.SyndEntryImpl;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -15,7 +16,7 @@ import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
-public class RSSConnector extends AbstractConnector {
+public class RSSConnector extends AbstractConnector<RSSConnectorConfig>  {
 
   private static final long serialVersionUID = 1L;
 

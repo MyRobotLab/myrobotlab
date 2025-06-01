@@ -1,0 +1,10 @@
+!!org.myrobotlab.service.config.VirtualArduinoConfig
+connect: false
+listeners: null
+peers:
+  uart:
+    autoStart: true
+    name: virtualarduino.uart
+    type: Serial
+port: null
+type: VirtualArduino

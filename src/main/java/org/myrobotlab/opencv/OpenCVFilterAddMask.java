@@ -58,6 +58,9 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   double opacity = 0.4;
 
+  transient private CloseableFrameConverter converter1 = new CloseableFrameConverter();
+  transient private CloseableFrameConverter converter2 = new CloseableFrameConverter();
+
   public OpenCVFilterAddMask(String name) {
     super(name);
   }
@@ -71,7 +74,7 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
     if (transparency != null) {
       transparency = OpenCVFilter.loadMat("transparent-bubble.png");
-      Mat targetImage = toMat(image.clone()); // toMat(image);
+      Mat targetImage = converter1.toMat(image.clone()); // toMat(image);
       Mat resultImage = targetImage.clone();
       // IplImage src = cvCreateImage(cvGetSize(srcColor), IPL_DEPTH_8U, 1);
       // blendFast(transparency, targetImage, resultImage);
@@ -90,41 +93,58 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
        log.info("here");
        * </pre>
        */
-      return toImage(resultImage.clone());
+      return converter2.toImage(resultImage.clone());
     }
 
     return image;
+  }
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter1.close();
+    converter2.close();
   }
 
   int cnt = 0;
 
   /** Does alpha blending with high-performance Indexer from JavaCPP. */
   final void blendFast(final Mat rgbaImg, final Mat bgrImg, final Mat dstImg) {
-    final UByteIndexer rgbaIdx = rgbaImg.createIndexer();
-    final UByteIndexer bgrIdx = bgrImg.createIndexer();
-    final UByteIndexer dstIdx = dstImg.createIndexer();
-    final int rows = rgbaImg.rows(), cols = rgbaImg.cols();
+    try {
+      final UByteIndexer rgbaIdx = rgbaImg.createIndexer();
+      final UByteIndexer bgrIdx = bgrImg.createIndexer();
+      final UByteIndexer dstIdx = dstImg.createIndexer();
+      final int rows = rgbaImg.rows(), cols = rgbaImg.cols();
 
-    log.warn("cnt {}", ++cnt);
-    Parallel.loop(0, rows, new Parallel.Looper() {
-      public void loop(int from, int to, int looperID) {
-        for (int i = from; i < to; i++) {
-          for (int j = 0; j < cols; j++) {
-            float a = rgbaIdx.get(i, j, 3) * (1.0f / 255.0f);
-            float x = bgrIdx.get(i, j, 0);
-            float b = rgbaIdx.get(i, j, 2) * a + bgrIdx.get(i, j, 0) * (1.0f - a);
-            float g = rgbaIdx.get(i, j, 1) * a + bgrIdx.get(i, j, 1) * (1.0f - a);
-            float r = rgbaIdx.get(i, j, 0) * a + bgrIdx.get(i, j, 2) * (1.0f - a);
-            dstIdx.put(i, j, 0, (byte) b);
-            dstIdx.put(i, j, 1, (byte) g);
-            dstIdx.put(i, j, 2, (byte) r);
+      log.debug("cnt {}", ++cnt);
+      Parallel.loop(0, rows, new Parallel.Looper() {
+        @Override
+        public void loop(int from, int to, int looperID) {
+          for (int i = from; i < to; i++) {
+            for (int j = 0; j < cols; j++) {
+              float a = rgbaIdx.get(i, j, 3) * (1.0f / 255.0f);
+              float x = bgrIdx.get(i, j, 0);
+              float b = rgbaIdx.get(i, j, 2) * a + bgrIdx.get(i, j, 0) * (1.0f - a);
+              float g = rgbaIdx.get(i, j, 1) * a + bgrIdx.get(i, j, 1) * (1.0f - a);
+              float r = rgbaIdx.get(i, j, 0) * a + bgrIdx.get(i, j, 2) * (1.0f - a);
+              dstIdx.put(i, j, 0, (byte) b);
+              dstIdx.put(i, j, 1, (byte) g);
+              dstIdx.put(i, j, 2, (byte) r);
+            }
           }
         }
-      }
-    });
-    rgbaIdx.release();
-    bgrIdx.release();
-    dstIdx.release();
+      });
+      rgbaIdx.release();
+      bgrIdx.release();
+      dstIdx.release();
+    } catch (IndexOutOfBoundsException ex) {
+      log.error("blendFast threw a out of bound index");
+    } catch (RuntimeException ey) {
+      log.error("blendFast threw a runtime exception");
+    } catch (Exception e) {
+      log.error("blendFast threw", e);
+    }
   }
 
   public void test() {

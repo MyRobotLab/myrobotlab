@@ -5,4 +5,4 @@
 # possibly more info @: http://myrobotlab.org/service/Webcam
 #########################################
 # start the service
-webcam = Runtime.start("webcam","Webcam")
+webcam = runtime.start("webcam","Webcam")

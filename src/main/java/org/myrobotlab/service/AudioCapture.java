@@ -50,13 +50,15 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.AudioCaptureConfig;
 import org.slf4j.Logger;
 
 /**
  * AudioCapture - a service that can record and playback from a microphone.
  * 
  */
-public class AudioCapture extends Service {
+public class AudioCapture extends Service<AudioCaptureConfig>
+{
   public final static Logger log = LoggerFactory.getLogger(AudioCapture.class.getCanonicalName());
 
   private static final long serialVersionUID = 1L;
@@ -159,13 +161,13 @@ public class AudioCapture extends Service {
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
       audioIn.playAudio();
-      audioIn.save("me5.wav");
+      audioIn.saveAudioFile("me5.wav");
 
       audioIn.captureAudio();
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
       audioIn.playAudio();
-      audioIn.save("me1.wav");
+      audioIn.saveAudioFile("me1.wav");
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -261,7 +263,8 @@ public class AudioCapture extends Service {
         // byte array containing the data
         InputStream byteArrayInputStream = new ByteArrayInputStream(audioData);
         AudioFormat audioFormat = getAudioFormat();
-        audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat, audioData.length / audioFormat.getFrameSize());
+        audioInputStream = new AudioInputStream(byteArrayInputStream, audioFormat,
+            audioData.length / audioFormat.getFrameSize());
         DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
         sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
         sourceDataLine.open(audioFormat);
@@ -284,7 +287,7 @@ public class AudioCapture extends Service {
     return byteArrayOutputStream;
   }
 
-  public void save(String filename) throws IOException {
+  public void saveAudioFile(String filename) throws IOException {
     byte[] data = byteArrayOutputStream.toByteArray();
     AudioInputStream ais = new AudioInputStream(new ByteArrayInputStream(data), audioFormat, data.length);
     AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File(filename));

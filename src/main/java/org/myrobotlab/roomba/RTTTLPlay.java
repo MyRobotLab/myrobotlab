@@ -107,7 +107,7 @@ public class RTTTLPlay {
       int notearray[] = new int[songsize * 2];
       int j = 0;
       for (int i = 0; i < songsize; i++) {
-        Note note = (Note) notelist.get(i);
+        Note note = notelist.get(i);
         int sec64ths = note.duration * 64 / 1000;
         notearray[j++] = note.notenum;
         notearray[j++] = sec64ths;
@@ -120,7 +120,7 @@ public class RTTTLPlay {
       log.info("playing song in realtime with playNote()");
       int fudge = 20;
       for (int i = 0; i < songsize; i++) {
-        Note note = (Note) notelist.get(i);
+        Note note = notelist.get(i);
         int duration = note.duration;
         int sec64ths = duration * 64 / 1000;
         if (sec64ths < 5)

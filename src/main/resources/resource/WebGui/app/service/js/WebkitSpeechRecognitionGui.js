@@ -30,7 +30,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     // this is really a js service
     // and this is the initial service state we want
     $scope.service = {
-        isRecording: false,
+        config: {isRecording: false},
         status: null
     }
 
@@ -38,10 +38,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.changeListeningState = function() {
         if (!$scope.isRecording) {
             $scope.setState('start')
-            // msg.send('startListening') 
+            mrl.sendTo($scope.name,'startListening') 
         } else {
             $scope.setState('stop')
-            // msg.send('stopListening')
+            mrl.sendTo($scope.name,'stopListening') 
         }
     }
 
@@ -181,14 +181,24 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
     }
 
+    $scope.setLanguageFromService = function(lang) {
+        // recognizer.lang = $scope.selectedLanguage
+        recognizer.lang = lang
+        // sync'ing runtime platform locale
+        // msg.send("setLocale", $scope.selectedLanguage)
+        if ($scope.isRecording) {
+            recognizer.stop()
+        }
+    }
+
     this.updateState = function(service) {
         // $scope.service is old data
         // service is new data
 
-        if ($scope.isRecording && !service.isRecording) {
+        if ($scope.isRecording && !service.config.recording) {
             $scope.setState('stop')
         }
-            if (!$scope.isRecording && service.isRecording) {
+        if (!$scope.isRecording && service.config.recording) {
             $scope.setState('start')
         }
 
@@ -199,13 +209,43 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             }
         })
         */
+        let tag = service.locale.tag.substring(0,2)
+        if (tag == 'fr'){
+            tag = 'fr-FR'
+        } else if (tag == 'de'){
+            tag = 'de-DE'
+        } else if (tag == 'en'){
+            tag = 'en-US'
+        } else if (tag == 'es'){
+            tag = 'es-ES'
+        } else if (tag == 'fi'){
+            tag = 'fi-FI'
+        } else if (tag == 'fr'){
+            tag = 'fr-FR'
+        } else if (tag == 'hi'){
+            tag = 'hi-IN'
+        } else if (tag == 'it'){
+            tag = 'it-IT'
+        } else if (tag == 'nl'){
+            tag = 'nl-NL'
+        } else if (tag == 'pt'){
+            tag = 'pt-PT'
+        } else if (tag == 'ru'){
+            tag = 'ru-RU'
+        } else if (tag == 'tr'){
+            tag = 'tr-TR'
+        }
 
-        $scope.selectedLanguage = service.locale.tag
+        if (tag != $scope.selectedLanguage){
+            $scope.selectedLanguage = tag
+            $scope.setLanguageFromService(tag)            
+        }
 
         // update en-mass
         $scope.service = service
-        if (service.wakeWord != null && $scope.wakeWord == null){
-            $scope.wakeWord = service.wakeWord
+
+        if (service.config.wakeWord){
+            service.wakeWord = service.config.wakeWord
         }
 
     }
@@ -253,6 +293,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     // $scope.setState('start')
 
     msg.subscribe('publishListeningEvent')
+    // msg.subscribe('setLocale')
     // msg.subscribe('onStartSpeaking')
 
     /*
@@ -265,6 +306,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     // $scope.setState('start')
     msg.subscribe(this)
+    msg.send('broadcastState')
+
 
 }
 ])

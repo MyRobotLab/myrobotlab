@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-piston = Runtime.start('piston','Piston')
+piston = runtime.start('piston','Piston')

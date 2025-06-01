@@ -1,0 +1,148 @@
+<div class="row col-md-12">
+    <table>
+        <tr>
+            <td>
+                <b>cleanSession</b>
+            </td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <toggle width="70" height="28" ng-model="service.cleanSession" title="Server is listening" ng-change="service.connected?msg.start():msg.stop()" width="20" height="30" on="" off=""/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>auto subscribe</b>
+            </td>
+            <td></td>
+            <td>
+                <toggle width="70" height="28" ng-model="service.autoSubscribe" title="Allow clients without id" ng-change="msg.setAutoSubscribe(!service.autoSubscribe)" width="20" height="30" on="" off=""/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>auto reconnect</b>
+            </td>
+            <td></td>
+            <td>
+                <toggle width="70" height="28" ng-model="service.autoReconnect" title="Allow clients without id" ng-change="msg.setAutoReconnect(!service.autoReconnect)" width="20" height="30" on="" off=""/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>mqtt url</b>
+            </td>
+            <td></td>
+            <td>
+                <input class="form-control" type="text" id="service.url" ng-model="service.url" ng-readonly="service.connected"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>user name</b>
+            </td>
+            <td></td>
+            <td>
+                <input class="form-control" type="text" id="service.username" ng-model="service.username" ng-readonly="service.connected"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>password</b>
+            </td>
+            <td></td>
+            <td>
+                <input class="form-control" type="password" id="service.password" ng-model="service.password" ng-readonly="service.connected"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <b>client id</b>
+            </td>
+            <td></td>
+            <td>
+                <input class="form-control" type="text" id="service.clientId" ng-model="service.clientId" ng-readonly="service.connected"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" ng-show="!service.connected && !service.connecting" ng-click="connect()" ng-readonly="service.connecting">connect</button>
+                    </span>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" ng-show="service.connecting && !service.connected"  ng-readonly="true">connecting</button>
+                    </span>
+                    <span class="input-group-btn">
+                        <button class="btn btn-warning" ng-show="service.connected || service.connecting" ng-click="msg.disconnect();msg.broadcastState()">disconnect</button>
+                    </span>
+                </div>
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+<br/>
+<div class="row col-md-12">
+    <b>messages sent {{sentMsgCnt}}</b>
+    <input class="form-control" type="text" placeholder="myEchoTopic" id="publishTopic" ng-model="publishTopic" ng-readonly="!service.connected"/>
+    <textarea placeholder="['foo', 'bar']" ng-model="data" class="form-control" rows="3" id="data" ng-readonly="!service.connected"></textarea>
+    <!-- TODO - implement :) <button class="btn btn-default" ng-readonly="!isConnected" ng-click="sendFile()">send file</button> -->
+    <div class="input-group">
+        <span class="input-group-btn">
+            <button class="btn btn-default" ng-show="service.connected" ng-click="publish(publishTopic, data, service.qos)">publish</button>
+        </span>
+    </div>
+</div>
+<br/>
+<div class="row col-md-12">
+    <b>subscriptions</b>
+    <ul>
+        <li ng-repeat="s in service.subscriptions">{{s}}</li>
+    </ul>
+    <input class="form-control" type="text" placeholder="myEchoTopic" id="subscribeTopic" ng-model="subscribeTopic" ng-readonly="!service.connected"/>
+    <div class="input-group">
+        <span class="input-group-btn">
+            <button class="btn btn-default" ng-show="service.connected" ng-click="msg.subscribe(subscribeTopic)">subscribe</button>
+        </span>
+    </div>
+</div>
+<br/>
+<div class="row col-md-12">
+    <b>recieved messages</b>
+    <br/>
+    {{rowCount}} messages recieved - current window size is {{maxRecords}}<br/>
+    <button class="btn btn-default" ng-click="reverse =!reverse" title="sort log entries, arrow indicates direction which new log entries shall be inserted">
+        <span ng-class="{'glyphicon glyphicon-arrow-down': !reverse, 'glyphicon glyphicon-arrow-up':reverse}"></span>
+    </button>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">time</th>
+                <th scope="col">topic</th>
+                <th scope="col">payload</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="e in log | orderBy:'':reverse">
+                <td>
+                    <small>{{e.date}}</small>
+                </td>
+                <td>
+                    <small>{{e.topicName}}</small>
+                </td>
+                <td>
+                    <small>{{e.payload}}</small>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

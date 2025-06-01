@@ -59,20 +59,20 @@ public class Map3D {
         int index = x + y * widthImage;
         PVector loc = null;
         if (depthData[index].z > closestDistance && depthData[index].z <= fartestDistance) {
-          for (float z = closestDistance; z < depthData[index].z - skip; z += (float) skip) {
+          for (float z = closestDistance; z < depthData[index].z - skip; z += skip) {
             loc = PVector.div(depthData[index], depthData[index].z);
             loc = PVector.mult(loc, z);
             addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
           }
           addCoordValue(depthData[index].x, depthData[index].y, depthData[index].z, CoordStateValue.FILL);
-          for (float z = depthData[index].z + (float) skip; z < fartestDistance; z += (float) skip) {
+          for (float z = depthData[index].z + skip; z < fartestDistance; z += skip) {
             loc = PVector.div(depthData[index], depthData[index].z);
             loc = PVector.mult(loc, z);
             addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.UNDEFINED);
           }
         }
         if (depthData[index].z > fartestDistance) {
-          for (float z = closestDistance; z <= depthData[index].z && z <= fartestDistance; z += (float) skip) {
+          for (float z = closestDistance; z <= depthData[index].z && z <= fartestDistance; z += skip) {
             loc = PVector.div(depthData[index], depthData[index].z);
             loc = PVector.mult(loc, z);
             addCoordValue(loc.x, loc.y, loc.z, CoordStateValue.EMPTY);
@@ -189,9 +189,9 @@ public class Map3D {
     Point pOut = new Point(inputMatrix.elements[0][3], inputMatrix.elements[1][3], inputMatrix.elements[2][3], 0, 0, 0);
 
     // convert to the coordinate use by our ik engine and reduce the resolution
-    double posx = (int) ((int) pOut.getX() / skip * skip);
-    double posy = (int) ((int) pOut.getY() / skip * skip);
-    double posz = (int) ((int) pOut.getZ() / skip * skip);
+    double posx = (int) pOut.getX() / skip * skip;
+    double posy = (int) pOut.getY() / skip * skip;
+    double posz = (int) pOut.getZ() / skip * skip;
 
     Map3DPoint map = new Map3DPoint();
     map.point = pOut;

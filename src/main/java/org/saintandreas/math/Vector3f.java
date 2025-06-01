@@ -45,233 +45,226 @@ import javax.annotation.Nonnull;
  * @author Brad Davis
  */
 public final class Vector3f extends Vector<Vector3f> implements java.io.Serializable {
-    static final long serialVersionUID = 1;
+  static final long serialVersionUID = 1;
 
-    public final static Vector3f ZERO = new Vector3f(0, 0, 0);
-    public final static Vector3f NAN = new Vector3f(Float.NaN, Float.NaN, Float.NaN);
-    public final static Vector3f UNIT_X = new Vector3f(1, 0, 0);
-    public final static Vector3f UNIT_Y = new Vector3f(0, 1, 0);
-    public final static Vector3f UNIT_Z = new Vector3f(0, 0, 1);
-    public final static Vector3f UNIT_XYZ = new Vector3f(1, 1, 1);
-    public final static Vector3f POSITIVE_INFINITY = new Vector3f(
-            Float.POSITIVE_INFINITY,
-            Float.POSITIVE_INFINITY,
-            Float.POSITIVE_INFINITY);
-    public final static Vector3f NEGATIVE_INFINITY = new Vector3f(
-            Float.NEGATIVE_INFINITY,
-            Float.NEGATIVE_INFINITY,
-            Float.NEGATIVE_INFINITY);
+  public final static Vector3f ZERO = new Vector3f(0, 0, 0);
+  public final static Vector3f NAN = new Vector3f(Float.NaN, Float.NaN, Float.NaN);
+  public final static Vector3f UNIT_X = new Vector3f(1, 0, 0);
+  public final static Vector3f UNIT_Y = new Vector3f(0, 1, 0);
+  public final static Vector3f UNIT_Z = new Vector3f(0, 0, 1);
+  public final static Vector3f UNIT_XYZ = new Vector3f(1, 1, 1);
+  public final static Vector3f POSITIVE_INFINITY = new Vector3f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+  public final static Vector3f NEGATIVE_INFINITY = new Vector3f(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 
+  /**
+   * the x value of the vector.
+   */
+  public final float x;
 
-    /**
-     * the x value of the vector.
-     */
-    public final float x;
+  /**
+   * the y value of the vector.
+   */
+  public final float y;
 
-    /**
-     * the y value of the vector.
-     */
-    public final float y;
+  /**
+   * the z value of the vector.
+   */
+  public final float z;
 
-    /**
-     * the z value of the vector.
-     */
-    public final float z;
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> with default values of
+   * (0,0,0).
+   *
+   */
+  public Vector3f() {
+    this(0);
+  }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> with default
-     * values of (0,0,0).
-     *
-     */
-    public Vector3f() {
-        this(0);
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> with default values of
+   * (0,0,0).
+   * 
+   * @param s
+   *          value
+   *
+   */
+  public Vector3f(float s) {
+    x = y = z = s;
+  }
+
+  /**
+   * Constructor instantiates a new <code>Vector3f</code> with provides values.
+   *
+   * @param x
+   *          the x value of the vector.
+   * @param y
+   *          the y value of the vector.
+   * @param z
+   *          the z value of the vector.
+   */
+  public Vector3f(float x, float y, float z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+
+  /**
+   * Promote a 2 vec to a 3 vec
+   * 
+   * @param v
+   *          v
+   * @param z
+   *          z
+   */
+  public Vector3f(@Nonnull Vector2f v, float z) {
+    this(v.x, v.y, z);
+  }
+
+  /**
+   * @param v
+   *          v
+   */
+  public Vector3f(@Nonnull Vector2f v) {
+    this(v, 0);
+  }
+
+  public float getX() {
+    return x;
+  }
+
+  public float getY() {
+    return y;
+  }
+
+  public float getZ() {
+    return z;
+  }
+
+  /**
+   * <code>toString</code> returns the string representation of this vector. The
+   * format is:
+   *
+   * org.jme.math.Vector3f [X=XX.XXXX, Y=YY.YYYY, Z=ZZ.ZZZZ]
+   *
+   * @return the string representation of this vector.
+   */
+  @Override
+  public String toString() {
+    return "(" + x + ", " + y + ", " + z + ")";
+  }
+
+  /**
+   * <code>cross</code> calculates the cross product of this vector with a
+   * parameter vector v.
+   *
+   * @param v
+   *          the vector to take the cross product of with this.
+   * @return the cross product vector.
+   */
+  public Vector3f cross(Vector3f v) {
+    float resX = ((y * v.z) - (z * v.y));
+    float resY = ((z * v.x) - (x * v.z));
+    float resZ = ((x * v.y) - (y * v.x));
+    return new Vector3f(resX, resY, resZ);
+  }
+
+  /**
+   * <code>angleBetween</code> returns (in radians) the angle between two
+   * vectors. It is assumed that both this vector and the given vector are unit
+   * vectors (iow, normalized).
+   * 
+   * @param otherVector
+   *          a unit vector to find the angle against
+   * @return the angle in radians.
+   */
+  @Override
+  public float angleBetween(Vector3f otherVector) {
+    float dotProduct = dot(otherVector);
+    float angle = FastMath.acos(dotProduct);
+    return angle;
+  }
+
+  /*
+   * public static void generateOrthonormalBasis(Vector3f u, Vector3f v,
+   * Vector3f w) { w.normalizeLocal(); generateComplementBasis(u, v, w); }
+   * 
+   * public static void generateComplementBasis(Vector3f u, Vector3f v, Vector3f
+   * w) { float fInvLength;
+   * 
+   * if (FastMath.abs(w.x) >= FastMath.abs(w.y)) { // w.x or w.z is the largest
+   * magnitude component, swap them fInvLength = FastMath.invSqrt(w.x * w.x +
+   * w.z * w.z); u.x = -w.z * fInvLength; u.y = 0.0f; u.z = +w.x * fInvLength;
+   * v.x = w.y * u.z; v.y = w.z * u.x - w.x * u.z; v.z = -w.y * u.x; } else { //
+   * w.y or w.z is the largest magnitude component, swap them fInvLength =
+   * FastMath.invSqrt(w.y * w.y + w.z * w.z); u.x = 0.0f; u.y = +w.z *
+   * fInvLength; u.z = -w.y * fInvLength; v.x = w.y * u.z - w.z * u.y; v.y =
+   * -w.x * u.z; v.z = w.x * u.y; } }
+   */
+
+  /**
+   * Saves this Vector3f into the given float[] object.
+   * 
+   */
+  @Override
+  public float[] toArray() {
+    return new float[] { x, y, z };
+  }
+
+  /**
+   * are these two vectors the same? they are is they both have the same x,y,
+   * and z values.
+   *
+   * @param o
+   *          the object to compare for equality
+   * @return true if they are equal
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Vector3f)) {
+      return false;
     }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> with default
-     * values of (0,0,0).
-     *
-     */
-    public Vector3f(float s) {
-        x = y = z = s;
+    if (this == o) {
+      return true;
     }
 
-    /**
-     * Constructor instantiates a new <code>Vector3f</code> with provides
-     * values.
-     *
-     * @param x
-     *            the x value of the vector.
-     * @param y
-     *            the y value of the vector.
-     * @param z
-     *            the z value of the vector.
-     */
-    public Vector3f(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
+    Vector3f comp = (Vector3f) o;
+    if (Float.compare(x, comp.x) != 0)
+      return false;
+    if (Float.compare(y, comp.y) != 0)
+      return false;
+    if (Float.compare(z, comp.z) != 0)
+      return false;
+    return true;
+  }
 
-    /**
-     * Promote a 2 vec to a 3 vec
-     * @param v
-     * @param z
-     */
-    public Vector3f(@Nonnull Vector2f v, float z) {
-      this(v.x, v.y, z);
-    }
-
-    /**
-     * 
-     * @param v
-     */
-    public Vector3f(@Nonnull Vector2f v) {
-      this(v, 0);
-    }
-
-    public float getX() {
+  /**
+   * @param index
+   *          i
+   * @return x value if index == 0, y value if index == 1 or z value if index ==
+   *         2
+   * @throws IllegalArgumentException
+   *           if index is not one of 0, 1, 2.
+   */
+  public float get(int index) {
+    switch (index) {
+      case 0:
         return x;
-    }
-
-    public float getY() {
+      case 1:
         return y;
-    }
-
-    public float getZ() {
+      case 2:
         return z;
     }
+    throw new IllegalArgumentException("index must be either 0, 1 or 2");
+  }
 
-    /**
-     * <code>toString</code> returns the string representation of this vector.
-     * The format is:
-     *
-     * org.jme.math.Vector3f [X=XX.XXXX, Y=YY.YYYY, Z=ZZ.ZZZZ]
-     *
-     * @return the string representation of this vector.
-     */
-    @Override
-    public String toString() {
-        return "(" + x + ", " + y + ", " + z + ")";
-    }
+  @Override
+  protected Vector3f build(float[] v) {
+    return new Vector3f(v[0], v[1], v[2]);
+  }
 
-    /**
-     * <code>cross</code> calculates the cross product of this vector with a
-     * parameter vector v.
-     *
-     * @param v
-     *            the vector to take the cross product of with this.
-     * @return the cross product vector.
-     */
-    public Vector3f cross(Vector3f v) {
-      float resX = ((y * v.z) - (z * v.y)); 
-      float resY = ((z * v.x) - (x * v.z));
-      float resZ = ((x * v.y) - (y * v.x));
-      return new Vector3f(resX, resY, resZ);
-    }
-
-    /**
-     * <code>angleBetween</code> returns (in radians) the angle between two vectors.
-     * It is assumed that both this vector and the given vector are unit vectors (iow, normalized).
-     * 
-     * @param otherVector a unit vector to find the angle against
-     * @return the angle in radians.
-     */
-    @Override
-    public float angleBetween(Vector3f otherVector) {
-        float dotProduct = dot(otherVector);
-        float angle = FastMath.acos(dotProduct);
-        return angle;
-    }
-
-    /*
-    public static void generateOrthonormalBasis(Vector3f u, Vector3f v, Vector3f w) {
-        w.normalizeLocal();
-        generateComplementBasis(u, v, w);
-    }
-
-    public static void generateComplementBasis(Vector3f u, Vector3f v,
-            Vector3f w) {
-        float fInvLength;
-
-        if (FastMath.abs(w.x) >= FastMath.abs(w.y)) {
-            // w.x or w.z is the largest magnitude component, swap them
-            fInvLength = FastMath.invSqrt(w.x * w.x + w.z * w.z);
-            u.x = -w.z * fInvLength;
-            u.y = 0.0f;
-            u.z = +w.x * fInvLength;
-            v.x = w.y * u.z;
-            v.y = w.z * u.x - w.x * u.z;
-            v.z = -w.y * u.x;
-        } else {
-            // w.y or w.z is the largest magnitude component, swap them
-            fInvLength = FastMath.invSqrt(w.y * w.y + w.z * w.z);
-            u.x = 0.0f;
-            u.y = +w.z * fInvLength;
-            u.z = -w.y * fInvLength;
-            v.x = w.y * u.z - w.z * u.y;
-            v.y = -w.x * u.z;
-            v.z = w.x * u.y;
-        }
-    }
-    */
-
-    /**
-     * Saves this Vector3f into the given float[] object.
-     * 
-     */
-    @Override
-    public float[] toArray() {
-      return new float[] { x, y, z};
-    }
-
-    /**
-     * are these two vectors the same? they are is they both have the same x,y,
-     * and z values.
-     *
-     * @param o
-     *            the object to compare for equality
-     * @return true if they are equal
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Vector3f)) { return false; }
-
-        if (this == o) { return true; }
-
-        Vector3f comp = (Vector3f) o;
-        if (Float.compare(x,comp.x) != 0) return false;
-        if (Float.compare(y,comp.y) != 0) return false;
-        if (Float.compare(z,comp.z) != 0) return false;
-        return true;
-    }
-
-    /**
-     * @param index
-     * @return x value if index == 0, y value if index == 1 or z value if index ==
-     *         2
-     * @throws IllegalArgumentException
-     *             if index is not one of 0, 1, 2.
-     */
-    public float get(int index) {
-        switch (index) {
-            case 0:
-                return x;
-            case 1:
-                return y;
-            case 2:
-                return z;
-        }
-        throw new IllegalArgumentException("index must be either 0, 1 or 2");
-    }
-
-    @Override
-    protected Vector3f build(float[] v) {
-      return new Vector3f(v[0], v[1], v[2]);
-    }
-
-    @Override
-    protected Vector3f build(float s) {
-      return new Vector3f(s);
-    }
+  @Override
+  protected Vector3f build(float s) {
+    return new Vector3f(s);
+  }
 }

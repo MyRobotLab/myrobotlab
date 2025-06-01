@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.JMonkeyEngineGui', []).controller('JMonkeyEngineGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function($scope, $log, mrl, $timeout) {
-    $log.info('JMonkeyEngineGuiCtrl')
+angular.module('mrlapp.service.JMonkeyEngineGui', []).controller('JMonkeyEngineGuiCtrl', ['$scope', 'mrl', function($scope, mrl, ) {
+    console.info('JMonkeyEngineGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -9,24 +9,29 @@ angular.module('mrlapp.service.JMonkeyEngineGui', []).controller('JMonkeyEngineG
     }
 
     this.onMsg = function(inMsg) {
+        data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            $timeout(function() {
-                _self.updateState(inMsg.data[0])
-            })
+            _self.updateState(data)
             break
-        case 'onPulse':
-            $timeout(function() {
-                $scope.pulseData = inMsg.data[0]
-            })
+        case 'onStatus':
+            console.info()
+            break
+        case 'onNodes':
+            $scope.pulseData = data
+            break
+        case 'onSelectedPath':
+            $scope.selectedPath = data
+            $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
 
-    // msg.subscribe('pulse')
+    msg.subscribe('getSelectedPath')
+    msg.subscribe('publishSelected')
     msg.subscribe(this)
 
 }

@@ -54,9 +54,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.InstallCert;
+import org.myrobotlab.service.config.HttpClientConfig;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -72,18 +74,33 @@ import org.slf4j.Logger;
  *         - Proxies proxies proxies ! -
  *         https://memorynotfound.com/configure-http-proxy-settings-java/
  */
-public class HttpClient extends Service {
+public class HttpClient<C extends HttpClientConfig> extends Service<C> implements TextPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(HttpClient.class);
 
   private static final long serialVersionUID = 1L;
 
   transient CloseableHttpClient client;
+  
+  /**
+   * simple pojo for request data
+   */
+  public class HttpRequestData {
+    public String url;
+    public String verb;
+    public String body;
+    public HttpRequestData(String verb, String url, String body) {
+      this.verb = verb;
+      this.url = url;
+      this.body = body;      
+    }
+  }
 
   public HttpClient(String n, String id) {
     super(n, id);
   }
 
+  @Override
   public void attach(Attachable service) {
     // determine type
     if (HttpDataListener.class.isAssignableFrom(service.getClass())) {
@@ -102,12 +119,12 @@ public class HttpClient extends Service {
     addListener("publishHttpResponse", service.getName());
   }
 
-  @Deprecated /* use attach(HttpDataListener) */
+  @Deprecated /* use attachHttpDataListener(HttpDataListener) */
   public void addHttpDataListener(HttpDataListener listener) {
     attachHttpDataListener(listener);
   }
 
-  @Deprecated /* used attach(HttpResponseListener) */
+  @Deprecated /* used attachHttpResponseListener(HttpResponseListener) */
   public void addHttpResponseListener(HttpResponseListener listener) {
     attachHttpResponseListener(listener);
   }
@@ -116,12 +133,18 @@ public class HttpClient extends Service {
    * Simplest GET return string type of the endpoint
    * 
    * @param url
-   * @return
+   *          the url to get
+   * @return the data as a string
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String get(String url) throws ClientProtocolException, IOException {
     HttpData response = processResponse(new HttpGet(url));
+    HttpRequestData rd = new HttpRequestData("GET", url, null);
+    invoke("publishHttpRequestData", rd);
     if (response.data != null) {
       return new String(response.data);
     }
@@ -132,11 +155,17 @@ public class HttpClient extends Service {
    * GET bytes from endpoint
    * 
    * @param url
-   * @return
+   *          the url
+   * @return the bytes returned
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public byte[] getBytes(String url) throws ClientProtocolException, IOException {
+    HttpRequestData rd = new HttpRequestData("GET", url, null);
+    invoke("publishHttpRequestData", rd);
     return processResponse(new HttpGet(url)).data;
   }
 
@@ -145,8 +174,10 @@ public class HttpClient extends Service {
    * response code and headers
    * 
    * @param url
-   * @return
+   *          the url
+   * @return the http data returned
    * @throws IOException
+   *           boom
    */
   public HttpData getResponse(String url) throws IOException {
     HttpData response = processResponse(new HttpGet(url));
@@ -157,9 +188,13 @@ public class HttpClient extends Service {
    * Post without body
    * 
    * @param url
-   * @return
+   *          the url to post to
+   * @return the string returned
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String post(String url) throws ClientProtocolException, IOException {
     byte[] bytes = postBytes(url, null, null);
@@ -168,35 +203,61 @@ public class HttpClient extends Service {
     }
     return null;
   }
-
+  
   /**
-   * Post a json string to an endpoint. This method adds the appropriate
-   * contentype and return a string of data
-   * 
+   * Post JSON with authorization of type bearer token
+   * @param auth
    * @param url
    * @param json
    * @return
    * @throws IOException
    */
-  public String postJson(String url, String json) throws IOException {
+  public String postJson(String auth, String url, String json) throws IOException {
     HttpPost request = new HttpPost(url);
+    HttpRequestData rd = new HttpRequestData("POST", url, json);
+    invoke("publishHttpRequestData", rd);
     StringEntity params = new StringEntity(json);
-    request.addHeader("content-type", "application/json");
+    if (auth != null) {
+      request.addHeader("Authorization", "Bearer " + auth);
+    }    
+    request.addHeader("Content-Type", "application/json");
     request.setEntity(params);
     HttpData data = processResponse(request);
     if (data.data != null) {
       return new String(data.data);
     }
     return null;
+
+  }
+
+  /**
+   * Post a json string to an endpoint. This method adds the appropriate
+   * contentype and return a string of data
+   * 
+   * @param url
+   *          the url
+   * @param json
+   *          the json to post
+   * @return the returned string
+   * @throws IOException
+   *           boom
+   * 
+   */
+  public String postJson(String url, String json) throws IOException {
+    return postJson(null, url, json);
   }
 
   /**
    * post and object to a json endpoint
    * 
    * @param url
+   *          the url
    * @param object
-   * @return
+   *          the object to post as json
+   * @return the returned string
    * @throws IOException
+   *           boom
+   * 
    */
   public String postJson(String url, Object object) throws IOException {
     return postJson(url, CodecUtils.toJson(object));
@@ -206,9 +267,13 @@ public class HttpClient extends Service {
    * post json to an endpoint where you want bytes from
    * 
    * @param url
+   *          the url
    * @param json
-   * @return
+   *          the json
+   * @return the bytes returned
    * @throws IOException
+   *           boom
+   * 
    */
   public byte[] postJsonToBytes(String url, String json) throws IOException {
     Map<String, String> headers = new HashMap<>();
@@ -220,10 +285,15 @@ public class HttpClient extends Service {
    * html form post
    * 
    * @param url
+   *          the url
    * @param fields
-   * @return
+   *          the key/value params to post
+   * @return the returned string
    * @throws ClientProtocolException
+   *           boom
    * @throws IOException
+   *           boom
+   * 
    */
   public String postForm(String url, Map<String, String> fields) throws ClientProtocolException, IOException {
     HttpPost request = new HttpPost(url);
@@ -244,6 +314,13 @@ public class HttpClient extends Service {
   }
 
   public byte[] postBytes(String url, Map<String, String> headers, byte[] data) throws ClientProtocolException, IOException {
+    String strData = null;
+    if (data != null) {
+      strData = new String(data); 
+    }
+    HttpRequestData rd = new HttpRequestData("POST", url, strData);
+    invoke("publishHttpRequestData", rd);
+
     HttpPost request = new HttpPost(url);
     if (data != null) {
       request.setEntity(new ByteArrayEntity(data));
@@ -264,13 +341,18 @@ public class HttpClient extends Service {
    * future maintenance to a minimum
    * 
    * @param request
-   * @return
+   *          the http req
+   * @return the httpdata
    * @throws IOException
+   *           boom
+   * 
    */
   public HttpData processResponse(HttpUriRequest request) throws IOException {
-    HttpData data = new HttpData(request.getURI().toString());
+    String url = request.getURI().toString();
+    HttpData data = new HttpData(url);
+    invoke("publishUrl", url);
 
-    log.info("url [{}]", request.getURI());
+    log.info("url [{}]", url);
 
     HttpResponse response = client.execute(request);
     StatusLine statusLine = response.getStatusLine();
@@ -288,9 +370,16 @@ public class HttpClient extends Service {
     // publishing
     invoke("publishHttpData", data);
     if (data.data != null) {
-      invoke("publishHttpResponse", new String(data.data));
+      String text = new String(data.data);
+      invoke("publishHttpResponse", text);
+      invoke("publishText", text);
     }
 
+    return data;
+  }
+  
+  
+  public HttpRequestData publishHttpRequestData(HttpRequestData data) {
     return data;
   }
 
@@ -332,6 +421,7 @@ public class HttpClient extends Service {
     return data;
   }
 
+  @Override
   public void startService() {
     super.startService();
     if (client == null) {
@@ -346,6 +436,27 @@ public class HttpClient extends Service {
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
+
+  public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
+    if (fields == null || fields.length % 2 != 0) {
+      log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
+      return null;
+    }
+    Map<String, String> data = new HashMap<>();
+    for (int i = 0; i < fields.length; i = i + 2) {
+      data.put(fields[i], fields[i + 1]);
+    }
+    return postForm(url, data);
+  }
+
+  public String publishUrl(String url) {
+    return url;
   }
 
   public static void main(String[] args) {
@@ -400,19 +511,6 @@ public class HttpClient extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
-
-  }
-
-  public String postForm(String url, String... fields) throws ClientProtocolException, IOException {
-    if (fields == null || fields.length % 2 != 0) {
-      log.error("postForm fields must be in the form \"key1\", \"value1\", \"key2\", \"value2\"");
-      return null;
-    }
-    Map<String, String> data = new HashMap<>();
-    for (int i = 0; i < fields.length; i = i + 2) {
-      data.put(fields[i], fields[i + 1]);
-    }
-    return postForm(url, data);
   }
 
 }

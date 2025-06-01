@@ -6,10 +6,10 @@
 #########################################
 
 # start the service
-gui = Runtime.start('gui','SwingGui')
+gui = runtime.start('gui','SwingGui')
 
 # start a new service
-python2 = Runtime.start('python2','Python')
+python2 = runtime.start('python2','Python')
 
 # focus service
 gui.setActiveTab("python2")

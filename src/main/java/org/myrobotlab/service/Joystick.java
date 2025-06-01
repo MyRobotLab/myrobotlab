@@ -38,13 +38,19 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.joystick.Controller;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.JoystickConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.AnalogData;
 import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.interfaces.AnalogListener;
+import org.myrobotlab.service.interfaces.AnalogPublisher;
 import org.slf4j.Logger;
 
 import net.java.games.input.ControllerEnvironment;
@@ -61,63 +67,107 @@ import net.java.games.input.Rumbler;
  * To Test java -Djava.library.path="./" -cp "./*"
  * net.java.games.input.test.ControllerReadTest
  */
-public class Joystick extends Service {
+public class Joystick extends Service<JoystickConfig> implements AnalogPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(Joystick.class);
   private static final long serialVersionUID = 1L;
 
-  List<Controller> controllers;
+  protected List<Controller> controllers;
 
   /**
    * current selected controller
    */
-  Controller hardwareController = null;
+  protected Controller hardwareController = null;
 
-  Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String, Set<MRLListener>>();
+  /**
+   * component listeners
+   */
+  protected Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<>();
 
-  List<Component> hardwareComponents; // holds the
+  /**
+   * all analog listeners
+   */
+  protected Map<String, Set<String>> analogListeners = new HashMap<>();
 
-  transient Rumbler[] hardwareRumblers;
+  /**
+   * all digital listeners
+   */
+  protected Map<String, Set<String>> digitalListeners = new HashMap<>();
 
-  transient InputPollingThread pollingThread = null;
+  protected List<Component> hardwareComponents;
 
-  boolean isPolling = false;
+  /**
+   * non serializable hardware rumblers
+   */
+  protected transient Rumbler[] hardwareRumblers;
 
-  TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
+  final protected Poller poller = new Poller();
 
-  // FIXME - lame not just last index :P
-  int rumblerIdx; // index for the rumbler being used
-  boolean rumblerOn = false; // whether rumbler is on or off
+  /**
+   * polling state
+   */
+  volatile protected boolean isPolling = false;
+
+  /**
+   * name to index map of controllers
+   */
+  protected TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
+
+  /**
+   * index for the rumbler being used
+   */
+  protected int rumblerIdx;
+
+  /**
+   * is rumbler on or off
+   */
+  protected boolean rumblerOn = false;
 
   /**
    * non-transient serializable definition
    */
-  Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
-  Map<String, Component> components = null;
+  protected Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
 
-  String controller;
+  protected Map<String, Component> components = null;
 
-  public class InputPollingThread extends Thread {
+  protected String controller;
 
-    public InputPollingThread(String name) {
-      super(name);
-    }
+  public class Poller implements Runnable {
 
+    transient Thread myThread = null;
+
+    @Override
     public void run() {
       poll();
     }
+
+    public synchronized void start() {
+      if (isPolling) {
+        log.warn("already polling");
+        return;
+      }
+      myThread = new Thread(this, String.format("%s_polling", getName()));
+      myThread.start();
+    }
+
+    public synchronized void stop() {
+      isPolling = false;
+      if (myThread != null) {
+        myThread.interrupt();
+      }      
+    }
   }
 
+  /**
+   * main polling loop - data read and published
+   */
   public void poll() {
-
-    // v net.java.games.input.Controller pollingController = null;
-    // v net.java.games.input.Component[] hwComponents = null;
 
     Controller pollingController = null;
     Component[] hwComponents = null;
-
-    while (isPolling) {
-      try {
+    isPolling = true;
+    try {
+      while (isPolling) {
 
         if (pollingController != hardwareController) {
           // the controller was switched !
@@ -131,25 +181,22 @@ public class Joystick extends Service {
         if (pollingController == null) {
           error("controller is null - can not poll");
           stopPolling();
+          break;
         }
 
         // get the data
-        if (!pollingController.poll()) {
+        if (isPolling && !pollingController.poll()) {
           error("failed to poll controller");
           stopPolling();
+          break;
         }
 
         // iterate through each component and compare last values
         for (int i = 0; i < hwComponents.length; i++) {
 
-          // v net.java.games.input.Component hwComp = hwComponents[i];
           Component hwComp = hwComponents[i];
 
           String id = hwComp.getIdentifier().toString();
-          /*
-           * if (id.equals("3")) { log.info("here"); }
-           */
-
           float input = hwComp.getPollData();
 
           // log.info("", input);
@@ -164,11 +211,23 @@ public class Joystick extends Service {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = Double.valueOf(mappers.get(id).calcOutput((double) input)).floatValue();
+              input = Double.valueOf(mappers.get(id).calcOutput(input)).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);
             invoke("publishJoystickInput", data);
+
+            // filtered by analog and id
+            if (analogListeners.containsKey(id)) {
+              Set<String> listeners = analogListeners.get(id);
+              AnalogData d = new AnalogData();
+              d.id = id;
+              d.name = getName();
+              d.value = data.value.doubleValue();
+              for (String listener : listeners) {
+                send(listener, "onAnalog", d);
+              }
+            }
 
             // filtered by subscribed components
             if (idAndServiceSubscription.containsKey(id)) {
@@ -186,25 +245,17 @@ public class Joystick extends Service {
         }
 
         Thread.sleep(20);
-      } catch (Exception e) {
-        log.info("leaving {} polling thread leaving", getName());
-        pollingThread = null;
-      }
+      } // while
+
+    } catch (Exception e) {
+      log.info("leaving {} polling thread leaving", getName());
     }
+
+    isPolling = false;
   }
 
   public Joystick(String n, String id) {
     super(n, id);
-    // we will force a system property here to specify the native location for
-    // the
-    // jinput libraries
-    // TODO: this is a hacky work around because for some reason, the jinput
-    // natives
-    // aren't found from the jinput-platform jar files!!
-    String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
-    System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
-    String[] controllers = getControllerNames();
-    info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
   }
 
   // FIXME - simply set components e.g. getComponents
@@ -214,22 +265,14 @@ public class Joystick extends Service {
       info("getComponents no controller set");
       return components;
     }
-
     components = hardwareController.getComponentMap();
-
-    /*
-     * hardwareComponents = hardwareController.getComponents(); if
-     * (hardwareComponents.length == 0) {
-     * error("getComponents no Components found"); return components; }
-     * 
-     * info("number of components: " + hardwareComponents.length); for (int i =
-     * 0; i < hardwareComponents.length; i++) { // v
-     * net.java.games.input.Component c = hardwareComponents[i]; Component c =
-     * hardwareComponents[i]; String id = c.getIdentifier().toString(); // v
-     * Component component = new Component(getName(), i, c); // v
-     * log.info("found {}", component); // v components.put(id, component); }
-     */
     return components;
+  }
+
+  public void refresh() {
+    getControllers();
+    getComponents();
+    broadcastState();
   }
 
   public Map<String, Integer> getControllers() {
@@ -247,10 +290,12 @@ public class Joystick extends Service {
     }
     return controllerNames;
   }
+  
+  List<Controller> virtualControllers = new ArrayList<>();
 
   // FIXME - clear global
   public List<Controller> getControllerList() {
-    List<Controller> controllers = new ArrayList<Controller>();
+    List<Controller> controllers = new ArrayList<>();
     net.java.games.input.Controller[] jinputControllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
     for (net.java.games.input.Controller controller : jinputControllers) {
       try {
@@ -260,6 +305,8 @@ public class Joystick extends Service {
         log.error("adding new controller threw", e);
       }
     }
+    
+    controllers.addAll(virtualControllers);
     // FIXME - add virtual
     return controllers;
   }
@@ -292,9 +339,66 @@ public class Joystick extends Service {
     service.subscribe(this.getName(), "publishJoystickInput");
   }
 
+  @Override
+  public void attach(Attachable service) {
+    if (AnalogListener.class.isAssignableFrom(service.getClass())) {
+      attachAnalogListener((AnalogListener) service);
+    } else {
+      error(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
+    }
+  }
+
+  @Override
+  public void attachAnalogListener(AnalogListener service) {
+    String id = service.getAxis();
+    String serviceName = service.getName();
+    getComponents();
+    if (components != null && !components.containsKey(id)) {
+      error("%s requests subscription to component %s - but %s does not exist", serviceName, id, id);
+    }
+
+    Component c = components.get(id);
+    if (c == null) {
+      error("could not find requested joystick component %s", id);
+    }
+    if (c != null && !c.isAnalog) {
+      error("attachAnalogListener getAnalogId (%s) is a not an analog component", id);
+    }
+
+    Set<String> listeners = null;
+    if (analogListeners.containsKey(id)) {
+      listeners = analogListeners.get(id);
+      if (listeners.contains(serviceName)) {
+        log.info("already attached to %s", serviceName);
+        return;
+      }
+    } else {
+      listeners = new HashSet<String>();
+    }
+    analogListeners.put(id, listeners);
+    listeners.add(serviceName);
+    // service.attachAnalogPublisher(this);
+  }
+  
+  public void clearListeners() {
+    analogListeners.clear();
+    digitalListeners.clear();
+  }
+
+  @Override
+  public void detachAnalogListener(AnalogListener listener) {
+    String id = listener.getAxis();
+    String serviceName = listener.getName();
+    Set<String> listeners = analogListeners.get(id);
+    if (listeners != null) {
+      listeners.remove(serviceName);
+    }
+  }
+
+  @Deprecated /* name should be attachComponentListener */
   public void attach(String serviceName, String id) {
     if (!components.containsKey(id)) {
-      error("%s requests subscription to component %s - but %d does not exist", serviceName, id, id);
+      error("%s requests subscription to component %s - but %s does not exist", serviceName, id, id);
       return;
     }
     Set<MRLListener> listeners = null;
@@ -365,53 +469,45 @@ public class Joystick extends Service {
     }
   } // end of setRumbler()
 
-  synchronized public void startPolling() {
+  public void startPolling() {
     log.info("startPolling - starting new polling thread {}_polling", getName());
-    if (pollingThread != null && isPolling == true) {
-      log.warn("already polling, stop polling first");
-      return;
-    }
-    isPolling = true;
-    pollingThread = new InputPollingThread(String.format("%s_polling", getName()));
-    pollingThread.start();
+    poller.start();
   }
 
-  synchronized public void stopPolling() {
-    isPolling = false;
-    pollingThread = null;
+  public void stopPolling() {
+    poller.stop();
   }
 
+  @Override
   public void startService() {
     super.startService();
+    initNativeLibs();
     invoke("getControllers");
+  }
+
+  private void initNativeLibs() {
+    // we will force a system property here to specify the native location for
+    // the
+    // jinput libraries
+    // TODO: this is a hacky work around because for some reason, the jinput
+    // natives
+    // aren't found from the jinput-platform jar files!!
+    String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
+    System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
+    String[] controllers = getControllerNames();
+    info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
   }
 
   public String getController() {
     return controller;
   }
 
+  @Override
   public void releaseService() {
     super.releaseService();
-    if (pollingThread != null) {
-      pollingThread.interrupt();
-      isPolling = false;
-    }
+    stopPolling();
   }
 
-  /*
-   * Map<String, Set<RelativePositionControl>> axisConsumers = new
-   * HashMap<String, Set<RelativePositionControl>>();
-   * 
-   * @Override public void subscribeToAxis(RelativePositionControl
-   * serviceToControl, String axisName) throws Exception {
-   * 
-   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks =
-   * null; if (axisConsumers.containsKey(axisName)){ callbacks =
-   * axisConsumers.get(axisName); } else { callbacks = new
-   * HashSet<RelativePositionControl>(); } callbacks.add(serviceToControl);
-   * axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i
-   * want motor to subscribe to my filtered x axis // subscribe() } }
-   */
   public Component getAxis(String name) {
     if (components == null) {
       error("%s components null - cannot get axis %s", getName(), name);
@@ -482,7 +578,8 @@ public class Joystick extends Service {
     Controller controller = controllers.get(index);
     String filename = String.format("%s-virtual-%s-%s.json", getName(), controller.getName(), ++index);
 
-    save(controller, filename);
+    String json = CodecUtils.toJson(controller);
+    FileIO.toFile(filename, json);
 
     // FIXME - non-symmetric save and load :(
     String fname = String.format("%s%s%s", FileIO.getCfgDir(), File.separator, filename);
@@ -509,18 +606,18 @@ public class Joystick extends Service {
   }
 
   public static void main(String args[]) {
-    LoggingFactory.init();
-    LoggingFactory.setLevel("INFO");
     try {
 
+      Runtime.main(new String[] { "--id", "admin"});
+      LoggingFactory.init("INFO");
+
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      Runtime.start("webgui", "WebGui");
 
       boolean done = true;
       if (done) {
         return;
       }
-
-      Runtime.start("gui", "SwingGui");
 
       joy.setController(2);
 
@@ -595,6 +692,66 @@ public class Joystick extends Service {
 
     Component component = components.get(axisName);
     component.setVirtualValue(value);
+  }
+
+  @Override
+  public JoystickConfig getConfig() {
+    super.getConfig();
+    config.controller = controller;
+
+    if (analogListeners.size() > 0) {
+      config.analogListeners = new HashMap<>();
+      for (String key : analogListeners.keySet()) {
+        Set<String> listeners = analogListeners.get(key);
+        // HashSet<String> s = new HashSet<>();
+        // String[] s = new String[listeners.size()];
+        ArrayList<String> s = new ArrayList<>();
+        config.analogListeners.put(key, s);
+        for (String l : listeners) {
+          s.add(l);
+        }
+      }
+    }
+    return config;
+  }
+
+  @Override
+  public JoystickConfig apply(JoystickConfig c) {
+    super.apply(c);
+    // "special" needs native libs
+    // FIXME - should be done in startService
+    initNativeLibs();
+
+    // scan for hardware controllers
+    // required because you can't "set" a controller
+    // unless its in the list of controllers
+    getControllers();
+
+    // get controller request from config
+    if (c.controller != null) {
+      setController(config.controller);
+    }
+
+    // stupid transform from array to set - yaml wants array, set prevents
+    // duplicates :(
+    if (c.analogListeners != null) {
+      for (String id : c.analogListeners.keySet()) {
+        ArrayList<String> list = c.analogListeners.get(id);
+        Set<String> s = analogListeners.get(id);
+        if (s == null) {
+          s = new HashSet<>();
+          analogListeners.put(id, s);
+          // attachAnalogListener(null);
+        }
+        s.addAll(list);
+      }
+    }
+    return c;
+  }
+
+  @Override
+  public AnalogData publishAnalog(AnalogData data) {
+    return data;
   }
 
 }

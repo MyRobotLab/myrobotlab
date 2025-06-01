@@ -3,7 +3,8 @@ package org.myrobotlab.service;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
-import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.config.MotorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 
 /**
  * A general motor implementation with a "simple H-bridge" where one control
@@ -12,7 +13,7 @@ import org.myrobotlab.service.interfaces.MotorController;
  * 
  */
 
-public class Motor extends AbstractMotor {
+public class Motor extends AbstractMotor<MotorConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -44,6 +45,14 @@ public class Motor extends AbstractMotor {
     this.pwrPin = pwrPin + "";
   }
 
+  public void setPwrPin(String pwrPin) {
+    this.pwrPin = pwrPin;
+  }
+
+  public void setDirPin(String dirPin) {
+    this.dirPin = dirPin;
+  }
+
   public String getDirPin() {
     return dirPin;
   }
@@ -58,6 +67,30 @@ public class Motor extends AbstractMotor {
 
   public void setPwmFreq(Integer pwmfreq) {
     this.pwmFreq = pwmfreq;
+  }
+
+  @Override
+  public MotorConfig getConfig() {    
+    MotorConfig config = (MotorConfig)super.getConfig();
+    config.dirPin = getDirPin();
+    config.pwrPin = getPwrPin();
+    config.pwmFreq = getPwmFreq();
+    return config;
+  }
+
+  public MotorConfig apply(MotorConfig config) {
+    super.apply(config);
+    
+    if (config.pwrPin != null) {
+      setPwrPin(pwrPin);
+    }
+    if (config.dirPin != null) {
+      setDirPin(dirPin);
+    }
+    if (config.pwmFreq != null) {
+      setPwmFreq(pwmFreq);
+    }
+    return config;
   }
 
   public static void main(String[] args) {
@@ -125,7 +158,7 @@ public class Motor extends AbstractMotor {
       // m1.attach(arduino, Motor.TYPE_PULSE_STEP, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_2_PWM, pwmPin, dirPin);
       // m1.attach(arduino, Motor.TYPE_SIMPLE, pwmPin, dirPin);
-      m1.attachMotorController((MotorController) arduino);
+      m1.attachMotorController(arduino);
 
       m1.move(1.0);
       m1.move(-1.0);
@@ -161,6 +194,18 @@ public class Motor extends AbstractMotor {
       Logging.logError(e);
     }
 
+  }
+
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

@@ -8,7 +8,7 @@
 port="COM3"
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 arduino = runtime.start("arduino","Arduino")
 motor = runtime.start("motor","MotorDualPwm")

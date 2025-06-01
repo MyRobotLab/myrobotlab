@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.DockerConfig
+listeners: null
+peers: null
+type: Docker

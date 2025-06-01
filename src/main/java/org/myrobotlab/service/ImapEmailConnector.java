@@ -26,6 +26,7 @@ import javax.mail.internet.MimeMultipart;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.transformer.ConnectorConfig;
+import org.myrobotlab.service.config.ImapEmailConnectorConfig;
 
 import com.sun.mail.imap.IMAPFolder;
 
@@ -36,7 +37,7 @@ import com.sun.mail.imap.IMAPFolder;
  * documents that represents the emails messages that were crawled.
  *
  */
-public class ImapEmailConnector extends AbstractConnector {
+public class ImapEmailConnector extends AbstractConnector<ImapEmailConnectorConfig> {
 
   private static final long serialVersionUID = 1L;
   private static final String MESSAGE_ID_HEADER = "message_id";
@@ -57,6 +58,7 @@ public class ImapEmailConnector extends AbstractConnector {
     log.info("Set Config not yet implemented");
   }
 
+  @Override
   public void startCrawling() {
     log.info("Sarting IMAP Email connector.");
     // connect to the email store
@@ -294,7 +296,7 @@ public class ImapEmailConnector extends AbstractConnector {
     Object content = m.getContent();
     if (content instanceof String) {
       // This is already a string! ok...
-      doc.addToField("text", (String) (content));
+      doc.addToField("text", (content));
     } else if (content instanceof MimeMultipart) {
       // multi-part mime docs are a pain. we'll just accumulate the
       // text from each part.
@@ -430,10 +432,12 @@ public class ImapEmailConnector extends AbstractConnector {
     this.folderName = folderName;
   }
 
+  @Override
   public String getDocIdPrefix() {
     return docIdPrefix;
   }
 
+  @Override
   public void setDocIdPrefix(String docIdPrefix) {
     this.docIdPrefix = docIdPrefix;
   }

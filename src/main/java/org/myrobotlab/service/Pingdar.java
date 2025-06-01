@@ -6,6 +6,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
+import org.myrobotlab.service.config.PingdarConfig;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangingControl;
 import org.slf4j.Logger;
@@ -16,7 +17,8 @@ import org.slf4j.Logger;
  * module. The result is a sonar style range finding.
  *
  */
-public class Pingdar extends Service implements RangingControl, RangeListener, EncoderListener {
+public class Pingdar extends Service<PingdarConfig> implements RangingControl,RangeListener,EncoderListener
+{
 
   public static class Point {
 
@@ -96,6 +98,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
    * 
    * invoke("publishPingdar", new Point(pos, lastRange)); lastPos = pos; return
    * lastPos; }
+   * 
+   * @param point
+   *              p
+   * @return p
    */
 
   public Point publishPingdar(Point point) {
@@ -128,7 +134,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
       servo = getServo();
 
       sensor.addRangeListener(this);
-      servo.attach((EncoderListener) this);
+      servo.attach(this);
 
       // servo.setSpeed(60);
       servo.setSpeed(30.0);
@@ -174,7 +180,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM5");
       sr04.attach(arduino, 12, 11);
-      servo.attach(arduino, 2);
+      servo.attach(arduino);
 
       Pingdar pingdar = (Pingdar) Runtime.start("pingdar", "Pingdar");
       sleep(1000);

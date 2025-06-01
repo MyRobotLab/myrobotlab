@@ -1,0 +1,17 @@
+!!org.myrobotlab.service.config.MotorConfig
+axis: null
+controller: null
+dirPin: null
+listeners: null
+locked: false
+mapper:
+  clip: true
+  inverted: false
+  maxIn: 100.0
+  maxOut: 100.0
+  minIn: -100.0
+  minOut: -100.0
+peers: null
+pwmFreq: null
+pwrPin: null
+type: Motor

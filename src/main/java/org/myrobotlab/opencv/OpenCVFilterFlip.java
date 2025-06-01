@@ -31,6 +31,7 @@ import static org.bytedeco.opencv.global.opencv_core.cvFlip;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class OpenCVFilterFlip extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    flipped = IplImage.createCompatible(image);
+    flipped = AbstractIplImage.createCompatible(image);
   }
 
   @Override

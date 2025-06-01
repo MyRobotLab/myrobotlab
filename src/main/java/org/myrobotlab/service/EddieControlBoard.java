@@ -9,6 +9,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.EddieControlBoardConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;
@@ -21,7 +22,8 @@ import org.slf4j.Logger;
  * EddieControlBoard It can publish sensor data , control motors and more!
  *
  */
-public class EddieControlBoard extends Service implements KeyListener, SerialDataListener, JoystickListener {
+public class EddieControlBoard extends Service<EddieControlBoardConfig> implements KeyListener,SerialDataListener,JoystickListener
+{
 
   class SensorPoller extends Thread {
 
@@ -184,7 +186,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     if (r > 127) {
       r = 128 - r;
     }
-    String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF), Integer.toHexString(r & 0xFF)).toUpperCase();
+    String cmd = String.format("GO %s %s\r", Integer.toHexString(l & 0xFF), Integer.toHexString(r & 0xFF))
+        .toUpperCase();
     info("%s", cmd);
     serial.write(cmd);
   }
@@ -345,10 +348,10 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
    * blocking for response
    * 
    * @param cmd
-   *          to send
+   *            to send
    * @return the string response
    * @throws Exception
-   *           e
+   *                   e
    */
   public String sendCommand(String cmd) throws Exception {
     log.info("sendCommand {}", cmd);
@@ -395,30 +398,28 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     }
     return false;
   }
-  
-  public void start() {
-	    try {
-	        if (serial == null) {
-	          serial = (Serial) startPeer("serial");
-	        }
-	        serial.addByteListener(this);
-	        serial.setTimeout(500);
-	        if (keyboard == null) {
-	          keyboard = (Keyboard) startPeer("keyboard");
-	        }
-	        if (keyboard != null) {
-	          keyboard.attach(getName());
-	        }
-	        python = (Python) Runtime.start("python", "Python");
-	        if (mouth == null) {
-	          mouth = (SpeechSynthesis) Runtime.start("mouth", "WebkitSpeechSynthesis");
-	        }
-	    } catch(Exception e) {
-	    	log.error("start threw", e);
-	    }
-  }
 
- 
+  public void start() {
+    try {
+      if (serial == null) {
+        serial = (Serial) startPeer("serial");
+      }
+      serial.addByteListener(this);
+      serial.setTimeout(500);
+      if (keyboard == null) {
+        keyboard = (Keyboard) startPeer("keyboard");
+      }
+      if (keyboard != null) {
+        keyboard.attach(getName());
+      }
+      python = (Python) Runtime.start("python", "Python");
+      if (mouth == null) {
+        mouth = (SpeechSynthesis) Runtime.start("mouth", "WebkitSpeechSynthesis");
+      }
+    } catch (Exception e) {
+      log.error("start threw", e);
+    }
+  }
 
   public void startWebGUI() throws Exception {
     webgui = (WebGui) startPeer("webgui");

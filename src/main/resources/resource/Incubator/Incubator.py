@@ -1,2 +1,2 @@
 # start the service
-incubator = Runtime.start("incubator","Incubator")
+incubator = runtime.start("incubator","Incubator")

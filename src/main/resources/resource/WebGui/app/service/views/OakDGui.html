@@ -1,0 +1,51 @@
+<table>
+    <tr>
+        <td>
+            <label> </label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>WORK IN PROGRESS</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <button class="btn btn-default" ng-show="!startedAI" ng-click="execScript('resource/OakD/startScripts/AI_start.py')">AI</button>
+            <button class="btn btn-info" ng-show="startedAI" ng-click="execScript('resource/OakD/startScripts/AI_stop.py')">AI</button>
+            <button class="btn btn-default" ng-show="!startedDepth" ng-click="execScript('resource/OakD/startScripts/Depth_start.py')">Depth</button>
+            <button class="btn btn-info" ng-show="startedDepth" ng-click="execScript('resource/OakD/startScripts/Depth_stop.py')">Depth</button>
+            <div class="btn btn-default" ng-show="!startedCamera" ng-click="setPanel('camera')">Camera</div>
+            <button class="btn btn-info" ng-show="startedCamera" ng-click="execScript('resource/OakD/startScripts/Camera_stop.py')">Camera</button>
+            <button class="btn btn-default" ng-show="!startedMisc" ng-click="execScript('resource/OakD/startScripts/Misc_start.py')">Misc</button>
+            <button class="btn btn-info" ng-show="startedMisc" ng-click="execScript('resource/OakD/startScripts/Misc_stop.py')">Misc</button>
+        </td>
+    </tr>
+    <!------------------------ hand begin ------------------------------>
+    <table ng-show="showPanel('camera')" class="inmoov-sub-panel table table-striped">
+    <tr>
+        <td>
+            <label>COLOR</label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>FPS</label>
+                <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init=""  placeholder="30"/>
+            <button class="btn btn-info" ng-show="startedCamera"
+                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Resolution</button>
+            <button class="btn btn-info" ng-show="startedCamera"
+                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Enable sync</button>
+            <button class="btn btn-info" ng-show="startedCamera"
+                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">RGB-Depth Alignment</button>
+        </td>
+    </tr>
+    </table>
+            <!------------------------ camera end ------------------------------>
+    <tr>
+        <td>
+            <button class="btn btn-default" 
+                ng-click="execScript('resource/OakD/startScripts/depthai_demo.py')">Apply and Restart</button>
+        </td>
+    </tr>
+</table>

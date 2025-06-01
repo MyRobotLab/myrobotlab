@@ -7,6 +7,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.service.config.OculusDiyConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.OrientationListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -18,7 +19,7 @@ import org.slf4j.Logger;
  * build of MRLComm to work. Check with \@Alessandruino for questions.
  *
  */
-public class OculusDiy extends Service implements OrientationListener {
+public class OculusDiy extends Service<OculusDiyConfig> implements OrientationListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -46,8 +47,6 @@ public class OculusDiy extends Service implements OrientationListener {
 
   public OculusDiy(String n, String id) {
     super(n, id);
-    arduino = (Arduino) createPeer("arduino");
-    mpu6050 = (Mpu6050) createPeer("mpu6050");
   }
 
   public void calibrate() {
@@ -91,7 +90,7 @@ public class OculusDiy extends Service implements OrientationListener {
   public void computeAnglesAndroid(float yaw, float roll, float pitch) {
 
     // head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
-    head = mapperPitch.calcOutput((double) pitch);
+    head = mapperPitch.calcOutput(pitch);
     // headingint = (int) mapperYaw.calc(yaw);
     headingint = (int) yaw;
 

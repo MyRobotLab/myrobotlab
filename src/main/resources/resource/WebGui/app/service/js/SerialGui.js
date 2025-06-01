@@ -74,6 +74,12 @@ angular.module('mrlapp.service.SerialGui', []).controller('SerialGuiCtrl', ['$sc
             $scope.stats = msg.data[0]
             $scope.$apply()
             break
+        case 'onStatus':
+            // backend update 
+            //_self.updateState(msg.data[0])
+            $scope.status = msg.data[0]
+            $scope.$apply()
+            break
         case 'onRX':
             $scope.rx += _self.format(msg.data[0])
             ++$scope.rxCount

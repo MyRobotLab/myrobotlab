@@ -8,9 +8,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.UltrasonicSensorConfig;
+import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangePublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
@@ -26,72 +29,72 @@ import org.slf4j.Logger;
  * UltrasonicSensor implements RangeListener just for testing purposes
  *
  */
-public class UltrasonicSensor extends Service implements RangeListener, RangePublisher, UltrasonicSensorControl {
+public class UltrasonicSensor extends Service<UltrasonicSensorConfig> implements RangeListener, RangePublisher, UltrasonicSensorControl {
+
+  private final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(UltrasonicSensor.class);
+  transient protected UltrasonicSensorController controller;
 
-  public final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
-  private int pings;
+  protected String controllerName;
 
-  // currently not variable in NewPing.h
-  // Integer maxDistanceCm = 500;
+  transient protected BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
 
-  private Integer trigPin = null;
-  private Integer echoPin = null;
-  private String SensorType = "SR04";
+  @Deprecated /* use directly from config - should be String */
+  protected Integer echoPin = null;
 
-  private Double lastRaw;
-  private Double lastRange;
+  protected boolean isAttached = false;
 
   // for blocking asynchronous data
-  private boolean isBlocking = false;
+  protected boolean isBlocking = false;
 
-  transient private BlockingQueue<Double> data = new LinkedBlockingQueue<Double>();
+  protected boolean isRanging = false;
 
-  private transient UltrasonicSensorController controller;
+  protected Double lastRange;
 
-  String controllerName;
+  protected Double max;
 
-  double multiplier = 1;
+  protected Double min;
 
-  double offset = 0;
+  protected double multiplier = 1;
 
-  long timeout = 500;
+  protected double offset = 0;
+
+  protected long pingCount = 0;
+
+  protected Double rateHz = 1.0;
+
+  protected long timeout = 500;
+
+  @Deprecated /* use directly from config - should be String */
+  protected Integer trigPin = null;
+
+  protected final Set<String> types = new HashSet<String>(Arrays.asList("SR04", "SR05"));
+
+  protected boolean useRate = false;
+
+  protected long nextSampleTs = System.currentTimeMillis();
 
   public UltrasonicSensor(String n, String id) {
     super(n, id);
+    registerForInterfaceChange(UltrasonicSensorController.class);
   }
 
-  // ---- part of interfaces begin -----
-
-  // Uber good - .. although this is "chained" versus star routing
-  // Star routing would be routing from the Arduino directly to the Listener
-  // The "chained" version takes 2 thread contexts :( .. but it has the
-  // benefit
-  // of the "publishRange" method being affected by the Sensor service e.g.
-  // change units, sample rate, etc
-  // FIXME - NOT SERVICE .. possibly name or interface but not service
   public void addRangeListener(Service service) {
     addListener("publishRange", service.getName(), "onRange");
   }
 
-  public void attach(String port, int trigPin, int echoPin) throws Exception {
-    UltrasonicSensorController peerController = null;
-    // prepare the peer
-    if (controller != null) {
-      peerController = controller;
-    } else {
-      peerController = (UltrasonicSensorController) startPeer("controller");
+  @Override
+  public void attach(Attachable service) throws Exception {
+    if (service instanceof UltrasonicSensorController) {
+      attach((UltrasonicSensorController) service, trigPin, echoPin);
+      return;
     }
-    // connect it
-    peerController.connect(port);
-    // attach it
-    attach(peerController, trigPin, echoPin);
-    controller = peerController;
+    log.error("do not know how to attach to a {}", service.getClass().getSimpleName());
   }
 
+  @Override
   public void attach(UltrasonicSensorController controller, Integer trigPin, Integer echoPin) throws Exception {
 
     // critical test
@@ -112,11 +115,54 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
     // call other service's attach
     controller.attach(this, trigPin, echoPin);
-
+    isAttached = true;
+    broadcastState();
   }
 
-  private boolean isAttached(UltrasonicSensorController controller) {
-    return this.controller == controller;
+  /**
+   * This method is used to clear the Min, Max, last range and ping count values.
+   */
+  public void clear() {
+    pingCount = 0;
+    lastRange = null;
+    min = null;
+    max = null;
+    broadcastState();
+  }
+
+  // TODO - this could be Java 8 default interface implementation
+  @Override
+  public void detach(String controllerName) {
+    isAttached = false;
+    if (controller == null || !controllerName.equals(controller.getName())) {
+      return;
+    }
+    controller.detach(this);
+    controller = null;
+    this.controllerName = null;
+    broadcastState();
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    HashSet<String> ret = new HashSet<String>();
+    if (controller != null) {
+      ret.add(controller.getName());
+    }
+    return ret;
+  }
+
+  @Override
+  public UltrasonicSensorConfig getConfig() {
+
+    super.getConfig();
+    // FIXME - remove member variables use config directly
+    config.controller = controllerName;
+    config.triggerPin = trigPin;
+    config.echoPin = echoPin;
+    config.timeout = timeout;
+
+    return config;
   }
 
   // FIXME - should be MicroController Interface ..
@@ -124,12 +170,88 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return controller;
   }
 
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Echo Pin which is the pin the signal is returned on.
+   * @return
+   * Pin number.
+   */
   public int getEchoPin() {
     return echoPin;
   }
 
+  /**
+   * Used to get the Maximum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
+  public Double getMax() {
+    return max;
+  }
+
+  /**
+   * Used to get the Minimum range detected since the last clear() command.
+   * @return
+   * centimeters or inches based on the current setting.
+   */
+  public Double getMin() {
+    return min;
+  }
+
+  /**
+   * Used to get the number of pings sent since the last clear() command.
+   * @return
+   * Number of pings.
+   */
+  public long getPingCount() {
+    return pingCount;
+  }
+
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This function returns the Trigger Pin which is used to trigger the ping.
+   * @return
+   * Pin number.
+   */
   public int getTriggerPin() {
     return trigPin;
+  }
+  
+  public boolean isAttached() {
+    return isAttached;
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return isAttached;
+  }
+
+  protected boolean isAttached(UltrasonicSensorController controller) {
+    return this.controller == controller;
+  }
+
+  @Override
+  public UltrasonicSensorConfig apply(UltrasonicSensorConfig c) {
+    super.apply(c);
+
+    if (c.triggerPin != null)
+      setTriggerPin(c.triggerPin);
+
+    if (c.echoPin != null)
+      setEchoPin(c.echoPin);
+
+    if (c.timeout != null)
+      timeout = c.timeout;
+
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    return c;
   }
 
   @Override
@@ -137,44 +259,58 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     log.info("RANGE: {}", range);
   }
 
-  public Double publishRange(Double range) {
-
-    ++pings;
-
-    lastRange = range; // * 0.393701 inches
-
-    log.info("publishRange {}", lastRange);
-    return lastRange;
-  }
-
-  public boolean setType(String type) {
-    if (types.contains(type)) {
-      this.SensorType = type;
-      return true;
-    }
-    return false;
-  }
-
-  // ---- part of interfaces end -----
-
   @Override
-  public void startRanging() {
-    controller.ultrasonicSensorStartRanging(this);
-  }
+  public Double onUltrasonicSensorData(Double rawMs) {
+    // data comes in 'raw' and leaves as Range
+    // TODO implement changes based on type of sensor SRF04 vs SRF05
+    // TODO implement units preferred
+    // direct callback vs pub/sub (this needs to be handled by the
+    // framework)
 
-  @Override
-  public void stopRanging() {
-    controller.ultrasonicSensorStopRanging(this);
-  }
+    // FIXME - convert to appropriate range
+    // inches/meters/other kubits?
+    Double range = (rawMs * multiplier + offset);
 
-  synchronized public Double range() {
-    Double rawMs = ping();
-    if (rawMs == null) {
-      return null;
+    if (useRate) {
+      // FIXME - average - then publish ?
+      if (System.currentTimeMillis() < nextSampleTs) {
+        // using rate limiting and not yet ready to process
+        return range;
+      } else {
+        nextSampleTs = System.currentTimeMillis() + (long) (1000 * 1 / rateHz);
+      }
     }
-    return rawMs * multiplier + offset;
+
+    if (isBlocking) {
+      try {
+        data.put(range);
+      } catch (InterruptedException e) {
+        // don't care
+      }
+    }
+
+    if (max == null || range > max) {
+      max = range;
+    }
+
+    if (min == null || range < min) {
+      min = range;
+    }
+
+    pingCount++;
+
+    invoke("publishRange", range);
+    // range with source
+    invoke("publishRangeData", range);
+    return range;
   }
 
+  /**
+   * The raw time value that came back from the trigger pin after the echo pin
+   * was activated
+   * 
+   * @return - time in micro seconds
+   */
   synchronized public Double ping() {
     data.clear();
     startRanging();
@@ -192,53 +328,58 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return null;
   }
 
-  // probably should do this in a util class
-  public static int byteArrayToInt(int[] b) {
-    return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
-  }
-
-  public int getPings() {
-    return pings;
-  }
-
-  public String getSensorType() {
-    return SensorType;
-  }
-
-  // TODO - this could be Java 8 default interface implementation
   @Override
-  public void detach(String controllerName) {
-    if (controller == null || !controllerName.equals(controller.getName())) {
-      return;
-    }
-    controller.detach(this);
-    controller = null;
+  public Double publishRange(Double range) {
+
+    lastRange = range; // * 0.393701 inches
+
+    log.info("publishRange {}", lastRange);
+    return lastRange;
   }
 
-  @Override
-  public Double onUltrasonicSensorData(Double rawMs) {
-    // data comes in 'raw' and leaves as Range
-    // TODO implement changes based on type of sensor SRF04 vs SRF05
-    // TODO implement units preferred
-    // direct callback vs pub/sub (this needs to be handled by the
-    // framework)
+  public RangeData publishRangeData(Double range) {
+    RangeData ret = new RangeData(getName(), range);
+    return ret;
+  }
 
-    // FIXME - convert to appropriate range
-    // inches/meters/other kubits?
-
-    ++pings;
-    lastRaw = rawMs;
-    Double range = (rawMs * multiplier + offset);
-    if (isBlocking) {
-      try {
-        data.put(lastRaw);
-      } catch (InterruptedException e) {
-        Logging.logError(e);
-      }
+  /**
+   * Takes the value of ping and applies multiplier and offset for the desired
+   * value in cm or inches
+   * 
+   * @return - converted value
+   */
+  synchronized public Double range() {
+    Double rawMs = ping();
+    if (rawMs == null) {
+      return null;
     }
+    return rawMs * multiplier + offset;
+  }
 
-    invoke("publishRange", range);
-    return range;
+  public void setContinuous(boolean b) {
+    isBlocking = !b;
+    broadcastState();
+  }
+
+  /**
+   * There are two pins used on an Ultrasonic sensor, Trigger and Echo.
+   * This method set the Echo Pin which is the pin the signal is returned on.
+   * @param pin
+   *  The pin the echo will be returned on.
+   */
+  public void setEchoPin(int pin) {
+    echoPin = pin;
+  }
+
+  /**
+   * There are two pins used on an Ultrasonic sensor.
+   * Trigger and Echo.
+   * This method set the Trigger Pin which starts the ranging process.
+   * @param pin
+   *  The pin used to trigger the ranging process.
+   */
+  public void setTriggerPin(int pin) {
+    trigPin = pin;
   }
 
   @Override
@@ -251,18 +392,54 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     multiplier = 0.393701;
   }
 
-  @Override
-  public boolean isAttached(String name) {
-    return controller != null;
+  /**
+   * Sets the rate at which ranging is done to be as fast as possible (Uses more processing power).
+   */
+  public void maxRate() {
+    useRate = false;
+  }
+
+  /**
+   * Sets the ranging rate to the rate using setRate(value).
+   */
+  public void useRate() {
+    useRate = true;
+  }
+
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * To set rates lower than one, use public void setRate(double hz) instead.
+   * @param hz
+   */
+  public void setRate(int hz) {
+    setRate((double) hz);
+  }
+
+  /**
+   * Set the ping rate when ranging to the frequence supplied in the parameter.
+   * @param hz
+   */
+  public void setRate(double hz) {
+    rateHz = hz;
+    useRate();
   }
 
   @Override
-  public Set<String> getAttached() {
-    HashSet<String> ret = new HashSet<String>();
-    if (controller != null) {
-      ret.add(controller.getName());
+  public void startRanging() {
+    if (controller == null || !controller.isConnected()) {
+      info("controller must be attached and connected to range");      
+      return;
     }
-    return ret;
+    isRanging = true;
+    controller.ultrasonicSensorStartRanging(this);
+  }
+
+  @Override
+  public void stopRanging() {
+    isRanging = false;
+    if (controller != null) {
+      controller.ultrasonicSensorStopRanging(this);
+    }
   }
 
   public static void main(String[] args) {
@@ -270,27 +447,37 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
     try {
 
-      VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-      UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
-      // Runtime.start("python", "Python");
-      Runtime.start("gui", "SwingGui");
+      // Runtime.setAllVirtual(true);
       Runtime.start("webgui", "WebGui");
 
-      int trigPin = 8;
-      int echoPin = 7;
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect("/dev/ttyACM2");
+
+      UltrasonicSensor srf04 = (UltrasonicSensor) Runtime.start("srf04", "UltrasonicSensor");
+
+      srf04.setTriggerPin(3);
+      srf04.setEchoPin(2);
 
       // TODO test with externally supplied arduino
       // virtual.connect("COM10");
 
-      srf04.attach("COM5", trigPin, echoPin);
+      srf04.attach(arduino);
 
-      Arduino arduino = (Arduino) srf04.getController();
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      srf04.attach("arduino");
+
       // arduino.enableBoardInfo(true);
       // arduino.enableBoardInfo(false);
       // arduino.setDebug(false);
 
       Servo servo = (Servo) Runtime.start("servo", "Servo");
-      servo.attach(arduino, 6);
+      servo.setPin(6);
+      servo.attach(arduino);
+      // servo.attach(arduino, 6);
       servo.moveTo(30.0);
 
       srf04.startRanging();
@@ -312,5 +499,4 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
       Logging.logError(e);
     }
   }
-
 }

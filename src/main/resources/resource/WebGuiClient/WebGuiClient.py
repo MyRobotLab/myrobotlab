@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-WebGuiclient = Runtime.start('WebGuiclient','WebGuiClient')
+WebGuiclient = runtime.start('WebGuiclient','WebGuiClient')

@@ -10,6 +10,7 @@ public class HttpData {
     this.uri = uri;
   }
 
+  @Override
   public String toString() {
     int length = 0;
     if (data != null) {

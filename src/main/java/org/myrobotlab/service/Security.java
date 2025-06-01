@@ -17,6 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -45,12 +47,17 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.SecurityConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
 
 // controlling export is "nice" but its control messages are the most important to mediate
 
-public class Security extends Service implements AuthorizationProvider {
+public class Security extends Service<SecurityConfig> implements AuthorizationProvider {
+
+  protected Set<String> serviceKeyNames = new HashSet<>();
 
   public static class Group {
     public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();
@@ -69,15 +76,18 @@ public class Security extends Service implements AuthorizationProvider {
       this.tm = tm;
     }
 
+    @Override
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
       this.chain = chain;
       tm.checkServerTrusted(chain, authType);
     }
 
+    @Override
     public X509Certificate[] getAcceptedIssuers() {
 
       /**
@@ -122,7 +132,8 @@ public class Security extends Service implements AuthorizationProvider {
    * I think it might be easier concept to use a singleton for this service ...
    * Almost "always" better to have a singleton instance vs static methods !!!
    * 
-   * @return
+   * @return the security service (singleton)
+   * 
    */
   public static Security getInstance() {
     return (Security) Runtime.start("security", "Security");
@@ -131,7 +142,6 @@ public class Security extends Service implements AuthorizationProvider {
   public static void main(String[] args) throws Exception {
     // LoggingFactory.init(Level.INFO);
 
-    Runtime.getInstance(args);
 
     Runtime.start("gui", "SwingGui");
     // Security security = Security.getInstance();
@@ -338,9 +348,10 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * remove a key from the keystore
+   * 
    * 
    * @param keyName
+   *          remove a key from the keystore
    */
   public void deleteKey(String keyName) {
     if (store.containsKey(keyName)) {
@@ -394,7 +405,7 @@ public class Security extends Service implements AuthorizationProvider {
    * 
    * @param name
    *          - the name of the security key
-   * @return
+   * @return the property for a given key
    */
   public String getKey(String name) {
     if (store.containsKey(name)) {
@@ -410,9 +421,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * return the set of key names currently stored in the key store
+   * @return the set of key names currently stored in the key store
    * 
-   * @return
+   * 
    */
   public Set<String> getKeyNames() {
     Set<String> ret = new TreeSet<String>();
@@ -708,7 +719,11 @@ public class Security extends Service implements AuthorizationProvider {
    * code which sets the key can be removed
    * 
    * @param keyName
+   *          name
    * @param keyValue
+   *          value
+   * @return the name of the key stored
+   * 
    */
   public String setKey(String keyName, String keyValue) {
     store.put(keyName, keyValue);
@@ -718,6 +733,7 @@ public class Security extends Service implements AuthorizationProvider {
     return keyName;
   }
 
+  @Deprecated /* replace with StringUtil.bytesToHex */
   private String toHexString(byte[] bytes) {
     StringBuilder sb = new StringBuilder(bytes.length * 3);
     for (int b : bytes) {
@@ -727,6 +743,34 @@ public class Security extends Service implements AuthorizationProvider {
       sb.append(' ');
     }
     return sb.toString();
+  }
+
+  public Set<String> getServiceKeyNames() {
+    List<String> servicesNeedingKeys = Runtime.getServiceNamesFromInterface(KeyConsumer.class);
+    for (String serviceName : servicesNeedingKeys) {
+      KeyConsumer s = (KeyConsumer) Runtime.getService(serviceName);
+      addServiceKeyNames(s.getKeyNames());
+    }
+    broadcastState();
+    return serviceKeyNames;
+  }
+
+  // WTH? this never gets called
+  public void onRegistered(String name) {
+    log.info("onRegistered({})", name);
+  }
+
+  public void onStarted(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (si instanceof KeyConsumer) {
+      addServiceKeyNames(((KeyConsumer) si).getKeyNames());
+    }
+  }
+
+  public void addServiceKeyNames(String[] keyNamesIn) {
+    for (String keyName : keyNamesIn) {
+      serviceKeyNames.add(keyName);
+    }
   }
 
 }

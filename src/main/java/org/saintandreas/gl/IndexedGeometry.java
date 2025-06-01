@@ -1,6 +1,7 @@
 package org.saintandreas.gl;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glDrawElements;
 
 import java.util.List;
 
@@ -32,13 +33,11 @@ public class IndexedGeometry extends Geometry {
 
     @Override
     public IndexedGeometry build() {
-      return new IndexedGeometry(ibo, vbo, buildVertexArray(), drawType,
-          elements);
+      return new IndexedGeometry(ibo, vbo, buildVertexArray(), drawType, elements);
     }
   }
 
-  public IndexedGeometry(IndexBuffer ibo, VertexBuffer vbo, VertexArray vao,
-      int drawType, int elements) {
+  public IndexedGeometry(IndexBuffer ibo, VertexBuffer vbo, VertexArray vao, int drawType, int elements) {
     super(vbo, vao, drawType, elements);
     this.ibo = ibo;
   }

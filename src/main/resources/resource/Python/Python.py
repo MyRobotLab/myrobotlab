@@ -1,2 +1,2 @@
 # start the service
-python = Runtime.start("python","Python")
+python = runtime.start("python","Python")

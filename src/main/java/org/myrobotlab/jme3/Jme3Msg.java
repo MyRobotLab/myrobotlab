@@ -13,4 +13,8 @@ public class Jme3Msg {
     this.method = method;
     this.data = params;
   }
+  
+  public String toString() {
+    return String.format("method:%s data:%s", method, data); 
+  }
 }

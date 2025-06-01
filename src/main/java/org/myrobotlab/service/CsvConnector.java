@@ -9,11 +9,12 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
+import org.myrobotlab.service.config.CsvConnectorConfig;
 import org.myrobotlab.string.StringUtil;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-public class CsvConnector extends AbstractConnector {
+public class CsvConnector extends AbstractConnector<CsvConnectorConfig> {
 
   private static final long serialVersionUID = 1L;
   private String filename;

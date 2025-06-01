@@ -1,0 +1,9 @@
+!!org.myrobotlab.service.config.Mpu6050Config
+address: null
+bus: null
+controller: null
+listeners: null
+peers: null
+sampleRate: null
+start: false
+type: Mpu6050

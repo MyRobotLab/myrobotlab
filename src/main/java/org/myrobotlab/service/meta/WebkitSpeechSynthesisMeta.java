@@ -11,17 +11,11 @@ public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public WebkitSpeechSynthesisMeta(String name) {
-
-    super(name);
+  public WebkitSpeechSynthesisMeta() {
     addDescription("Web speech api using Chrome or Firefox speech synthesis");
-    setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
+    setAvailable(false); // false if you do not want it viewable in a
     addCategory("speech", "sound");
-
   }
 
 }

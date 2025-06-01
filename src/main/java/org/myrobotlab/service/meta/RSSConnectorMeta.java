@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,12 +11,8 @@ public class RSSConnectorMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public RSSConnectorMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public RSSConnectorMeta() {
     addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
     setCloudService(true);
     addCategory("cloud");

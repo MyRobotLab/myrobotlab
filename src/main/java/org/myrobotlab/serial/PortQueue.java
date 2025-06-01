@@ -52,6 +52,7 @@ public class PortQueue extends Port {
    * written to the queue by MrlCommIno can be read here and taken off the
    * queue.
    */
+  @Override
   public byte[] readBytes() {
     try {
       // here we should take as many bytes as there are to return.
@@ -71,6 +72,7 @@ public class PortQueue extends Port {
     }
   }
 
+  @Override
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
@@ -81,6 +83,7 @@ public class PortQueue extends Port {
     out.add(data);
   }
 
+  @Override
   public void write(byte[] data) throws IOException {
     // convert this to match the output queue of integer by upcasting the byte
     // array

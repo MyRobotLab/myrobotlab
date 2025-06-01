@@ -69,15 +69,22 @@ public final class MRLListener implements Serializable {
    */
   public String callbackMethod;
 
+  public MRLListener() {
+  }
+
   public MRLListener(String topicMethod, String callbackName, String callbackMethod) {
     this.topicMethod = topicMethod;
     this.callbackMethod = callbackMethod;
     this.callbackName = callbackName;
   }
 
-  final public boolean equals(final MRLListener other) {
-    if (callbackName.equals(other.callbackName) && callbackMethod.equals(other.callbackMethod) && topicMethod.equals(other.topicMethod)) {
-      return true;
+  @Override
+  public boolean equals(final Object other) {
+    if (other instanceof MRLListener) {
+      MRLListener listener = (MRLListener) other;
+      return callbackName.equals(listener.callbackName)
+              && callbackMethod.equals(listener.callbackMethod)
+              && topicMethod.equals(listener.topicMethod);
     }
     return false;
   }

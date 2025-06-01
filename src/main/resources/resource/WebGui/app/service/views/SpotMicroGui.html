@@ -1,0 +1,390 @@
+<style>
+    #spot-container{
+    width: 620px;
+    height: 588px;
+    /* border: 1px solid #000; */
+    position: relative;
+    background-image: url("../img/SpotMicro/spotBackGround.png");
+    z-index: 0;
+    float: none;
+    }
+
+    #spot-container-cell {
+    width: 620px;
+    }
+
+</style>
+
+<table border="1" class="table table-striped">
+<tr>
+    <td colspan="2">&nbsp;{{onText}} 
+    </td>
+</tr>
+<tr>
+    <link type="text/css" rel="stylesheet" media="all" href="../service/css/SpotGui.css">
+    <td id="spot-container-cell">
+        <div id="spot-container">
+            <!-- Right -->
+            <div id="Indicator" ng-click="setPanel('spotmicro')" class="rectangleIndicator preventDragSelect">SpotMicro</div>
+
+            <div id="sensorsButton" class="dotSpotButtons rightSide preventDragSelect" ng-click="setPanel('sensors')">Sensors</div>
+            <div id="sensorsDot" class="dotEnabled preventDragSelect"></div>
+            <div id="sensorsLine" class="rightLine preventDragSelect"></div>
+
+            <div id="controllerButton" class="dotSpotButtons rightSide preventDragSelect" ng-click="setPanel('controller')">Controllers</div>
+            <div id="controllerDot" class="dotEnabled preventDragSelect"></div>
+            <div id="controllerLine" class="rightLine preventDragSelect"></div>
+
+            <!-- Left -->
+
+            <div id="frontLegsButton" class="dotSpotButtons leftSide preventDragSelect" ng-click="setPanel('frontLegs')">Front Legs</div>
+            <div id="frontLegsDot" class="dotEnabled preventDragSelect"></div>
+            <div id="frontLegsLine" class="leftLine preventDragSelect"></div>
+
+            <div id="backLegsButton" class="dotSpotButtons leftSide preventDragSelect" ng-click="setPanel('backLegs')">Back Legs</div>
+            <div id="backLegsDot" class="dotEnabled preventDragSelect"></div>
+            <div id="backLegsLine" class="leftLine preventDragSelect"></div>
+
+            <div id="leftBackButton" class="dotSpotButtons leftSide preventDragSelect" ng-click="mrl.changeTab('intro')">Back</div>
+            <div id="leftBackArrow" class="leftBackArrow preventDragSelect"></div>
+
+            <div id="startButton" ng-click="execScript('resource/SpotMicro/startScripts/start.py')" class="rectangleStart preventDragSelect">Start</div>
+
+            <div id="gesturesButton" ng-click="setPanel('gestures')" class="rectangleGestures preventDragSelect">Gestures</div>
+
+            <div id="simulatorButton" ng-click="setPanel('simulator')" class="rectangleSimulator preventDragSelect">Simulator</div>
+        </div>
+    </td>
+<td>
+<!-- panels begin -->
+<!------------------------ spotmicro begin ------------------------------>
+<table ng-show="showPanel('spotmicro')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>spotMicro is:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <img ng-src="{{(isSpotMicro)?'../../green.png':'../../red.png'}}"/>
+    </td>
+</tr>
+</table>    
+<!------------------------ spotmicro end ------------------------------>
+<!------------------------ sensors begin ------------------------------>
+<table ng-show="showPanel('sensors')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Sensors:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../UltrasonicSensor.png" />
+        <label>Ultrasonic Right</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted(service, 'ultrasonicRight')"
+        ng-click="startPeer('ultrasonicRight')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted(service, 'ultrasonicRight')"
+        ng-click="releasePeer('ultrasonicRight')">on</button>
+        <span ng-show="peer.isPeerStarted(service, 'ultrasonicRight')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, 'ultrasonicRight'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../UltrasonicSensor.png" />
+        <label>Ultrasonic Left</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted(service, 'ultrasonicLeft')"
+        ng-click="startPeer('ultrasonicLeft')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted(service, 'ultrasonicLeft')"
+        ng-click="releasePeer('ultrasonicLeft')">on</button>
+        <span ng-show="peer.isPeerStarted(service, 'ultrasonicLeft')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName(service, 'ultrasonicLeft'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>
+</tr>
+    <td>
+        <button class="btn btn-default" ng-click="mrl.sendTo('runtime', 'export', 'sensors')">Save sensors Config</button>
+    </td>
+</tr>
+</table>
+<!------------------------ sensors end ------------------------------>
+<!------------------------ controller begin ------------------------------>
+<table ng-show="showPanel('controller')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Controllers:</label>
+    </td>
+</tr>   
+<tr>
+    <td>
+        <img src="../microcontroller_1.png" />
+        <label>Controller Right</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('right')"
+            ng-click="startPeer('right')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('right')"
+            ng-click="releasePeer('right')">on</button>
+        <span ng-show="peer.isPeerStarted('right')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('right'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>        
+</tr>
+<tr>
+    <td>
+        <img src="../microcontroller_1.png" />
+        <label>Controller Left</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('left')"
+            ng-click="startPeer('left')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('left')"
+            ng-click="releasePeer('left')">on</button>
+        <span ng-show="peer.isPeerStarted('left')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('left'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../Mpu6050.png" />
+        <label>MPU 6050</label>
+    </td>
+    <td>
+        <button class="btn btn-secondary" ng-show="!peer.isPeerStarted('mpu')"
+            ng-click="startPeer('mpu')">off</button>
+        <button class="btn btn-info" ng-show="peer.isPeerStarted('mpu')"
+            ng-click="releasePeer('mpu')">on</button>
+        <span ng-show="peer.isPeerStarted('mpu')">
+            <a href="" ng-click="mrl.changeTab(peer.getActualName('mpu'))">
+                <img src="settings.png" width="30" />
+            </a>
+        </span>
+    </td>
+</tr>    
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="mrl.sendTo('runtime', 'export', 'controllers')">Save controllers Config</button>
+    </td>
+</tr>
+</table>
+<!------------------------ controller end ------------------------------>
+<!------------------------ backLegs begin ------------------------------>
+<table ng-show="showPanel('backLegs')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Back legs:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>Shoulder:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('startScripts/BLS_Servo.py')"></button>
+        <label>BLS_Servo</label>
+    </td>
+    <span ng-show="peer.isPeerStarted('BLS_Servo')">
+        <a href="" ng-click="mrl.changeTab(peer.getActualName('BLS_Servo'))">
+            <img src="resource/settings.png" width="30" />
+        </a>
+    </span>
+</tr>
+<tr ng-show="peer.isPeerStarted('BLS_Servo')">
+    <td>
+        <div class="tab-content" service-body panel="mrl.getPanel('BLS_Servo')"></div>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('startScripts/BRS_Servo.py')"></button>
+        <label>BRS_Servo</label>
+    </td>
+    <span ng-show="peer.isPeerStarted('BLS_Servo')">
+        <a href="" ng-click="mrl.changeTab(peer.getActualName('BRS_Servo'))">
+            <img src="resource/settings.png" width="30" />
+        </a>
+    </span>
+</tr>
+<tr>
+    <td>
+        <label>Arm:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('BLA_Servo')"></button>
+        <label>BLA_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('BRA_Servo')"></button>
+        <label>BRA_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>Wrist:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('BLW_Servo')"></button>
+        <label>BLW_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('BRW_Servo')"></button>
+        <label>BRW_Servo</label>
+    </td>
+</tr>
+</table>
+<!------------------------ backLegs end ------------------------------>
+<!------------------------ frontLegs begin ------------------------------>
+<table ng-show="showPanel('frontLegs')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Front legs:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>Shoulder:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FLS_Servo')"></button>
+        <label>FLS_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FRS_Servo')"></button>
+        <label>FRS_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>Arm:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FLA_Servo')"></button>
+        <label>FLA_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FRA_Servo')"></button>
+        <label>FRA_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>Wrist:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FLW_Servo')"></button>
+        <label>FLW_Servo</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" service-body panel="mrl.getPanel('FRW_Servo')"></button>
+        <label>FRW_Servo</label>
+    </td>
+</tr>
+</table>
+<!------------------------ frontLegs end ------------------------------>
+<!------------------------ gestures begin ------------------------------>
+<table ng-show="showPanel('gestures')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Gestures:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Sit</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+       <label>Stand</label>        
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Walk</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Rest</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Crouch</label>
+    </td>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>RestToStand</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>StandTall</label>
+    </td>
+</tr>
+</table>
+<!------------------------ gestures end ------------------------------>
+<!------------------------ simulator begin ------------------------------>
+<table ng-show="showPanel('simulator')" class="spotmicro-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../SpotMicro.png"/>
+        <label>Simulator:</label>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="execScript('system/startScripts/sit.py')"></button>
+        <label>Start</label>
+    </td>
+</tr>
+</table>
+<!------------------------ simulator end ------------------------------>
+<!-- panels end -->
+</td></tr></table>

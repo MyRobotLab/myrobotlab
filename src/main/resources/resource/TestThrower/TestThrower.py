@@ -1,2 +1,2 @@
 # start the service
-testthrower = Runtime.start("testthrower","TestThrower")
+testthrower = runtime.start("testthrower","TestThrower")

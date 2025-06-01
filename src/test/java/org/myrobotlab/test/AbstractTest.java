@@ -1,68 +1,69 @@
 package org.myrobotlab.test;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.text.ParseException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.rules.TestName;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.Attachable;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.slf4j.Logger;
 
 public class AbstractTest {
 
-  private static long coolDownTimeMs = 100;
+  /**
+   * cached network test value for tests
+   */
+  protected static Boolean hasInternet = null;
 
-  /** cached network test value for tests */
-  static Boolean hasInternet = null;
+  /**
+   * Install dependencies once per process, same process will not check. A new
+   * process will use the libraries/serviceData.json to determine if deps are
+   * satisfied
+   */
+  protected static boolean installed = false;
 
-  static boolean install = true;
+  protected final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
-  protected static boolean installed = true;
-
-  public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
-
-  static private boolean logWarnTestHeader = false;
-
-  private static boolean releaseRemainingServices = true;
-
-  private static boolean releaseRemainingThreads = false;
-  
-  protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
-
-  static transient Set<Thread> threadSetStart = null;
-  
-  protected Set<Attachable> attached = new HashSet<>();
-
-  protected boolean printMethods = true;
+  protected static transient Set<Thread> threadSetStart = null;
 
   @Rule
-  public final TestName testName = new TestName();
-  static public String simpleName;
-  private static boolean lineFeedFooter = true;
+  public TestWatcher watchman = new TestWatcher() {
+    @Override
+    protected void starting(Description description) {
+      System.out.println("Starting: " + description.getClassName() + "." + description.getMethodName());
+    }
 
-  public String getSimpleName() {
-    return simpleName;
-  }
+    @Override
+    protected void succeeded(Description description) {
+      // System.out.println("Succeeded: " + description.getMethodName());
+    }
 
-  public String getName() {
-    return testName.getMethodName();
-  }
+    @Override
+    protected void failed(Throwable e, Description description) {
+      System.out.println("Failed: " + description.getMethodName());
+    }
+
+    @Override
+    protected void skipped(org.junit.AssumptionViolatedException e, Description description) {
+      System.out.println("Skipped: " + description.getMethodName());
+    }
+
+    @Override
+    protected void finished(Description description) {
+      System.out.println("Finished: " + description.getMethodName());
+    }
+  };
 
   static public boolean hasInternet() {
     if (hasInternet == null) {
@@ -92,11 +93,25 @@ public class AbstractTest {
     }
   }
 
-  // super globals - probably better not to use the mixin - but just initialize
-  // statics in the
-  // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
+
+    // setup runtime resource = src/main/resources/resource
+    File runtimeYml = new File("data/config/default/runtime.yml");
+    // if (!runtimeYml.exists()) {
+    runtimeYml.getParentFile().mkdirs();
+    RuntimeConfig rc = new RuntimeConfig();
+    rc.resource = "src/main/resources/resource";
+    String yml = CodecUtils.toYaml(rc);
+
+    FileOutputStream fos = null;
+    fos = new FileOutputStream(runtimeYml);
+    fos.write(yml.getBytes());
+    fos.close();
+
+    // }
+
+    Runtime.getInstance().setVirtual(true);
 
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
@@ -109,144 +124,78 @@ public class AbstractTest {
     if (threadSetStart == null) {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
+    installAll();
   }
-  
-  static public List<String> getThreadNames(){
-    List <String> ret = new ArrayList<>();
+
+  static public List<String> getThreadNames() {
+    List<String> ret = new ArrayList<>();
     Set<Thread> tds = Thread.getAllStackTraces().keySet();
-    for (Thread t : tds ) {
+    for (Thread t : tds) {
       ret.add(t.getName());
     }
     return ret;
   }
 
-  static public void sleep(int sleepMs) {
-    try {
-      Thread.sleep(sleepMs);
-    } catch (InterruptedException e) {
-      // don't care
-    }
-  }
-
   public static void sleep(long sleepTimeMs) {
     try {
-      Thread.sleep(coolDownTimeMs);
+      Thread.sleep(sleepTimeMs);
     } catch (Exception e) {
-
     }
   }
 
   @AfterClass
   public static void tearDownAbstractTest() throws Exception {
     log.info("tearDownAbstractTest");
-
-    if (releaseRemainingServices) {
-      releaseServices();
-    }
-
-    if (logWarnTestHeader) {
-      log.warn("=========== finished test {} ===========", simpleName);
-    }
-
-    if (lineFeedFooter) {
-      System.out.println();
-    }
+    releaseServices();
   }
 
-  protected void installAll() throws ParseException, IOException {
+  static protected void installAll() {
     if (!installed) {
-      log.warn("installing all services");
-      Runtime.install();
+      log.warn("=====================installing all services=====================");
+      // install all service while blocking until done
+      Runtime.install(null, true);
       installed = true;
     }
   }
 
+  /**
+   * release all services except runtime ?
+   */
   public static void releaseServices() {
 
-    // services to be cleaned up/released
-    String[] services = Runtime.getServiceNames();
-    Set<String> releaseServices = new TreeSet<>();
-    for (String service : services) {
-      // don't kill runtime - although in the future i hope this is possible
-      if (!"runtime".equals(service)) {
-        releaseServices.add(service);
-        log.info("service {} left in registry - releasing", service);
-        Runtime.releaseService(service);
-      }
-    }
+    log.info("end of test - id {} remaining services {}", Runtime.getInstance().getId(),
+        Arrays.toString(Runtime.getServiceNames()));
 
-    if (releaseServices.size() > 0) {
-      log.info("attempted to release the following {} services [{}]", releaseServices.size(), String.join(",", releaseServices));
-      log.info("cooling down for {}ms for dependencies with asynchronous shutdown", coolDownTimeMs);
-      sleep(coolDownTimeMs);
-    }
+    // release all including runtime - be careful of default runtime.yml
+    Runtime.releaseAll(true, true);
+    // wait for draining threads
+    sleep(100);
 
     // check threads - kill stragglers
     // Set<Thread> stragglers = new HashSet<Thread>();
     Set<Thread> threadSetEnd = Thread.getAllStackTraces().keySet();
     Set<String> threadsRemaining = new TreeSet<>();
     for (Thread thread : threadSetEnd) {
-      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
-        if (releaseRemainingThreads) {
-          log.info("interrupting thread {}", thread.getName());
-          thread.interrupt();
-          /*
-           * if (useDeprecatedThreadStop) { thread.stop(); }
-           */
-        } else {
-          // log.warn("thread {} marked as straggler - should be killed",
-          // thread.getName());
-          threadsRemaining.add(thread.getName());
-        }
+      if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName())
+          && !"runtime".equals(thread.getName())) {
+        threadsRemaining.add(thread.getName());
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
-    log.info("finished the killing ...");
+
+    // resets runtime with fresh new instance
+    Runtime.getInstance();
+
   }
 
-  public AbstractTest() {
-    
-    // default : make testing environment "virtual"
-    Platform.setVirtual(true);
-    
-    simpleName = this.getClass().getSimpleName();
-    if (logWarnTestHeader) {
-      log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
-    }
-    if (install) {
-      try {
-        installAll();
-      } catch (Exception e) {
-        log.error("installing services failed");
-        fail("installing service failed");
-      }
-    }
-    
-    // log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
-    // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
-    
-  }
-  
   public void setVirtual() {
-    Platform.setVirtual(true);
+    Runtime.getInstance().setVirtual(true);
   }
-  
+
   public boolean isVirtual() {
-    return Platform.isVirtual();
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  public void testFunction() {
-    log.info("tested testFunction");
+    return Runtime.getInstance().isVirtual();
   }
 
 }

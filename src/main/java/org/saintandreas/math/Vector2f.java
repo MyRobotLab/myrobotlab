@@ -52,12 +52,12 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
   public final float y;
 
   /**
-   * Constructor instantiates a new <code>Vector3f</code> with default
-   * values of (0,0,0).
+   * Constructor instantiates a new <code>Vector3f</code> with default values of
+   * (0,0,0).
    *
    */
   public Vector2f() {
-      x = y = 0;
+    x = y = 0;
   }
 
   /**
@@ -103,6 +103,7 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
   public String toString() {
     return "(" + x + ", " + y + ")";
   }
+
   /**
    * are these two vectors the same? they are is they both have the same x and y
    * values.
@@ -156,12 +157,11 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
    * @param changeAmnt
    *          An amount between 0.0 - 1.0 representing a precentage change from
    *          beginVec towards finalVec
+   * @return vector
    */
-  public static Vector2f interpolate(@Nonnull Vector2f beginVec,
-      @Nonnull Vector2f finalVec, float changeAmnt) {
+  public static Vector2f interpolate(@Nonnull Vector2f beginVec, @Nonnull Vector2f finalVec, float changeAmnt) {
     return beginVec.interpolate(finalVec, changeAmnt);
   }
-
 
   /**
    * <code>smallestAngleBetween</code> returns (in radians) the minimum angle
@@ -190,8 +190,7 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
    */
   @Override
   public float angleBetween(Vector2f otherVector) {
-    float angle = FastMath.atan2(otherVector.y, otherVector.x)
-        - FastMath.atan2(y, x);
+    float angle = FastMath.atan2(otherVector.y, otherVector.x) - FastMath.atan2(y, x);
     return angle;
   }
 

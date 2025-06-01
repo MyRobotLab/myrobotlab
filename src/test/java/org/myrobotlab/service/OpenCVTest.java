@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,18 +27,20 @@ public class OpenCVTest extends AbstractTest {
   static OpenCV cv = null;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVTest.class);
-  static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/OpenCV/";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
   static final String TEST_LOCAL_MP4 = "src/test/resources/OpenCV/monkeyFace.mp4";
-  // static final String TEST_LOCAL_MP4 = "src/test/resources/OpenCV/big_buck_bunny.mp4";
-  
-  // static final String TEST_YOUTUBE = "https://www.youtube.com/watch?v=I9VA-U69yaY";
+  // static final String TEST_LOCAL_MP4 =
+  // "src/test/resources/OpenCV/big_buck_bunny.mp4";
+
+  // static final String TEST_YOUTUBE =
+  // "https://www.youtube.com/watch?v=I9VA-U69yaY";
   static final String TEST_INPUT_DIR = "src/test/resources/OpenCV/kinect-data";
   static final String TEST_TRANSPARENT_FILE_PNG = "src/test/resources/OpenCV/transparent-bubble.png";
   // static final String TEST_REMOTE_FILE_JPG = TEST_LOCAL_FACE_FILE_JPEG;
-  // static final String TEST_REMOTE_FILE_JPG = "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
+  // static final String TEST_REMOTE_FILE_JPG =
+  // "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
   static final String TEST_REMOTE_FILE_JPG = "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg";
   private static final int MAX_TIMEOUT = 1000 * 300; // 5 minutes
 
@@ -82,49 +85,23 @@ public class OpenCVTest extends AbstractTest {
       log.error("main threw", e);
     }
   }
-  
+
   @Rule
   public final TestName testName = new TestName();
+  
+  @Before
+  public void beforeTest() {
+    cv.reset();
+  }
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    log.warn("========= OpenCVTest - setupbefore class - begin loading libraries =========");
-    log.warn("========= OpenCVTest - setupbefore class - starting cv =========");
+    log.info("========= OpenCVTest - setupbefore class - begin loading libraries =========");
+    log.info("========= OpenCVTest - setupbefore class - starting cv =========");
     long ts = System.currentTimeMillis();
     cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    swing = (SwingGui) Runtime.start("gui", "SwingGui");
-    
-    /*
-  
-    log.warn("========= OpenCVTest - setupbefore class - started cv {} ms =========", System.currentTimeMillis()-ts );
-    ts = System.currentTimeMillis();
-    log.warn("========= OpenCVTest - setupbefore class - starting capture =========");
-    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-    log.warn("========= OpenCVTest - setupbefore class - started capture {} ms =========", System.currentTimeMillis()-ts );
-    ts = System.currentTimeMillis();
-    log.warn("========= OpenCVTest - setupbefore class - starting getFaceDetect =========");
-    cv.getFaceDetect(120000);// two minute wait to load all libraries
-    log.warn("========= OpenCVTest - setupbefore class - started getFaceDetect {} ms =========", System.currentTimeMillis()-ts );
-    ts = System.currentTimeMillis();
-    log.warn("========= OpenCVTest - setupbefore class - starting getClassifications =========");
-    cv.reset();
-    OpenCVFilter yoloFilter = cv.addFilter("yolo");
-    // cv.getClassifications(120000);
-    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-    log.warn("========= OpenCVTest - setupbefore class - started getClassifications {} ms =========", System.currentTimeMillis()-ts );
 
-    ts = System.currentTimeMillis();
-    log.warn("========= OpenCVTest - setupbefore class - starting getOpenCVData =========");
-
-    cv.reset();
-    cv.capture(TEST_LOCAL_MP4);
-    cv.getOpenCVData();
-    log.warn("========= OpenCVTest - setupbefore class - started getOpenCVData {} ms =========", System.currentTimeMillis()-ts );
-      cv.disableAll();
-    // if (!isHeadless()) { - no longer needed I believe - SwingGui now handles it
-      
-    // }
-     */
   }
 
   // FIXME - do the following test
@@ -147,8 +124,8 @@ public class OpenCVTest extends AbstractTest {
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (!cv.isVirtual()) {
-      //  if hasHardware camera index 0 - FIXME should check if camera 0 exists ?
-      ChaosMonkey.giveToMonkey(cv, "capture", 0); 
+      // if hasHardware camera index 0 - FIXME should check if camera 0 exists ?
+      ChaosMonkey.giveToMonkey(cv, "capture", 0);
     }
     ChaosMonkey.startMonkeys();
     ChaosMonkey.monkeyReport();
@@ -156,7 +133,7 @@ public class OpenCVTest extends AbstractTest {
     // check after the monkeys have pounded on it - it still works !
     cv.reset();
     cv.removeFilters();
-    
+
     cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     List<Classification> data = cv.getFaces(MAX_TIMEOUT);
     assertNotNull(data);
@@ -166,7 +143,7 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void simpleFaces() {
     log.warn("=======OpenCVTest simpleFaces=======");
-  
+
     cv.reset();
     cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     List<Classification> data = cv.getFaces(MAX_TIMEOUT);
@@ -214,20 +191,25 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_INPUT_DIR);
     assertNotNull(data);
 
+
+  }
+  
+  @Test
+  public void testHttpCapture() {
+    
     /**
      * Test ImageFile frame grabber
      */
-    
+
     if (hasInternet()) {
       cv.reset();
       cv.setGrabberType("ImageFile");
-      cv.capture("https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg");
-      data = cv.getFaces(MAX_TIMEOUT);
+      cv.capture("https://upload.wikimedia.org/wikipedia/commons/f/fe/Isaac_Asimov%2C_RIT_NandE_Vol13Num29_1981_Sep24_Complete.jpg");
+      List<Classification> data = cv.getFaces(MAX_TIMEOUT);
       assertNotNull(data);
       assertTrue(data.size() > 0);
     }
     
-
   }
 
   // TODO test enable disable & enableDisplay
@@ -246,9 +228,9 @@ public class OpenCVTest extends AbstractTest {
     cv.capture(TEST_LOCAL_MP4);
 
     for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      log.info("trying filter {}", fn);
-      if (fn.startsWith("DL4J") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
-        log.info("skipping {}", fn);
+      log.warn("trying filter {}", fn);
+      if ( fn.startsWith("FaceDetectDNN") || fn.startsWith("FaceRecognizer") || fn.startsWith("DL4J") || fn.startsWith("FaceTraining") || fn.startsWith("Tesseract") || fn.startsWith("SimpleBlobDetector") || fn.startsWith("Solr") || fn.startsWith("Split")) {
+        log.warn("skipping {}", fn);
         continue;
       }
       cv.addFilter(fn);
@@ -266,7 +248,7 @@ public class OpenCVTest extends AbstractTest {
     // cv.removeFilters();
     log.warn("=======OpenCVTest testGetClassifications - 1=======");
     cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-    // OpenCVFilter f = 
+    // OpenCVFilter f =
     log.warn("=======OpenCVTest testGetClassifications - 2=======");
     cv.addFilter("yolo");
     log.warn("=======OpenCVTest testGetClassifications - 3=======");

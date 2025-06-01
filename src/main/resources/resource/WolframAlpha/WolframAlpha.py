@@ -5,7 +5,7 @@
 #########################################
 
 #Start the Service
-wolframalpha = Runtime.start("wolframalpha","WolframAlpha")
+wolframalpha = runtime.start("wolframalpha","WolframAlpha")
 
 #Beside using the GUI of the engine which works exactly like a usual search engine, one can use the engine with these methods.
 keyword = "ape"

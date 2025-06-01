@@ -13,6 +13,7 @@ import org.myrobotlab.opencv.OpenCVFilterAffine;
 import org.myrobotlab.opencv.OpenCVFilterTranspose;
 import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.service.config.OculusRiftConfig;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import com.oculusvr.capi.TrackingState;
  *
  */
 // TODO: implement publishOculusRiftData ...
-public class OculusRift extends Service implements PointPublisher {
+public class OculusRift extends Service<OculusRiftConfig>  implements PointPublisher {
 
   public static final int ABS_TIME_MS = 0;
   public static final boolean LATENCY_MARKER = false;
@@ -98,12 +99,14 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   // Boradcast the state of the peers to notify the gui.
-  public void broadcastState() {
+  @Override
+  public Service broadcastState() {
     // notify the gui
     if (leftOpenCV != null)
       leftOpenCV.broadcastState();
     if (rightOpenCV != null)
       rightOpenCV.broadcastState();
+    return this;
   }
 
   private void setupRift() {
@@ -503,14 +506,14 @@ public class OculusRift extends Service implements PointPublisher {
     LoggingFactory.init("INFO");
 
     Runtime.createAndStart("gui", "SwingGui");
-    //Runtime.createAndStart("python", "Python");
+    // Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
     String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
     String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
 
-    //rift.setLeftEyeURL(leftEyeURL);
-    //rift.setRightEyeURL(rightEyeURL);
+    // rift.setLeftEyeURL(leftEyeURL);
+    // rift.setRightEyeURL(rightEyeURL);
 
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
@@ -521,7 +524,7 @@ public class OculusRift extends Service implements PointPublisher {
     rift.initContext();
 
     rift.logOrientation();
-    
+
     rift.leftOpenCV.capture();
     // TODO: configuration to enable left/right camera roll tracking.
     // while (true) {

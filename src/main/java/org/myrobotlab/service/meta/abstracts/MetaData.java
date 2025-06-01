@@ -1,6 +1,7 @@
 package org.myrobotlab.service.meta.abstracts;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,11 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.repo.ServiceArtifact;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 
 /**
@@ -35,6 +38,11 @@ public class MetaData implements Serializable {
    * available in the UI(s)
    */
   Boolean available = true; // why not ? :P
+
+  /**
+   * if this service's dependencies are currently installed
+   */
+  public boolean installed = false;
 
   /**
    * Set of categories this service belongs to
@@ -81,24 +89,15 @@ public class MetaData implements Serializable {
   /**
    * full type name of the service
    */
-  String name;
+  String type;
 
-  /**
-   * key'd structure of other services that are necessary for the correct
-   * function of this service can be modified with overrides before starting
-   * named instance of this service
-   */
-  public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+
+  // public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
   /**
    * true if the service requires a key e.g. Polly
    */
   Boolean requiresKeys = false;
-
-  /**
-   * instance name of service this MetaData belongs to e.g. "i01"
-   */
-  String serviceName;
 
   /**
    * simple class name of this service
@@ -111,26 +110,36 @@ public class MetaData implements Serializable {
   String sponsor;
 
   /**
-   * service life-cycle state inactive | created | registered | running |
-   * stopped | released
-   */
-  String state = null;
-
-  /**
    * what is left TODO on this service for it to be ready for release
    */
   String todo;
 
   Integer workingLevel = null;
 
-  public MetaData(String name) {
+  static public String getConfigType(String type) {
+    if (type.contains(".") && type.endsWith("Meta")) {
+      return type;
+    }
 
+    if (!type.contains(".") && !type.endsWith("Meta")) {
+      type = String.format("org.myrobotlab.service.meta.%sMeta", type);
+    } else {
+      int pos = type.lastIndexOf(".");
+      String serviceTypeName = type.substring(pos + 1);
+      type = type.substring(0, pos) + ".meta." + serviceTypeName + "Meta";
+    }
+    return type;
+  }
+
+  public MetaData() {
+
+    // this.plan = new Plan(this);
     // name is the name this meta class respresents
     // in the case of ArduinoMeta - it represents the
     // org.myrobotlab.service.Arduino
-    this.serviceName = name;
+    // this.serviceName = name;
     this.simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
-    this.name = "org.myrobotlab.service." + simpleName;
+    this.type = "org.myrobotlab.service." + simpleName;
   }
 
   public void addArtifact(String orgId, String classifierId) {
@@ -152,7 +161,7 @@ public class MetaData implements Serializable {
   }
 
   public void addDependency(String groupId, String artifactId, String version, String ext) {
-    ServiceDependency library = new ServiceDependency(groupId, artifactId, version, ext);
+    ServiceDependency library = new ServiceDependency(groupId, artifactId, version, ext, includeServiceInOneJar);
     lastDependency = library;
     dependencies.add(library);
   }
@@ -192,16 +201,6 @@ public class MetaData implements Serializable {
 
   public String getLink() {
     return link;
-  }
-
-  // FIXME - change to name ... change name to type
-  // check for webgui breakage
-  public String getName() {
-    return serviceName;
-  }
-
-  public Map<String, ServiceReservation> getPeers() {
-    return peers;
   }
 
   public String getSimpleName() {
@@ -263,69 +262,61 @@ public class MetaData implements Serializable {
   @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
-    if (serviceName != null) {
-      sb.append(String.format("\n%s %s\n", serviceName, simpleName));
-    } else {
-      sb.append(String.format("\n%s\n", simpleName));
-    }
-
-    for (ServiceReservation sr : peers.values()) {
-      sb.append(sr).append("\n");
-    }
-
+    sb.append(String.format("\n%s\n", simpleName));
     return sb.toString();
   }
+  
+  
 
-  public ServiceReservation getPeer(String peerKey) {
-    if (peers.get(peerKey) == null) {
-      log.warn("{} not found in peer keys - possible keys follow:", peerKey);
-      for (String key : peers.keySet()) {
-        log.info(key);
-      }
-    }
-    return peers.get(peerKey);
-  }
-
-  public void setServiceName(String serviceName) {
-    this.serviceName = serviceName;
-  }
-
-  public String getServiceName() {
-    return serviceName;
-  }
-
-  /**
-   * typical adding of a service reservation .. the actual name is left null, so
-   * that this template will dynamically generate peer names depending on the
-   * parents name
-   * 
-   * @param key
-   * @param peerType
-   * @param comment
-   */
-  public void addPeer(String key, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, null, peerType, comment));
-  }
-
-  public void addPeer(String key, String actualName, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
-
-  public String getPeerActualName(String peerKey) {
-
-    // return local defined name
-    ServiceReservation peer = peers.get(peerKey);
-    if (peer != null) {
-      if (peer.actualName != null) {
-        return peer.actualName;
-      }
-    }
-    return null;
-  }
 
   public String getType() {
-    // FIXME - change name to type check for webgui breakage
-    return name;
+    return type;
+  }
+
+  @Deprecated /* use ServiceConfig */
+  public Plan getDefault(String name) {
+
+    // FIXME - plan passed in
+    Plan plan = new Plan(name);
+    try {
+
+      // FIXME-sc read from 
+      // either overwrite starting with base default
+      // or invert - do not overwrite if override is supplied
+      
+      // gonna try - use first file only - don't seek override, never overwrite
+      // 1. attempt to read data/config/blah/name.yml
+      // 2. try resources/resource/Type/type.yml
+      // 3. construct new ServiceConfig ?
+      
+      Class<?> c = Class.forName("org.myrobotlab.service.config." + simpleName + "Config");
+      Constructor<?> con = c.getConstructor();
+      ServiceConfig sc = (ServiceConfig) con.newInstance();
+
+      // FIXME handle no Config object ... just Service
+      plan.put(name, sc);
+
+    } catch (Exception e) {
+      log.info("could not find {} loading generalized ServiceConfig", type);
+      ServiceConfig sc = new ServiceConfig();
+      sc.type = simpleName;
+      plan.put(name, sc);
+    }
+    return plan;
+  }
+
+  @Deprecated /* use ServiceConfig */
+  public static MetaData get(String type) {
+    try {
+      type = getConfigType(type);
+      Class<?> c = Class.forName(type);
+      Constructor<?> con = c.getConstructor();
+      return (MetaData) con.newInstance();
+
+    } catch (Exception e) {
+      log.error("getting MetaData failed on {}", type);
+    }
+    return null;
   }
 
 }

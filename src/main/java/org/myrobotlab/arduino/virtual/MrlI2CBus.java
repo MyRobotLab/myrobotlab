@@ -70,6 +70,7 @@ public class MrlI2CBus extends Device {
     msg.publishI2cData(id, msg.getBuffer());
   }
 
+  @Override
   void update() {
     // Nothing to do
   }

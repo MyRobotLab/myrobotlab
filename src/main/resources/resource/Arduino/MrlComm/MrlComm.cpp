@@ -331,28 +331,49 @@ void MrlComm::i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byt
 	((MrlI2CBus *)getDevice(deviceId))->i2cWriteRead(deviceAddress, readSize, writeValue);
 }
 
-// > neoPixelAttach/pin/b16 numPixels
-void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels, byte depth)
-{
-	//msg->publishDebug("MrlNeopixel.deviceAttach!");
+/////////////////////////////////// NeoPixel Begin ///////////////////////////////////////////
 
+// > neoPixelAttach/deviceId/pin/b16 numPixels/depth
+void MrlComm::neoPixelAttach( byte deviceId,  byte pin,  int numPixels,  byte depth)
+{
 	MrlNeopixel *neo = (MrlNeopixel *)addDevice(new MrlNeopixel(deviceId));
 	msg->publishDebug("id" + String(deviceId));
 	neo->attach(pin, numPixels, depth);
 }
 
-// > neoPixelAttach/pin/b16 numPixels
-void MrlComm::neoPixelSetAnimation(byte deviceId, byte animation, byte red, byte green, byte blue, int speed)
+// > neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b16 wait
+void MrlComm::neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms)
 {
-	msg->publishDebug("MrlNeopixel.setAnimation!");
-	((MrlNeopixel *)getDevice(deviceId))->setAnimation(animation, red, green, blue, speed);
+	// msg->publishDebug("MrlNeopixel.neoPixelSetAnimation!");
+	((MrlNeopixel *)getDevice(deviceId))->setAnimation(animation, red, green, blue, white, wait_ms);
 }
 
 // > neoPixelWriteMatrix/deviceId/[] buffer
-void MrlComm::neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte *buffer)
+void MrlComm::neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer)
 {
-	((MrlNeopixel *)getDevice(deviceId))->neopixelWriteMatrix(bufferSize, buffer);
+	((MrlNeopixel *)getDevice(deviceId))->writeMatrix(bufferSize, buffer);
 }
+
+// > neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+void MrlComm::neoPixelFill( byte deviceId,  int address,  int count,  byte red,  byte green,  byte blue,  byte white)
+{
+	((MrlNeopixel *)getDevice(deviceId))->fill(address, count, red, green, blue, white);
+}
+
+// > neoPixelSetBrightness/deviceId/brightness
+void MrlComm::neoPixelSetBrightness( byte deviceId,  byte brightness)
+{
+	((MrlNeopixel *)getDevice(deviceId))->setBrightness(brightness);
+}
+
+// > neoPixelClear/deviceId
+void MrlComm::neoPixelClear( byte deviceId)
+{
+	((MrlNeopixel *)getDevice(deviceId))->clear();
+}
+
+
+/////////////////////////////////// NeoPixel End ///////////////////////////////////////////
 
 // > servoAttach/deviceId/pin/targetOutput/b16 velocity
 void MrlComm::servoAttach(byte deviceId, byte pin, int initialPosUs, int velocity, byte nameSize, const char *name)
@@ -432,14 +453,14 @@ void MrlComm::setSerialRate(long rate)
 // > setTrigger/pin/value
 void MrlComm::setTrigger(byte pin, byte triggerValue)
 {
-	msg->publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
+	msg->publishDebug("setTrigger not impl");
 }
 
 // TODO - implement
 // > setDebounce/pin/delay
 void MrlComm::setDebounce(byte pin, byte delay)
 {
-	msg->publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
+	msg->publishDebug("setDebounce not impl");
 }
 
 // TODO - implement
@@ -463,7 +484,7 @@ void MrlComm::serialRelay(byte deviceId, byte dataSize, const byte *data)
 // aref wip
 void MrlComm::setAref(int aref)
 {
-	msg->publishDebug("setAref " + String(aref));
+	// msg->publishDebug("setAref " + String(aref));
 	// TODO check here if aref compatible with board
 	// EXTERNAL 0
 	// DEFAULT 1

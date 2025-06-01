@@ -8,11 +8,11 @@
 */
 
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
-    console.debug('mrl.js - begin')
+    console.info('mrl.js - begin')
 
     // TODO - get 'real' platform info - browser type - node version - etc
     let platform = {
-        os: "chrome",
+        os: "browser",
         lang: "javascript",
         bitness: 64,
         mrlVersion: "unknown"
@@ -23,8 +23,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // object containing all panels
     let panels = {}
 
+    // history of tab changes
+    let history = []
+
     // dictionary of images to display and their display properties
     let displayImages = {}
+
+    // set of services that are appropriate to select from to attach 
+    // depends on requested and provided interfaces
+    _self.interfaceToPossibleServices = {}
 
     // list of callback functions to display images
     let displayCallbacks = []
@@ -42,7 +49,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
-        return 'webgui-client-' + new Date().getTime()
+
+        // non unique
+        return 'webgui-client'
+
+        // unique
+        // return 'webgui-client-' + new Date().getTime()
     }
 
     // The name of the gateway I am
@@ -102,9 +114,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         url: document.location.origin.toString() + '/api/messages?user=root&pwd=pwd&session_id=2309adf3dlkdk&id=' + this.id,
         transport: 'websocket',
         maxRequest: 100,
-        enableProtocol: true,
+        maxReconnectOnClose: 100,
+        enableProtocol: false,
         timeout: -1,
+        // infinite idle timeout
         fallbackTransport: 'long-polling',
+        reconnectInterval: 1000,
+        maxReconnectOnClose: 50,
         // trackMessageLength: true,
         // maxTextMessageSize: 10000000,
         // maxBinaryMessageSize: 10000000,
@@ -114,9 +130,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // connectivity related end
     var msgCount = 0
 
-    // FIXME - clean up maps and target vs source runtime
-    // msg map of js runtime 
-    var jsRuntimeMethodMap = {}
     // map of 'full' service names to callbacks
     var nameCallbackMap = {}
 
@@ -151,6 +164,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         nameMethodCallbackMap[key].push(callback)
     }
 
+    // subscribe to connected java service - addListener of js runtime with callback
+    this.subscribeTo = function(toServiceName, method, callbackFunctionRef) {
+        var key = 'runtime@' + _self.id + "." + getCallBackName(method)
+        if (!(key in jsRuntimeMethodCallbackMap)) {
+            jsRuntimeMethodCallbackMap[key] = []
+        }
+        jsRuntimeMethodCallbackMap[key].push(callbackFunctionRef)
+
+        // remote subscription - runtime@id handles all callback for this js client
+        _self.sendTo(toServiceName, "addListener", method, 'runtime@' + _self.id)
+    }
+
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
             methodCallbackMap[methodName] = []
@@ -165,7 +190,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         status["detail"] = errorstr
         var d = []
         d.push(status)
-        msg = this.createMessage("mrl", "onStatus", d)
+        let msg = this.createMessage("mrl", "onStatus", d)
         let cbs = methodCallbackMap[msg.method]
         for (var i = 0; i < cbs.length; i++) {
             cbs[i](msg)
@@ -181,7 +206,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         var name = msg.data[0]
         _self.releasePanel(name)
         // FIXME - unregister from all callbacks
-        // delete registry[_self.getFullName(service)]
+        inName = _self.getFullName(name)
+        delete registry[inName]
+        console.info(registry)
     }
 
     // FIXME - the Runtime.cli uses this
@@ -221,18 +248,21 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return promise
     }
 
+    /**
+     * The 'hopefully' single location where data is actually sent.  Encoding
+     * and other details related to connection could be managed here.
+     */
     this.sendMessage = function(msg) {
-        var cleanJsonData = []
+        // GOOD DEBUGGING
+        // console.info('out-msg <-- ' + msg.name + '.' + msg.method)
+        msg.encoding = 'json'
         if (msg.data != null && msg.data.length > 0) {
             // reverse encoding - pop off undefined
             // to shrink paramter length
             // js implementation -
             var pos = msg.data.length - 1
-            for (i = pos; i > -1; --i) {
-                // WTF? - why do this ? - it's a bug for overloaded method
-                // ProgramAB.getResponse(null, 'hello') --> resolves to --> ProgramAB.getResponse(null)
-                if (typeof msg.data[i] == 'undefined') {// msg.data.pop() RECENTLY CHANGED 2016-01-21 - popping changes signature !!!! - changing to NOOP
-                } else {
+            for (let i = pos; i > -1; --i) {
+                if (typeof msg.data[i] == 'undefined') {} else {
                     msg.data[i] = JSON.stringify(msg.data[i])
                 }
             }
@@ -247,8 +277,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.onHelloResponse = function(response) {
-        console.log('onHelloResponse:')
-        console.log(response)
+        console.info('onHelloResponse:')
+        console.info(response)
     }
 
     /**
@@ -265,7 +295,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.register(describeResults.registrations[i])
             }
         } else {
-            log.error("describe did not have reservations !!!!")
+            console.error("describe did not have reservations !!!!")
         }
     }
 
@@ -293,11 +323,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
+        // FIXME - currently handles all unknown types through kludgy test
+        if (!simpleTypeName || simpleTypeName.includes(':') || simpleTypeName == 'Unknown') {
+            simpleTypeName = "Unknown";
+            registration.typeKey = "Unknown"
+        }
+
         serviceTypes[simpleTypeName] = registration.typeKey
 
         // initial de-serialization of state
         let service = JSON.parse(registration.state)
         registry[fullname] = service
+        if (simpleTypeName == "Unknown") {
+            service.simpleName = "Unknown"
+        }
 
         // now add a panel - with the function it registered
         // _self.addServicePanel(service)
@@ -316,7 +355,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      */
     this.describe = function(request) {
         console.log('--> got describe: and set jsRuntimeMethodCallbackMap')
-        let hello = JSON.parse(request.data[1])
+        hello = request.data[1]
 
         remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -349,13 +388,27 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         } else {
             var msg
             try {
+
+                // first parse parses header and array of encoded strings
                 msg = jQuery.parseJSON(body)
 
-                console.info('in-msg --> ' + msg.method)
+                // GOOD DEBUGGING
+                console.info('in-msg --> ' + msg.name + '.' + msg.method)
 
                 if (msg == null) {
                     console.log('msg null')
                     return
+                }
+
+                if (msg.method == 'onDescribe') {
+                    console.info('here')
+                }
+
+                // second parse decodes each parameter in the array
+                if (msg.data) {
+                    for (let x = 0; x < msg.data.length; ++x) {
+                        msg.data[x] = jQuery.parseJSON(msg.data[x])
+                    }
                 }
 
                 // GREAT FOR DEBUGGING INCOMING MSGS
@@ -376,13 +429,34 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 key = msg.name + '.' + msg.method
                 if (jsRuntimeMethodCallbackMap.hasOwnProperty(key)) {
                     let cbs = jsRuntimeMethodCallbackMap[key]
-                    cbs(msg)
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i](msg)
+                    }
+                }
+
+                // on all onState msg - from broadcastState update the 
+                // registry
+                let senderFullName = _self.getFullName(msg.sender)
+                if (msg.method == 'onState') {
+                    let s = registry[senderFullName]
+                    if (s) {
+                        let service = msg.data[0]
+                        registry[senderFullName] = service
+                        // for ([key,value] of Object.entries(service.serviceType.peers)) {
+                        //     peerKey = key[0].toUpperCase() + key.substring(1)
+                        //     if (value.state == 'STARTED') {
+                        //         service['is' + peerKey + 'Started'] = true
+                        //     } else {
+                        //         service['is' + peerKey + 'Started'] = false
+                        //     }
+                        // }
+
+                    }
                 }
 
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap')
-                let senderFullName = _self.getFullName(msg.sender)
                 if (nameCallbackMap.hasOwnProperty(senderFullName) && msg.method != 'onMethodMap') {
                     let cbs = nameCallbackMap[senderFullName]
                     for (var i = 0; i < cbs.length; i++) {
@@ -432,6 +506,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         console.log(status)
     }
 
+    this.onReconnect = function(request, response) {
+        console.info('onReconnect')
+    }
+
+    this.onReopen = function(request, response) {
+        console.info('onReopen')
+        initialize(response)
+    }
+
     this.onClose = function(response) {
         connected = false
         console.error('mrl.onClose')
@@ -449,6 +532,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getShortName = function(name) {
+        if (!name) {
+            return;
+        }
         if (name.includes('@')) {
             return name.substring(0, name.indexOf("@"))
         } else {
@@ -472,13 +558,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             } else {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
-                    console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
+                    // killer chatty - so chatty it kills browsers
+                    // console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
                     return service + '@' + _self.remoteId
                 } else {
                     return service
                 }
             }
         } else {
+
+            if (!service.name) {
+                console.error('uh oh')
+            }
 
             if (service.name.includes('@')) {
                 return service.name
@@ -512,12 +603,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
     }
 
-    this.getServicesFromInterface = function(interface) {
+    this.getServicesFromInterface = function(interfaceName) {
         var ret = []
         for (var name in registry) {
             var service = registry[name]
             // see if a service has the same input interface
-            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interface])) {
+            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interfaceName])) {
                 ret.push(registry[name])
             }
         }
@@ -525,7 +616,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getService = function(name) {
-
+        id = _self.remoteId
         if (registry[_self.getFullName(name)] == null) {
             return null
         }
@@ -534,6 +625,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.addService = function(service) {
         registry[_self.getFullName(service)] = service
+        return service
     }
 
     this.removeService = function(name) {
@@ -599,10 +691,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return context[func].apply(this, args)
     }
 
-    // up-link open
+    /**
+     * successful open of the websocket
+     */
     this.onOpen = function(response) {
-        console.debug('mrl.onOpen begin')
+        console.info('onOpen')
+        initialize(response)
+        console.debug('mrl.onOpen end')
+    }
 
+    /**
+     * initialization after a successful open or reOpen
+     */
+    var initialize = function(response) {
+        console.info('initialize')
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
         connecting = false
@@ -610,7 +712,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // connected = true
         // this.connected = true mrl.isConnected means data
         // was asked and recieved from the backend
-        console.log('mrl.onOpen: ' + transport + ' connection opened')
+        console.info('initialize: ' + transport + ' connection opened')
 
         let hello = {
             id: _self.id,
@@ -618,7 +720,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             platform: platform
         }
 
-        console.log('mrl.onOpen: connectedCallbacks ' + connectedCallbacks.length)
+        console.info('initialize: connectedCallbacks ' + connectedCallbacks.length)
 
         angular.forEach(connectedCallbacks, function(value, key) {
             value(connected)
@@ -626,25 +728,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         console.debug('sending describe to host runtime with hello ' + JSON.stringify(hello))
 
+        _self.subscribeTo('runtime', 'describe', _self.onDescribe)
+        _self.subscribeTo('runtime', 'registered', _self.onRegistered)
+        _self.subscribeTo('runtime', 'released', _self.onReleased)
+
         // js runtime callbacks
         let fullname = 'runtime@' + _self.id
-        jsRuntimeMethodCallbackMap[fullname + '.onDescribe'] = _self.onDescribe
-        jsRuntimeMethodCallbackMap[fullname + '.onRegistered'] = _self.onRegistered
-        jsRuntimeMethodCallbackMap[fullname + '.onReleased'] = _self.onReleased
-
-        // sloppy - short name runtime "will" work since the pipe is connected directly
-        // to the instance of interest - it won't work beyond that :(
-        // for mutli instances multiple hops away - you would need complete name,
-        // but of course, multiple hops away would never be in the onOpen method
-        _self.subscribe('runtime', 'describe')
-        _self.subscribe('runtime', 'registered')
-        _self.subscribe('runtime', 'released')
-
         // send us a description
         _self.sendTo('runtime', "describe")
-
-        console.debug('mrl.onOpen end')
-
     }
 
     this.getSimpleName = function(fullname) {
@@ -756,6 +847,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             angular.forEach(panelReleasedSubscribers, function(value, key) {
                 value(panelName)
             })
+            // _self.changeTab('runtime')
         }
 
         var notifyAllOfUpdate = function() {
@@ -783,16 +875,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
 
-        /*
-        _self.setViewType = function(viewType) {
-            _self.viewType = viewType
-        }
-
-        _self.getViewType = function() {
-            return _self.viewType
-        }
-        */
-
         /**
          * return a flattened sorted array of properties for input service
          * TODO - add exclude replacement and info parameters
@@ -801,9 +883,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let flat = _self.flatten(service)
             // console.table(flat) -  very cool logging, but to intensive
 
-            properties = []
+            let properties = []
 
-            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'typeKey', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
             // FIXME - extract from javadoc !
             let info = {
@@ -851,7 +933,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 name = 'image-' + Object.keys(displayImages).length
             }
             displayImages[name] = createPanel(name, name, 15, lastPosY, 800, 0, zIndex, imageSrc)
-            for (i = 0; i < displayCallbacks.length; ++i) {
+            for (let i = 0; i < displayCallbacks.length; ++i) {
                 displayCallbacks[i](displayImages[name])
             }
         }
@@ -868,13 +950,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var fullname = _self.getFullName(service)
 
             if (panels.hasOwnProperty(fullname)) {
-                $log.warn(fullname + ' already has panel')
+                console.warn(fullname + ' already has panel')
                 return panels[fullname]
             }
             lastPosY += 40
             zIndex++
             //construct panel & add it to dictionary
-            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            panels[fullname] = createPanel(fullname, service.typeKey, 15, lastPosY, 800, 0, zIndex)
             return panels[fullname]
         }
 
@@ -882,18 +964,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let name = _self.getFullName(serviceName)
             if (panels.hasOwnProperty(name)) {
                 return panels[name]
-            } else {
-                console.error('could not find panel ' + name)
+            } else {// TOO CHATTY - BROWSER KILLER !
+            // console.error('could not find panel ' + name)
             }
             return null
         }
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
-            panel = {
+            let displayName = fullname.endsWith(_self.remoteId) ? _self.getShortName(fullname) : fullname
+            console.info('createPanel', _self.remoteId, displayName)
+            let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
-                displayName: _self.getShortName(fullname),
+                displayName: displayName,
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
                 templatestatus: null,
@@ -906,10 +990,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
                 posX: x,
                 posY: y,
+
                 width: width,
                 height: height,
                 zIndex: zIndex,
                 hide: false,
+
+                showPeerTable: false,
 
                 // FIXME  - remove this use mrl panel methods
                 svc: _self,
@@ -928,9 +1015,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var type = service.simpleName
             //first load & parse the controller,    //js
             //then load and save the template       //html
-            $log.debug('lazy-loading:', name, type)
+            console.debug('lazy-loading:', name, type)
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
-                $log.debug('lazy-loading successful:', name, type)
+                console.debug('lazy-loading successful:', name, type)
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
@@ -948,7 +1035,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // http template failure
                 type = "No"
                 // becomes NoGui
-                $log.warn('lazy-loading wasnt successful:', type)
+                console.warn('lazy-loading wasnt successful:', type)
                 addPanel(name).templatestatus = 'notfound'
                 notifyAllOfUpdate()
             })
@@ -979,7 +1066,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             console.info('registering controllers scope', name, scope)
             if ('scope'in panels[name]) {
-                $log.warn('replacing an existing scope for ' + name)
+                console.warn('replacing an existing scope for ' + name)
             }
 
             // hanging 'all service' related properties on the instance scope
@@ -1088,6 +1175,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         this.connect = function(url, proxy) {
+            console.info('mrl.connect()')
             if (connected) {
                 console.debug("aleady connected")
                 return this
@@ -1100,10 +1188,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             connecting = true
             socket = atmosphere.subscribe(this.request)
 
+            // critical subscriptions from the java runtime we are connected to
+            // to the js runtime - these send addListeners to java runtime
+
         }
 
         this.onError = function(response) {
-            $log.error('onError, can not connect')
+            console.error('onError, can not connect')
         }
 
         _self.setSearchFunction = function(ref) {
@@ -1117,10 +1208,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.changeTab = function(serviceName) {
-            if (!tabsViewCtrl) {
+            if (!tabsViewCtrl || !_self.getService(serviceName)) {
                 console.error('tabsViewCtrl is null - cannot changeTab')
             } else {
+                console.info("changeTab !", serviceName)
                 tabsViewCtrl.changeTab(serviceName)
+                history.push(serviceName)
+            }
+        }
+
+        _self.goBack = function() {
+            if (!tabsViewCtrl) {
+                console.error('tabsViewCtrl is null - cannot goBack')
+            } else {
+                tabsViewCtrl.goBack()
             }
         }
 
@@ -1148,6 +1249,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 var deferred = $q.defer()
                 if (!msgInterfaces.hasOwnProperty(name)) {
                     //console.log(name + ' getMsgInterface ')
+
                     msgInterfaces[name] = {
                         "name": name,
                         "temp": {},
@@ -1176,7 +1278,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                          *   sendArgs will be called by the dynamically generated code interface
                          */
                         sendArgs: function(method, obj) {
-                            data = []
+                            let data = []
                             for (var key in obj) {
                                 if (obj.hasOwnProperty(key)) {
                                     data.push(obj[key])
@@ -1225,7 +1327,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                     }
                                     msgInterfaces[msg.sender].temp.methodMap = methodMap
                                 } catch (e) {
-                                    $log.error("onMethodMap blew up - " + e)
+                                    console.error("onMethodMap blew up - " + e)
                                 }
                                 deferred.resolve(msgInterfaces[msg.sender])
                                 break
@@ -1235,6 +1337,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                             // end switch
                         },
+                        // FIXME - future refactor - just build a key and set desired callback method (or construct it) 
                         subscribeToMethod: function(callback, methodName) {
                             _self.subscribeToMethod(callback, methodName)
                         },
@@ -1254,6 +1357,22 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                         },
 
+                        isPeerStarted(peerName) {
+                            // IS THIS USED ??? not = function(peerName) format
+                            try {
+                                let service = _self.getService(name)
+
+                                if (service.config) {
+                                    if (_self.getFullName(service.config[peerName])in registry) {
+                                        return true
+                                    }
+                                }
+                            } catch (e) {}
+                            return false
+                        },
+
+                        interfaceToPossibleServices: _self.interfaceToPossibleServices,
+
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -1267,11 +1386,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here")
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(name, "addListener", "publishStatus", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "publishState", 'runtime@' + _self.id)
-                                _self.sendTo(name, "addListener", "getMethodMap", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishStatus", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "publishState", 'runtime@' + _self.id)
+                                _self.sendTo(_self.getFullName(name), "addListener", "getMethodMap", 'runtime@' + _self.id)
 
-                                _self.sendTo(name, "broadcastState")
+                                _self.sendTo(_self.getFullName(name), "broadcastState")
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
                                 // it to our onMsg method
@@ -1305,6 +1424,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // - name + '@' + _self.id)
                 _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap')
                 msgInterfaces[name].getMethodMap()
+                // deferred.resolve("yay")
                 return deferred.promise
             },
             getPlatform: function() {
@@ -1339,23 +1459,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.debug('mrl.init')
-                if (connected) {
-                    console.debug('connected')
-                    return true
-                }
-                if (connecting) {
-                    console.debug('connecting')
-                    return false
-                }
-
+                console.debug('mrl.init connected ' + connected + ' connecting ' + connecting)
                 _self.connect()
-                // return deferred.promise
             },
             isConnected: function() {
                 return connected
             },
-
             noWorky: function(userId) {
                 console.debug('mrl-noWorky', userId)
                 _self.sendTo(runtime.name + '@' + _self.remoteId, "noWorky", userId)
@@ -1372,37 +1481,41 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return arrayOfServices
             },
 
-            controllerscope: _self.controllerscope,
-            setSearchFunction: _self.setSearchFunction,
-            setNavCtrl: _self.setNavCtrl,
-            setTabsViewCtrl: _self.setTabsViewCtrl,
-            error: _self.error,
             changeTab: _self.changeTab,
-            search: _self.search,
+            controllerscope: _self.controllerscope,
             createMessage: _self.createMessage,
             display: _self.display,
+            error: _self.error,
+            getDisplayName: _self.getDisplayName,
             getDisplayImages: getDisplayImages,
-            setDisplayCallback: setDisplayCallback,
-            subscribeToUpdates: _self.subscribeToUpdates,
-            subscribeToRegistered: _self.subscribeToRegistered,
-            subscribeToReleased: _self.subscribeToReleased,
-            getPanelList: _self.getPanelList,
+            getFullName: _self.getFullName,
             getPanel: _self.getPanel,
-            sendTo: _self.sendTo,
+            getPanelList: _self.getPanelList,
+            getProperties: _self.getProperties,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
             getStyle: _self.getStyle,
-            subscribe: _self.subscribe,
-            unsubscribe: _self.unsubscribe,
-            subscribeToService: _self.subscribeToService,
-            getFullName: _self.getFullName,
+            goBack: _self.goBack,
+            isPeerStarted: _self.isPeerStarted,
+            search: _self.search,
+            sendMessage: _self.sendMessage,
             sendBlockingMessage: _self.sendBlockingMessage,
+            sendTo: _self.sendTo,
+            setNavCtrl: _self.setNavCtrl,
+            setDisplayCallback: setDisplayCallback,
+            setSearchFunction: _self.setSearchFunction,
+            setTabsViewCtrl: _self.setTabsViewCtrl,
+            subscribe: _self.subscribe,
             subscribeConnected: _self.subscribeConnected,
+            subscribeTo: _self.subscribeTo,
             subscribeToMethod: _self.subscribeToMethod,
+            subscribeToReleased: _self.subscribeToReleased,
+            subscribeToRegistered: _self.subscribeToRegistered,
+            subscribeToService: _self.subscribeToService,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
-            getProperties: _self.getProperties,
-            sendMessage: _self.sendMessage // setViewType: _self.setViewType,
-            // getViewType: _self.getViewType
+            subscribeToUpdates: _self.subscribeToUpdates,
+            unsubscribe: _self.unsubscribe,
+            interfaceToPossibleServices: _self.interfaceToPossibleServices
 
         }
 
@@ -1465,7 +1578,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 "maxMemory": 3543
             },
             "jvmArgs": ["-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:37551", "-javaagent:/lhome/grperry/Downloads/eclipse-jee-2019-06-R-linux-gtk-x86_64/eclipse/configuration/org.eclipse.osgi/405/0/.cp/lib/javaagent-shaded.jar", "-Dfile.encoding=UTF-8"],
-            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov/InMoov.py"],
+            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov2/InMoov2.py"],
             "locale": "en-us",
             "serviceType": {
                 "name": "org.myrobotlab.service.Runtime",
@@ -1474,7 +1587,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "name": "runtime",
             "id": "webgui-client-1234-5678",
             "simpleName": "Runtime",
-            "serviceClass": "org.myrobotlab.service.Runtime",
+            "typeKey": "org.myrobotlab.service.Runtime",
             "isRunning": true,
             "interfaceSet": {
                 "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",
@@ -1497,14 +1610,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // assign callbacks
     this.request.onOpen = this.onOpen
     this.request.onClose = this.onClose
+    this.request.onReconnect = this.onReconnect
+    this.request.onReopen = this.onReopen
     this.request.onTransportFailure = this.onTransportFailure
+    // this.request.onFailureToReconnect = this.onFailureToReconnect
     this.request.onMessage = this.onMessage
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError
-
-    // correct way to put in callbacks for js runtime instance
-    jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
-    // jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so

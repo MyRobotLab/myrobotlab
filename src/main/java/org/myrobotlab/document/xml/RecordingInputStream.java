@@ -46,7 +46,7 @@ public class RecordingInputStream extends FilterInputStream {
     int i = 0;
     byte[] buf = new byte[1024];
     while (l < len) {
-      i = read(buf, 0, (int) Math.min((long) buf.length, len - l));
+      i = read(buf, 0, (int) Math.min(buf.length, len - l));
       if (i == -1)
         break;
       l += i;

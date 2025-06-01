@@ -1,0 +1,11 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+enableCli: true
+id: null
+listeners: null
+locale: null
+logLevel: info
+peers: null
+registry: [
+  ]
+type: Runtime
+virtual: false

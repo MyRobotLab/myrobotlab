@@ -111,7 +111,7 @@ public class RTTTLParser {
         if (m.group(2).equals("p")) {
           notenum = 0;
         } else {
-          Integer nn = (Integer) noteToNum.get(m.group(2));
+          Integer nn = noteToNum.get(m.group(2));
           notenum = nn.intValue();
           notenum = notenum + 12 * oct;
         }

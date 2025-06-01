@@ -14,7 +14,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.data.AngleData;
+import org.myrobotlab.service.config.InverseKinematics3DConfig;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -35,7 +35,8 @@ import org.slf4j.Logger;
  * @author kwatters
  * 
  */
-public class InverseKinematics3D extends Service implements IKJointAnglePublisher, PointsListener {
+public class InverseKinematics3D extends Service<InverseKinematics3DConfig> implements IKJointAnglePublisher,PointsListener
+{
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InverseKinematics3D.class);
@@ -145,17 +146,17 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
    * "moveTo" call.
    * 
    * @param dx
-   *          - x axis translation
+   *              - x axis translation
    * @param dy
-   *          - y axis translation
+   *              - y axis translation
    * @param dz
-   *          - z axis translation
+   *              - z axis translation
    * @param roll
-   *          - rotation about z (in degrees)
+   *              - rotation about z (in degrees)
    * @param pitch
-   *          - rotation about x (in degrees)
+   *              - rotation about x (in degrees)
    * @param yaw
-   *          - rotation about y (in degrees)
+   *              - rotation about y (in degrees)
    * @return a matric that represents the rotation/translation matrix
    */
   public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {
@@ -200,7 +201,11 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
    * Compute the inverse kinematics to move the robot hand to the destination
    * first scale the input point, then apply
    * 
+   * @param name
+   *             n
    * @param p
+   *             p
+   * 
    */
   public void moveTo(String name, Point p) {
 
@@ -239,10 +244,10 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       // angles between 0 - 360 degrees.. not sure what people will really want?
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
-      angleMap.put(jointName, (double) angle % 360.0F);
-      invoke("publishJointAngle", new AngleData(jointName, (double) angle % 360.0F));
+      angleMap.put(jointName, angle % 360.0F);
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
+    invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -277,6 +282,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     this.arms.put(name, arm);
   }
 
+  @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
       addListener("publishJointAngle", attachable.getName(), "onJointAngle");
@@ -292,7 +298,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
+    inversekinematics.setCurrentArm(arm, InMoov2Arm.getDHRobotArm("i01", "left"));
     //
     // inversekinematics.getCurrentArm(arm).setIk3D(inversekinematics);
     // Create a new DH Arm.. simpler for initial testing.
@@ -326,8 +332,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
     boolean attached = true;
     if (attached) {
       // set up the left inmoov arm
-      InMoovArm leftArm = (InMoovArm) Runtime.start("leftArm", "InMoovArm");
-      leftArm.connect("COM21");
+      InMoov2Arm leftArm = (InMoov2Arm) Runtime.start("leftArm", "InMoov2Arm");
+      // leftArm.connect("COM21");
       // leftArm.omoplate.setMinMax(0, 180);
       // attach the publish joint angles to the on JointAngles for the inmoov
       // arm.
@@ -363,7 +369,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   }
 
   @Override
-  public AngleData publishJointAngle(AngleData angleData) {
+  public Map<String, Double> publishJointAngles(Map<String, Double> angleData) {
     return angleData;
   }
 

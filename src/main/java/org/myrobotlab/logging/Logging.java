@@ -50,7 +50,7 @@ public abstract class Logging {
     } catch (Exception e2) {
       return "bad stackToString";
     }
-    return "------\r\n" + sw.toString() + "------\r\n";
+    return sw.toString();
   }
 
   public abstract void addAppender(Object type);

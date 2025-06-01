@@ -14,16 +14,20 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.IpCameraConfig;
 import org.slf4j.Logger;
 
 /**
  * IPCamera - a service to allow streaming of video from an IP based camera.
  *
  * Android related -
- * http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
+ * <a href=
+ * "http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage">Android
+ * bitmap to buffered image</a>
  * Bitmap to BufferedImage - conversion once Bitmap class is serialized
  */
-public class IpCamera extends Service {
+public class IpCamera extends Service<IpCameraConfig>
+{
 
   public class VideoProcess implements Runnable {
     @Override
@@ -36,10 +40,10 @@ public class IpCamera extends Service {
           log.debug("grabbed");
           if (bi != null) {
             log.debug("publishDisplay");
-            invoke("publishDisplay", new Object[] { getName(), bi });
+            invoke("publishDisplay", getName(), bi);
           }
         }
-      } catch (Exception e) {
+      } catch (Exception ignored) {
       }
     }
   }
@@ -94,18 +98,14 @@ public class IpCamera extends Service {
 
       foscam.startService();
 
-      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
-      gui.startService();
-
     } catch (Exception e) {
       Logging.logError(e);
     }
 
   }
 
-  public final static SerializableImage publishFrame(String source, BufferedImage img) {
-    SerializableImage si = new SerializableImage(img, source);
-    return si;
+  public static SerializableImage publishFrame(String source, BufferedImage img) {
+    return new SerializableImage(img, source);
   }
 
   public IpCamera(String n, String id) {
@@ -176,7 +176,7 @@ public class IpCamera extends Service {
     }
 
     log.info("move " + param);
-    StringBuffer ret = new StringBuffer();
+    StringBuilder ret = new StringBuilder();
     try {
       // TODO - re-use connection optimization
 
@@ -214,7 +214,6 @@ public class IpCamera extends Service {
   public void stopCapture() {
     capturing = false;
     if (videoProcess != null) {
-      capturing = false;
       videoProcess = null;
     }
   }

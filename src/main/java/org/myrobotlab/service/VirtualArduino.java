@@ -13,6 +13,7 @@ import org.myrobotlab.arduino.virtual.MrlCommIno;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.VirtualArduinoConfig;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
@@ -28,7 +29,8 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class VirtualArduino extends Service implements PortPublisher, PortListener, PortConnector, SerialDataListener {
+public class VirtualArduino extends Service<VirtualArduinoConfig> implements PortPublisher,PortListener,PortConnector,SerialDataListener
+{
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);
@@ -97,6 +99,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
     }
 
+    @Override
     public void run() {
       // prior to running reset, MrlComm would be reset,
       // this is also what happens if you press the reset button on
@@ -147,6 +150,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   /**
    * Connect to a serial port to the uart/DCE side of a virtual serial port.
    */
+  @Override
   public void connect(String portName) throws IOException {
     if (portName == null) {
       log.warn("{}.connect(null) not valid", getName());
@@ -166,11 +170,16 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     // update our board info
     if (runner == null) {
       runner = new InoScriptRunner(this, ino);
+      // runner.start();
     }
-    // register our selves to listen for the bytes
+
+    // FIXME - THIS MAKES NO SENSE - NEXT LINE ASSIGNS IT !?!?! uart =
+    // Serial.connectVirtualUart WTF?
     uart.addByteListener(this);
+
     // connect the DCE/uart port side
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+    // register our selves to listen for the bytes
     // create a new mrlcommino runner..
     start();
     // There is a small race condition. so wait for the runner to actually be
@@ -204,8 +213,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void stop() {
-    if (runner != null)
+    if (runner != null) {
       runner.stop();
+    }
+    if (uart != null) {
+      uart.disconnect();
+    }
   }
 
   /*
@@ -236,12 +249,17 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart = (Serial) startPeer("uart");
   }
 
+  @Override
   public void releaseService() {
+    super.releaseService();
     if (runner != null) {
       runner.stop();
     }
-    releasePeers();
-    super.releaseService();
+    if (uart != null) {
+      uart.releaseService();
+    }
+    // sleep(300);
+    disconnect();
   }
 
   public Serial getSerial() {
@@ -445,6 +463,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     stop();

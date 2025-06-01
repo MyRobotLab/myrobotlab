@@ -28,7 +28,10 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void addAppender(String type, String filename) {
-
+    if (!(LoggerFactory.getILoggerFactory() instanceof LoggerContext)) {
+      log.warn("addAppender not possible - wrong type of logger {}", LoggerFactory.getILoggerFactory().getClass().getCanonicalName());
+      return;
+    }
     LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
     PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
@@ -39,7 +42,7 @@ public class LoggingSLF4J extends Logging {
     ple.start();
 
     // allows you to add appenders to different logging locations
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     logger.setAdditive(false);
 
     if (AppenderType.CONSOLE.equalsIgnoreCase(type)) {
@@ -68,18 +71,25 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void configure() {
-    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    JoranConfigurator configurator = new JoranConfigurator();
-    configurator.setContext(context);
-    StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-    removeAllAppenders();
-    addAppender(AppenderType.CONSOLE);
-    addAppender(AppenderType.FILE);
+    // why can't slf4j make a common configuration interface ! :(
+    // setting log level should be common to all :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+      JoranConfigurator configurator = new JoranConfigurator();
+      configurator.setContext(context);
+      StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+      removeAllAppenders();
+      addAppender(AppenderType.CONSOLE);
+      addAppender(AppenderType.FILE);
+    }
   }
 
   @Override
   public String getLevel() {
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    if (!(LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger)) {
+      return "UNKNOWN";
+    }
+    Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
     Level level = logger.getLevel();
     if (level.equals(Level.DEBUG)) {
       return "DEBUG";
@@ -95,8 +105,10 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAllAppenders() {
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    logger.detachAndStopAllAppenders();
+    if (LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger) {
+      Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+      logger.detachAndStopAllAppenders();
+    }
   }
 
   @Override
@@ -107,9 +119,11 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAppender(String name) {
+    if (LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) instanceof Logger) {
 
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    logger.detachAppender(name); // does this stop it too ?
+      Logger logger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+      logger.detachAppender(name); // does this stop it too ?
+    }
   }
 
   @Override
@@ -120,24 +134,25 @@ public class LoggingSLF4J extends Logging {
   @Override
   public void setLevel(String clazz, String targetLevel) {
     if (clazz == null || clazz.length() == 0) {
-      clazz = Logger.ROOT_LOGGER_NAME;
+      clazz = org.slf4j.Logger.ROOT_LOGGER_NAME;
     }
+    // why can't slf4j make a common set log level interface :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      Logger logger = (Logger) LoggerFactory.getLogger(clazz);
 
-    Logger logger = (Logger) LoggerFactory.getLogger(clazz);
-
-    if ("DEBUG".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.DEBUG);
-    } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.TRACE);
-    } else if ("WARN".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.WARN);
-    } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.ERROR);
-      // } else if ("FATAL".equalsIgnoreCase(level)) {
-      // logger.setLevel(Level.FATAL);
-    } else {
-      logger.setLevel(Level.INFO);
+      if ("DEBUG".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.DEBUG);
+      } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.TRACE);
+      } else if ("WARN".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.WARN);
+      } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.ERROR);
+        // } else if ("FATAL".equalsIgnoreCase(level)) {
+        // logger.setLevel(Level.FATAL);
+      } else {
+        logger.setLevel(Level.INFO);
+      }
     }
   }
-
 }

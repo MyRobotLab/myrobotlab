@@ -5,8 +5,9 @@ import java.util.List;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.ServiceConfig;
 
-public class MockDocumentListener extends Service implements DocumentListener {
+public class MockDocumentListener extends Service<ServiceConfig> implements DocumentListener {
 
   private static final long serialVersionUID = 1L;
   private int count = 0;

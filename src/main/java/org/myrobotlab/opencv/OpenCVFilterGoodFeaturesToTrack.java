@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
@@ -51,18 +52,14 @@ import com.sun.jna.ptr.IntByReference;
 public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGoodFeaturesToTrack.class.getCanonicalName());
-
   transient IplImage grey = null;
   transient IplImage eig = null;
   transient IplImage temp = null;
   transient IplImage mask = null; // ROI
-
   public int maxPointCount = 46;
   public int totalIterations = 0;
   public boolean colorAgeOfPoint = true;
-
   // quality - Multiplier for the maxmin eigenvalue; specifies minimal
   // accepted quality of image corners
   public double qualityLevel = 0.05;
@@ -77,24 +74,17 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   public int useHarris = 0;
   // Free parameter of Harris detector; used only if useHarris != 0
   public double k = 0.0;
-
   public Point2df oldest = new Point2df();
-
   public HashMap<String, Integer> stableIterations;
-
   int lastMaxPointCount = 0;
   transient IntByReference cornerCount = new IntByReference(maxPointCount);
   transient CvPoint2D32f corners = null;
   int[] count = { maxPointCount };
-
   // only valid for a "fixed" camera - need a new index to support camera
   // movement
   HashMap<String, Float> values = new HashMap<String, Float>();
-
-  DecimalFormat df = new DecimalFormat("0.###");
-
+  transient DecimalFormat df = new DecimalFormat("0.###");
   transient Color color = null;
-
   transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
   public OpenCVFilterGoodFeaturesToTrack() {
@@ -167,7 +157,7 @@ public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     if (channels == 3) {
-      grey = IplImage.create(image.cvSize(), 8, 1);
+      grey = AbstractIplImage.create(image.cvSize(), 8, 1);
       cvCvtColor(image, grey, CV_BGR2GRAY);
     } else {
       grey = image;

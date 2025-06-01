@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.VertxConfig
+listeners: null
+peers: null
+port: 8443
+type: Vertx

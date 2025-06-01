@@ -1,0 +1,28 @@
+<div class="col-md-12">
+<table class="table table-striped table-hover">
+
+    <h3>{{service.id}}  <span class="glyphicon glyphicon-resize-horizontal" style="color: grey;" /> {{service.remoteId}} </h3>
+    
+    <thead>
+        <tr>
+            <th>ts</th>
+            <th>sender</th>
+            <th></th>
+            <th>name</th>
+            <th>method</th>
+            <th>data</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat="msg in service.msgs">
+            <td><small>{{msg.msgId}}</small></td>
+            <td><small>{{msg.sender}} </small></td>
+            <td><small><span ng-hide="msgToRemote(msg)" class="glyphicon glyphicon-arrow-left" style="color: grey;" /><span ng-hide="!msgToRemote(msg)" class="glyphicon glyphicon-arrow-right" style="color: grey;" /></small></td>
+            <td><small>{{msg.name}}</small></td>
+            <td><small>{{msg.method}}</small></td>
+            <td><small>{{msg.data}}</small></td>
+        </tr>
+    </tbody>
+</table>    
+</div>

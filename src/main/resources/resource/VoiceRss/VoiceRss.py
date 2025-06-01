@@ -4,7 +4,7 @@
 # more info @: http://myrobotlab.org/service/VoiceRss
 #########################################
 
-mouth = Runtime.start("mouth", "VoiceRss")
+mouth = runtime.start("mouth", "VoiceRss")
 
 #possible voices ( selected voice is stored inside config until you change it )
 print ("these are the voices I can have", mouth.getVoices())

@@ -1,7 +1,7 @@
 from time import sleep
 
 
-gps1 = Runtime.start("gps1", "Gps")
+gps1 = runtime.start("gps1", "Gps")
 
 gps1.connect("COM3")
 sleep(1)

@@ -1,2 +1,2 @@
 # start the service
-wii = Runtime.start("wii","Wii")
+wii = runtime.start("wii","Wii")

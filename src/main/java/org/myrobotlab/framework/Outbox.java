@@ -31,12 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.MessageListener;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -61,30 +62,63 @@ public class Outbox implements Runnable, Serializable {
   static public final String BROADCAST = "BROADCAST";
   static public final String PROCESSANDBROADCAST = "PROCESSANDBROADCAST";
 
-  NameProvider myService = null;
-  LinkedList<Message> msgBox = new LinkedList<Message>();
+  protected String name = null;
+
+  private transient LinkedList<Message> msgBox = new LinkedList<Message>();
+
   private boolean isRunning = false;
+
   private boolean blocking = false;
+
   int maxQueue = 1024;
+
   int initialThreadCount = 1;
+
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
+
+  protected Map<String, FilterInterface> filters = new TreeMap<>();
+
+  public interface FilterInterface {
+    public boolean filter(Message msg);
+  }
 
   /**
    * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
    */
-  public HashMap<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
+  protected Map<String, List<MRLListener>> notifyList = new TreeMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-  public Outbox(NameProvider myService) {
-    this.myService = myService;
+  private boolean autoClean = false;
+
+  public boolean isAutoClean() {
+    return autoClean;
   }
 
-  public Set<String> getAttached() {
+  public void setAutoClean(boolean autoClean) {
+    this.autoClean = autoClean;
+  }
+
+  public Outbox(String myService) {
+    this.name = myService;
+  }
+
+  public Set<String> getAttached(String publishingPoint) {
+    return getAttached(publishingPoint, true);
+  }
+
+  public Set<String> getAttached(String publishingPoint, boolean localOnly) {
     Set<String> unique = new TreeSet<>();
     for (List<MRLListener> subcribers : notifyList.values()) {
       for (MRLListener listener : subcribers) {
-        unique.add(listener.callbackName);
+        if (localOnly && !CodecUtils.isLocal(listener.callbackName)) {
+          continue;
+        }
+        if (publishingPoint == null) {
+          unique.add(listener.callbackName);
+        } else if (listener.topicMethod.equals(publishingPoint)) {
+          unique.add(listener.callbackName);
+        }
       }
     }
     return unique;
@@ -111,8 +145,9 @@ public class Outbox implements Runnable, Serializable {
       // we warn if over 10 messages are in the queue - but we will still
       // process them
       if (msgBox.size() > maxQueue) {
-
-        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
+        // log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to
+        // {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
+        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}", name, msgBox.size(), msg);
       }
       msgBox.addFirst(msg);
 
@@ -178,7 +213,7 @@ public class Outbox implements Runnable, Serializable {
         // get the value for the source method
         List<MRLListener> subList = notifyList.get(msg.sendingMethod);
         if (subList == null) {
-          log.debug("no additional routes for {}.{} ", msg.sender, msg.sendingMethod);
+          // log.debug("no additional routes for {}.{} ", msg.sender, msg.sendingMethod);
           // This will cause issues in broadcasts
           continue;
         }
@@ -187,7 +222,10 @@ public class Outbox implements Runnable, Serializable {
           MRLListener listener = subList.get(i);
           msg.setName(listener.callbackName);
           msg.method = listener.callbackMethod;
-          send(msg);
+
+          if (!isFiltered(msg)) {
+            send(msg);
+          }
 
           // must make new for internal queues
           // otherwise you'll change the name on
@@ -200,8 +238,24 @@ public class Outbox implements Runnable, Serializable {
         }
         continue;
       }
-
     } // while (isRunning)
+  }
+
+  public FilterInterface addFilter(String name, String method, FilterInterface filter) {
+    return filters.put(String.format("%s.%s", CodecUtils.getFullName(name), method), filter);
+  }
+
+  public FilterInterface removeFilter(String name, String method) {
+    return filters.remove(String.format("%s.%s", CodecUtils.getFullName(name), method));
+  }
+
+  public boolean isFiltered(Message msg) {
+    String fullname = CodecUtils.getFullName(msg.name);
+    if (filters.size() == 0 || !filters.containsKey(String.format("%s.%s", fullname, msg.method))) {
+      return false;
+    } else {
+      return filters.get(String.format("%s.%s", fullname, msg.method)).filter(msg);
+    }
   }
 
   public int size() {
@@ -210,7 +264,7 @@ public class Outbox implements Runnable, Serializable {
 
   public void start() {
     for (int i = outboxThreadPool.size(); i < initialThreadCount; ++i) {
-      Thread t = new Thread(this, myService.getName() + "_outbox_" + i);
+      Thread t = new Thread(this, CodecUtils.getShortName(name) + "_outbox_" + i);
       outboxThreadPool.add(t);
       t.start();
     }
@@ -268,12 +322,15 @@ public class Outbox implements Runnable, Serializable {
         // queue
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
-        if (sw == null) {
-          log.info("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+        if (sw == null && autoClean) {
+          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
           ServiceInterface sender = Runtime.getService(msg.sender);
           if (sender != null) {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
           }
+          return;
+        } else if (sw == null) {
+          log.info("could not find service {} to process {} from sender {}", msg.getName(), msg.method, msg.sender);
           return;
         }
 
@@ -284,7 +341,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         // get gateway
-        Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
+        Gateway gateway = Runtime.getInstance().getGatway(msg.getId());
         if (gateway == null) {
           // log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
           return;
@@ -307,9 +364,12 @@ public class Outbox implements Runnable, Serializable {
   /**
    * Safe detach for single subscriber
    * 
-   * @param name
+   * @param service
+   *          the name of the listener to detach
+   * 
    */
-  synchronized public void detach(String name) {
+  synchronized public void detach(String service) {
+    String name = CodecUtils.getFullName(service);
     for (String topic : notifyList.keySet()) {
       List<MRLListener> subscribers = notifyList.get(topic);
       ArrayList<MRLListener> smallerList = new ArrayList<>();
@@ -320,6 +380,10 @@ public class Outbox implements Runnable, Serializable {
       }
       notifyList.put(topic, smallerList);
     }
+  }
+
+  public Map<String, List<MRLListener>> getNotifyList() {
+    return notifyList;
   }
 
 }

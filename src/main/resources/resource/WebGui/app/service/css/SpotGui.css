@@ -1,0 +1,349 @@
+
+
+.preventDragSelect{
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+.dotDisabled{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    background-color: #7d7d7d;
+}
+
+.dotEnabled{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    background-color: #6fd596;
+    box-shadow: inset 0 0px 1px 1px rgb(255, 255, 255, 0.54);
+}
+
+@keyframes dotSpotActive {
+  0% { filter: saturate(200%) brightness(200%) drop-shadow(0px 0px 10px rgba(255, 0, 0, 0.6)); }
+  10% { background-color: #FF0000; }
+  50% {box-shadow: 0 0px 20px 6px rgb(250, 0, 0, 0.54), 0px 0px 10px 1px rgba(255, 133, 133, 0.92), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.54);}
+
+  90% { background-color: #d68080; }
+  100% { filter: none; }
+}
+
+.dotSpotActive{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    animation: dotSpotActive 2000ms infinite;
+}
+
+
+#Indicator{
+    left:214px;
+    top:36px;
+    width: 200px;
+    height: 40px;
+}
+
+.rectangleIndicator{
+    position:absolute;
+    display: table-cell;
+    border-radius: 5px;
+    background: #73AD21;
+    font-family: helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: #feb331;
+    line-height: 40px;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
+    cursor:default;
+}
+
+.dotSpotButtons{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #1b4049;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #414b4e, 0 0 7px #76bed3, 0 0 7px #8ddaefd9;
+}
+.dotSpotButtons:hover{
+    color: #FFFFFF;
+}
+.dotSpotButtons:active{
+    color: #FFFFFF;
+    text-shadow: 0 0 3px #414b4e, 0 0 10px #FFFFFF, 0 0 10px #FFFFFF, 0 0 10px #FFFFFF;
+}
+
+.dotSpotButtonsActive{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #ff1414, 0 0 10px #FFFFFF;
+    cursor: default;
+}
+
+
+.leftSide{
+    text-align: left;
+}
+
+.rightSide{
+    text-align: right;
+}
+
+
+/* -------------------    Right DOTs position --------------------*/
+
+#sensorsDot{
+    position:absolute;
+    left:194px;
+    top:243px;
+}
+
+#controllerDot{
+    position:absolute;
+    left:300px;
+    top:193px;
+}
+
+/* -------------------    Right LINEs position --------------------*/
+
+.rightLine{
+    position:absolute;
+    border: solid #15d7ed;
+    display: inline-block;
+    transform: rotate(180deg);
+    z-index: -1;
+}
+#sensorsLine{
+    border-width: 0 0px 3px 0;
+    padding: 0px 23px;
+    left: 148px;
+    top: 247px;
+}
+
+#controllerLine{
+    border-width: 0 0px 3px 0;
+    padding: 0px 65px;
+    left: 175px;
+    top: 197px;
+}
+
+/* -------------------    Right Buttons  --------------------*/
+
+#sensorsButton{
+    right: 485px;
+    top: 231px;
+}
+#sensorsButton:hover + #sensorsDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+#controllerButton{
+    right: 461px;
+    top: 182px;
+}
+#controllerButton:hover + #controllerDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+
+/* -------------------    Legs DOTs position --------------------*/
+
+#backLegsDot{
+    position:absolute;
+    left: 404px;
+    top:235px;
+}
+
+#frontLegsDot{
+    position:absolute;
+    left:314px;
+    top:331px;
+}
+
+/* -------------------    Legs LINEs position --------------------*/
+
+.leftLine{
+    position:absolute;
+    border: solid #15d7ed;
+    display: inline-block;
+    transform: rotate(270deg);
+    z-index: -1;
+}
+#frontLegsLine{
+    border-width: 0 3px 0px 0;
+    padding: 70px 0px;
+    left: 387px;
+    top: 266px;
+}
+#backLegsLine{
+    border-width: 0 3px 0px 0;
+    padding: 25px 0px;
+    left: 428px;
+    top: 215px;
+}
+
+/* -------------------    Legs Buttons --------------------*/
+
+
+#frontLegsButton{   
+    left: 468px;
+    top: 322px;
+}
+#frontLegsButton:hover + #frontLegsDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+#backLegsButton{
+    left: 466px;
+    top: 223px;
+}
+#backLegsButton:hover + #backLegsDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* -------------------    Left Back position --------------------*/
+
+#leftBackButton{
+    left: 41px;
+    top: 528px;
+}
+#leftBackButton:#leftBackArrow{
+    background-color: #FF0000;
+    animation: none;
+}
+/* -------------------    Left Back Arrow position --------------------*/
+
+#leftBackArrow{
+    border-top: 9px solid transparent;
+    border-right: 10px solid #33393b;
+    border-bottom: 9px solid transparent;
+    display: inline-block;
+    position:absolute;
+    left:29px;
+    top:534px;
+}    
+
+/* -------------------    start position --------------------*/
+
+#startButton{
+    position:absolute;
+    width:83px;
+    left: 152px;
+    top: 528px;
+}
+
+.rectangleStart{
+    position:absolute;
+    display: table-cell;
+    border-radius: 5px;
+    background: #73AD21;
+    font-family: helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: #feb331;
+    line-height: 40px;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
+    cursor:default;
+}
+
+/* -------------------    gestures position --------------------*/
+
+#gesturesButton{
+    position:absolute;
+    width:122px;
+    left: 246px;
+    top: 528px;
+}
+
+.rectangleGestures{
+    position:absolute;
+    display: table-cell;
+    border-radius: 5px;
+    background: #73AD21;
+    font-family: helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: #feb331;
+    line-height: 40px;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
+    cursor:default;
+} 
+
+/* -------------------    gestures position --------------------*/
+
+#simulatorButton{
+    position:absolute;
+    width:122px;
+    left: 380px;
+    top: 528px;
+}
+
+.rectangleSimulator{
+    position:absolute;
+    display: table-cell;
+    border-radius: 5px;
+    background: #73AD21;
+    font-family: helvetica,sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: #feb331;
+    line-height: 40px;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(218, 94, 94);
+    cursor:default;
+}

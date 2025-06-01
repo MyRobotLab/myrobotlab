@@ -7,8 +7,8 @@ import java.util.List;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.AbstractConnectorConfig;
 import org.myrobotlab.service.interfaces.DocumentConnector;
-import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 
 /**
@@ -17,7 +17,7 @@ import org.myrobotlab.service.interfaces.DocumentPublisher;
  * service.
  * 
  */
-public abstract class AbstractConnector extends Service implements DocumentPublisher, DocumentConnector {
+public abstract class AbstractConnector <C extends AbstractConnectorConfig> extends Service<C> implements DocumentPublisher, DocumentConnector {
 
   private static final long serialVersionUID = 1L;
   protected ConnectorState state = ConnectorState.STOPPED;
@@ -117,6 +117,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
     this.state = state;
   }
 
+  @Override
   public Document publishDocument(Document doc) {
     return doc;
   }
@@ -125,12 +126,7 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
     return batch;
   }
 
-  public void addDocumentListener(DocumentListener listener) {
-    addListener("publishDocument", listener.getName(), "onDocument");
-    addListener("publishDocuments", listener.getName(), "onDocuments");
-    addListener("publishFlush", listener.getName(), "onFlush");
-  }
-
+  @Override
   public ConnectorState getConnectorState() {
     return state;
   }

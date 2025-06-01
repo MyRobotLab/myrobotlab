@@ -1,0 +1,67 @@
+<br/>
+<div class="row">
+    <div class="col-md-6"><h3>{{spoken}}</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <tr>
+                <td>
+                    <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
+                    <span ng-show="!service.ready">NovelAI requires AWS Keys</span>
+                </td>
+                <td>
+                    mute <toggle width="30" height="30" ng-model="service.mute" ng-change="msg.setMute(service.mute)" on="" off=""/>
+                </td>
+                
+                <td colspan="2">
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-default">{{service.voice.name}} - {{service.voice.locale.tag}} - {{service.voice.gender}}</button>
+                        <button type="button" class="btn btn-default" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                        </button>
+                        <ul uib-dropdown-menu>
+                            <li ng-repeat="(key, container) in service.voices">
+                                <a href="" ng-click="msg.setVoice(key);msg.broadcastState()">{{key}} - {{container.locale.tag}} - {{container.gender}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <input class="form-control" ng-keyup="$event.keyCode == 13 && speak(text)" ng-show="!textArea" type="text" ng-model="text" placeholder="enter text">
+                    <textarea type="text" ng-show="textArea" class="form-control" placeholder="type here" ng-model="text"/>
+                </td>
+            </tr>
+            <tr>
+                <td>auto-clear &nbsp;&nbsp;</td>
+                <td>
+                    <input type="checkbox" ng-model="autoClear"/>
+                </td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;text area</td>
+                <td>
+                    <input type="checkbox" ng-model="textArea"/>
+                </td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="row" ng-show="!service.ready">
+    <div class="col-lg-12">
+        <form class="form-inline">
+            <input class="form-control" type="password" ng-model="key" placeholder="aws NovelAI key" title="key name to identify secret">
+            <input class="form-control" type="password" ng-model="secret" placeholder="aws NovelAI secret" title="NovelAI key and secret ">
+            <button class="btn btn-default" ng-click="msg.setKeys(key, secret);">set keys</button>
+            <a href="https://docs.aws.amazon.com/NovelAI/latest/dg/authentication-and-access-control.html">how to get keys</a>
+        </form>
+    </div>
+</div>

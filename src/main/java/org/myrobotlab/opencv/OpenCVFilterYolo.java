@@ -35,6 +35,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);
 
+  protected Boolean running;
+
   // zero offset to where the confidence level is in the output matrix of the
   // darknet.
   private static final int CONFIDENCE_INDEX = 4;
@@ -170,7 +172,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
           pending = false;
           count++;
           if (count % 10 == 0) {
-            double rate = 1000.0 * count / (float) (System.currentTimeMillis() - start);
+            double rate = 1000.0 * count / (System.currentTimeMillis() - start);
             log.info("Yolo Classification Rate : {}", rate);
           }
 
@@ -376,12 +378,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void disable() {
+    super.disable();
     if (classifier == null) {
       // already disabled
       return;
     }
-    super.disable();
-    int waitTime = 0;
+    int waitTime = 0;    
     while (classifier != null && waitTime < 1000) {
       ++waitTime;
       Service.sleep(10);

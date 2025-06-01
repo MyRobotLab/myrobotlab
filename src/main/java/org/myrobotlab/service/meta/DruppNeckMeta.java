@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,21 +11,11 @@ public class DruppNeckMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public DruppNeckMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
+  public DruppNeckMeta() {
     addDescription("InMoov Drupp Neck Service");
     addCategory("robot");
-
-    addPeer("up", "Servo", "Up servo");
-    addPeer("middle", "Servo", "Middle servo");
-    addPeer("down", "Servo", "Down servo");
-
     setAvailable(true);
-
   }
 
 }

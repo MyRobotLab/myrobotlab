@@ -10,14 +10,14 @@ public class FileConnectorTest extends AbstractConnectorTest {
 
   @Override
   public AbstractConnector createConnector() {
-    FileConnector connector = (FileConnector)Runtime.start("testconnector", "FileConnector");
+    FileConnector connector = (FileConnector) Runtime.start("testconnector", "FileConnector");
     connector.setDirectory(".");
     return connector;
   }
 
   @Override
   public MockDocumentListener createListener() {
-    return (MockDocumentListener)Runtime.start("mocklistener", "MockDocumentListener");
+    return (MockDocumentListener) Runtime.start("mocklistener", "MockDocumentListener");
   }
 
   @Override

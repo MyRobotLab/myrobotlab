@@ -1,9 +1,28 @@
 package org.saintandreas.gl;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL31.*;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glGetError;
+import static org.lwjgl.opengl.GL11.glLoadMatrixf;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
+import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+import static org.lwjgl.opengl.GL31.GL_PRIMITIVE_RESTART;
+import static org.lwjgl.opengl.GL31.glPrimitiveRestartIndex;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -41,7 +60,7 @@ public final class OpenGL {
   public static void checkError() {
     int error = glGetError();
     if (error != 0) {
-//      throw new IllegalStateException("GL error " + error);
+      // throw new IllegalStateException("GL error " + error);
     }
   }
 
@@ -79,8 +98,7 @@ public final class OpenGL {
     return result;
   }
 
-  public static List<Vector4f> interleaveConstants(
-      Collection<? extends Vector4f> vs, Vector4f... attributes) {
+  public static List<Vector4f> interleaveConstants(Collection<? extends Vector4f> vs, Vector4f... attributes) {
     List<Vector4f> result = new ArrayList<>(vs.size() * (attributes.length + 1));
     for (Vector4f v : vs) {
       result.add(v);
@@ -99,8 +117,7 @@ public final class OpenGL {
       List<Vector4f> vertices = makeColorCubeVertices();
       List<Short> indices = makeColorCubeIndices();
       IndexedGeometry.Builder builder = new IndexedGeometry.Builder(indices, vertices);
-      builder.withDrawType(GL_TRIANGLE_STRIP).withAttribute(Attribute.POSITION)
-          .withAttribute(Attribute.COLOR);
+      builder.withDrawType(GL_TRIANGLE_STRIP).withAttribute(Attribute.POSITION).withAttribute(Attribute.COLOR);
       COLOR_CUBE = builder.build();
     }
     return COLOR_CUBE;
@@ -113,10 +130,8 @@ public final class OpenGL {
       if (!result.isEmpty()) {
         result.add(Short.MAX_VALUE);
       }
-      result.addAll(Lists.newArrayList(Short.valueOf((short) (offset + 0)),
-          Short.valueOf((short) (offset + 1)),
-          Short.valueOf((short) (offset + 2)),
-          Short.valueOf((short) (offset + 3))));
+      result.addAll(
+          Lists.newArrayList(Short.valueOf((short) (offset + 0)), Short.valueOf((short) (offset + 1)), Short.valueOf((short) (offset + 2)), Short.valueOf((short) (offset + 3))));
       offset += 4;
     }
     return result;
@@ -131,30 +146,25 @@ public final class OpenGL {
     result.addAll(interleaveConstants(transformed(q, m), Colors.B));
 
     // Back
-    m = new Matrix4f().rotate(TAU / 2f, Vector3f.UNIT_X).translate(
-        new Vector3f(0, 0, 0.5f));
+    m = new Matrix4f().rotate(TAU / 2f, Vector3f.UNIT_X).translate(new Vector3f(0, 0, 0.5f));
     result.addAll(interleaveConstants(transformed(q, m), Colors.Y));
 
     // Top
-    m = new Matrix4f().rotate(TAU / -4f, Vector3f.UNIT_X).translate(
-        new Vector3f(0, 0, 0.5f));
+    m = new Matrix4f().rotate(TAU / -4f, Vector3f.UNIT_X).translate(new Vector3f(0, 0, 0.5f));
     result.addAll(interleaveConstants(transformed(q, m), Colors.G));
-    
+
     // Bottom
-    m = new Matrix4f().rotate(TAU / 4f, Vector3f.UNIT_X).translate(
-        new Vector3f(0, 0, 0.5f));
+    m = new Matrix4f().rotate(TAU / 4f, Vector3f.UNIT_X).translate(new Vector3f(0, 0, 0.5f));
     result.addAll(interleaveConstants(transformed(q, m), Colors.M));
 
     // Left
-    m = new Matrix4f().rotate(TAU / -4f, Vector3f.UNIT_Y).translate(
-        new Vector3f(0, 0, 0.5f));
+    m = new Matrix4f().rotate(TAU / -4f, Vector3f.UNIT_Y).translate(new Vector3f(0, 0, 0.5f));
     result.addAll(interleaveConstants(transformed(q, m), Colors.R));
 
     // Right
-    m = new Matrix4f().rotate(TAU / 4f, Vector3f.UNIT_Y).translate(
-        new Vector3f(0, 0, 0.5f));
+    m = new Matrix4f().rotate(TAU / 4f, Vector3f.UNIT_Y).translate(new Vector3f(0, 0, 0.5f));
     result.addAll(interleaveConstants(transformed(q, m), Colors.C));
-    
+
     return result;
   }
 
@@ -201,8 +211,7 @@ public final class OpenGL {
     return makeTexturedQuad(min, max, new Vector2f(0, 0), new Vector2f(1, 1));
   }
 
-  public static IndexedGeometry makeTexturedQuad(Vector2f min, Vector2f max,
-      Vector2f tmin, Vector2f tmax) {
+  public static IndexedGeometry makeTexturedQuad(Vector2f min, Vector2f max, Vector2f tmin, Vector2f tmax) {
     Vector2f texMin = tmin;
     Vector2f texMax = tmax;
     List<Vector4f> vertices = new ArrayList<>();
@@ -217,27 +226,21 @@ public final class OpenGL {
     List<Short> indices = new ArrayList<>();
     indices.add((short) 0); // LL
     indices.add((short) 1); // LR
-    indices.add((short) 3); // UL 
-    indices.add((short) 2); // UR 
+    indices.add((short) 3); // UL
+    indices.add((short) 2); // UR
     IndexedGeometry.Builder builder = new IndexedGeometry.Builder(indices, vertices);
     builder.withDrawType(GL_TRIANGLE_STRIP).withAttribute(Attribute.POSITION).withAttribute(Attribute.TEX);
     return builder.build();
   }
 
   private static final Map<Resource, Texture> CUBE_MAPS = new HashMap<>();
-  private static final int RESOURCE_ORDER[] = {
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-  };
+  private static final int RESOURCE_ORDER[] = { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, };
 
-  public static Texture getCubemapTextures(Resource ... resources) {
-    assert(resources.length > 0);
+  public static Texture getCubemapTextures(Resource... resources) {
+    assert (resources.length > 0);
     Resource firstResource = resources[0];
-    assert(null != firstResource);
+    assert (null != firstResource);
     if (!CUBE_MAPS.containsKey(firstResource)) {
 
       Texture texture = new Texture(GL_TEXTURE_CUBE_MAP);
@@ -277,7 +280,7 @@ public final class OpenGL {
     Vector2f texMax = new Vector2f(1, 1);
     return makeTexturedQuad(min, max, texMin, texMax);
   }
-  
+
   public static void bindProjection(Program program) {
     program.setUniform("Projection", MatrixStack.PROJECTION.top());
   }
@@ -310,8 +313,7 @@ public final class OpenGL {
   }
 
   // WARNING: not thread safe
-  private static final FloatBuffer MATRIX_FLOAT_BUFFER = 
-      BufferUtils.getFloatBuffer(16);
+  private static final FloatBuffer MATRIX_FLOAT_BUFFER = BufferUtils.getFloatBuffer(16);
 
   @Deprecated
   public static void loadMatrix(Matrix4f m) {
@@ -328,13 +330,11 @@ public final class OpenGL {
   public static void drawColorCube() {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(Short.MAX_VALUE);
-    if (null == COLOR_CUBE_GEOMETRY ) {
+    if (null == COLOR_CUBE_GEOMETRY) {
       COLOR_CUBE_GEOMETRY = makeColorCube();
     }
     if (null == COLOR_CUBE_PROGRAM) {
-      COLOR_CUBE_PROGRAM = new Program(
-          GlamourResources.SHADERS_COLORED_VS,
-          GlamourResources.SHADERS_COLORED_FS);
+      COLOR_CUBE_PROGRAM = new Program(GlamourResources.SHADERS_COLORED_VS, GlamourResources.SHADERS_COLORED_FS);
       COLOR_CUBE_PROGRAM.link();
     }
     COLOR_CUBE_PROGRAM.use();

@@ -1,2 +1,2 @@
 # start the service
-robotplatform = Runtime.start("robotplatform","RobotPlatform")
+robotplatform = runtime.start("robotplatform","RobotPlatform")

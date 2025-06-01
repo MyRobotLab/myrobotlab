@@ -31,7 +31,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacv.Frame;
+import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -77,16 +78,17 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public RecognizerType recognizerType = RecognizerType.FISHER;
   // when in training mode, this is the name to associate with the face.
   public String trainName = null;
-  private FaceRecognizer faceRecognizer;
+  transient private FaceRecognizer faceRecognizer;
   private boolean trained = false;
   // the directory to store the training images.
+  // FIXME - this is the wrong place it should be data/OpenCV/training
   private String trainingDir = "training";
   private int modelSizeX = 256;
   private int modelSizeY = 256;
   // We read in the face filter when training the first time, and use it for all
   // subsequent
   // training and for masking images prior to comparison.
-  private Mat facemask = null;
+  transient private Mat facemask = null;
 
   // cannot be this because - gets changed to src/main/resources/resource/OpenCV
   // if src is present !!!!
@@ -94,12 +96,12 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
   public String cascadeDir = "resource/OpenCV/haarcascades";
 
-  private CascadeClassifier faceCascade;
-  private CascadeClassifier eyeCascade;
+  transient private CascadeClassifier faceCascade;
+  transient private CascadeClassifier eyeCascade;
   // private CascadeClassifier mouthCascade;
   // These are cv converts that help us convert between mat,frame and iplimage
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
-  private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient private CvFont fontWarning = cvFont(CV_FONT_HERSHEY_PLAIN);
   private boolean debug = false;
   // KW: I made up this word, but I think it's fitting.
   private boolean dePicaso = true;
@@ -109,6 +111,14 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   private boolean face = false;
   private String lastRecognizedName = null;
   public String faceModelFilename = "faceModel.bin";
+  transient private CloseableFrameConverter converter = new CloseableFrameConverter();
+
+  @Override
+  public void release() {
+    // TODO Auto-generated method stub
+    super.release();
+    converter.close();
+  }
 
   public OpenCVFilterFaceRecognizer(String name) {
     super(name);
@@ -273,6 +283,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
    * Save the current model to the faceModelFilename
    * 
    * @throws IOException
+   *           if the save fails
    */
   public void save() throws IOException {
     save(faceModelFilename);
@@ -313,6 +324,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     ArrayList<File> trainingFiles = new ArrayList<File>();
     // only jpg , png , pgm files. TODO: other formats? bmp/tiff/etc?
     FilenameFilter imgFilter = new FilenameFilter() {
+      @Override
       public boolean accept(File dir, String name) {
         name = name.toLowerCase();
         // TODO: figure out which formats we can actually accept?
@@ -379,7 +391,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   public IplImage process(IplImage image) throws InterruptedException {
     // convert to grayscale
     // Frame grayFrame =
-    Mat bwImgMat = makeGrayScaleMat(image);
+
+    IplImage imageBW = makeGrayScale(image);
+    Mat bwImgMat = converter.toMat(imageBW);
     ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
     // Ok, for each of these detected faces we should try to classify them.
     for (DetectedFace dF : dFaces) {
@@ -408,9 +422,9 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
           if (!StringUtils.isEmpty(trainName)) {
             try {
               saveTrainingImage(trainName, dFaceMat);
-              cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+              cvPutText(image, "Snapshot Saved: " + trainName, cvPoint(20, 60), font, AbstractCvScalar.CYAN);
             } catch (IOException e) {
-              cvPutText(image, "Error saving: " + trainName, cvPoint(20, 60), font, CvScalar.CYAN);
+              cvPutText(image, "Error saving: " + trainName, cvPoint(20, 60), font, AbstractCvScalar.CYAN);
               log.warn("Unable to save the training image.", e);
             }
           }
@@ -427,7 +441,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
             face = true;
             // Resize the face to pass it to the predicter
             String name = predictFace(dFaceMat);
-            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, CvScalar.CYAN);
+            cvPutText(image, name, dF.resolveGlobalLowerLeftCorner(), font, AbstractCvScalar.CYAN);
             // If it's a new name. invoke it an publish.
             if (lastRecognizedName != name) {
               invoke("publishRecognizedFace", name);
@@ -498,19 +512,17 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     UUID randValue = UUID.randomUUID();
     String filename = trainingDir + File.separator + label + File.separator + randValue + ".png";
     // TODO: we need to be able to write a unicode filename with a path here..
-    BufferedImage buffImg = toBufferedImage(dFaceMat);
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImg = converter.toBufferedImage(dFaceMat);
     ImageIO.write(buffImg, "png", new File(filename));
+    converter.close();
     log.info("Saved Training image {} ", filename);
   }
 
-  private Frame makeGrayScale(IplImage image) {
-    IplImage imageBW = IplImage.create(image.width(), image.height(), 8, 1);
+  private IplImage makeGrayScale(IplImage image) {
+    IplImage imageBW = AbstractIplImage.create(image.width(), image.height(), 8, 1);
     cvCvtColor(image, imageBW, CV_BGR2GRAY);
-    return converterToMat.convert(imageBW);
-  }
-
-  private Mat makeGrayScaleMat(IplImage image) {
-    return toMat(makeGrayScale(image));
+    return imageBW;
   }
 
   private ArrayList<DetectedFace> extractDetectedFaces(Mat bwImgMat) {
@@ -603,20 +615,20 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
 
   private void drawFaceRects(IplImage image, DetectedFace dFace) {
     // helper function to draw rectangles around the detected face(s)
-    drawRect(image, dFace.getFace(), CvScalar.MAGENTA);
+    drawRect(image, dFace.getFace(), AbstractCvScalar.MAGENTA);
     if (dFace.getLeftEye() != null) {
       // Ok the eyes are relative to the face
       Rect offset = new Rect(dFace.getFace().x() + dFace.getLeftEye().x(), dFace.getFace().y() + dFace.getLeftEye().y(), dFace.getLeftEye().width(), dFace.getLeftEye().height());
-      drawRect(image, offset, CvScalar.BLUE);
+      drawRect(image, offset, AbstractCvScalar.BLUE);
     }
     if (dFace.getRightEye() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getRightEye().x(), dFace.getFace().y() + dFace.getRightEye().y(), dFace.getRightEye().width(),
           dFace.getRightEye().height());
-      drawRect(image, offset, CvScalar.BLUE);
+      drawRect(image, offset, AbstractCvScalar.BLUE);
     }
     if (dFace.getMouth() != null) {
       Rect offset = new Rect(dFace.getFace().x() + dFace.getMouth().x(), dFace.getFace().y() + dFace.getMouth().y(), dFace.getMouth().width(), dFace.getMouth().height());
-      drawRect(image, offset, CvScalar.GREEN);
+      drawRect(image, offset, AbstractCvScalar.GREEN);
     }
   }
 

@@ -20,6 +20,18 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   private boolean installed = false;
 
+  /**
+   * Whether this dependency should be packaged in the final jar, instead of
+   * being fetched on-demand at runtime.
+   */
+  private boolean includeInOneJar = false;
+
+  /**
+   * Whether this dependency should be skipped. This should only be set by a
+   * {@link Repo} when it detects duplicate dependencies
+   */
+  private boolean skipped = false;
+
   private List<ServiceExclude> excludes = new ArrayList<ServiceExclude>();
   private List<ServiceArtifact> artifacts = new ArrayList<ServiceArtifact>();
 
@@ -70,6 +82,11 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     this.ext = ext;
   }
 
+  public ServiceDependency(String groubId, String artifactId, String version, String ext, boolean includeInOneJar) {
+    this(groubId, artifactId, version, ext);
+    this.includeInOneJar = includeInOneJar;
+  }
+
   @Override
   public int compare(ServiceDependency o1, ServiceDependency o2) {
     return o1.getKey().compareTo(o2.getKey());
@@ -89,6 +106,18 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   public String getExt() {
     return ext;
+  }
+
+  public boolean getIncludeInOneJar() {
+    return includeInOneJar;
+  }
+
+  public boolean isSkipped() {
+    return skipped;
+  }
+
+  public void setSkipped(boolean skipped) {
+    this.skipped = skipped;
   }
 
   public boolean isInstalled() {
@@ -111,6 +140,27 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
 
   public String getKey() {
     return String.format("%s/%s/%s/%s", groupId, artifactId, version, ext);
+  }
+
+  /**
+   * Gives the Maven coordinates for this dependency,
+   * which are the group ID, artifact ID, and version
+   * all separated by colons.
+   * @return The Maven coordinates for this dependency
+   */
+  public String getCoordinates() {
+    return String.format("%s:%s:%s", groupId, artifactId, version);
+  }
+
+  /**
+   * Gives the unique Maven coordinates of this dependency's project.
+   * This does not give the version, and is mainly used to determine
+   * if two dependencies are for the same project.
+   *
+   * @return The group ID and the artifact ID, separated by a colon
+   */
+  public String getProjectCoordinates() {
+    return String.format("%s:%s", groupId, artifactId);
   }
 
   public void add(ServiceExclude serviceExclude) {

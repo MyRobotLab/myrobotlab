@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.UltrasonicSensorConfig
+controller: null
+echoPin: null
+listeners: null
+peers: null
+timeout: null
+triggerPin: null
+type: UltrasonicSensor

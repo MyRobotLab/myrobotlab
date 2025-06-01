@@ -45,7 +45,7 @@ public class SendToSolr extends AbstractStage {
   @Override
   public void startStage(StageConfiguration config) {
     solrUrl = config.getProperty("solrUrl", solrUrl);
-    issueCommit = config.getBoolParam("issueCommit", new Boolean(issueCommit));
+    issueCommit = config.getBoolParam("issueCommit", Boolean.valueOf(issueCommit));
     batchSize = Integer.valueOf(config.getIntegerParam("batchSize", batchSize));
 
     // basicAuthUser = config.getStringParam("basicAuthUser", basicAuthUser);
@@ -129,6 +129,7 @@ public class SendToSolr extends AbstractStage {
 
   }
 
+  @Override
   public synchronized void flush() {
 
     log.info("Flush called for Send to solr stage. ");

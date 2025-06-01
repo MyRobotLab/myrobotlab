@@ -3,7 +3,10 @@ package org.myrobotlab.audio;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -13,16 +16,16 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.config.AudioFileConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
 // FIXME - make runnable
 public class AudioProcessor extends Thread {
 
-  static Logger log = LoggerFactory.getLogger(AudioProcessor.class);
+  static transient Logger log = LoggerFactory.getLogger(AudioProcessor.class);
 
   // REFERENCES -
   // http://www.javalobby.org/java/forums/t18465.html
@@ -33,28 +36,40 @@ public class AudioProcessor extends Thread {
   // a audio decoder can be slected from some
   // internal registry ... i think
 
-  int currentTrackCount = 0;
-  int samplesAdded = 0;
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  transient private final ScheduledExecutorService delayScheduler = Executors.newScheduledThreadPool(1);
 
-  double volume = 1.0f;
+  protected int currentTrackCount = 0;
 
-  float balance = 0.0f;
+  protected int samplesAdded = 0;
 
-  float targetBalance = balance;
+  /**
+   * unless explicitly set - uses master volue of AudioFile service
+   */
+  protected Double volume = null;
 
-  AudioFile audioFile = null;
+  protected float balance = 0.0f;
 
-  boolean isPlaying = false;
+  protected float targetBalance = balance;
 
-  boolean isRunning = false;
+  protected AudioFile audioFile = null;
 
-  public String track;
+  protected boolean isPlaying = false;
 
-  BlockingQueue<AudioData> queue = new LinkedBlockingQueue<AudioData>();
+  protected boolean isRunning = false;
 
-  AudioData currentAudioData = null;
+  protected String track;
 
-  private int repeatCount;
+  protected transient BlockingQueue<AudioData> queue = new LinkedBlockingQueue<AudioData>();
+
+  protected AudioData currentAudioData = null;
+
+  protected int repeatCount;
+
+  /**
+   * loop counter
+   */
+  private int cnt = 0;
 
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
@@ -62,10 +77,20 @@ public class AudioProcessor extends Thread {
     this.track = track;
   }
 
+  /**
+   * Pause the current playing file - if it is paused - it is "still considered"
+   * to be playing so isPlaying needs to remain true (otherwise the file/audio
+   * processor will completely stop)
+   * 
+   * @param b
+   *          - to pause or not
+   * @return
+   */
   public AudioData pause(boolean b) {
-    if (b) {
-      isPlaying = false;
-    }
+    // isPlaying = b; <- DO NOT DO THIS !
+    // someone put this bug in - when a song is 'paused' its still playing
+    // ie - this needs to remain true otherwise it will not resume when
+    // requested !!
     if (currentAudioData != null) {
       if (b) {
         currentAudioData.waitForLock = new Object();
@@ -74,6 +99,7 @@ public class AudioProcessor extends Thread {
           synchronized (currentAudioData.waitForLock) {
             currentAudioData.waitForLock.notifyAll();
             currentAudioData.waitForLock = null; // removing reference
+            isPlaying = true;
           }
         }
       }
@@ -100,10 +126,6 @@ public class AudioProcessor extends Thread {
           audioFile.error(String.format("audio file %s 0 byte length", file.getName()));
           return data;
         }
-        /*
-         * fis = new FileInputStream(file); bis = new BufferedInputStream(fis);
-         * in = AudioSystem.getAudioInputStream(bis);
-         */
 
         in = AudioSystem.getAudioInputStream(file);
 
@@ -130,8 +152,10 @@ public class AudioProcessor extends Thread {
         isPlaying = true;
 
         audioFile.invoke("publishAudioStart", data);
+        AudioFileConfig config = (AudioFileConfig) audioFile.getConfig();
 
         while (isPlaying && (nBytesRead = din.read(buffer, 0, buffer.length)) != -1) {
+          ++cnt;
           // byte[] goofy = new byte[4096];
           /*
            * HEE HEE .. if you want to make something sound "bad" i'm sure its
@@ -148,30 +172,35 @@ public class AudioProcessor extends Thread {
             }
           }
 
-          if (data.volume == null) {
-            data.volume = volume;
+          // determining volume through precedence
+          // first master volume
+          Double volume = audioFile.getVolume();
+          // unless track is explicitly set
+          if (this.volume != null) {
+            volume = this.volume;
+          }
+          // unless file itself is explicitly set
+          if (data.volume != null) {
+            volume = data.volume;
           }
 
-          if (data.volume != null) {
+          if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
 
-            if (line.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+            // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
+            // * 20.0);
 
-              FloatControl ctrl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
-              // float scaled = (float) (Math.log(data.volume) / Math.log(10.0)
-              // * 20.0);
+            if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * volume)), 3)) {
+              if (volume <= 1.0f && volume >= 0) {
 
-              if (MathUtils.round(ctrl.getValue(), 3) != MathUtils.round((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)), 3)) {
-                if (data.volume <= 1.0f && data.volume >= 0) {
-
-                  ctrl.setValue((float) (ctrl.getMinimum() + ((double) (ctrl.getMaximum() - ctrl.getMinimum()) * data.volume)));
-                  log.debug("Audioprocessor set volume to : " + ctrl.getValue());
-                } else {
-                  log.error("Requested volume value " + data.volume.toString() + " not allowed");
-                  data.volume = 1.0;
-                }
+                ctrl.setValue((float) (ctrl.getMinimum() + ((ctrl.getMaximum() - ctrl.getMinimum()) * volume)));
+                log.debug("Audioprocessor set volume to : " + ctrl.getValue());
+              } else {
+                log.error("Requested volume value " + volume.toString() + " not allowed");
+                volume = 1.0;
               }
-              // volume.setValue(scaled);
             }
+            // volume.setValue(scaled);
           }
 
           if (balance != targetBalance) {
@@ -180,25 +209,49 @@ public class AudioProcessor extends Thread {
               control.setValue(balance);
               balance = targetBalance;
             } catch (Exception e) {
-              Logging.logError(e);
+              log.error("floatcontrol threw", e);
             }
           }
 
-          // BooleanControl
-          // muteControl=(BooleanControl)source.getControl(BooleanControl.Type.MUTE);
-          /*
-           * if (volume == 0) { muteControl.setValue(true); }
-           */
-
-          // the buffer of raw data could be published from here
-          // if a reference of the service is passed in
-
-          if (audioFile.isMute()) {
-            // NoOp for a mute audioFile.
-          } else {
+          if (!audioFile.isMute()) {
             line.write(buffer, 0, nBytesRead);
+          } else {
+            // rough estimate of play time - the above blocks the thread
+            // if we are not computing and blocking the loops is much too fast
+            // by definition "mute" should still read/process the file, just not
+            // make any sound
+            sleep(100);
           }
+          // Compute the peak value and publish it.
+          if (cnt % config.peakSampleInterval == 0) {
+            float peak = 0f;
+            int b = buffer.length;
+            // convert bytes to samples here
+            for (int i = 0; i < b;) {
+              int sample = 0;
+              sample |= buffer[i++] & 0xFF; // (reverse these two lines
+              sample |= buffer[i++] << 8; // if the format is big endian)
+              float abs = Math.abs(sample / 32768f);
+              if (abs > peak) {
+                peak = abs;
+              }
+            }
 
+            final double value = peak * (double) audioFile.getPeakMultiplier();
+
+            // skew publish forwards in time
+            if (audioFile.getConfig().peakDelayMs == null) {
+              audioFile.invoke("publishPeak", value);
+            } else {
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", value), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
+            }
+
+            // reset to 0 after millis
+            if (audioFile.getConfig().publishPeakResetDelayMs != null) {
+              delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs + audioFile.getConfig().publishPeakResetDelayMs,
+                  TimeUnit.MILLISECONDS);
+            }
+          }
         }
         // Stop
 
@@ -213,6 +266,13 @@ public class AudioProcessor extends Thread {
 
         // System.gc();
 
+        if (audioFile.getConfig().peakDelayMs == null) {
+          audioFile.invoke("publishPeak", 0);
+        } else {
+          delayScheduler.schedule(() -> audioFile.invoke("publishPeak", 0), audioFile.getConfig().peakDelayMs, TimeUnit.MILLISECONDS);
+        }
+
+        audioFile.invoke("publishPeak", 0);
         audioFile.invoke("publishAudioEnd", data);
 
         synchronized (data) {
@@ -224,7 +284,6 @@ public class AudioProcessor extends Thread {
         log.error("line is null !");
       }
     } catch (Exception e) {
-      audioFile.warn("%s - %s output audio line was not found - is audio enabled?", e.getClass().getSimpleName(), e.getMessage());
       if (data != null) {
         synchronized (data) {
           log.debug("notifying others");
@@ -232,7 +291,11 @@ public class AudioProcessor extends Thread {
         }
       }
       if (audioFile != null) {
-        audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+        audioFile.error(e);
+        audioFile.warn("%s - %s output audio line was not found - is audio enabled?", e.getClass().getSimpleName(), e.getMessage());
+        if (data != null) {
+          audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+        }
       }
     } finally {
       if (din != null) {
@@ -252,7 +315,6 @@ public class AudioProcessor extends Thread {
 
     try {
       AudioData data = null;
-      int lastTrackPlayed = currentTrackCount;
       while (isRunning) {
         // FIXME - timeSinceLastFinishedSample (collect all time)
 
@@ -268,25 +330,8 @@ public class AudioProcessor extends Thread {
           repeatCount = 0;
         }
 
-        // check to see if we should be waiting for another track to finish
-        // FIXME - REMOVE ! NO KEYS JUST LOCK ON OBJECT !!!!
-        /*
-         * if (waitForKey != null) { Object waitForLock =
-         * audioFile.getWaitForLock(waitForKey); synchronized (waitForLock) {
-         * waitForLock.wait(); } }
-         */
-
         play(data);
         ++repeatCount;
-
-        // FIXME - DONT USE KEYS !! DONT USE AUDIOFILE !! LOCK ON OBJECT IN DATA
-        // !!!
-        /*
-         * if (currentTrackCount != lastTrackPlayed) { String key =
-         * String.format("%s:%s", queueName, currentTrackCount); Object
-         * waitForLock = audioFile.getWaitForLock(key); if (waitForLock != null)
-         * { synchronized (waitForLock) { waitForLock.notify(); } } }
-         */
 
         data.stopTs = System.currentTimeMillis();
 
@@ -296,13 +341,14 @@ public class AudioProcessor extends Thread {
     }
     // default waits on queued audio requests
     log.info("audio processor {} exiting", getName());
+    delayScheduler.shutdown();
   }
 
-  public void setVolume(double volume) {
+  public void setVolume(Double volume) {
     this.volume = volume;
   }
 
-  public double getVolume() {
+  public Double getVolume() {
     return volume;
   }
 

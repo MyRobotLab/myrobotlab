@@ -15,7 +15,7 @@ outputPin = 8
 inputPin = 13
 
 # start the services
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 
 # you have to replace COMX with your arduino serial port number
 # arduino.connect("/dev/ttyUSB0") - Linux way

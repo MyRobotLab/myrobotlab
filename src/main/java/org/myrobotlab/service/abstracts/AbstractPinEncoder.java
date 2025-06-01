@@ -42,9 +42,10 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     return angle;
   }
 
-  // This is used to relay the data being broadcast from a controller (such as an arduino)
+  // This is used to relay the data being broadcast from a controller (such as
+  // an arduino)
   public void onEncoderData(EncoderData data) {
-    // TODO: maybe the raw pin data from the arduino comes in here instead.. 
+    // TODO: maybe the raw pin data from the arduino comes in here instead..
     // current timestamp / delta since last update.
     long now = System.currentTimeMillis();
     long delta = now - lastUpdate;

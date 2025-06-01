@@ -1,0 +1,20 @@
+!!org.myrobotlab.service.config.OculusDiyConfig
+arduino:
+  autoStart: true
+  name: arduino
+  type: Arduino
+listeners: null
+mpu6050:
+  autoStart: true
+  name: mpu6050
+  type: Mpu6050
+peers:
+  arduino:
+    autoStart: true
+    name: oculusdiy.arduino
+    type: Arduino
+  mpu6050:
+    autoStart: true
+    name: oculusdiy.mpu6050
+    type: Mpu6050
+type: OculusDiy

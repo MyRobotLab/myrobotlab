@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 public class PortQueueTest implements SerialDataListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(PortQueueTest.class);
-  
+
   @Test
   public void testPortQueue() throws IOException {
     // Test a port queue.
@@ -24,7 +24,7 @@ public class PortQueueTest implements SerialDataListener {
     BlockingQueue<Integer> rx = new LinkedBlockingQueue<Integer>();
     BlockingQueue<Integer> tx = new LinkedBlockingQueue<Integer>();
     PortQueue portQueue = new PortQueue(portName, rx, tx);
-    
+
     // TODO: use the port queue to do something.
     portQueue.listen(this);
     assertFalse(portQueue.isOpen());
@@ -34,7 +34,7 @@ public class PortQueueTest implements SerialDataListener {
     assertFalse(portQueue.isOpen());
     portQueue.open();
     assertTrue(portQueue.isOpen());
-   
+
   }
 
   @Override
@@ -70,8 +70,8 @@ public class PortQueueTest implements SerialDataListener {
   @Override
   public void onBytes(byte[] bytes) {
     // TODO Auto-generated method stub
-    // ?!?!  what do we do with this?  on bytes for which queue?!
+    // ?!?! what do we do with this? on bytes for which queue?!
     log.info("On Bytes");
   }
-  
+
 }

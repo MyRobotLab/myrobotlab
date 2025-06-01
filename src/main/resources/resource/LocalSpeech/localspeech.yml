@@ -1,0 +1,15 @@
+!!org.myrobotlab.service.config.LocalSpeechConfig
+blocking: false
+listeners: null
+mute: false
+peers:
+  audioFile:
+    autoStart: true
+    name: localspeech.audioFile
+    type: AudioFile
+replaceChars: null
+speechRecognizers: null
+speechType: null
+substitutions: null
+type: LocalSpeech
+voice: null

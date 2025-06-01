@@ -1,4 +1,4 @@
-owm=Runtime.createAndStart("owm", "OpenWeatherMap")
+owm=runtime.start("owm", "OpenWeatherMap")
 owm.setKey("YOUR_KEY") #you can use this only once
 owm.setUnits("metric") # or imperial
 owm.setLang("en") # fr / de ... TODO use locale

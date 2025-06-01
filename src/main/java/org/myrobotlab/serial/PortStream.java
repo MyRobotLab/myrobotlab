@@ -56,6 +56,7 @@ public class PortStream extends Port {
     return new ArrayList<String>();
   }
 
+  @Override
   public byte[] readBytes() {
     try {
       int size = in.available();
@@ -89,6 +90,7 @@ public class PortStream extends Port {
     this.out = out;
   }
 
+  @Override
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
@@ -102,6 +104,7 @@ public class PortStream extends Port {
     out.flush();
   }
 
+  @Override
   public void write(byte[] data) throws IOException {
     out.write(data);
     // TODO: should we flush here?

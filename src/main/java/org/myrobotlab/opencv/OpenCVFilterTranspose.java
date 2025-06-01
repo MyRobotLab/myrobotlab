@@ -32,6 +32,7 @@ import static org.bytedeco.opencv.global.opencv_core.cvTranspose;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class OpenCVFilterTranspose extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    dst = IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
+    dst = AbstractIplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
     // dst = IplImage.createCompatible(image);
   }
 

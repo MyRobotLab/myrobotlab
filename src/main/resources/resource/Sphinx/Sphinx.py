@@ -3,8 +3,8 @@ from org.myrobotlab.service import Sphinx
 from org.myrobotlab.service import Runtime
 
 # create ear and mouth
-ear = Runtime.createAndStart("ear","Sphinx")
-mouth = Runtime.createAndStart("mouth","MarySpeech")
+ear = runtime.start("ear","Sphinx")
+mouth = runtime.start("mouth","MarySpeech")
 
 # start listening for the words we are interested in
 ear.addComfirmations("yes","correct","ya")

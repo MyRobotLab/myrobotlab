@@ -1,0 +1,126 @@
+<div class="row">
+    <div class="col-md-3">
+        <!-- desired vs reported -->
+        <table width="100%">
+            <tr>
+                <td colspan="3">
+                    <b>power</b>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    requested<h1>{{(requestedPower/100).toFixed(2)}}</h1>
+                </td>
+                <td>
+                    reported
+                    
+                    <h1>
+                        <font color="grey">{{service.powerInput.toFixed(2)}}</font>
+                    </h1>
+                </td>
+                <td>
+                    output
+                    
+                    <h1>
+                        <font color="grey">{{powerOutput.toFixed(2)}}</font>
+                    </h1>
+                </td>
+            </tr>
+            <br/>
+            <table width="100%">
+                <tr>
+                    <td colspan="5">
+                        <b>mapping</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">input</td>
+                    <td colspan="2">output</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        min<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minIn" title="minimum input"/>
+                    </td>
+                    <td>
+                        max<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxIn" title="maximum input"/>
+                    </td>
+                    <td>
+                        min<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.minOut" title="minimum output"/>
+                    </td>
+                    <td>
+                        max<br/>
+                        <input class="form-control" type="text" width="4" ng-model="service.config.mapper.maxOut" title="maximum output"/>
+                    </td>
+                    <td>
+                        <br/>                        
+                        <button type="button" class="btn btn-default" ng-click='update()'>update</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>invert</b>
+                        &nbsp;<toggle ng-model="service.config.mapper.inverted" class="miniBTN" title="This will invert motor direction" ng-change="msg.setInverted(true)" on="" off="" size="btn-lg"/>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+    </div>
+    <div class="col-md-9">&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <attach options='options'/>
+        <button type="button" class="btn btn-default" ng-click='attach()' ng-show='!service.config.controller'>attach</button>
+        <button type="button" class="btn btn-default" ng-click='detach()' ng-show='service.config.controller'>detach</button>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">left pin {{service.leftPwmPin}}</button>
+            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in pins">
+                    <a href="" ng-click="msg.setLeftPwmPin(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group" uib-dropdown>
+            <button type="button" class="btn btn-default">right pin {{service.rightPwmPin}}</button>
+            <button id="single-button" ng-disabled="service.controller != null" type="button" class="btn btn-default" uib-dropdown-toggle>
+                <span class="caret"></span>
+            </button>
+            <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li ng-repeat="c in pins">
+                    <a href="" ng-click="msg.setRightPwmPin(c)">{{c}}</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-default" ng-click='stop()' ng-show='service.config.controller'>
+            <img src="stop-large.png" width="40"/>
+        </button>
+    </div>
+    <div class="col-md-6">&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <table width="100%">
+            <tr>
+                <td>
+                    <b>power</b>
+                    <input type="range" ng-model="requestedPower" min="-100" max="100" step="1" ng-change="setSpeed()"/>
+                </td>
+                <td>&nbsp;</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-6">&nbsp;</div>
+</div>

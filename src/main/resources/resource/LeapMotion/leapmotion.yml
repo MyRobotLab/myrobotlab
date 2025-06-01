@@ -1,0 +1,54 @@
+!!org.myrobotlab.service.config.LeapMotionConfig
+leftIndex:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftMiddle:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftPinky:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftRing:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+leftThumb:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+listeners: null
+peers: null
+rightIndex:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+rightMiddle:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+rightPinky:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+rightRing:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+rightThumb:
+  maxIn: 180
+  maxOut: 180
+  minIn: 0
+  minOut: 0
+type: LeapMotion

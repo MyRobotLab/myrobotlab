@@ -1,5 +1,5 @@
 # start the service
-twitter = Runtime.start("twitter","Twitter")
+twitter = runtime.start("twitter","Twitter")
 
 # credentials for your twitter account and api key info goes here
 consumerKey = "XXX"

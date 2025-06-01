@@ -1,5 +1,11 @@
 package org.myrobotlab.framework;
 
+import org.apache.commons.lang3.StringUtils;
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.json.JsonDeserializationException;
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,45 +16,39 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
-
-import com.google.gson.internal.LinkedTreeMap;
-
 /**
  * 
- * @author GroG
- * 
+ *
+ *
  *         A method cache whos purpose is to build a cache of methods to be
  *         accessed when needed for invoking. This cache is typically used for
  *         services and populated during Runtime.create({name},{Type}). It's a
  *         static resource and contains a single definition per {Type}.
- * 
+ * <p>
  *         It has a single map of "all" MethodEntries per type, and several
  *         indexes to that map. The other utility indexes are supposed to be
  *         useful and relevant for service specific access of methods.
- * 
+ * <p>
  *         The definition of "declared methods" is slightly different for Mrl
  *         services. "Declared methods" are service methods which are expected
  *         to be commonly used. The difference occurs often with abstract
  *         classes such as AbstractSpeechSynthesis. Polly's
  *         class.getDeclaredMethods() would NOT include all the useful methods
  *         commonly defined in AbstractSpeechSynthesis.
- * 
+ * <p>
  *         FIXME - keys should be explicitly typed full signature with execution
- *         format e.g. method(
- * 
- * 
+ *          format e.g. method(
+ * <p>
+ *
  *         The cache is built when new services are created. Method signatures
  *         are used as keys. The keys are string based. All parameters in key
  *         creation are "boxed", this leads to the ability to write actual
  *         functions with primitives e.g. doIt(int x, float y, ...) and invoking
  *         does not need to fail for it to be called directly.
- * 
+ * <p>
  *         Ancestor classes are all indexed, so there is no "special" handling
  *         to call abstract class methods.
- * 
+ * <p>
  *         Special indexes are created when a new service gets created that are
  *         explicitly applicable for remote procedure calls e.g. methods which
  *         contain interfaces in the parameters are not part of this index, if
@@ -56,16 +56,17 @@ import com.google.gson.internal.LinkedTreeMap;
  *         remotely, you would make it with a String {name} reference as a
  *         parameter.
  *
+ * @author GroG
  */
 public class MethodCache {
 
   // FIXME - mostly interested in
-  // NOT Object
-  // RARELY Service
-  // OFTEN ANYTHING DEFINED LOWER THAN THAT
-  // WHICH MEANS - filter out Object
-  // CREATE a "Service" Index
-  // -> ALL OTHER METHODS ARE OF INTEREST
+  //  NOT Object
+  //  RARELY Service
+  //  OFTEN ANYTHING DEFINED LOWER THAN THAT
+  //  WHICH MEANS - filter out Object
+  //  CREATE a "Service" Index
+  //  -> ALL OTHER METHODS ARE OF INTEREST
   class MethodIndex {
     // index for typeless resolution and invoking
     Map<String, List<MethodEntry>> methodOrdinalIndex = new TreeMap<>();
@@ -77,6 +78,10 @@ public class MethodCache {
     Map<String, List<MethodEntry>> remoteOrdinalIndex = new TreeMap<>();
     // Map<String, List<MethodEntry>> declaredMethodOrdinalIndex = new
     // TreeMap<>();
+
+    // declared methods of both this real concrete service and its parent
+    // ending at Service
+    Set<String> serviceMethodNameSet = new TreeSet<>();
   }
 
   private static MethodCache instance;
@@ -120,18 +125,6 @@ public class MethodCache {
     }
     return instance;
   }
-  /*
-   * public static void main(String[] args) { try {
-   * 
-   * // LoggingFactory.init(Level.INFO);
-   * 
-   * MethodCache cache = MethodCache.getInstance(); //
-   * cache.cacheMethodEntries(Runtime.class);
-   * cache.cacheMethodEntries(Clock.class);
-   * 
-   * 
-   * } catch(Exception e) { log.error("main threw", e); } }
-   */
 
   Set<String> excludeMethods = new TreeSet<>();
 
@@ -140,16 +133,15 @@ public class MethodCache {
   protected MethodCache() {
   }
 
-  public void cacheMethodEntries(Class<?> object) {
-    Set<Class<?>> exclude = new HashSet<>();
-    exclude.add(Service.class);
-    exclude.add(Object.class);
-    cacheMethodEntries(object, exclude);
-  }
+  /*
+   * public void cacheMethodEntries(Class<?> object) { Set<Class<?>> exclude =
+   * new HashSet<>(); exclude.add(Service.class); exclude.add(Object.class);
+   * cacheMethodEntries(object, exclude); }
+   */
 
   // public void cacheMethodEntries(Class<?> object, Class<?> maxSuperType,
   // Set<String> excludeMethods) {
-  public void cacheMethodEntries(Class<?> object, Set<Class<?>> excludeFromDeclared) {
+  public void cacheMethodEntries(Class<?> object) {
 
     if (objectCache.containsKey(object.getTypeName())) {
       log.info("already cached {} methods", object.getSimpleName());
@@ -160,6 +152,7 @@ public class MethodCache {
     MethodIndex mi = new MethodIndex();
     Method[] methods = object.getMethods();
     Method[] declaredMethods = object.getDeclaredMethods();
+
     log.info("caching {}'s {} methods and {} declared methods", object.getSimpleName(), methods.length, declaredMethods.length);
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
@@ -194,6 +187,11 @@ public class MethodCache {
       if (!hasInterfaceInParamList) {
         addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
       }
+
+      if (!me.objectName.equals("org.myrobotlab.framework.Service") && !me.objectName.equals("java.lang.Object")) {
+        mi.serviceMethodNameSet.add(me.getName());
+      }
+
       log.debug("processed {}", me);
     }
 
@@ -255,6 +253,22 @@ public class MethodCache {
     return size;
   }
 
+  public Set<String> getCachedObjectNames() {
+    return objectCache.keySet();
+  }
+
+  public Method getDefaultInvokeMethod(String fullType) {
+    try {
+      // last ditch effort - try default msg handler method
+      Class<?> c = Class.forName(fullType);
+      Method m = c.getMethod("defaultInvokeMethod", String.class, Object[].class);
+      return m;
+    } catch (Exception e) {
+      // no default
+    }
+    return null;
+  }
+
   public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) throws ClassNotFoundException {
     String[] paramTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
@@ -278,6 +292,7 @@ public class MethodCache {
    *          - actual parameter
    * @return - the method to invoke
    * @throws ClassNotFoundException
+   *           if the class isn't found
    */
   public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
     Class<?>[] paramTypes = getParamTypes(params);
@@ -301,16 +316,31 @@ public class MethodCache {
     return paramTypes;
   }
 
+  public Set<String> getMethodNames(String className) {
+    MethodIndex mi = objectCache.get(className);
+
+    // MethodIndex has a superset of keys grouped by class
+    // class hierarchy can be derived several times under service
+    // default we want declared methods
+
+    return mi.serviceMethodNameSet;
+  }
+
   /**
    * A full string interface to get a method - although this is potentially a
    * easy method to use, the most common use case would be used by the framework
    * which will automatically supply fully qualified type names.
    * 
    * @param fullType
+   *          full type
    * @param methodName
+   *          method to lookup
    * @param paramTypeNames
-   * @return
+   *          names of params
+   * @return the looked up method
    * @throws ClassNotFoundException
+   *           if the fullType class isn't found.
+   * 
    */
   public Method getMethod(String fullType, String methodName, String[] paramTypeNames) throws ClassNotFoundException {
 
@@ -334,9 +364,15 @@ public class MethodCache {
       String ordinalKey = getMethodOrdinalKey(fullType, methodName, paramTypeNames.length);
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
       if (possibleMatches == null) {
-        // log.error("there were no possible matches for ordinal key {} - does
-        // the method exist?", ordinalKey);
-        // log.error("{}.{}.{}", fullType, methodName, paramTypeNames);
+
+        log.error("Method Cache look up Failed! {}.{}({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
+
+        // if a service provides a methodCacheDefaultMethod - it means whenever
+        // no match is found
+        // call "this" method, similar to preProcessHook which intercepts msgs
+        // when they come off a msg queue
+        // but before invoke is called
+
         return null;
       }
       if (possibleMatches.size() == 1) {
@@ -416,8 +452,6 @@ public class MethodCache {
     MethodCache cache = MethodCache.getInstance();
     Method method = cache.getMethod(obj.getClass(), methodName, params);
     retobj = method.invoke(obj, params);
-    out(methodName, retobj); // <-- FIXME clean this up !!!
-
     return retobj;
   }
 
@@ -466,22 +500,10 @@ public class MethodCache {
     return key;
   }
 
-  public void out(String method, Object o) {
-    /*
-     * Message m = Message.createMessage(this, null, method, o); // create a //
-     * un-named // message // as output
-     * 
-     * if (m.sender.length() == 0) { m.sender = this.getName(); } if
-     * (m.sendingMethod.length() == 0) { m.sendingMethod = method; } if (outbox
-     * == null) {
-     * log.info("******************OUTBOX IS NULL*************************");
-     * return; } outbox.add(m);
-     */
-  }
-
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
       log.error("getOrdinalMethods on a null object ");
+      return null;
     }
     String objectKey = object.getTypeName();
 
@@ -510,43 +532,63 @@ public class MethodCache {
     return methodIndex.remoteOrdinalIndex.get(ordinalKey);
   }
 
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+  /**
+   * Decode parameters from a String Json format into the format
+   * specified by the declared method parameter type.
+   *
+   * <p>
+   *     If clazz, methodName, or encodedParameters are null, then null is returned.
+   * </p>
+   *
+   * <p>
+   *     FIXME Change encodedParameters to String[] to enforce type safety
+   * </p>
+   *
+   * @param clazz The class to lookup methods for
+   * @param methodName The name of the method to decode parameters for
+   * @param encodedParams The encoded parameters in JSON format.
+   * @return The decoded parameters according to a matched method, or null
+   *  if no such method could be found.
+   */
+  public /*@Nullable*/ Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
 
     if (clazz == null) {
       log.error("cannot query method cache for null class");
+
+      // Null was already returned for this case in the following
+      // conditional but relied on getRemoteOrdinalMethods() returning
+      // null for a null class, best to make this explicit
+      return null;
     }
     // get templates
     // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName,
     // encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
     if (possible == null) {
-      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz.getSimpleName(), methodName, encodedParams.length);
+      log.error("getRemoteOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz, methodName, encodedParams);
       return null;
     }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
-    for (int p = 0; p < possible.size(); ++p) {
-      Class<?>[] paramTypes = possible.get(p).getParameterTypes();
+    for (MethodEntry methodEntry : possible) {
+      Class<?>[] paramTypes = methodEntry.getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          if (encodedParams[i].getClass() == LinkedTreeMap.class) {
-            // specific gson implementation
-            // rather than double encode everything - i have chosen
-            // to re-encode objects back to string since gson will decode them
-            // all ot linked tree maps - if the json decoder changes from gson
-            // this will probably need to change too
-            encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
-          }
-          params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
+//          try {
+            params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
+//          } catch(JsonDeserializationException e) {
+//            log.info("could not decode threw {}.{}( ordinal[{}] {} {})- assuming String - missing quotes?", clazz.getSimpleName(), methodName, i, paramTypes[i].getSimpleName(), encodedParams[i]);
+//            // load raw string on
+//            params[i] = encodedParams[i];
+//          }
         }
         // successfully decoded params
         return params;
       } catch (Exception e) {
-
-        log.info("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e.getMessage());
+        log.info("getDecodedParameters threw clazz {} method {} params {} Message: {}", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }
     // if successful return new msg
@@ -567,13 +609,25 @@ public class MethodCache {
     return sb.toString();
   }
 
-  public List<MethodEntry> query(String fullClassName, String methodName) {
-    MethodIndex methodIndex = objectCache.get(fullClassName);
-    String keyPart = String.format("%s.%s(", fullClassName, methodName);
+  public List<MethodEntry> query(String className, String methodName) {
+
+    if (!className.contains(".")) {
+      className = "org.myrobotlab.service." + className;
+    }
+
+    MethodIndex methodIndex = objectCache.get(className);
+    String keyPart = String.format("%s.%s(", className, methodName);
     List<MethodEntry> ret = new ArrayList<>();
+
+    Set<String> filter = new HashSet<String>();
+
+    // This method is for the UI or specifically for the GSON/JSON interface
+    // Its to get a list of potential methods to be used by the UI
     for (String key : methodIndex.methodsIndex.keySet()) {
       if (key.startsWith(keyPart)) {
-        ret.add(methodIndex.methodsIndex.get(key));
+        // log.info("[{}]", key);
+        MethodEntry me = methodIndex.methodsIndex.get(key);
+        ret.add(me);
       }
     }
     return ret;

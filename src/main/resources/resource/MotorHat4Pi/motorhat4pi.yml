@@ -1,0 +1,15 @@
+!!org.myrobotlab.service.config.MotorHat4PiConfig
+axis: null
+controller: null
+listeners: null
+locked: false
+mapper:
+  clip: true
+  inverted: false
+  maxIn: 100.0
+  maxOut: 100.0
+  minIn: -100.0
+  minOut: -100.0
+motorId: null
+peers: null
+type: MotorHat4Pi

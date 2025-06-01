@@ -6,6 +6,6 @@ public interface StatePublisher {
 
   public Service publishState();
 
-  public void broadcastState();
+  public Service broadcastState();
 
 }

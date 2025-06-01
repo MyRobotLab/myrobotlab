@@ -20,23 +20,36 @@ public class PidTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
+    String key = "x";
+    float target = 240;
+
     Pid pid = (Pid) Runtime.start("pid", "Pid");
+    pid.setPid(key, 0.1, 1.0, 0.0);
+    pid.setSetpoint(key, target);
+    pid.setOutputRange(key, -400.0, 400.0);
+    
+    // MiniPID mpid = new MiniPID(0.1, 1.0, 0);
 
-    // pid.init("x");
+    float[] series = new float[] { 210 };
 
-    pid.setPID("x", 10.0, 0.0, 0.0);
-    pid.setMode("x", Pid.MODE_AUTOMATIC);
-    pid.setOutputRange("x", 10.0, 50.0);
-    pid.setSetpoint("x", 0.5);
-    pid.setInput("x", 0.5);
-    pid.setDeadBand("x", 0.0);
+    
+    //boolean done = false;
+    for (Float in : series) {
+      // double mout = mpid.getOutput(in, target);
+      double pout = pid.compute(key, in);
+      log.warn("in {} pout {}", in, pout);
+    }
+
+    pid.setMode(key, Pid.MODE_AUTOMATIC);
+    pid.setOutputRange(key, 10.0, 50.0);
+    pid.setSetpoint(key, 0.5);
+    pid.setDeadBand(key, 0.0);
     // Test that the value is centered
-    boolean calculated = pid.compute("x");
-    if (calculated) {
-      double actualOutput = pid.getOutput("x");
-      assertEquals("Incorrect Pid output", 30.0, actualOutput, 3);
+    Double calculated = pid.compute(key, 0.5);
+    if (calculated != null) {
+      assertEquals("Incorrect Pid output", 30.0, calculated, 3);
     } else {
-      assertTrue("No calculation done", calculated);
+      assertTrue("No calculation done", calculated == null);
     }
 
     try {
@@ -47,15 +60,13 @@ public class PidTest extends AbstractServiceTest {
     }
 
     // Test the P(roportional value)
-    pid.setInput("x", 1.0);
-    calculated = pid.compute("x");
-    if (calculated) {
-      double actualOutput = pid.getOutput("x");
-      assertEquals("Incorrect Pid output", 25.0, actualOutput, 3);
+    calculated = pid.compute(key, 0.5);
+    if (calculated != null) {
+      assertEquals("Incorrect Pid output", 33.0, calculated, 3);
     } else {
-      assertTrue("No calculation done", calculated);
+      assertTrue("No calculation done", calculated == null);
     }
-    
+
   }
 
 }

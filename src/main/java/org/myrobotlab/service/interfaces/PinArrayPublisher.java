@@ -10,7 +10,7 @@ import org.myrobotlab.service.data.PinData;
  */
 public interface PinArrayPublisher extends NameProvider {
 
-  public void attach(PinArrayListener listener);
+  public void attachPinArrayListener(PinArrayListener listener);
 
   public PinData[] publishPinArray(PinData[] pinData);
 

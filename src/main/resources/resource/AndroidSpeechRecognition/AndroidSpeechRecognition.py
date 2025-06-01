@@ -4,10 +4,10 @@
 #########################################
 
 # start the service
-androidspeechrecognition = Runtime.start("androidspeechrecognition","AndroidSpeechRecognition")
+androidspeechrecognition = runtime.start("androidspeechrecognition","AndroidSpeechRecognition")
 
 # start mouth
-marySpeech = Runtime.start("marySpeech", "MarySpeech")
+marySpeech = runtime.start("marySpeech", "MarySpeech")
 
 # shutdown microphone if robot speaking
 androidspeechrecognition.attach(marySpeech)

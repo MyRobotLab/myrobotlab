@@ -1,0 +1,70 @@
+<br/>
+<h3>Cron Tab</h3>
+<i>
+    <a href="https://crontab.guru/">cron help</a>
+</i>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <tr>
+                <th></th>
+                <th>id</th>
+                <th>cron</th>
+                <th>service</th>
+                <th>method</th>
+                <th>parameters</th>
+            </tr>
+            <tr ng-repeat="(key, value) in service.tasks">
+                <td>
+                    <span ng-click="removeTask(value.id)" class="glyphicon glyphicon-remove red"></span>
+                </td>
+                <td>{{ value.id }}</td>
+                <td>{{ value.cronPattern }}</td>
+                <td>{{ value.name }}</td>
+                <td>{{ value.method }}</td>
+                <td>{{ value.data }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <input class="form-control" type="text" ng-model="newTask.id" placeholder="id"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="newTask.cronPattern" placeholder="cron pattern" style="width:200px"//>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="newTask.name" placeholder="name"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="newTask.method" placeholder="method">
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="parameters" placeholder="parameters"/>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button class="btn btn-primary" ng-click="addNamedTask();">add task</button>
+                </td>
+            </tr>
+            <tr><td>History</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            
+            </tr>
+            <tr ng-repeat="history in service.history | orderBy: '-processedTime'">
+                <td></td>
+                <td>{{history.id}}</td>
+                <td colspan="4">{{ history.processedTime | epochToLocalDate }}</td>
+            </tr>
+        </table>
+    </div>
+</div>

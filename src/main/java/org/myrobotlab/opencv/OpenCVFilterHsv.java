@@ -40,6 +40,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
@@ -75,7 +76,7 @@ public class OpenCVFilterHsv extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    hsv = IplImage.createCompatible(image);
+    hsv = AbstractIplImage.createCompatible(image);
   }
 
   @Override
@@ -85,6 +86,7 @@ public class OpenCVFilterHsv extends OpenCVFilter {
 
   }
 
+  @Override
   public void samplePoint(Integer inX, Integer inY) {
     ++clickCounter;
     x = inX;

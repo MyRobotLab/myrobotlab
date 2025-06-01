@@ -31,6 +31,7 @@ import static org.bytedeco.opencv.global.opencv_video.createBackgroundSubtractor
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_video.BackgroundSubtractor;
@@ -69,7 +70,7 @@ public class OpenCVFilterDetector extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    foreground = IplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
+    foreground = AbstractIplImage.create(image.width(), image.height(), IPL_DEPTH_8U, 1);
     mog = createBackgroundSubtractorMOG2();
 
   }

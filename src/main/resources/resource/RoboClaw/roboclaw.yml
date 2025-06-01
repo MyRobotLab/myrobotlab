@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.RoboClawConfig
+listeners: null
+peers:
+  serial:
+    autoStart: true
+    name: roboclaw.serial
+    type: Serial
+type: RoboClaw

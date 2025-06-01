@@ -4,6 +4,7 @@ package org.myrobotlab.arduino;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import org.myrobotlab.service.Serial;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -81,7 +82,7 @@ public class %javaClass% {
   private int method = -1;
   public boolean debug = false;
   // when using a real service, invoke should be true, for unit tests, this should be false.
-  private boolean invoke = true;
+  private boolean invoke = %invokeIfService%;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
@@ -233,7 +234,9 @@ public class %javaClass% {
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            if (!arduino.isConnecting()){
+              log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            }
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -266,7 +269,10 @@ public class %javaClass% {
           } 
           
           if (!clearToSend) {
-            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            if (!arduino.isConnecting()) {
+              // we're connecting, so we're going to ignore the message.
+              log.warn("NOT CLEAR TO SEND! resetting parser!");
+            }
             // We opened the port, and we got some data that isn't a Begin message.
             // so, I think we need to reset the parser and continue processing bytes...
             // there will be errors until the next magic byte is seen.
@@ -401,6 +407,12 @@ public class %javaClass% {
   
   synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
+
+    if (message.length > MAX_MSG_SIZE) {
+      log.error("**** message size {} > MAX_MSG_SIZE {} - not sending ****", MAX_MSG_SIZE, message.length);
+      return message;
+    }
+
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M
       waitForAck();
@@ -475,7 +487,7 @@ public class %javaClass% {
   }
   
   public void waitForAck(){
-    if (!ackEnabled) {
+    if (!ackEnabled || serial == null || !serial.isConnected()) {
       return;
     }
     // if there's a pending message, we need to wait for the ack to be received.
@@ -613,6 +625,10 @@ public class %javaClass% {
   
   public void setInvoke(boolean b){	
     invoke = b;	
+  }
+
+  public void setSerial(Serial serial) {
+    this.serial = serial;
   }
 
 }

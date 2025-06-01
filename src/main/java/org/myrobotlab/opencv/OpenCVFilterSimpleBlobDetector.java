@@ -65,8 +65,18 @@ public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
+    
+    // Set up parameters for SimpleBlobDetector
+    SimpleBlobDetector.Params params = new SimpleBlobDetector.Params();
+    
+    // Filter by Area
+//    params.filterByArea(true);
+//    params.minArea(100);
+//    params.maxArea(2000);
+    
+    
     // TODO: track an array of blobs , not just one.
-    SimpleBlobDetector o = new SimpleBlobDetector();
+    SimpleBlobDetector o = new SimpleBlobDetector(params);
 
     // KeyPoint point = new KeyPoint();
     KeyPointVector pv = new KeyPointVector();

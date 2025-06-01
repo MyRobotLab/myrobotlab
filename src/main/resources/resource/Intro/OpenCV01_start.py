@@ -5,4 +5,4 @@
 #########################################
 # uncomment for virtual hardware
 # Platform.setVirtual(True)
-opencv = Runtime.start('opencv', 'OpenCV')
+opencv = runtime.start('opencv', 'OpenCV')

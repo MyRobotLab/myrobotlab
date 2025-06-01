@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', function($compile, $templateCache, mrl) {
+angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function(peer, $compile, $templateCache, mrl, modalService, $state, $stateParams) {
     return {
         scope: {
             panel: '='
@@ -6,25 +6,24 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
         // controller: 'serviceCtrl',
         link: function(scope, elem, attr) {
 
-            console.log('serviceBodyDirective - link')
-            /*
-            elem.css({
-                'overflow-x': 'auto',
-                'overflow-y': 'auto'
-            })
-            */
+            console.info('serviceBodyDirective - link')
+
+            if (!scope.panel) {
+                // Intro is trying to access panels probably in ng-show="false" state
+                // but it will still explode since they are just being registered
+                console.info('service directive panel is null')
+                return
+            }
 
             scope.panel.notifySizeYChanged = function(height) {
                 elem.css({
                     height: height + 'px'
                 })
             }
-            
 
             scope.panel.getCurrentHeight = function() {
                 return elem.height()
             }
-            
 
             var isUndefinedOrNull = function(val) {
                 return angular.isUndefined(val) || val === null
@@ -35,8 +34,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
             }, function() {
                 if (!isUndefinedOrNull(scope.panel.scope)) {
                     watch()
-                    console.info('================ got scope! using it', scope.panel.name)
+                    console.info('=== creating new scope for service ', scope.panel.name)
                     var newscope = scope.panel.scope
+                    newscope.parentPanel = scope.panel
+
                     newscope.updateServiceData = function() {
                         //get an updated / fresh servicedata & convert it to json
                         var servicedata = mrl.getService(scope.panel.name)
@@ -46,12 +47,40 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     newscope.toggleVirtual = function(virtual) {
                         var service = mrl.getService(scope.panel.name)
                         //service.isVirtual = !service.isVirtual
-                        mrl.sendTo(scope.panel.name, 'setVirtual', virtual)
+                        mrl.sendTo(scope.panel.name, 'setVirtual', !service.isVirtual)
                     }
 
-                    newscope.export = function() {
-                        mrl.sendTo(scope.panel.name, 'exportAll')
+                    newscope.showPeers = function(show) {
+                        scope.panel.showPeerTable = show
                     }
+
+                    newscope.saveDefault = function() {
+                        mrl.sendTo('runtime', 'saveDefault', scope.panel.displayName, scope.panel.simpleName)
+                    }
+
+                    newscope.release = function(peerKey) {
+                        mrl.sendTo('runtime', 'release', scope.panel.name)
+                    }
+
+                    newscope.startPeer = function(peerKey) {
+                        mrl.sendTo(scope.panel.name, 'startPeer', peerKey)
+                    }
+
+                    newscope.releasePeer = function(peerKey) {
+                        mrl.sendTo(scope.panel.name, 'releasePeer', peerKey)
+                    }
+
+                    newscope.save = function() {
+                        mrl.sendTo('runtime', 'save', scope.panel.displayName)
+                    }
+
+                    newscope.apply = function() {
+                        mrl.sendTo(scope.panel.displayName, 'apply')
+                        mrl.sendTo(scope.panel.displayName, 'broadcastState')
+                    }
+                        
+                    // making peer service/singleton available in drop down scope
+                    newscope.peer = peer
 
                     var header = $templateCache.get('service/tab-header.html')
                     var content = $templateCache.get(scope.panel.simpleName + 'Gui.html')
@@ -61,6 +90,20 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     // when the html was in a hidden state but all the properties where ng-repeated as part of the dom
                     // newscope.properties = mrl.getProperties(newscope.service)
                     $compile(elem.contents())(newscope)
+
+                    // default the id if one was not supplied
+                    let tab = null
+                    if ($stateParams.servicename && $stateParams.servicename.includes('@')) {
+                        tab = $stateParams.servicename
+                    } else {
+                        tab = $stateParams.servicename + '@' + mrl.getRemoteId()
+                    }
+
+                    // if we have an exact match swith to that tab
+                    if (newscope.name == tab) {
+                        // exact match with url e.g. /python@blah
+                        mrl.changeTab(tab)
+                    }
                 }
             })
         }

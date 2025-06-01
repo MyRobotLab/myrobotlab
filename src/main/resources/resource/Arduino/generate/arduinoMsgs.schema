@@ -71,9 +71,14 @@
 < publishI2cData/deviceId/[] data
 
 # NeoPixel
-> neoPixelAttach/deviceId/pin/b32 numPixels/depth
-> neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
+> neoPixelAttach/deviceId/pin/b16 numPixels/depth
+> neoPixelSetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+# write matrix is incorrect in that the address is a single byte
+# neopixels can have more than 256 pixels
 > neoPixelWriteMatrix/deviceId/[] buffer
+> neoPixelFill/deviceId/b16 address/b16 count/red/green/blue/white
+> neoPixelSetBrightness/deviceId/brightness
+> neoPixelClear/deviceId
 
 # Arduino Pins
 > analogWrite/pin/value
@@ -149,3 +154,5 @@
 # adding to the end for less compatibility impact
 # a method to stop a servo immediately - regardless of sweeping or speed control
 > servoStop/deviceId
+
+

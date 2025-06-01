@@ -1,0 +1,59 @@
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <tr>
+                <td>
+                    <attach options='servoOptions'/>
+                </td>
+                <td>
+                    <attach options='speechOptions'/>
+                </td>
+                <td>
+                    <attach options='neoPixelOptions'/>
+                </td>
+            </tr>
+            <tr>
+                <td>mouth closed position </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" ng-model="service.mouthClosedPos"/>
+                </td>
+            </tr>
+            <tr>
+                <td>mouth opened position </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" ng-model="service.mouthOpenedPos"/>
+                </td>
+            </tr>
+            <tr>
+                <td>delay time </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" ng-model="service.delaytime"/>
+                </td>
+            </tr>
+            <tr>
+                <td>delay time stop </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" ng-model="service.delaytimestop"/>
+                </td>
+            </tr>
+            <tr>
+                <td>delay time letter </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="text" class="form-control" ng-readonly="service.controller" ng-model="service.delaytimeletter"/>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>&nbsp;</td>
+                <td>
+                    <button type="button" class="btn btn-default" ng-click='update();' tooltip="send log file" tooltip-placement="bottom">update</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

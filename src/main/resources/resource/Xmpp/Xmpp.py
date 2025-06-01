@@ -2,7 +2,7 @@
 # using a robot with the Xmpp service 
 
 # create an xmpp service
-xmpp = Runtime.createAndStart("xmpp","Xmpp")
+xmpp = runtime.start("xmpp","Xmpp")
 
 # adds the python service as a listener for messages
 xmpp.addListener("python","publishMessage")

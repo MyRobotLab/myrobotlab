@@ -7,12 +7,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.FileConnectorConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
 import org.slf4j.Logger;
 
@@ -20,10 +23,11 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   public final static Logger log = LoggerFactory.getLogger(FileConnector.class.getCanonicalName());
   private static final long serialVersionUID = 1L;
-  private String directory;
+  // private String directory;
+  private FileConnectorConfig config = new FileConnectorConfig();
   // TODO: add wildcard includes/excludes
   // TODO: add file path includes/excludes
-  private boolean interrupted = false;
+  private volatile boolean interrupted = false;
 
   public FileConnector(String name, String id) {
     super(name, id);
@@ -38,22 +42,28 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   @Override
   public void startCrawling() {
     state = ConnectorState.RUNNING;
-    Path startPath = Paths.get(directory);
+    Path startPath = Paths.get(((FileConnectorConfig)config).directory);
+    log.info("Started Crawling {}", startPath);
     try {
       Files.walkFileTree(startPath, this);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    // we're done.. publish a flush so other down stream components know to flush any partial batches they might have.
+    invoke("publishFlush");
     log.info("File Connector finished walking the tree.");
+    
     // TODO: should we flush here immediately?
     state = ConnectorState.STOPPED;
   }
 
   @Override
   public void stopCrawling() {
+    log.info("Stop crawling requested...");    
     interrupted = true;
     state = ConnectorState.INTERRUPTED;
+//    notify();
   }
 
   @Override
@@ -69,10 +79,11 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
     }
     String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
     Document doc = new Document(docId);
-    doc.setField("last_modified", attrs.lastModifiedTime());
-    doc.setField("created_date", attrs.creationTime());
-    doc.setField("filename", file.toFile().getAbsolutePath());
+    doc.setField("last_modified", new Date(attrs.lastModifiedTime().toMillis()));
+    doc.setField("created_date", new Date(attrs.creationTime().toMillis()));
+    doc.setField("filepath", file.toFile().getAbsolutePath());
     doc.setField("size", attrs.size());
+    doc.setField("type", "file");
     // TODO: potentially add a byte array of the file
     // or maybe an input stream or other handle to the file.
     feed(doc);
@@ -81,7 +92,20 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
 
   @Override
   public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-    throw exc;
+    if (interrupted) {
+      state = ConnectorState.INTERRUPTED;
+      return FileVisitResult.TERMINATE;
+    }
+    String docId = getDocIdPrefix() + file.toFile().getAbsolutePath();
+    Document doc = new Document(docId);
+    doc.setField("type", "file");
+    // TODO: how does this serialize?
+    doc.setField("error", exc);
+    // doc.setField("timestamp", new Date());
+    feed(doc);
+    log.warn("Exception processing {}", file, exc);
+    // Keep going!!!
+    return FileVisitResult.CONTINUE;
   }
 
   @Override
@@ -90,15 +114,30 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
       throw exc;
     }
     return FileVisitResult.CONTINUE;
-
   }
 
   public String getDirectory() {
-    return directory;
+    return config.directory;
   }
 
   public void setDirectory(String directory) {
-    this.directory = directory;
+    config.directory = directory;
   }
 
+  @Override
+  public ServiceConfig apply(ServiceConfig c) {
+    super.apply(c);
+    // anything else?
+    return c;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    // return the config
+    // we need the super stuff here.
+    FileConnectorConfig config = (FileConnectorConfig)super.getConfig();
+    // this is goofy..
+    config.directory = this.config.directory;
+    return config;
+  }
 }

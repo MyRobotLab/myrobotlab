@@ -13,9 +13,9 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
+import org.myrobotlab.config.ConfigUtils;
 // Do not pull in deps to this class !
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -65,13 +65,7 @@ public class Platform implements Serializable {
   String vmName;
   String vmVersion;
   String mrlVersion;
-  boolean isVirtual = false;
 
-  /**
-   * Static identifier to identify the "instance" of myrobotlab - similar to
-   * network ip of a device and used in a similar way
-   */
-  String id;
   String branch;
 
   String pid;
@@ -96,7 +90,7 @@ public class Platform implements Serializable {
    * All data should be accessed through public functions on the local instance.
    * If the local instance is desired. If its from a serialized instance, the
    * "getters" will be retrieving appropriate info for that serialized instance.
-   * 
+   *  
    * @return - return the local instance of the current platform
    */
   public static Platform getLocalInstance() {
@@ -122,9 +116,12 @@ public class Platform implements Serializable {
 
       // === ARCH ===
       String arch = System.getProperty("os.arch").toLowerCase();
-      if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
+      if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch)
+          || "amd64".equals(arch) || arch.startsWith("x86")) {
         platform.arch = "x86"; // don't care at the moment
       }
+
+      platform.osBitness = ("amd64".equals(arch)) ? 64 : 32;
 
       if ("arm".equals(arch)) {
 
@@ -151,13 +148,15 @@ public class Platform implements Serializable {
       }
 
       // === BITNESS ===
+
       if (platform.isWindows()) {
         // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
         // this will attempt to guess the bitness of the underlying OS, Java
         // tries very hard to hide this from running programs
         String procArch = System.getenv("PROCESSOR_ARCHITECTURE");
         String procArchWow64 = System.getenv("PROCESSOR_ARCHITEW6432");
-        platform.osBitness = (procArch != null && procArch.endsWith("64") || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
+        platform.osBitness = (procArch != null && procArch.endsWith("64")
+            || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
         switch (arch) {
           case "x86":
           case "i386":
@@ -208,20 +207,6 @@ public class Platform implements Serializable {
         platform.commit = (gitProp != null) ? gitProp : platform.commit;
         if (platform.commit != null) {
           platform.shortCommit = platform.commit.substring(0, 7);
-        }
-
-        gitProp = gitProps.getProperty("git.build.time");
-        // 2020-08-23T18:36:27-0700
-        if (gitProp != null) {
-          try {
-            // String isoDatePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-            String pattern = "yyyy-MM-dd'T'HH:mm:ssZ";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            Date d = simpleDateFormat.parse(gitProp);
-            platform.mrlVersion = Platform.VERSION_PREFIX + d.getTime() / 1000;
-          } catch (Exception e) {
-            log.error("parsing date threw", e);
-          }
         }
       }
 
@@ -302,14 +287,25 @@ public class Platform implements Serializable {
   public Platform() {
   }
 
+  /**
+   * @return The process id of the currently running Java process
+   * 
+   */
   public String getPid() {
     return pid;
   }
 
+  /**
+   * @return The message of the day. "resistance is futile, we have cookies and
+   *         robots ..."
+   */
   public String getMotd() {
     return motd;
   }
 
+  /**
+   * @return The branch this software was built from.
+   */
   public String getBranch() {
     return branch;
   }
@@ -318,34 +314,65 @@ public class Platform implements Serializable {
     return build;
   }
 
+  /**
+   * @return This is the full commit of the source.
+   */
   public String getCommit() {
     return commit;
   }
+
+  /**
+   * @return CPU Architecture x86, armv6, armv7, armv8
+   */
 
   public String getArch() {
     return arch;
   }
 
+  /**
+   * @return Os bitness - should be 64 or 32
+   */
   public int getOsBitness() {
     return osBitness;
   }
 
+  /**
+   * @return Java virtual machine bitness either 64 or 32 bit
+   * 
+   */
   public int getJvmBitness() {
     return jvmBitness;
   }
 
+  /**
+   * @return Operating system type linux, windows, mac
+   * 
+   */
   public String getOS() {
     return os;
   }
 
+  /**
+   * @return arc bitness and os together x86.64.linux, armv7.32.linux,
+   *         x86.32.windows etc..
+   * 
+   */
   public String getPlatformId() {
     return String.format("%s.%s.%s", getArch(), getJvmBitness(), getOS());
   }
 
+  /**
+   * @return version or myrobotlab
+   * 
+   */
   public String getVersion() {
     return mrlVersion;
   }
 
+  /**
+   * @return Name of the Jvm Hotspot or OpenJDK typically
+   *
+   */
   public String getVMName() {
     return vmName;
   }
@@ -393,7 +420,8 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");//
+        // Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
         in = new FileInputStream("target/classes/git.properties");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
@@ -429,34 +457,19 @@ public class Platform implements Serializable {
     return String.format("%s.%d.%s", arch, jvmBitness, os);
   }
 
-  public String getId() {
-    // null ids are not allowed
-    if (id == null) {
-      id = NameGenerator.getName();
-    }
-    return id;
-  }
-
+  /**
+   * @return The Computer's hostname
+   */
   public String getHostname() {
     return hostname;
   }
 
-  public void setId(String newId) {
-    id = newId;
-  }
-
+  /**
+   * @return the time when this instance was started
+   * 
+   */
   public Date getStartTime() {
     return startTime;
-  }
-
-  public static boolean isVirtual() {
-    Platform p = getLocalInstance();
-    return p.isVirtual;
-  }
-
-  public static void setVirtual(boolean b) {
-    Platform p = getLocalInstance();
-    p.isVirtual = b;
   }
 
   public static void main(String[] args) {
@@ -474,8 +487,7 @@ public class Platform implements Serializable {
     }
   }
 
-  public boolean getVmVersion() {
-    // TODO Auto-generated method stub
-    return false;
+  public String getVmVersion() {
+    return vmVersion;
   }
 }

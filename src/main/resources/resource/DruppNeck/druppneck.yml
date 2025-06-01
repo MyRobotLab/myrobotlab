@@ -1,0 +1,16 @@
+!!org.myrobotlab.service.config.DruppNeckConfig
+listeners: null
+peers:
+  down:
+    autoStart: true
+    name: druppneck.down
+    type: Servo
+  middle:
+    autoStart: true
+    name: druppneck.middle
+    type: Servo
+  up:
+    autoStart: true
+    name: druppneck.up
+    type: Servo
+type: DruppNeck

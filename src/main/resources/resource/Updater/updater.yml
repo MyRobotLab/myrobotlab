@@ -1,0 +1,12 @@
+!!org.myrobotlab.service.config.UpdaterConfig
+listeners: null
+peers:
+  builder:
+    autoStart: true
+    name: updater.builder
+    type: Maven
+  git:
+    autoStart: true
+    name: updater.git
+    type: Git
+type: Updater

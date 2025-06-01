@@ -1,0 +1,2 @@
+- must make a $scope var onChange llm config "Must save to persist changes"
+- https://platform.openai.com/docs/guides/text-to-speech?lang=curl

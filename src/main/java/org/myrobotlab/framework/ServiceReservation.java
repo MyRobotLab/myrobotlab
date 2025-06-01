@@ -20,68 +20,30 @@ public class ServiceReservation implements Serializable {
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceReservation.class);
 
-  public String key;
-  public String actualName;
+  // public String key;
   public String type;
-  public String comment;
-  public Boolean autoStart;
+  // public String comment;
+
   /**
    * service life-cycle state inactive | created | registered | running |
    * stopped | released a challenge will be keeping it sync'd with actual
    * service state :P
    */
-  public String state = "inactive";
+  transient public String state = "INACTIVE";
 
-  /**
-   * key type and comment are all that is needed to define a peer
-   * 
-   * @param key
-   * @param typeName
-   * @param comment
-   */
-  public ServiceReservation(String key, String typeName, String comment) {
-    this(key, null, typeName, comment, null);
-  }
-
-  /**
-   * when actual name is specified whatever key is then mapped to the actual
-   * name
-   * 
-   * @param key
-   * @param actualName
-   * @param typeName
-   * @param comment
-   */
-  public ServiceReservation(String key, String actualName, String typeName, String comment) {
-    this(key, actualName, typeName, comment, null);
-  }
-
-  public ServiceReservation(String key, String actualName, String typeName, String comment, Boolean autoStart) {
-    if (key == null) {
-      log.error("key cannot be null");
-    }
-
-    if (typeName == null) {
-      log.error("typeName cannot be null");
-    }
-
-    this.key = key;
-    this.actualName = actualName;
-    this.type = typeName;
-    this.comment = comment;
-    this.autoStart = (autoStart == null) ? true : autoStart;
-  }
+//  public ServiceReservation(String typeName) {
+//
+//    if (typeName == null) {
+//      log.error("typeName cannot be null");
+//    }
+//
+//    this.type = typeName;
+//  }
 
   @Override
   public String toString() {
 
     StringBuffer sb = new StringBuffer();
-    // sb.append(key).append("=");
-    if (actualName != null) {
-      sb.append("[");
-      sb.append(actualName);
-      sb.append("] ");
-    }
     sb.append(type);
 
     return sb.toString();

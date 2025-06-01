@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-testcatcher = Runtime.start('testcatcher','TestCatcher')
+testcatcher = runtime.start('testcatcher','TestCatcher')

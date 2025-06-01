@@ -5,9 +5,10 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.GoProConfig;
 import org.slf4j.Logger;
 
-public class GoPro extends Service {
+public class GoPro extends Service<GoProConfig> {
 
   transient public HttpClient http;
 
@@ -21,9 +22,9 @@ public class GoPro extends Service {
 
   public GoPro(String n, String id) {
     super(n, id);
-    http = (HttpClient) createPeer("http");
   }
 
+  @Override
   public void startService() {
     super.startService();
     http = (HttpClient) startPeer("http");

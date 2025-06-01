@@ -1,0 +1,127 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: "11"
+          distribution: "adopt"
+          cache: "maven"
+
+      - name: Install Missing Dependencies
+        run: sudo apt-get install -y libv4l-0 ffmpeg
+
+      - name: Clear Local Maven Cache
+        run: rm -rf ~/.m2/repository && rm -f ./libraries/serviceData.json
+
+      - name: Dependency Test
+        run: mvn test -Dtest=org.myrobotlab.framework.DependencyTest -q
+
+      - name: Get next version
+        id: version
+        uses: reecetech/version-increment@2023.9.3
+        with:
+          scheme: semver
+          increment: patch
+
+      - name: Package with Maven
+        run: mvn clean package -q -DskipTests -Dversion=${{ steps.version.outputs.version }} -q
+
+      - name: Rename Artifact
+        run: mv target/myrobotlab.zip target/myrobotlab-${{ steps.version.outputs.version }}.zip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Upload Artifact to S3
+        run: |
+          FILE="target/myrobotlab-${{ steps.version.outputs.version }}.zip"
+          BUCKET="myrobotlab-repo"
+
+          echo "Uploading $FILE to S3 bucket $BUCKET..."
+          aws s3 cp "$FILE" "s3://$BUCKET/" --acl public-read
+
+          echo "Updating permalink myrobotlab.zip..."
+          aws s3 cp "$FILE" "s3://$BUCKET/myrobotlab.zip" --acl public-read
+
+      - name: Upload Artifact for Release
+        uses: actions/upload-artifact@v4
+        with:
+          name: myrobotlab
+          path: target/myrobotlab-${{ steps.version.outputs.version }}.zip
+
+      - name: Create and Push Git Tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: myrobotlab
+          path: target/
+
+      - name: Generate Change Log
+        run: |
+          echo "## Changelog" > changelog.md
+          echo "" >> changelog.md
+          git log --pretty=format:"- %s" -n 10 >> changelog.md
+          echo "" >> changelog.md
+
+      - name: Read Change Log into Variable
+        id: read_changelog
+        run: echo "CHANGELOG<<EOF" >> $GITHUB_ENV && cat changelog.md >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: "v${{ needs.build.outputs.version }}"
+          name: "MyRobotLab Nixie v${{ needs.build.outputs.version }}"
+          body: |
+            ## MyRobotLab Nixie Release
+
+            Open Source Framework for Robotics and Creative Machine Control  
+            *You know, for robots!*
+
+            * Project Website: [MyRobotLab.org](http://myrobotlab.org)  
+            * Project Discord: [Join here](https://discord.gg/AfScp5x8r5)  
+            * Download Built Application: [Nixie v${{ needs.build.outputs.version }}](https://myrobotlab-repo.s3.amazonaws.com/myrobotlab-${{ needs.build.outputs.version }}.zip)  
+            * [JavaDocs](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/$build/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)  
+
+            ## Base Requirements
+            You will need **Java 11 or newer**. If you are only running MyRobotLab, you need the JRE (Java Runtime Environment).  
+            If you are building from source, you will need the JDK (Java Development Kit). Oracle or OpenJDK will work.
+
+            ${{ env.CHANGELOG }}
+
+          files: target/myrobotlab-${{ needs.build.outputs.version }}.zip
+          draft: false
+          prerelease: false

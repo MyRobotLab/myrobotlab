@@ -1,2 +1,2 @@
 # start the service
-plantoid = Runtime.start("plantoid","Plantoid")
+plantoid = runtime.start("plantoid","Plantoid")

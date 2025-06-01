@@ -4,11 +4,32 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.DetachedHeadException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.TextProgressMonitor;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.MrlException;
@@ -124,8 +145,11 @@ public class Updater extends Service {
    * Checks in the branches directory for the latest version of desired "branch"
    * 
    * @param branch
-   * @return
+   *          the branch to check
+   * @return the latest version
    * @throws MrlException
+   *           boom
+   * 
    */
   public String getLatestLocalVersion(String branch) throws MrlException {
     Set<String> allLocal = getLocalVersions(branch);
@@ -159,8 +183,11 @@ public class Updater extends Service {
    * access it will ask the build server what successful builds exist
    * 
    * @param branch
+   *          the branch
    * @param allowRemote
-   * @return
+   *          true/false
+   * @return a set
+   * 
    */
   synchronized public Set<String> getVersions(String branch, Boolean allowRemote) {
     Set<String> versions = new TreeSet<String>();
@@ -179,7 +206,9 @@ public class Updater extends Service {
    * Get the local versions available for the selected branch.
    * 
    * @param branch
-   * @return
+   *          the branch
+   * @return the set of local versions
+   * 
    */
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
@@ -203,7 +232,9 @@ public class Updater extends Service {
    * Get remote versions from jenkins
    * 
    * @param branch
-   * @return
+   *          the branch name
+   * @return the set of remote versions
+   * 
    */
   public Set<String> getRemoteVersions(String branch) {
     Set<String> versions = new TreeSet<String>();
@@ -212,7 +243,7 @@ public class Updater extends Service {
       byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
       if (data != null) {
         String json = new String(data);
-        WorkflowJob job = (WorkflowJob) CodecUtils.fromJson(json, WorkflowJob.class);
+        WorkflowJob job = CodecUtils.fromJson(json, WorkflowJob.class);
         if (job.builds != null) {
           for (WorkflowRun build : job.builds) {
             if ("SUCCESS".equals(build.result)) {
@@ -382,10 +413,13 @@ public class Updater extends Service {
       if (isSrcMode) {
         String cwd = System.getProperty("user.dir");
         boolean makeBuild = false;
-        String branch = Git.getBranch();
+
+        Repository repo = new FileRepositoryBuilder().setGitDir(new File(System.getProperty("user.dir"))).build();
+        org.eclipse.jgit.api.Git git = new org.eclipse.jgit.api.Git(repo);
+        String branch = git.getRepository().getBranch();
         log.info("current source branch is \"{}\"", branch);
 
-        int commitsBehind = Git.pull(branch);
+        int commitsBehind = pull(null, branch);
 
         if (gitProps == null) {
           log.info("target/classes/git.properties does not exist - will build");
@@ -403,7 +437,8 @@ public class Updater extends Service {
           // FIXME - download mvn if it does not exist ??
 
           // remove git properties before compile
-          Git.removeProps();
+          File props = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "classes" + File.separator + "git.properties");
+          props.delete();
 
           // FIXME - compile or package mode !
           String ret = Maven.mvn(cwd, branch, "compile", System.currentTimeMillis() / 1000, offline);
@@ -424,7 +459,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -436,7 +471,7 @@ public class Updater extends Service {
               updated.destroy();
               // FIXME - merge original
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
             }
@@ -503,10 +538,11 @@ public class Updater extends Service {
               FileIO.copy(currentJar, String.format("target/myrobotlab-%s-%s.jar", branch, currentVersion));
             }
 
+            // FIXME - re-implement
             // export current state
-            if (Runtime.exists()) {
-              Runtime.getInstance().exportAll("export.py");
-            }
+            // if (Runtime.exists()) {
+            // Runtime.getInstance().save("last-restart/runtime.yml");
+            // }
 
             // replace our current jar (classes ? build?)
             log.info("writing {} to myrobotlab.jar", latestFile);
@@ -521,7 +557,7 @@ public class Updater extends Service {
               // FIXME check for null etc.. singleton
               // FIXME - ability to merge more commands !!!
               CmdOptions options = new CmdOptions();
-              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
               ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
@@ -602,6 +638,73 @@ public class Updater extends Service {
     return false;
   }
 
+  TextProgressMonitor monitor = new TextProgressMonitor();
+
+  public int pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
+      CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
+
+    if (src == null) {
+      src = System.getProperty("user.dir");
+    }
+
+    if (branch == null) {
+      log.warn("branch is not set - setting to default develop");
+      branch = "develop";
+    }
+
+    List<String> branches = new ArrayList<String>();
+    branches.add("refs/heads/" + branch);
+
+    File repoParentFolder = new File(src);
+
+    org.eclipse.jgit.api.Git git = null;
+    Repository repo = null;
+
+    // Open an existing repository FIXME Try Git.open(dir)
+    String gitDir = repoParentFolder.getAbsolutePath() + "/.git";
+    repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
+    git = new org.eclipse.jgit.api.Git(repo);
+
+    repo = git.getRepository();
+    git.branchCreate().setForce(true).setName(branch).setStartPoint(branch).call();
+    git.checkout().setName(branch).call();
+
+    git.fetch().setProgressMonitor(monitor).call();
+
+    List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
+    List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
+
+    RevCommit localCommit = localLogs.get(0);
+    RevCommit remoteCommit = remoteLogs.get(0);
+
+    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
+
+    // FIXME - Git.close() file handles
+
+    if (status.getBehindCount() > 0) {
+      log.info("local ts {}, remote {} - {} pulling", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
+      PullCommand pullCmd = git.pull();
+      pullCmd.setProgressMonitor(monitor);
+      pullCmd.call();
+      git.close();
+      return status.getBehindCount();
+    }
+    log.info("no new commits on branch {}", branch);
+    git.close();
+    return 0;
+  }
+
+  private List<RevCommit> getLogs(org.eclipse.jgit.api.Git git, String ref, int maxCount)
+      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
+    List<RevCommit> ret = new ArrayList<>();
+    Repository repository = git.getRepository();
+    Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
+    for (RevCommit rev : logs) {
+      ret.add(rev);
+    }
+    return ret;
+  }
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -618,7 +721,7 @@ public class Updater extends Service {
       Updater updater = (Updater) Runtime.start("updater", "Updater");
 
       CmdOptions options = new CmdOptions();
-      new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+      new CommandLine(options).parseArgs(new String[] { "-I", "python", "execFile", "export.py" });
       ProcessBuilder builder = Launcher.createBuilder(options);
       updater.updated = builder.start();
 

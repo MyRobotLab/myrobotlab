@@ -12,12 +12,12 @@ port = "COM15"
 
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
     
-relay = Runtime.start('relay','Relay')
+relay = runtime.start('relay','Relay')
 
-arduino = Runtime.start("arduino","Arduino")
+arduino = runtime.start("arduino","Arduino")
 arduino.connect(port)
 
 relay.arduino=arduino

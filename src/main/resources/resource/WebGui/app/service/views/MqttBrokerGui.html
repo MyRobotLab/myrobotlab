@@ -1,0 +1,96 @@
+<table>
+    <tr>
+        <td><b>listening</b></td>
+        <td>
+            <!-- toggle width="70" height="28" ng-model="service.listening" title="Server is listening" ng-change="service.listening?start():stop()" width="20" height="30" on="listening" off="not listening"/ -->
+            <button class="btn btn-success" ng-show="!service.listening" ng-click="start()">start listening</button>
+            <button class="btn btn-warning" ng-show="service.listening" ng-click="msg.stopListening()">stop listening</button>
+        </td>
+    </tr>
+<!--    
+    <tr>
+        <td><b>allow anonymous</b></td>
+        <td>
+            <toggle width="70" height="28" ng-model="service.allow_anonymous" title="Allow clients without id" ng-change="msg.setAllowAnonymous(!service.allow_anonymous)" width="20" height="30" on="" off=""/>
+        </td>
+    </tr>
+-->    
+    <tr>
+        <td><b>username</b></td>
+        <td>
+            <input class="form-control" type="text" id="username" ng-model="service.username" ng-readonly="service.listening"/>
+        </td>
+    </tr>
+    <tr>
+        <td><b>password</b></td>
+        <td>
+            <input class="form-control" type="password" id="password" ng-model="service.password" ng-readonly="service.listening"/>
+        </td>
+    </tr>
+    <tr>
+        <td><b>address</b></td>
+        <td>
+            <input class="form-control" type="text" id="address" ng-model="service.address" ng-readonly="service.listening"/>
+        </td>
+    </tr>
+    <tr>
+        <td><b>mqtt port</b></td>
+        <td>
+            <input class="form-control" type="text" id="port" ng-model="service.mqttPort" ng-readonly="service.listening"/>
+        </td>
+    </tr>
+    <tr>
+        <td><b>websocket port</b></td>
+        <td>
+            <input class="form-control" type="text" id="port" ng-model="service.wsPort" ng-readonly="service.listening"/>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+<br/>
+
+<b>clients</b>
+<div ng-repeat="clientId in service.connectedClients">
+    <small>{{clientId}}</small>
+</div>
+<br/>
+
+{{rowCount}} messages processed - current window size is {{maxRecords}}
+
+<button class="btn btn-default" ng-click="reverse =!reverse" title="sort log entries, arrow indicates direction which new log entries shall be inserted">
+    <span ng-class="{'glyphicon glyphicon-arrow-down': !reverse, 'glyphicon glyphicon-arrow-up':reverse}"></span>
+</button>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">time</th>
+            <th scope="col">client</th>
+            <th scope="col">topic</th>
+            <th scope="col">payload</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="e in log | orderBy:'':reverse">
+            <td>
+                <small>{{e.date}}</small>
+            </td>
+            <td>
+                <small>{{e.clientId}}</small>
+            </td>
+            <!-- <td><small>{{e.ts}}</small></td> -->
+            <td>
+                <small>{{e.topicName}}
+            
+            
+            
+            
+            </td>
+            <td>
+                <small>{{e.payload}}</small>
+            </td>
+        </tr>
+    </tbody>
+</table>

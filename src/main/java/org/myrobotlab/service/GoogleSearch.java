@@ -19,15 +19,18 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.GoogleSearchConfig;
+import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.ImagePublisher;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class GoogleSearch extends Service implements TextPublisher, SearchPublisher, LocaleProvider {
+public class GoogleSearch extends Service<GoogleSearchConfig> implements ImagePublisher, TextPublisher, SearchPublisher, LocaleProvider {
 
   private static final long serialVersionUID = 1L;
 
@@ -37,17 +40,11 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   // 403 - Forbidden
   public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36";
 
-  boolean saveSearchToFile = true;
-
   transient private static Pattern patternDomainName;
 
   transient private Matcher matcher;
 
-  Integer maxImageWidth = null;
-
-  int maxImages = 3;
-
-  Boolean lowerCase = null;
+  GoogleSearchConfig c;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
 
@@ -66,19 +63,15 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     Runtime runtime = Runtime.getInstance();
     runtime.getLanguage();
     excludeTextFilter.add("Wikipedia");
-    setLowerCase();
+    // setLowerCase();
   }
 
   public void setLowerCase() {
-    lowerCase = true;
+    c.lowerCase = true;
   }
 
   public void setUpperCase() {
-    lowerCase = false;
-  }
-
-  public void clearCase() {
-    lowerCase = null;
+    c.lowerCase = false;
   }
 
   public void addFilter(String filter) {
@@ -99,8 +92,10 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
 
+      // https://moz.com/blog/the-ultimate-guide-to-the-google-search-parameters
       // not sure if locale is supported tag probably is ....
-      String request = "https://google.com/search?lr=lang_" + locale.getTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      String request = "https://google.com/search?lr=lang_" + locale.getLanguage() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      log.info(String.format("request to google: %s", request));
 
       // Fetch the page
       Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
@@ -110,7 +105,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
        * "src", "http", "https", "data"));
        */
 
-      if (saveSearchToFile) {
+      if (c.saveSearchToFile) {
         FileOutputStream fos = new FileOutputStream(getDataDir() + fs + encodedSearch + ".html");
         fos.write(doc.toString().getBytes());
         fos.close();
@@ -130,9 +125,9 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
             // String url = header.attr("href");
 
             String text = null;
-            if (lowerCase != null && lowerCase) {
+            if (c.lowerCase != null && c.lowerCase) {
               text = span.text().toLowerCase();
-            } else if (lowerCase != null && !lowerCase) {
+            } else if (c.lowerCase != null && !c.lowerCase) {
               text = span.text().toUpperCase();
             }
             for (String filter : excludeTextFilter) {
@@ -194,16 +189,15 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     return data;
   }
 
-  // FIXME - use gson not simpl json
   @Override
-  public List<String> imageSearch(String searchText) {
+  public List<ImageData> imageSearch(String searchText) {
 
-    List<String> resultUrls = new ArrayList<String>();
+    List<ImageData> resultUrls = new ArrayList<>();
 
     try {
       // can only grab first 100 results
 
-      String url = "https://www.google.com/search?lr=lang_" + locale.getTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+      String url = "https://www.google.com/search?lr=lang_" + locale.getLanguage() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
       String filename = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString());
 
       // FIXME - check for cache ??? or useCache boolean config ?
@@ -216,9 +210,14 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       System.out.println("number of results: " + resultUrls.size());
 
-      for (String imageUrl : resultUrls) {
+      for (ImageData imageUrl : resultUrls) {
 
-        invoke("publishImage", imageUrl);
+        ImageData img = new ImageData();
+        img.name = searchText;
+        img.src = imageUrl.src;
+        img.source = getName();
+
+        invoke("publishImage", img);
         // System.out.println(imageUrl);
       }
 
@@ -253,7 +252,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   }
 
   @Override
-  public String publishImage(String image) {
+  public ImageData publishImage(ImageData image) {
     return image;
   }
 
@@ -262,27 +261,26 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     return images;
   }
 
-  @Override
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName());
-
+    attachTextListener(service.getName());
   }
 
   @Override
   public int setMaxImages(int cnt) {
-    maxImages = cnt;
+    c.maxImages = cnt;
     return cnt;
   }
 
   @Override
   public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
 
   public static void main(String[] args) {
     try {
 
+      Runtime.main(new String[] { "--id", "admin"});
       LoggingFactory.init(Level.INFO);
 
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
@@ -292,18 +290,12 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       // display.setAlwaysOnTop(true);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.setPort(8887);
       webgui.autoStartBrowser(false);
       webgui.startService();
 
       boolean isDone = true;
       if (isDone) {
         return;
-      }
-
-      List<String> htmlImagePage = google.imageSearch("gorilla");
-      for (String image : htmlImagePage) {
-        log.info(image);
       }
 
       // List<String> base64Images =
@@ -324,8 +316,8 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     }
   }
 
-  public List<String> extractImageRefs(String data) throws IOException {
-    List<String> ret = new ArrayList<>();
+  public List<ImageData> extractImageRefs(String data) throws IOException {
+    List<ImageData> ret = new ArrayList<>();
 
     // String data = FileIO.toString(filename);
 
@@ -342,8 +334,8 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
         if (pos1 > 0) {
           String ref = data.substring(pos1 + 1, pos0 + 3);
-          ret.add(ref);
-          if (ret.size() == maxImages) {
+          ret.add(new ImageData(ref));
+          if (ret.size() == c.maxImages) {
             return ret;
           }
         }
@@ -357,6 +349,11 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getAvailableLanguages();
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

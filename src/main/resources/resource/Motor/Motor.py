@@ -15,14 +15,14 @@ virtual = True
 port = "COM99"
 
 # start the services
-arduino = Runtime.start("arduino", "Arduino")
-m1 = Runtime.start("m1","Motor")
+arduino = runtime.start("arduino", "Arduino")
+m1 = runtime.start("m1","Motor")
 m1.setPwrPin(3)
 m1.setDirPin(4)
 
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 # connect the Arduino - (our motor controller)

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -13,12 +14,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.BlenderConfig;
 import org.slf4j.Logger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-public class Blender extends Service {
+public class Blender extends Service<BlenderConfig>
+{
 
   /**
    * Control line - JSON over TCP/IP This is the single control communication
@@ -32,9 +32,6 @@ public class Blender extends Service {
    * @author GroG
    *
    */
-
-  // MAKE NOTE - must NOT pretty print !!! \n will break messages
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
 
   public class ControlHandler extends Thread {
     Socket socket;
@@ -59,7 +56,7 @@ public class Blender extends Service {
           // JSONObject json = new JSONObject(in.readLine());
           String json = in.readLine();
           log.info("{}", json);
-          Message msg = gson.fromJson(json, Message.class);
+          Message msg = CodecUtils.fromJson(json, Message.class);
           log.info("msg {}", msg);
           invoke(msg);
 
@@ -187,7 +184,7 @@ public class Blender extends Service {
       Service.sleep(3000);
       // FIXME - more general case determined by "Type"
       ServiceInterface si = Runtime.getService(name);
-      if ("org.myrobotlab.service.Arduino".equals(si.getType())) {
+      if ("org.myrobotlab.service.Arduino".equals(si.getTypeKey())) {
         // FIXME - make more general - "any" Serial device !!!
         Arduino arduino = (Arduino) Runtime.getService(name);
         if (arduino != null) {
@@ -258,7 +255,7 @@ public class Blender extends Service {
         // NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!
         // Should be able to request a "new" named thread safe encoder !!
         // Adding newline for message delimeter
-        String json = String.format("%s\n", gson.toJson(msg));
+        String json = String.format("%s\n", CodecUtils.toJson(msg));
         info("sending %s", json);
         out.write(json.getBytes());
       } catch (Exception e) {
@@ -293,55 +290,6 @@ public class Blender extends Service {
 
       String vLeftPort = "vleft";
       String vRightPort = "vright";
-
-      // Step #0 pre-create MRL Arduino & Serial - an pre connect with tcp ip
-      // port
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-
-      // Serial i01_left_serial =
-      // (Serial)Runtime.createAndStart("i01.left.serial", "Serial");
-      // i01_left_serial.connectTCP(host, port); // is this better (more access)
-      // - or bury in blender.attach(?)
-
-      Arduino i01_left = (Arduino) Runtime.start("i01.left", "Arduino");
-      Arduino i01_right = (Arduino) Runtime.start("i01.right", "Arduino");
-
-      // Step #1 - setup virtual arduino --- NOT SURE - can be done outside
-      blender.attach(i01_left);
-      sleep(3);
-      blender.attach(i01_right);
-
-      // Step #2 - i01 connects
-      i01.startHead(vLeftPort);
-      // i01.startMouthControl(bogusLeftPort);
-      i01.startLeftArm(vLeftPort);
-      i01.startLeftHand(vLeftPort);
-
-      i01.startRightArm(vRightPort);
-      i01.startRightHand(vRightPort);
-
-      // left.biceps0
-      // i01.head.neck
-      /*
-       * Servo neck = (Servo) Runtime.start("jaw2", "Servo");
-       * 
-       * Service.sleep(4000); // Servo rothead = (Servo)
-       * Runtime.start("i01.head.rothead", // "Servo");
-       * 
-       * neck.attach(arduino01, 7); // rothead.attach(arduino01, 9);
-       * 
-       * // rothead.moveTo(90); neck.moveTo(90); sleep(100); //
-       * rothead.moveTo(120); neck.moveTo(120); sleep(100); //
-       * rothead.moveTo(0); neck.moveTo(0); sleep(100); // rothead.moveTo(90);
-       * neck.moveTo(90); sleep(100); // rothead.moveTo(120); neck.moveTo(120);
-       * sleep(100); // rothead.moveTo(0); neck.moveTo(0); sleep(100);
-       * 
-       * // servo01.sweep(); // servo01.stop(); neck.detach();
-       * 
-       * blender.getVersion(); // blender.toJson(); // blender.toJson();
-       */
-
-      // Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       Logging.logError(e);

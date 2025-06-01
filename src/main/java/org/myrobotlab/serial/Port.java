@@ -45,6 +45,7 @@ public abstract class Port implements Runnable, SerialControl {
    * something like COM4 or /dev/ttyACM0 or even a virtual port name.
    * 
    * @param portName
+   *          name of port
    */
   public Port(String portName) {
     this.stats.name = portName;
@@ -193,6 +194,8 @@ public abstract class Port implements Runnable, SerialControl {
    * iostream, tcp/ip)
    * 
    * @param state
+   *          dtr state true/false
+   * 
    * 
    */
   public void setDTR(boolean state) {

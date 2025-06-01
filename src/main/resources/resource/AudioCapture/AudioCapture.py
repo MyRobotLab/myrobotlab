@@ -1,4 +1,4 @@
-audiocapture = Runtime.createAndStart("audiocapture","AudioCapture")
+audiocapture = runtime.start("audiocapture","AudioCapture")
 #it starts capturing audio
 audiocapture.captureAudio()
 # it will record for 5 seconds
@@ -35,4 +35,4 @@ audiocapture.stopAudioCapture()
 audiocapture.playAudio()
 
 # save last capture
-audiocapture.save("mycapture.wav");
+audiocapture.saveAudioFile("mycapture.wav");

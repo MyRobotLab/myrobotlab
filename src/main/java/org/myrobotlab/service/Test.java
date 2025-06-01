@@ -33,6 +33,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.process.GitHub;
+import org.myrobotlab.service.config.TestConfig;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ import org.slf4j.Logger;
  *         method appended is a callback
  *
  */
-public class Test extends Service implements StatusListener {
+public class Test extends Service<TestConfig> implements StatusListener {
 
   /**
    * filter services by availabilities
@@ -156,6 +157,7 @@ public class Test extends Service implements StatusListener {
       this.isRunning = false;
     }
 
+    @Override
     public String toString() {
       return String.format("=== TEST ===> testName: %s service: %s/%s status: %s", testName, branch, serviceName, status);
     }
@@ -170,6 +172,7 @@ public class Test extends Service implements StatusListener {
       start();
     }
 
+    @Override
     public void run() {
       test.runTests();
       log.info("Tester is done - leaving");
@@ -246,7 +249,7 @@ public class Test extends Service implements StatusListener {
       Test test = (Test) Runtime.start("test", "Test");
       test.pythonServiceScriptDir = "../pyrobotlab/service/";
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser = false;
+      webgui.autoStartBrowser(false);
       webgui.startService();
       // Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
@@ -733,11 +736,13 @@ public class Test extends Service implements StatusListener {
 
   }
 
+  @Override
   public void startService() {
     super.startService();
     loadDefaultTests();
   }
 
+  @Override
   public void stopService() {
     super.stopService();
     if (tester != null) {

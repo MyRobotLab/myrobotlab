@@ -3,11 +3,13 @@ package org.myrobotlab.framework.repo;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ivy.Ivy;
 import org.apache.ivy.Main;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
@@ -32,13 +34,12 @@ public class IvyWrapper extends Repo implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  public static final String IVY_VERSION = "2.5.2";
+
   class IvyWrapperLogger extends AbstractMessageLogger {
 
     private int level = Message.MSG_INFO;
 
-    /**
-     * @param level
-     */
     public IvyWrapperLogger(int level) {
       this.level = level;
     }
@@ -73,6 +74,7 @@ public class IvyWrapper extends Repo implements Serializable {
   static String ivysettingsXmlTemplate = null;
 
   static String ivyXmlTemplate = null;
+
   transient static IvyWrapper localInstance = null;
 
   public static final Filter NO_FILTER = NoFilter.INSTANCE;
@@ -108,6 +110,7 @@ public class IvyWrapper extends Repo implements Serializable {
    *          - list of services to process
    * 
    */
+  @Override
   public void createBuildFiles(String location, String[] serviceTypes) {
     try {
 
@@ -135,7 +138,7 @@ public class IvyWrapper extends Repo implements Serializable {
         dependency.getVersion() == null ? "latest.integration" : dependency.getVersion()));
 
     List<ServiceExclude> excludes = dependency.getExcludes();
-    boolean twoTags = dependency.getExt() != null || excludes != null & excludes.size() > 0;
+    boolean twoTags = dependency.getExt() != null || excludes != null && excludes.size() > 0;
     if (twoTags) {
       // more stuffs ! - we have 2 tags - end this one without />
       sb.append(">\n");
@@ -150,7 +153,7 @@ public class IvyWrapper extends Repo implements Serializable {
     }
 
     // exclusions begin ---
-    if (excludes != null & excludes.size() > 0) {
+    if (excludes != null && excludes.size() > 0) {
       StringBuilder ex = new StringBuilder();
       for (ServiceExclude exclude : excludes) {
         ex.append("      <exclude ");
@@ -190,6 +193,13 @@ public class IvyWrapper extends Repo implements Serializable {
 
     StringBuilder ret = new StringBuilder();
     ServiceData sd = ServiceData.getLocalInstance();
+    if (serviceTypes == null) {
+      List<MetaData> ats = sd.getAvailableServiceTypes();
+      serviceTypes = new String[ats.size()];
+      for (int i = 0; i < ats.size(); ++i) {
+        serviceTypes[i] = ats.get(i).getType();
+      }
+    }
 
     ret.append("  <dependencies>\n\n");
 
@@ -288,6 +298,29 @@ public class IvyWrapper extends Repo implements Serializable {
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
 
+  public String[] buidCmdLine(String location) {
+
+    // TODO - noterminate :P
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+    // [artifact]-[revision].[ext]
+    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+    // String[] cmd = new String[] { "-settings", location +
+    // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+    // location + "/jar" + "/[artifact]-[revision].[ext]" };
+
+    StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-" + IVY_VERSION + ".jar");
+    for (String s : cmd) {
+      sb.append(" ");
+      sb.append(s);
+    }
+    log.info("cmd {}", sb);
+
+    return cmd;
+
+  }
+
   @Override
   public void installDependency(String location, ServiceDependency library) {
     // creating build files
@@ -298,25 +331,14 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      // TODO - noterminate :P
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
-
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
-      for (String s : cmd) {
-        sb.append(" ");
-        sb.append(s);
-      }
-      log.info("cmd {}", sb);
+      String[] cmd = buidCmdLine(location);
 
       // TODO: this breaks for me! please review why this needed to be commented
       // out.
       // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
       // ivy.getLoggerEngine().pushLogger(new
       // IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
+      // Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
       ResolveReport report = Main.run(cmd);
 
       // if no errors -h
@@ -348,7 +370,6 @@ public class IvyWrapper extends Repo implements Serializable {
       installedLibraries.put(library.toString(), library);
       info("installed %s platform %s", library, platform.getPlatformId());
       // }
-      save();
 
       ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
       for (int i = 0; i < artifacts.length; ++i) {
@@ -372,6 +393,8 @@ public class IvyWrapper extends Repo implements Serializable {
         }
       }
 
+      // save repo.json file
+      save();
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", library)));
 
     } catch (Exception e) {
@@ -382,80 +405,94 @@ public class IvyWrapper extends Repo implements Serializable {
   }
 
   @Override
-  synchronized public void install(String location, String[] serviceTypes) {
+  synchronized public void install(String location, String[] serviceTypes) throws IOException {
 
-    try {
+    Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
 
-      Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
-
-      if (targetLibraries.size() == 0) {
-        StringBuilder sb = new StringBuilder();
-        for (String type : serviceTypes) {
-          if (type.lastIndexOf(".") > 0){
-            sb.append(type.substring(type.lastIndexOf(".") + 1));
-          } else {
-            sb.append(type);
-          }
-          sb.append(" ");
+    if (targetLibraries.size() == 0) {
+      StringBuilder sb = new StringBuilder();
+      for (String type : serviceTypes) {
+        if (type.lastIndexOf(".") > 0) {
+          sb.append(type.substring(type.lastIndexOf(".") + 1));
+        } else {
+          sb.append(type);
         }
-        info("%s already installed", sb.toString());
-        return;
-      }
-
-      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[]) serviceTypes)));
-
-      log.info("installing {} services into {}", serviceTypes.length, location);
-
-      // create build files - generates appropriate ivy.xml and settings files
-      // this service file should be marked as dependencies all others
-      // should be marked as provided
-      // ??? do "provided" get incorporate in the resolve ?
-      createBuildFiles(location, serviceTypes);
-
-      Platform platform = Platform.getLocalInstance();
-
-      // TODO - noterminate :P
-      // String[] cmd = new String[] { "-settings", location +
-      // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
-      // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
-
-      StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
-      for (String s : cmd) {
         sb.append(" ");
-        sb.append(s);
       }
-      log.info("cmd {}", sb);
+      info("%s already installed", sb.toString());
+      return;
+    }
 
-      // TODO: this breaks for me! please review why this needed to be commented
-      // out.
-      // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
-      // ivy.getLoggerEngine().pushLogger(new
-      // IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
-      Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
-      ResolveReport report = Main.run(cmd);
+    publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_START, String.format("starting install of %s", (Object[]) serviceTypes)));
 
-      // if no errors -h
-      // mark "service" as installed
-      // mark all libraries as installed
+    log.info("installing {} services into {}", serviceTypes.length, location);
 
-      List<?> err = report.getAllProblemMessages();
+    // create build files - generates appropriate ivy.xml and settings files
+    // this service file should be marked as dependencies all others
+    // should be marked as provided
+    // ??? do "provided" get incorporate in the resolve ?
+    createBuildFiles(location, serviceTypes);
 
-      boolean error = false;
-      if (err.size() > 0) {
-        for (int i = 0; i < err.size(); ++i) {
-          String errStr = err.get(i).toString();
-          if (!errStr.startsWith("WARN:  symlinkmass")) {
-            error = true;
-          }
-          error(errStr);
+    Platform platform = Platform.getLocalInstance();
+
+    // templates [originalname](-[classifier])(-[revision]).[ext] parens are
+    // "optional"
+
+    List<String> cmd = new ArrayList<>();
+    cmd.add("-settings");
+    cmd.add(location + "/ivysettings.xml");
+    cmd.add("-ivy");
+    cmd.add(location + "/ivy.xml");
+    cmd.add("-retrieve");
+    cmd.add(location + "/jar" + "/[originalname].[ext]");
+
+    int msgLevel = Message.MSG_WARN;
+    if (log.isInfoEnabled()) {
+      msgLevel = Message.MSG_INFO;
+    } else {
+      cmd.add("-warn");
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+    sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
+    for (String s : cmd) {
+      sb.append(" ");
+      sb.append(s);
+    }
+
+    sb.append("\n");
+
+    log.info("cmd {}", sb);
+    FileIO.toFile("libraries/install.sh", sb.toString().getBytes());
+
+    Ivy ivy = Ivy.newInstance(); // <-- for future 2.5.x release
+    ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(msgLevel));
+
+    ResolveReport report = null;
+    List<String> err = new ArrayList<>();
+    try {
+      report = Main.run(cmd.toArray(new String[0]));
+    } catch (Exception e) {
+      err.add(e.toString());
+    }
+
+    // if no errors -h
+    // mark "service" as installed
+    // mark all libraries as installed
+
+    if (report != null) {
+      List<String> problems = report.getAllProblemMessages();
+      for (String problem : problems) {
+        if (!problem.startsWith("WARN:  symlinkmass")) {
+          err.add(problem);
         }
       }
+    }
 
-      if (error) {
-        log.error("had errors - repo will not be updated");
-        return;
-      }
+    if (err.size() > 0) {
+      log.error("had errors - repo will not be updated. Errors:\n{}", err);
+    } else {
 
       // TODO - promote to Repo.setInstalled
       for (ServiceDependency library : targetLibraries) {
@@ -465,12 +502,21 @@ public class IvyWrapper extends Repo implements Serializable {
         info("installed %s platform %s", library, platform.getPlatformId());
       }
       save();
+    }
+
+    if (report == null) {
+      String errorDetail = String.format("There were problems resolving dependencies %s", (Object[]) serviceTypes);
+      log.error(errorDetail);
+      publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.ERROR, Repo.INSTALL_FINISHED, errorDetail));
+      throw new RuntimeException(errorDetail);
+    } else {
 
       ArtifactDownloadReport[] artifacts = report.getAllArtifactsReports();
       for (int i = 0; i < artifacts.length; ++i) {
         ArtifactDownloadReport ar = artifacts[i];
         Artifact artifact = ar.getArtifact();
-        // String filename = IvyPatternHelper.substitute("[originalname].[ext]",
+        // String filename =
+        // IvyPatternHelper.substitute("[originalname].[ext]",
         // artifact);
 
         File file = ar.getLocalFile();
@@ -483,18 +529,17 @@ public class IvyWrapper extends Repo implements Serializable {
             Zip.unzip(filename, "./");
             info("unzipped %s", filename);
           } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("unable to unzip file {}", filename, e);
+            throw new IOException(String.format("unable to unzip file %s", filename));
           }
         }
+
+        publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED,
+            String.format("finished install of artifacts for %s", (Object[]) serviceTypes)));
       }
 
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
-
-    } catch (Exception e) {
-      error(e.getMessage());
-      log.error(e.getMessage(), e);
     }
-
   }
 
   private void publishStatus(String msg, int level) {
@@ -518,13 +563,30 @@ public class IvyWrapper extends Repo implements Serializable {
 
       LoggingFactory.init(Level.INFO);
 
-      Repo repo = Repo.getInstance("IvyWrapper");
+      IvyWrapper repo = (IvyWrapper) Repo.getInstance("IvyWrapper");
 
       String serviceType = "all";
       long ts = System.currentTimeMillis();
-      String dir = String.format("install.ivy.%s.%d", serviceType, ts);
+      String dir = String.format("install.ivy.%s.update", serviceType);
 
-      repo.createBuildFiles(dir, "Python");
+      String[] types = null;
+
+      types = ServiceData.getLocalInstance().getServiceTypeNames();
+      repo.createBuildFiles(dir, types);
+
+      String[] cmd = repo.buidCmdLine(".");
+
+      StringBuilder sb = new StringBuilder();
+      sb.append("wget https://repo1.maven.org/maven2/org/apache/ivy/ivy/" + IVY_VERSION + "/ivy-" + IVY_VERSION + ".jar\n");
+      sb.append("java -jar ivy-" + IVY_VERSION + ".jar");
+
+      for (String s : cmd) {
+        sb.append(" ");
+        sb.append(s);
+      }
+
+      FileIO.toFile(dir + "/test.sh", sb.toString().getBytes());
+
       // repo.installTo("install.ivy");
       // repo.install(dir, serviceType);
 

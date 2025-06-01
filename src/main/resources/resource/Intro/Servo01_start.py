@@ -15,8 +15,8 @@
 # port = "COM15"
 
 # create a servo controller and a servo
-arduino = Runtime.start("arduino","Arduino")
-servo01 = Runtime.start("servo01","Servo")
+arduino = runtime.start("arduino","Arduino")
+servo01 = runtime.start("servo01","Servo")
 
 # initialize arduino
 # linux or macos -> arduino.connect("/dev/ttyUSB0")

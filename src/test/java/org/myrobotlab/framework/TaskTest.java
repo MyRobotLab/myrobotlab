@@ -39,12 +39,20 @@ public class TaskTest extends AbstractTest {
     runtime.purgeTask("getUptime");
     catcher.clear();
 
-    Service.sleep(1000);
+    sleep(1000);
+    
 
     log.info("responded task events - expecting 0 got {}", msgs.size());
     assertTrue(msgs.size() == 0);
 
     catcher.clear();
+    
+    // invoke this method in the future
+    runtime.invokeFuture("getUptime", 100);
+    sleep(500);
+    // expect 1 and only 1
+    assertTrue(msgs.size() == 1);
+
   }
 
   public void onUptime(String data) {

@@ -1,0 +1,5 @@
+!!org.myrobotlab.service.config.SerialConfig
+listeners: null
+peers: null
+port: null
+type: Serial

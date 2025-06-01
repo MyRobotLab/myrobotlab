@@ -1,0 +1,75 @@
+<div class="row">
+    <div class="col-md-9">
+        <h3>Last Event {{event}} Current State: {{current}}</h3>
+        <table class="tableController table-condensed table-striped table-bordered">
+            <tr>
+                <th>From State</th>
+                <th>On Event</th>
+                <th>To State</th>
+                <th></th>
+            </tr>
+            <tr ng-repeat="transition in service.config.transitions">
+                <td>{{transition.from}}</td>
+                <td>
+                    <span class="glyphicon glyphicon-arrow-right"></span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.event}}
+                </td>
+                <td>
+                    <span class="glyphicon glyphicon-arrow-right"></span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{{transition.to}}
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="removeTransition(transition.from, transition.on, transition.to)">
+                        <span class="glyphicon glyphicon-minus"></span>
+                    </button>
+                        
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="form-control" type="text" ng-model="from" placeholder="From" style="width:200px"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="on" placeholder="On" style="width:200px"/>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="to" placeholder="To" style="width:200px"/>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="addTransition()">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input class="form-control" type="text" ng-model="state" placeholder="Set State" style="width:200px"/>
+                    <button class="btn btn-default" ng-click="setCurrent()">set</button>
+                </td>
+                <td>
+                    <input class="form-control" type="text" ng-model="msgKey" placeholder="on" style="width:200px"/>
+                    <button class="btn btn-default" ng-click="fire()">fire</button>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+<table class="table-condensed table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>State</th>
+      <th>Event</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="item in service.history">
+      <td>{{ item.ts }}</td>
+      <td>{{ item.state }}</td>
+      <td>{{ item.event }}</td>
+    </tr>
+  </tbody>
+</table>            
+            
+    </div>
+</div>

@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.RekognitionConfig;
 import org.slf4j.Logger;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -33,7 +34,8 @@ import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.services.rekognition.model.Label;
 import com.amazonaws.util.IOUtils;
 
-public class Rekognition extends Service {
+public class Rekognition extends Service<RekognitionConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -55,7 +57,11 @@ public class Rekognition extends Service {
   }
 
   public void setMinConfidence(float confidence) {
+    this.minConfidence = confidence;
+  }
 
+  public float getMinConfidence() {
+    return minConfidence;
   }
 
   /**
@@ -64,7 +70,9 @@ public class Rekognition extends Service {
    * once
    * 
    * @param accessKey
+   *                  aws access key
    * @param secretKey
+   *                  aws secret key
    */
   public void setCredentials(String accessKey, String secretKey) {
     Security security = Runtime.getSecurity();
@@ -87,19 +95,22 @@ public class Rekognition extends Service {
    * set the region - not sure which ones are supported
    * 
    * @param region
+   *               r
+   * 
    */
   public void setRegion(Regions region) {
     this.region = region;
   }
 
   /**
-   * returns an initialized client or throws with an error
+   * @return an initialized client or throws with an error
    * 
-   * @return
+   * 
    */
   public AmazonRekognition getClient() {
     if (rekognitionClient == null) {
-      rekognitionClient = AmazonRekognitionClientBuilder.standard().withRegion(region).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+      rekognitionClient = AmazonRekognitionClientBuilder.standard().withRegion(region)
+          .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
     }
     return rekognitionClient;
   }
@@ -109,11 +120,14 @@ public class Rekognition extends Service {
    * 
    * 
    * @param path
-   *          - the path
+   *             - the path
    * @return - labels
    * @throws FileNotFoundException
+   *                               boom
    * @throws IOException
+   *                               boom
    * @throws URISyntaxException
+   *                               boom
    */
   public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
     if (path == null) {
@@ -137,10 +151,12 @@ public class Rekognition extends Service {
    * get labels
    * 
    * @param inputStream
-   *          - the stream of data
+   *                    - the stream of data
    * @return - labels found
    * @throws FileNotFoundException
+   *                               boom
    * @throws IOException
+   *                               boom
    */
   public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
     ByteBuffer imageBytes;
@@ -152,11 +168,15 @@ public class Rekognition extends Service {
    * Hopefully, Label is serializable, otherwise it needs to return a list of
    * POJOs.
    * 
-   * @return
+   * @param imageBytes
+   *                   image data
+   * @return list of labels extracted
+   * 
    */
   public List<Label> getLabels(ByteBuffer imageBytes) {
     AmazonRekognition client = getClient();
-    DetectLabelsRequest request = new DetectLabelsRequest().withImage(new Image().withBytes(imageBytes)).withMaxLabels(maxLabels).withMinConfidence(minConfidence);
+    DetectLabelsRequest request = new DetectLabelsRequest().withImage(new Image().withBytes(imageBytes))
+        .withMaxLabels(maxLabels).withMinConfidence(minConfidence);
     DetectLabelsResult result = client.detectLabels(request);
     List<Label> labels = result.getLabels();
     lastImage = imageBytes;
@@ -167,7 +187,8 @@ public class Rekognition extends Service {
   // FIXME make BufferedImage translations...
   public List<FaceDetail> getFaces(ByteBuffer imageBytes, Integer width, Integer height) {
 
-    DetectFacesRequest request = new DetectFacesRequest().withImage(new Image().withBytes((imageBytes))).withAttributes(Attribute.ALL);
+    DetectFacesRequest request = new DetectFacesRequest().withImage(new Image().withBytes((imageBytes)))
+        .withAttributes(Attribute.ALL);
 
     DetectFacesResult result = getClient().detectFaces(request);
     System.out.println("Orientation: " + result.getOrientationCorrection() + "\n");
@@ -177,7 +198,8 @@ public class Rekognition extends Service {
       System.out.println("Face:");
       ShowBoundingBoxPositions(height, width, face.getBoundingBox(), result.getOrientationCorrection());
       AgeRange ageRange = face.getAgeRange();
-      System.out.println("The detected face is estimated to be between " + ageRange.getLow().toString() + " and " + ageRange.getHigh().toString() + " years old.");
+      System.out.println("The detected face is estimated to be between " + ageRange.getLow().toString() + " and "
+          + ageRange.getHigh().toString() + " years old.");
       System.out.println();
     }
 

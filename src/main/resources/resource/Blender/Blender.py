@@ -1,2 +1,2 @@
 # start the service
-blender = Runtime.start("blender","Blender")
+blender = runtime.start("blender","Blender")

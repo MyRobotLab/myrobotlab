@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.exception.ZeroByteFileException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -16,7 +18,6 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
@@ -72,39 +73,40 @@ public class TextExtractor extends AbstractStage {
         continue;
       }
 
-      FileInputStream binaryData = null;
-      try {
-        binaryData = new FileInputStream(f);
-      } catch (FileNotFoundException e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
-        // This should never happen.
+      if (f.length() == 0) {
+        // This is a zero byte file, there's no data to try to extract...  
+        log.info("zero byte file {}", f.getAbsolutePath());
         continue;
       }
-      // InputStream binaryData = null;
+      
+      InputStream binaryData = null;
+      try {
+        binaryData = new FileInputStream(f);
+      } catch (FileNotFoundException e) {
+        // This should never happen.
+        log.warn("Document {} not found.", doc.getId(), e);
+        continue;
+      }
 
       Metadata metadata = new Metadata();
       StringWriter textData = new StringWriter();
-      ContentHandler bch = new BodyContentHandler(textData);
+      BodyContentHandler bch = new BodyContentHandler(textData);
       try {
         parser.parse(binaryData, bch, metadata, parseCtx);
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (SAXException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (TikaException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      } catch (TikaException|IOException|SAXException e) {
+        log.warn("Error processing {} :", doc.getId(), e);
+        // Accumulate any errors on the document.
+        doc.addToField("error", e);
       }
 
       doc.addToField(textField, textData.toString());
       for (String name : metadata.names()) {
         // clean the field name first.
         String cleanName = cleanFieldName(name);
-        for (String value : metadata.getValues(name)) {
-          doc.addToField(cleanName, value);
+        if (cleanName != null) {
+          for (String value : metadata.getValues(name)) {
+            doc.addToField(cleanName, value);
+          }
         }
       }
     }

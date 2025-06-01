@@ -1,7 +1,11 @@
-angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$timeout', '$scope', 'mrl', function($timeout, $scope, mrl) {
+angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
     console.info('ServoGuiCtrl')
     var _self = this
     var msg = this.msg
+
+    $scope.disableServicePosUpdates = false
+
+    $scope.minView = true
 
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
@@ -11,62 +15,62 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     // useful for initialization of components
     var firstTime = true
 
+    $scope.state = {
+        useEncoderData: false,
+        showLimits: false,
+        rest: 90
+    }
+
+    $scope.attachController = function(serviceName) {
+        console.info("attachController")
+        if ($scope.service.pin){
+            msg.send("setPin", $scope.service.pin)            
+        }
+        if ($scope.service.config.controller){
+            msg.send("attach", $scope.service.config.controller)
+        }
+        msg.send("broadcastState")
+    }
+
+    $scope.setController = function(serviceName) {
+        console.info("setController")
+        msg.send("setController", serviceName)
+    }
+    
+    $scope.servoOptions = {
+        interface: 'ServoController',
+        isAttached: $scope.service.isAttached,
+        // callback: function...
+        attach: $scope.setController,
+        attachName: $scope.service?.config?.controller,
+        controllerTitle: 'controller'
+    }
+
+
     // init
-    $scope.pin = null
     $scope.min = 0
     $scope.max = 180
 
     $scope.possibleControllers = null
     $scope.testTime = 300
     $scope.sliderEnabled = false
-    $scope.speedDisplay = 0
+    $scope.speedDisplay = '0'
+    $scope.idleSeconds = 0
 
     $scope.speed = null
-    $scope.lockInputOutput = true
+    $scope.lockInputOutput = false
 
-    $scope.activeTabIndex = 0
+    $scope.activeTabIndex = 1
 
-    $scope.speedSlider = {
-        value: 501,
-        options: {
-            floor: 1,
-            ceil: 501,
-            minLimit: 1,
-            maxLimit: 501,
-            hideLimitLabels: true,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    if ($scope.speedSlider.value == 501) {
-                        msg.send('fullSpeed')
-                    } else {
-                        msg.send('setSpeed', $scope.speedSlider.value)
-                    }
-                }
-            },
-            onEnd: function() {}
-        }
-    }
+    $scope.optionsWithoutStart = {
+        connect: true,
+        range: {
+            min: 0,
+            max: 100,
+        },
+    };
 
-    $scope.autoDisable = null
-
-    $scope.autoDisableSlider = {
-        value: 3,
-        options: {
-            floor: 1,
-            ceil: 10,
-            minLimit: 1,
-            maxLimit: 10,
-            hideLimitLabels: true,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    msg.send('setIdleTimeout', $scope.autoDisableSlider.value * 1000)
-                }
-            },
-            onEnd: function() {}
-        }
-    }
+    $scope.sliderPositions = [20, 80];
 
     // TODO - should be able to build this based on
     // current selection of controller
@@ -76,114 +80,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         // make strings 
     }
 
-    //slider config with callbacks
-    $scope.pos = {
-        value: 90,
-        options: {
-            floor: 0,
-            ceil: 180,
-            minLimit: 0,
-            maxLimit: 180,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    msg.send('moveTo', $scope.pos.value)
-                }
-            },
-            onEnd: function() {}
-        }
-    }
-
-    $scope.restSlider = {
-        value: 0,
-        options: {
-            floor: 0,
-            ceil: 180,
-            step: 1,
-            showTicks: false,
-            hideLimitLabels: true,
-            onStart: function() {},
-            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
-            onChange: function() {
-                // $scope.setMinMax()
-                msg.send('setRest', $scope.restSlider.value)
-            },
-            onEnd: function() {}
-        }
-    }
-
-    $scope.inputSlider = {
-        minValue: 0,
-        maxValue: 180,
-        options: {
-            floor: 0,
-            ceil: 180,
-            step: 1,
-            showTicks: false,
-            hideLimitLabels: true,
-            noSwitching: true,
-            onStart: function() {},
-            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
-            onChange: function() {
-                if ($scope.lockInputOutput) {
-                    $scope.outputSlider.minValue = $scope.inputSlider.minValue
-                    $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
-                }
-                msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-            },
-            onEnd: function() {}
-        }
-    }
-
-    $scope.inputFieldMin = function(){
-        if ($scope.lockInputOutput) {
-            $scope.outputSlider.minValue = $scope.inputSlider.minValue
-        }
-        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-    }
-    $scope.inputFieldMax = function(){
-        if ($scope.lockInputOutput) {
-            $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
-        }
-        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-    }
-    $scope.outputFieldMin = function(){
-        if ($scope.lockInputOutput) {
-            $scope.inputSlider.minValue = $scope.outputSlider.minValue
-        }
-        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-    }
-    $scope.outputFieldMax = function(){
-        if ($scope.lockInputOutput) {
-            $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
-        }
-        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-    }
-    $scope.restField = function(){
-        msg.send('setRest', $scope.restSlider.value)
-    }
-
-    $scope.outputSlider = {
-        minValue: 0,
-        maxValue: 180,
-        options: {
-            floor: 0,
-            ceil: 180,
-            step: 1,
-            showTicks: false,
-            hideLimitLabels: true,
-            noSwitching: true,
-            onStart: function() {},
-            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
-            onChange: function() {
-                if ($scope.lockInputOutput) {
-                    $scope.inputSlider.minValue = $scope.outputSlider.minValue
-                    $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
-                }
-                msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
-            },
-            onEnd: function() {}
-        }
+    $scope.setRest = function() {
+        msg.send('setRest', $scope.service.rest)
     }
 
     $scope.toggleLock = function() {
@@ -200,84 +98,60 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         */
     }
 
-    $scope.setSpeed = function(speed) {
-        if (speed == null || ((typeof speed == 'string') && (speed.trim().length == 0))) {
+    $scope.setSpeed = function() {
+        if ($scope.service.speed == null || $scope.service.speed == "201") {
+            // if speed is null or speed is "max slider value" unset the speed
             msg.send("unsetSpeed")
         } else {
-            msg.send("setSpeed", speed)
+            msg.send("setSpeed", $scope.service.speed)
         }
-    }
-
-    $scope.refreshSlider = function() {
-        setTimeout(function() {
-            $scope.$broadcast('rzSliderForceRender');
-        }, 20)
     }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service
-        $scope.selectedController = service.controller
 
-        $scope.autoDisable = service.autoDisable
+        $scope.service = service
 
         // done correctly - speedDisplay is a 'status' display !
         // its NOT used to set 'control' speed - control is sent
         // from the ui interface - but the ui component does not display what it sent
         // speedDisplay displays what was recieved - and is currently set
         if (service.speed) {
-            $scope.speedDisplay = service.speed
+            $scope.speedDisplay = service.speed.toFixed(0)
         } else {
             $scope.speedDisplay = 'Max'
+            service.speed = 201
+            // max range of slider bar
         }
 
-        $scope.pin = service.pin
-
-        $scope.pos.options.minLimit = service.mapper.minX
-        $scope.pos.options.maxLimit = service.mapper.maxX
-
-        $scope.restSlider.options.minLimit = service.mapper.minX
-        $scope.restSlider.options.maxLimit = service.mapper.maxX
-        if($scope.restSlider.value < $scope.inputSlider.minValue){
-            $scope.restSlider.value = $scope.inputSlider.minValue
-            msg.send('setRest', $scope.restSlider.value)
-        }
-        if($scope.restSlider.value > $scope.inputSlider.maxValue){
-            $scope.restSlider.value = $scope.inputSlider.maxValue
-            msg.send('setRest', $scope.restSlider.value)
+        if (service?.config?.controller){
+            $scope.servoOptions.attachName = service?.config?.controller
         }
 
+        $scope.idleSeconds = service.idleTimeout / 1000
+        //         $scope.pos.options.minLimit = service.mapper.minX
+        //         $scope.pos.options.maxLimit = service.mapper.maxX
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control
         if (firstTime) {
 
-            $scope.restSlider.value = service.rest
+            // control assigned = status for "non" broadcastState methods
+            // guarded by firstTime - it never will get  updated after
+            // initialization
+            $scope.state.rest = service.rest
 
-            $scope.pos.value = service.currentOutputPos
+            // $scope.pos.value = service.currentInputPos
             $scope.sliderEnabled = true
 
-            $scope.activeTabIndex = service.controller == null ? 0 : 1
+            $scope.activeTabIndex = service.isAttached?1:0
 
-            $scope.inputSlider.minValue = service.mapper.minX
-            $scope.inputSlider.maxValue = service.mapper.maxX
-            $scope.outputSlider.minValue = service.mapper.minY
-            $scope.outputSlider.maxValue = service.mapper.maxY
+            $scope.state.inputMin = service.mapper.minX
+            $scope.state.inputMax = service.mapper.maxX
+            $scope.state.outputMin = service.mapper.minY
+            $scope.state.outputMax = service.mapper.maxY
 
             firstTime = false
-
-            // BELOW NECESSARY?
-            $timeout(function() {
-                $scope.$broadcast('rzSliderForceRender')
-            })
-        }
-
-        // init ui components
-        if (service.speed) {
-            $scope.speedSlider.value = service.speed
-        } else {
-            $scope.speedSlider.value = 501
-            // ui max limit
         }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
@@ -291,33 +165,49 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             _self.updateState(data)
             $scope.$apply()
             break
-            // servo event in the past 
-            // meant feedback from MRLComm.c
-            // but perhaps its come to mean
-            // feedback from the service.moveTo
+        case 'onServoSetSpeed':
+            if (data.speed) {
+                $scope.speedDisplay = data.speed
+            } else {
+                $scope.speedDisplay = 'Max'
+            }
+            $scope.$apply()
+            break
         case 'onRefreshControllers':
             $scope.possibleControllers = data
             $scope.$apply()
             break
         case 'onEncoderData':
-            $scope.service.currentOutputPos = data.angle
+            $scope.service.currentInputPos = Math.floor(data.mappedValue)
             $scope.$apply()
             break
+        case 'onServoMoveTo':
+            if (!$scope.disableServicePosUpdates) {
+                // if the user is not controlling the slider - let the servo service
+                if (data.inputPos) {
+                    $scope.service.targetPos = data.inputPos.toFixed(0)
+                    $scope.$apply()
 
-        case 'onServoEvent':
-            console.info("ServoEvent")
-            console.info(data)
-            /*  FIXME - use this to display servo 'intention' move stop etc
-            if ($scope.statusControlMode == 'status') {
-                $scope.service.currentOutputPos = data.pos
-                $scope.$apply()
+                }
             }
-        */
             break
-        case 'onMoveTo':
-            // FIXME - whole servo is sent ? - maybe not a bad thing, but there should probably be more
-            // granularity and selectiveness on what data is published when ...
-
+        case 'onServoEnable':
+            $scope.service.enabled = true
+            $scope.$apply()
+            break
+        case 'onServoDisable':
+            $scope.service.enabled = false
+            $scope.$apply()
+            break
+        case 'onServoStopped':
+            //$scope.service.currentInputPos = data.pos
+            $scope.$apply()
+            break
+        case 'onServoStarted':
+            // $scope.service.currentInputPos = data.pos
+            // $scope.$apply()
+            break
+        case 'onStatus':
             break
         default:
             console.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
@@ -325,45 +215,66 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.setPin = function(inPin) {
-        $scope.pin = inPin
+    $scope.toggleEncoderData = function() {
+        if ($scope.state.useEncoderData) {
+            msg.subscribe("publishEncoderData")
+            msg.send('broadcastState')
+        } else {
+            msg.unsubscribe("publishEncoderData")
+        }
+    }
+
+    $scope.setPin = function() {
+        msg.send('setPin', $scope.service.pin)
     }
 
     $scope.setAutoDisable = function() {
         msg.send("setIdleTimeout", $scope.service.idleTimeout)
-        msg.send("setAutoDisable", $scope.service.autoDisable)
+        msg.send("setAutoDisable", $scope.service.config.autoDisable)
     }
 
-    // regrettably the onMethodMap dynamic
-    // generation of methods failed on this overloaded
-    // sweep method - there are several overloads in the
-    // Java service - although msg.sweep() was tried for ng-click
-    // for some reason Js resolved msg.sweep(null, null, null, null) :P
     $scope.sweep = function() {
         msg.send('sweep')
     }
 
-    $scope.attachController = function(controller, pin) {
-        console.info("attachController")
-
-        // FIXME - there needs to be some updates to handle the complexity of taking updates from the servo vs
-        // taking updates from the UI ..  some of this would be clearly solved with a (control/status) button
-
-        let pos = $scope.pos.value;
-        // currently taken from the slider's value :P - not good if the slider's value is not good :(
-        if ($scope.speedSlider.value == 501){
-            msg.send('attach', controller, pin, pos)            
-        } else {
-            msg.send('attach', controller, pin, pos, $scope.speedSlider.value)
-        }
-
-        // $scope.rest) <-- previously used rest which is (not good)
-        // msg.attach($scope.controller, $scope.pin, 90)
+    $scope.moveTo = function(pos) {
+        msg.send('moveTo', pos)
     }
 
-    // msg.subscribe("publishMoveTo")
-    msg.subscribe("publishServoEvent")
-    msg.subscribe("publishEncoderData")
+    $scope.setIdleTimeout = function(idleTime) {
+        msg.send('setIdleTimeout', idleTime * 1000)
+    }
+
+    $scope.toggleServoSpeedBar = function (service) {
+      service.speedBar = !service.speedBar
+    }
+    
+    $scope.map = function() {
+
+        if ($scope.lockInputOutput) {
+            $scope.service.mapper.minY = $scope.service.mapper.minX
+            $scope.service.mapper.maxY = $scope.service.mapper.maxX
+        }
+
+        msg.send('map', $scope.service.mapper.minX, $scope.service.mapper.maxX, $scope.service.mapper.minY, $scope.service.mapper.maxY)
+        msg.send("broadcastState")
+    }
+
+    $scope.disableUpdates = function() {
+        $scope.disableServicePosUpdates = true
+    }
+    $scope.enableUpdates = function() {
+        $scope.disableServicePosUpdates = false
+    }
+
+    // msg.subscribe("publishMoveTo") - can cause a infinite loopback control-> status
+    // msg.subscribe("publishEncoderData") - not a good idea will swamp with data
+    msg.subscribe("publishServoEnable")
+    msg.subscribe("publishServoDisable")
+    msg.subscribe("publishServoStopped")
+    // msg.subscribe("publishServoStarted")
+    msg.subscribe("publishServoMoveTo")
+    msg.subscribe("publishServoSetSpeed")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')

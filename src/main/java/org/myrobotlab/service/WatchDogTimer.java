@@ -12,9 +12,10 @@ import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.WatchDogTimerConfig;
 import org.slf4j.Logger;
 
-public class WatchDogTimer extends Service {
+public class WatchDogTimer extends Service<WatchDogTimerConfig> {
 
   List<Message> globalActions = new ArrayList<Message>();
 
@@ -46,6 +47,7 @@ public class WatchDogTimer extends Service {
     int sleepIntervalMs = 200;
     private boolean autoDeactivate = false;
 
+    @Override
     public String toString() {
       return CodecUtils.toJson(this);
     }
@@ -150,6 +152,7 @@ public class WatchDogTimer extends Service {
     String checkPointName;
     boolean active = false;
 
+    @Override
     public String toString() {
       return CodecUtils.toJson(this);
     }
@@ -276,7 +279,10 @@ public class WatchDogTimer extends Service {
    * named method to "check-in" - a service calls this function to say
    * "everything is ok"
    * 
+   * @param watchDogTimerName
+   *          name of timer
    * @param checkPointName
+   *          checkpoint name
    */
 
   public void checkPoint(String watchDogTimerName, String checkPointName) {

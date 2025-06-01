@@ -1,6 +1,5 @@
 package org.myrobotlab.framework;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -29,8 +28,6 @@ import picocli.CommandLine.Option;
 @Command(name = "java -jar myrobotlab.jar ")
 public class CmdOptions {
 
-  public final String DEFAULT_CONNECT = "http://localhost:8888";
-
   static boolean contains(List<String> l, String flag) {
     for (String f : l) {
       if (f.equals(flag)) {
@@ -40,67 +37,34 @@ public class CmdOptions {
     return false;
   }
 
-  // FIXME - should work with a startup ...
-  @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
-      + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
-  public String addKeys[];
-
-  // launcher ??
-  @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
-  public boolean autoUpdate = false;
-
   // launcher
-  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-      + "All configuration of last run is saved to {data-dir}/lastjson. This file can be used as a starter config for subsequent --cfg config.json. "
-      + "If this value is set, all other configuration flags are ignored.")
-  public String config = null;
-
   @Option(names = { "-c",
-      "--connect" }, arity = "0..*", /*
-                                      * defaultValue = DEFAULT_CONNECT,
-                                      */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
-  public String connect = null;
-
-  // TODO - daemon / fork
-  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
-  public boolean daemon = false;
-
-  // if --from-launcher knows to createAndStart service on -s
-  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  public boolean fromLauncher = false;
+      "--config" }, fallbackValue = "default", description = "Specify a configuration set to start. The config set is a directory which has all the necessary configuration files. It loads runtime.yml first, and subsequent service configuration files will then load. \n example: --config my-config-dir to start the configuration stored in config data/config/my-config-dir")
+  public String config = null;
 
   @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
-
-  @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+  @Option(names = {
+      "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
   public String id;
 
   @Option(names = { "-i",
       "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {serviceType} installs dependencies for a specific service, if no type is specified then all services are installed")
   public String install[];
 
-  @Option(names = { "-I",
-      "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
-  public String invoke[];
-
-  // for launcher
   @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
   public String jvm;
 
-  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+  @Option(names = { "-l",
+      "--log-level" }, description = "log level - helpful for troubleshooting [debug info warn error]")
   public String logLevel = "info";
 
-  // FIXME - highlight or italics for examples !!
-  // launcher
   @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
   public String memory = null;
 
   @Option(names = { "-s", "--service",
       "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
   public List<String> services = new ArrayList<>();
-
-  @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
-  public boolean virtual = false;
 
   public CmdOptions() {
   }
@@ -136,50 +100,21 @@ public class CmdOptions {
   }
 
   /**
-   * Command options data object will return the options in List form
-   * to be appended to the ProcessBuilder(List)
+   * Command options data object will return the options in List form to be
+   * appended to the ProcessBuilder(List)
    * 
-   * @return
+   * @return the list of output command
    * @throws IOException
+   *                     boom
+   * 
    */
   public List<String> getOutputCmd() throws IOException {
 
     List<String> cmd = new ArrayList<>();
 
-    if (addKeys != null) {
-      cmd.add("-k");
-      for (int i = 0; i < addKeys.length; ++i) {
-        cmd.add(addKeys[i]);
-      }
-    }
-
-    if (autoUpdate) {
-      cmd.add("-a");
-    }
-
     if (config != null) {
       cmd.add("--config");
       cmd.add(config);
-    }
-
-    if (connect != null) {
-      cmd.add("-c");
-      cmd.add(connect);
-    }
-
-    if (daemon) {
-      cmd.add("-d");
-    }
-
-    if (invoke != null) {
-      cmd.add("-I");
-      for (int i = 0; i < invoke.length; ++i) {
-        cmd.add(invoke[i]);
-      }
-    }
-
-    if (fromLauncher) {
-      cmd.add("--from-launcher");
     }
 
     if (help) {
@@ -218,17 +153,13 @@ public class CmdOptions {
       services.add("python");
       services.add("Python");
     }
-    
+
     if (services.size() % 2 != 0) {
       throw new IOException("invalid choice - services must be -s {name} {type} ...");
     }
     cmd.add("-s");
     for (String s : services) {
       cmd.add(s);
-    }
-
-    if (virtual) {
-      cmd.add("-v");
     }
 
     return cmd;

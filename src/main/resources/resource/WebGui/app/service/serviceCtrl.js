@@ -1,11 +1,7 @@
 angular.module('mrlapp.service')
-        .controller('serviceCtrl', ['$scope', '$log', '$uibModal', 'mrl', 'noWorkySvc',
-            function ($scope, $log, $uibModal, mrl, noWorkySvc) {
-                $log.info('serviceCtrl', $scope.panel.name);
-
-//                var isUndefinedOrNull = function (val) {
-//                    return angular.isUndefined(val) || val === null;
-//                };
+        .controller('serviceCtrl', ['$scope', '$uibModal', 'mrl', 'noWorkySvc',
+            function ($scope, $uibModal, mrl, noWorkySvc) {
+                console.info('serviceCtrl', $scope.panel.name);
 
                 $scope.release = function () {
                     mrl.sendTo(mrl.getRuntime().name, 'release', $scope.panel.name);

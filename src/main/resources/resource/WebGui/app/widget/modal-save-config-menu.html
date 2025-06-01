@@ -1,0 +1,28 @@
+<div name="modalWindow" class="modal-content">
+    <div class="modal-header">
+        <!-- button type="button" class="closeNotElement" data-dismiss="modal" aria-hidden="true"
+                ng-click="cancel()">&times;</button -->
+        <h4 class="modal-title" id="myModalLabel">{{title }}</h4>
+    </div>
+    <div class="modal-body">
+        {{ text }}
+
+        <div class="form-inline">
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="panel.configDir" placeholder="myconfig">
+                <!--
+                <button type="button" class="btn btn-primary" ng-click='saveConfig()' tooltip="saves the currents config"
+                    tooltip-placement="bottom">save</button> -->
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn" ng-class="buttons.cancelButton.buttonStyle" data-dismiss="modal"
+                ng-show="buttons.cancelButton" ng-click="cancel()">{{buttons.cancelButton.buttonText}}
+        </button>
+        <button ng-repeat="btn in buttons.buttonSet" type="button" class="btn" ng-class="btn.buttonStyle"
+                data-dismiss="modal" ng-click="btnClicked(btn.callbackFunction)">{{btn.buttonText }}
+        </button>
+    </div>
+</div>

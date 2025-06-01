@@ -30,10 +30,10 @@ if ("virtual" in globals() and virtual):
 # TODO - list & print axis
 
 # start the services
-sabertooth = Runtime.start("sabertooth","Sabertooth")
-m1 = Runtime.start("m1","MotorPort")
-m2 = Runtime.start("m2","MotorPort")
-joy = Runtime.start("joy","Joystick")
+sabertooth = runtime.start("sabertooth","Sabertooth")
+m1 = runtime.start("m1","MotorPort")
+m2 = runtime.start("m2","MotorPort")
+joy = runtime.start("joy","Joystick")
 joy.setController(controllerIndex)
 
 # configure services

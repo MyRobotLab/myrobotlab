@@ -4,137 +4,249 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
+import org.myrobotlab.framework.Peer;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.slf4j.Logger;
 
-public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, Attachable {
+public interface ServiceInterface extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher,
+    ServiceStatus, TaskManager, Attachable, MessageInvoker, Comparable<ServiceInterface>/*, ConfigurableService<ServiceConfig> */{
 
-  /**
-   * this is a local method which adds a request from some foreign service with
-   * address information (otherService/callback) for a topic callback Adds an
-   * entry on the notify list
-   * 
-   * @param localTopic
-   *          l
-   * @param otherService
-   *          o
-   * @param callback
-   *          c
-   * 
-   */
+  // does this work ?
+  Logger log = LoggerFactory.getLogger(Service.class);
 
   /**
-   * virtualize the service, in this mode the service should not use any "real"
-   * hardware
+   * When set service will attempt to provide services with no hardware
+   * dependencies. Some services have the capablity to mock hardware such as the
+   * Serial and Arduino services.
    * 
    * @param b
-   * @return
+   *          true to set the virtual mode
+   * @return the value
+   * 
    */
-  public boolean setVirtual(boolean b);
+  boolean setVirtual(boolean b);
 
   /**
    * check to see if the service is running in a virtual mode
    * 
-   * @return
+   * @return true if in virtual mode.
+   * 
    */
-  public boolean isVirtual();
+  boolean isVirtual();
 
-  public String[] getDeclaredMethodNames();
+  String[] getDeclaredMethodNames();
 
-  public Method[] getDeclaredMethods();
+  Method[] getDeclaredMethods();
 
-  public URI getInstanceId();
+  URI getInstanceId();
 
-  public String[] getMethodNames();
+  String[] getMethodNames();
 
-  public Method[] getMethods();
+  Method[] getMethods();
 
-  public List<MRLListener> getNotifyList(String key);
+  List<MRLListener> getNotifyList(String key);
 
-  public List<String> getNotifyListKeySet();
+  List<String> getNotifyListKeySet();
 
-  public Inbox getInbox();
+  Inbox getInbox();
 
-  public Outbox getOutbox();
+  Outbox getOutbox();
 
-  public String getSimpleName();
-
-  // important to maintain a method to return canonical type
-  // important in the future when other services are expressed differently
-  // e.g.(node js services)
-  public String getType();
-
-  public boolean hasPeers();
+  @Override
+  String getSimpleName();
 
   /**
-   * recursive release - releases all peers and their peers etc. then releases
-   * this service
+   * equivalent to getClass().getCanonicalName()
+   *
+   * @return type string
    */
-  public void releasePeers();
+  String getTypeKey();
 
-  public void releaseService();
+
+  /**
+   * Does the meta data of this service define peers
+   * Keys to Peers - the keys are string constants the service uses to refer to a
+   * Peer service. The key never changes. However, the Peer's name and type can.
+   * This returns all peers for a service.
+   * 
+   * @return all peers
+   */
+  Map<String, Peer> getPeers();
+
+  /**
+   * Returns peers keys. Peer key is the hardcoded key a composite service
+   * references its peers with - actual name may vary
+   * 
+   * @return all peer keys
+   */
+  Set<String> getPeerKeys();
+
+  /**
+   * Returns the peer key if a name is supplied and matches a peer name
+   * 
+   * @param name
+   *          - service name
+   * @return - coorisponding peer key if it exists
+   */
+  String getPeerKey(String name);
+
+  /**
+   * Service life-cycle method: releaseService will call stopService, release
+   * its peers, do any derived business logic to release resources, then
+   * un-register itself
+   */
+  void releaseService();
 
   /**
    * called by runtime when system is shutting down a service can use this
    * method when it has to do some "ordered" cleanup
    */
-  public void preShutdown();
+  void preShutdown();
 
   /**
    * asked by the framework - to determine if the service needs to be secure
    * 
    * @return true/false
    */
-  public boolean requiresSecurity();
+  boolean requiresSecurity();
 
-  public void setInstanceId(URI uri);
-
-  public void setName(String prefix);
-
-  public void startService();
+  void setInstanceId(URI uri);
 
   /**
-   * loads json config and starts the service
+   * Service life cycle method - calls create, and starts any necessary
+   * resources to function
    */
-  public void loadAndStart();
-
-  public void stopService();
-
-  public String clearLastError();
-
-  public boolean hasError();
-
-  public void out(String method, Object retobj);
-
-  public boolean isRuntime();
-
-  // FIXME - meta data needs to be infused into instance
-  public String getDescription();
-
-  public Map<String, MethodEntry> getMethodMap();
-
-  public boolean isReady();
-
-  public boolean isRunning();
+  void startService();
 
   /**
-   * the order this service was created in relation to the other service
-   * 
+   * @return get a services current config
+   *
+   */
+  ServiceConfig getConfig();
+
+  /**
+   * reflectively sets a part of config
+   *   
+   * @param fieldname
+   * @param value
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   */
+  void setConfigValue(String fieldname, Object value)  throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException;
+
+
+  /**
+   * Service life-cycle method, stops the inbox and outbox threads - typically
+   * does not release "custom" resources. It's purpose primarily is to stop
+   * messaging from flowing in or out of this service - which is handled in the
+   * base Service class. Most times this method will not need to be overriden
+   */
+  void stopService();
+
+  String clearLastError();
+
+  boolean hasError();
+
+  void out(String method, Object retobj);
+
+  boolean isRuntime();
+
+  String getDescription();
+
+  Map<String, MethodEntry> getMethodMap();
+
+  boolean isReady();
+
+  boolean isRunning();
+
+  /**
    * @param creationCount
+   *          the order this service was created in relation to the other
+   *          service
    */
-  public void setOrder(int creationCount);
+  void setOrder(int creationCount);
 
-  public String getId();
+  String getId();
 
-  public String getFullName();
+  String getFullName();
 
-  public void loadLocalizations();
+  void loadLocalizations();
 
-  public void setLocale(String code);
+  void setLocale(String code);
 
+  int getCreationOrder();
+
+  MetaData getMetaData();
+  
+
+  /**
+   * Release a peer.
+   * @param peerKey
+   */
+  public void releasePeer(String peerKey);
+  
+  /**
+   * Release a set of peers in the order they are provided.
+   * @param peerKeys
+   */
+  public void releasePeers(String[] peerKeys);
+
+
+  /**
+   * Start a peer using a peerKey E.g. inside InMoov service startPeer("head").
+   * 
+   * @param peerKey
+   * @return
+   */
+  ServiceInterface startPeer(String peerKey);
+  
+  
+  /**
+   * Start a set of peers in the order they are provided.
+   * @param peerKeys
+   */
+  public void startPeers(String[] peerKeys);
+
+
+  /**
+   * Setting an instance id on the service - this represents the running
+   * instance's identifier which would be the service's home
+   * 
+   * @param id
+   */
+  void setId(String id);
+
+  /**
+   * Get a clone of config that is filtered based on service preference
+   * 
+   * @return a service config
+   */
+  ServiceConfig getFilteredConfig();
+
+  /**
+   * Adds the subscribers specified in the Service.listener as listeners to
+   * this service.
+   * 
+   * @param config
+   * @return a service config
+   */
+  public ServiceConfig addConfigListeners(ServiceConfig config);
+
+  /**
+   * get all the subscriptions to this service
+   * 
+   * @return - a map of current listeners (subscriptions)
+   */
+  public Map<String, List<MRLListener>>  getNotifyList();
 }

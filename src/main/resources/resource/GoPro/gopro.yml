@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.GoProConfig
+listeners: null
+peers:
+  http:
+    autoStart: true
+    name: gopro.http
+    type: HttpClient
+type: GoPro

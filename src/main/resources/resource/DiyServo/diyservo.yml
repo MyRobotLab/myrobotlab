@@ -1,0 +1,28 @@
+!!org.myrobotlab.service.config.DiyServoConfig
+autoDisable: false
+clip: true
+controller: null
+enabled: true
+idleTimeout: null
+inverted: false
+listeners: null
+maxIn: 180.0
+maxOut: 180.0
+minIn: 0.0
+minOut: 0.0
+peers:
+  motor:
+    autoStart: true
+    name: diyservo.motor
+    type: MotorDualPwm
+  pid:
+    autoStart: true
+    name: diyservo.pid
+    type: Pid
+pin: null
+rest: 90.0
+speed: null
+sweepMax: null
+sweepMin: null
+synced: null
+type: DiyServo

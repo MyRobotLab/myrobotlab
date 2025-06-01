@@ -2,13 +2,22 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.LocalSpeechConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
@@ -16,7 +25,7 @@ import org.slf4j.Logger;
 /**
  * Local OS speech service
  * 
- * windows and macos compatible
+ * Linux, Windows and OSx compatible
  *
  * @author moz4r
  *
@@ -39,17 +48,27 @@ import org.slf4j.Logger;
  *         mb-en1 -w out.wav espeak -v mb-us1 "Hello world, how are you doing
  *         today?"
  * 
- * 
  *         MBROLA voices -
  *         https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
  */
-public class LocalSpeech extends AbstractSpeechSynthesis {
+public class LocalSpeech extends AbstractSpeechSynthesis<LocalSpeechConfig> {
+
+  public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
-  private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
+  protected String mimicPath = getResourceDir() + fs + "mimic" + fs + "mimic.exe";
+
+  protected boolean removeExt = false;
+
+  protected String ttsCommand = null;
+
+  protected boolean ttsHack = false;
+
+  protected Set<String> types = new HashSet<>(Arrays.asList("Espeak", "Festival", "Mimic", "MsSpeech", "Say", "Tts", "Pico2Wav"));
+
+  protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
 
   public LocalSpeech(String n, String id) {
     super(n, id);
@@ -58,60 +77,75 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
+    // the actual filename on the file system
     String localFileName = getLocalFileName(toSpeak);
 
+    // the cmd filename - in some cases cmd templates don't want the extension
+    String filename = localFileName;
+    if (removeExt) {
+      // some cmd line require the filename without ext be supplied
+      filename = localFileName.substring(0, localFileName.lastIndexOf("."));
+    }
+
+    if (ttsHack) {
+      // lame tts.exe on windows appends "0.mp3" to whatever filename was
+      // supplied wtf?
+      filename = filename.substring(0, filename.length() - 5);
+    }
+
+    // filter out breaking chars
+    if (config.replaceChars == null) {
+      // if not user defined - escape double quotes to not affect templates
+      config.replaceChars = new HashMap<>();
+      config.replaceChars.put("\'", "\'\'");
+    }
+    for (String target : config.replaceChars.keySet()) {
+      toSpeak = toSpeak.replace(target, config.replaceChars.get(target));
+    }
+
     Platform platform = Runtime.getPlatform();
-    String filename = getLocalFileName(toSpeak);
-    if (filename == null) {
+    if (ttsCommand == null) {
+      log.error("tts command is invalid");
       return null;
+    }
+    String cmd = ttsCommand.replace("{text}", toSpeak);
+
+    cmd = cmd.replace("{filename}", filename);
+
+    if (getVoice() != null) {
+      cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
+      cmd = cmd.replace("{voice_name}", getVoice().getName());
     }
 
     if (platform.isWindows()) {
-      // GAH ! .. tts.exe isn't like a Linux app where -o means output file to
-      // "exact" name ...
-      // unfortunately it appends .mp3 :P
-      // so here we have to trim it off
+      // Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
+      List<String> args = new ArrayList<>();
 
-      filename = filename.substring(0, filename.length() - 5);
-      String cmd = "\"" + ttsPath + "\" -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
-      Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
-    } else if (platform.isMac()) {
-      // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
-      // ttsExeOutputFilePath + uuid + "0.AIFF");
-      String cmd = "say \"" + toSpeak + "\"" + "-o " + filename;
-      Runtime.execute(cmd);
-    } else if (platform.isLinux()) {
-      // ProcessBuilder pb = new ProcessBuilder()
-      // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
-      String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'",
-      // "").replace("|",
-      // "");
-      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
-      // --tts");
+      // https://thinkpowershell.com/create-cortana-audio-files-from-text-using-powershell/
+      // https://mcpmag.com/articles/2018/03/07/talking-through-powershell.aspx
 
-      // apt install espeak
-      // sudo apt-get install mbrola mbrola-en1
-      // espeak -f speak.txt -w out.wav
-      // espeak -ven-sc -f speak.txt -w out.wav
-      Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
-      // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
-      p.waitFor();
-      // audioFile.play(audioData);
+      // windows 10 minimum - power shell interface - output in json
+      args.add("Add-Type -AssemblyName System.Speech;");
+      args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+      args.add("$speak.SelectVoice('" + getVoice().getVoiceProvider().toString() + "');");
+      args.add("$speak.SetOutputToWaveFile('" + localFileName + "');");
+      args.add("$speak.speak('" + toSpeak + "')");
+      String ret = Runtime.execute(getWindowsPowerShell(), args, null, null, true);
+
+      log.info("powershell returned : {}", ret);
+
+    } else {
+      Runtime.execute("bash", "-c", cmd);
     }
 
-    /*
-     * String cmd = getTtsCmdLine(toSpeak);
-     * 
-     * 
-     */
     File fileTest = new File(localFileName);
     if (fileTest.exists() && fileTest.length() > 0) {
       return new AudioData(localFileName);
     } else {
       if (platform.isLinux()) {
-        error("0 byte file - is festival installed?  apt install festival");
+        error("0 byte file - please install a speech program: sudo apt-get install -y festival espeak speech-dispatcher gnustep-gui-runtime");
       } else {
-        error("%s returned 0 byte file !!! - it may block you", getName());
+        error("%s returned 0 byte file !!! - error with speech generation");
       }
       return null;
     }
@@ -121,13 +155,39 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * overridden because mac is silly for not being mp3 and ms tts is a mess
    * because it appends 0.mp3 :P
    */
+  @Override
   public String getAudioCacheExtension() {
-    if (Platform.getLocalInstance().isMac()) {
-      return ".aiff";
-    } else if (Platform.getLocalInstance().isWindows()) {
-      return "0.mp3"; // ya stoopid no ?
-    }
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
+  }
+
+  public Map<String, String> getFilter() {
+    return ((LocalSpeechConfig) config).replaceChars;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return Locale.getLocaleMap("en-US");
+  }
+
+  /**
+   * @return get the tts command template
+   */
+  public String getTtsCommand() {
+    return ttsCommand;
+  }
+
+  public String getTtsPath() {
+    return ttsPath;
+  }
+  
+  /**
+   * Powershell is sometimes on the PATH, this will find it hopefully
+   * @return absolute evaluated path to powershell.exe
+   */
+  public String getWindowsPowerShell() {
+    String systemRoot = System.getenv("SYSTEMROOT");
+    String command = systemRoot + "\\system32\\WindowsPowerShell\\v1.0\\powershell.exe";
+    return command;
   }
 
   /**
@@ -137,9 +197,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * Use protected addVoice(name, gender, lang, voiceProvider) to add voices
    * Voice.voiceProvider allows a serializable key to map MRL's Voice to a
    * implementation of a voice
+   * 
+   * FIXME create voices based on type, some types support different languages
+   * .. some do not
+   * 
    */
   @Override
-  protected void loadVoices() {
+  public void loadVoices() {
 
     if (voices.size() > 0) {
       log.info("already loaded voices");
@@ -148,81 +212,279 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     Platform platform = Platform.getLocalInstance();
 
-    // voices returned from local app
     String voicesText = null;
 
+    // FIXME this is not right - it should be based on speechType not OS
+    // speechType should be "set" based on OS and user preference
     if (platform.isWindows()) {
-      voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
-      log.info("cmd {}", voicesText);
+      try {
 
-      String[] lines = voicesText.split(System.getProperty("line.separator"));
-      for (String line : lines) {
-        // String[] parts = cmd.split(" ");
-        // String gender = "female"; // unknown
-        String lang = "en-US"; // unknown
+        List<String> args = new ArrayList<>();
 
-        if (line.startsWith("Exit")) {
-          break;
-        }
-        String[] parts = line.split(" ");
-        if (parts.length < 2) { // some voices are not based on a standard
-                                // pattern
-          continue;
-        }
-        // lame-ass parsing ..
-        // standard sapi pattern is 5 parameters :
-        // INDEX PROVIDER VOICE_NAME PLATEFORM - LANG
-        // we need INDEX, VOICE_NAME, LANG
-        // but .. some voices dont use it, we will try to detect pattern and
-        // adapt if no respect about it :
+        // windows 10 minimum - power shell interface - output in json
+        args.add("Add-Type -AssemblyName System.Speech;");
+        args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+        args.add("$speak.GetInstalledVoices() |");
+        args.add("Select-Object  -Property * | ");
+        // args.add("Select-Object -Property Culture, Name, Gender, Age");
+        args.add("ConvertTo-Json ");
+        voicesText = Runtime.execute(getWindowsPowerShell(), args, null, null, true);
 
-        // INDEX :
-        String voiceProvider = parts[0];
+        // voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\""
+        // + " -V" + "\"");
 
-        // VOICE_NAME
-        String voiceName = "Unknown" + voiceProvider; // default name if there
-                                                      // is an issue
-        // it is standard, cool
-        if (parts.length >= 6) {
-          voiceName = parts[2];// line.trim();
-        }
-        // almost standard, we have INDEX PROVIDER VOICE_NAME
-        else if (parts.length > 2) {
-          voiceName = line.split(" ")[2];
-        }
-        // non standard at all ... but we catch it !
-        else {
-          voiceName = line.split(" ")[1];
+        log.info("voicesText {}", voicesText);
+
+        int pos0 = voicesText.indexOf("[");
+        int pos1 = voicesText.lastIndexOf("]");
+
+        if (pos0 == -1 || pos1 == -1) {
+          error("could not get voices - request returned: %s", voicesText);
         }
 
-        // LANG ( we just detect for a keyword inside the whole string, because
-        // position is random sometime )
-        // TODO: locale converter from keyword somewhere ?
+        String json = voicesText.substring(pos0, pos1 + 1);
 
-        if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
-          lang = "fr-FR";
+        Object[] vo = CodecUtils.decodeArray(json);
+
+        for (Object v : vo) {
+          @SuppressWarnings("unchecked")
+          Map<String, Object> m = (Map<String, Object>) v;
+          @SuppressWarnings("unchecked")
+          Map<String, Object> vi = (Map<String, Object>) m.get("VoiceInfo");
+          String name = vi.get("Name").toString();
+          String gender = vi.get("Gender").toString().equals("1.0") ? "male" : "female";
+          String lang = vi.get("Culture").toString();
+          addVoice(name, gender, lang, name);
         }
 
-        try {
-          // verify integer
-          Integer.parseInt(voiceProvider);
-          // voice name cause issues because of spaces or (null), let's just use
-          // original number as name...
-          addVoice(voiceName, null, lang, voiceProvider);
-        } catch (Exception e) {
-          continue;
-        }
+      } catch (Exception e) {
+        error(e);
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
-      voicesText = Runtime.execute("say -v");
+      voicesText = Runtime.execute("bash", "-c", "say -v ?");
 
-      // FIXME - implement parse -v output
-      addVoice("fred", "male", "en-US", "fred"); // in the interim added 1 voice
-    } else if (platform.isLinux()) {
-      addVoice("Linus", "male", "en-US", "festival");
+      // "say -v ?" outputs a list of available TTS voices under MacOS, oner per
+      // line.
+      // eg: "Agnes en_US # Isn't it nice to have a computer that will talk to
+      // you?"
+
+      Pattern pattern = Pattern.compile("^(\\w+)\\s+(\\w+)\\s+(.+)$");
+      String lines[] = voicesText.split("\\r?\\n");
+
+      for (int i = 0; i <= lines.length - 1; i++) {
+        Matcher matcher = pattern.matcher(lines[i]);
+        if (matcher.find()) {
+          addVoice(matcher.group(1).toLowerCase(), "male", matcher.group(2), matcher.group(1).toLowerCase());
+        }
+      }
     }
+    // let apply config add and set the voices
+    // else if (platform.isLinux()) {
+    // addVoice("Linus", "male", "en-US", "festival");
+    // }
+  }
+
+  public void removeExt(boolean b) {
+    removeExt = b;
+  }
+
+  /**
+   * @return setEspeak sets the Linux tts to espeak template
+   */
+  public boolean setEspeak() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("espeak only supported on Linux");
+      return false;
+    }
+
+    config.speechType = "Espeak";
+    voices.clear();
+    addVoice("espeak", "male", "en-US", "espeak");
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("espeak \"{text}\" -w {filename}");
+    return true;
+  }
+
+  /**
+   * @return setFestival sets the Linux tts to festival template
+   */
+  public boolean setFestival() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+
+    voices.clear();
+    addVoice("Linus", "male", "en-US", "festival");
+    config.speechType = "Festival";
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
+    return true;
+  }
+
+  /**
+   * setPico2Wav attempts to switch the sub template of Local Speech
+   * 
+   * @return true if successfully switched
+   */
+  public boolean setPico2Wav() {
+    if (!Runtime.getPlatform().isLinux()) {
+      error("pico2wave only supported on Linux");
+      return false;
+    }
+
+    config.speechType = "Pico2Wav";
+    removeExt(false);
+    setTtsHack(false);
+
+    voices.clear();
+    addVoice("de-DE", "female", "de-DE", "pico2wav");
+    addVoice("en-GB", "female", "en-GB", "pico2wav");
+    addVoice("en-US", "female", "en-US", "pico2wav");
+    addVoice("es-ES", "female", "es-ES", "pico2wav");
+    addVoice("fr-FR", "female", "fr-FR", "pico2wav");
+    addVoice("it-IT", "female", "it-IT", "pico2wav");
+
+    if (voice == null) {
+      setVoice(getLocale().getTag());
+    }
+
+    setTtsCommand("pico2wave -l {voice_name} -w {filename} \"{text}\" ");
+
+    broadcastState();
+    return true;
+  }
+
+  /**
+   * String of characters to filter out of text to create the tts command.
+   * Typically double quotes should be filtered out of the command as creating
+   * the text to speech process command can be broken by double quotes
+   * 
+   * @param target
+   * @param replace
+   */
+  public void addFilter(String target, String replace) {
+
+    if (config.replaceChars == null) {
+      config.replaceChars = new HashMap<>();
+    }
+    config.replaceChars.put(target, replace);
+  }
+
+  /**
+   * @return setMimic sets the Windows mimic template
+   */
+  public boolean setMimic() {
+
+    config.speechType = "Mimic";
+    removeExt(false);
+    setTtsHack(false);
+    if (Runtime.getPlatform().isWindows()) {
+      setTtsCommand(mimicPath + " -voice " + getVoice() + " -o {filename} -t \"{text}\"");
+    } else {
+      setTtsCommand("mimic -voice " + getVoice() + " -o {filename} -t \"{text}\"");
+    }
+    return true;
+  }
+
+  @Deprecated /*
+               * use appopriate named setSpeechType setter - use setSpeechType
+               */
+  public String setType(String type) {
+    return setSpeechType(type);
+  }
+
+  public String setSpeechType(String speechType) {
+    if (types.contains(speechType)) {
+      // clever way to demux
+      invoke("set" + speechType);
+      return speechType;
+    }
+    error("%s is not a valid type, can be %s", speechType, types);
+    return null;
+  }
+
+  public String getSpeechType() {
+
+    return config.speechType;
+  }
+
+  /**
+   * Microsoft Speech Synthesis template
+   * 
+   * @return true if windows
+   */
+  public boolean setMsSpeech() {
+    if (!Runtime.getPlatform().isWindows()) {
+      error("microsoft speech is only supported on Windows");
+      return false;
+    }
+
+    config.speechType = "MsSpeech";
+
+    removeExt(false);
+    setTtsHack(false);
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Add-Type -AssemblyName System.Speech;");
+    sb.append("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+    sb.append("$speak.SelectVoice(\"{{voice_name} }\");\n");
+    sb.append("$speak.SetOutputToWaveFile(\"{filename}\");\n");
+    sb.append("$speak.speak(\"{text}\")\n");
+
+    return true;
+  }
+
+  /**
+   * @return setSay sets the Mac say template
+   */
+  public boolean setSay() {
+
+    config.speechType = "Say";
+    removeExt(false);
+    setTtsHack(false);
+    setTtsCommand("/usr/bin/say -v {voice_name} --data-format=LEF32@22050 -o {filename} \"{text}\"");
+    if (!Runtime.getPlatform().isMac()) {
+      error("say only supported on Mac");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @return setFestival sets the Windows tts template
+   * 
+   */
+  public boolean setTts() {
+
+    config.speechType = "Tts";
+    removeExt(false);
+    setTtsHack(true);
+    setTtsCommand("\"" + ttsPath + "\" -f 9 -v {voice} -o {filename} -t \"{text}\"");
+    if (!Runtime.getPlatform().isWindows()) {
+      error("tts only supported on Windows");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param ttsCommand
+   *          set the tts command template
+   * 
+   */
+  public void setTtsCommand(String ttsCommand) {
+
+    info("LocalSpeech speechType %s template is now: %s", config.speechType, ttsCommand);
+    this.ttsCommand = ttsCommand;
+  }
+
+  public void setTtsHack(boolean b) {
+    ttsHack = b;
   }
 
   /**
@@ -236,33 +498,115 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     this.ttsPath = ttsPath;
   }
 
-  public String getTtsPath() {
-    return ttsPath;
+  public boolean isExecutableAvailable(String executableName) {
+    ProcessBuilder processBuilder = new ProcessBuilder();
+    String command = "";
+    boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+    if (isWindows) {
+      command = "where " + executableName;
+    } else {
+      command = "which " + executableName;
+    }
+    processBuilder.command("sh", "-c", command);
+    try {
+      Process process = processBuilder.start();
+      process.waitFor();
+      return process.exitValue() == 0;
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
-  @Override
-  public Map<String, Locale> getLocales() {
-    return Locale.getLocaleMap("en-US");
+  public LocalSpeechConfig apply(LocalSpeechConfig config) {
+    super.apply(config);
+
+    // setup the default tts per os
+    Platform platform = Runtime.getPlatform();
+    if (config.speechType == null) {
+      if (platform.isWindows()) {
+        setTts();
+      } else if (platform.isMac()) {
+        setSay();
+      } else if (platform.isLinux()) {
+        if (isExecutableAvailable("pico2wave")) {
+          setPico2Wav();
+        } else {
+          setFestival();
+        }
+      } else {
+        error("%s unknown platform %s", getName(), platform.getOS());
+      }
+    } else {
+      setSpeechType(config.speechType);
+    }
+
+    if (config.voice != null) {
+      setVoice(config.voice);
+    }
+    return config;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
+    try {
 
-    LoggingFactory.init(Level.INFO);
-    Runtime.start("gui", "SwingGui");
+      // Runtime.main(new String[] { "--id", "admin"});
+      LoggingFactory.init("INFO");
 
-    LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
-    speech.speakBlocking("hello my name is sam, sam i am");
-    // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
-    // #LAUGH01_F# very funny");
-    // speech.getVoices();
-    // speech.setVoice("1");
-    /*
-     * speech.speak(String.format("hello yes yes yes, my voice name is %s",
-     * speech.getVoice().getName()));
-     * speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
-     * speech.speak("unicode éléphant");
-     */
+      // Runtime.startConfig("localspeech-01");
+
+      LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
+      // mouth.setSay();
+      // mouth.speakBlocking("test 1 2 3");
+      // mouth.speakBlocking("hello my name is sam, sam i am yet again, how
+      // \"are you? do you 'live in a zoo too? ");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      // mouth.setMimic();
+
+      String program = "Add-Type -AssemblyName System.Speech";
+      // String[] program = new
+      // String[]{"powershell.exe","$PSVersionTable.PSVersion"};
+
+      List<String> arguments = new ArrayList<>();
+      // arguments.add("$PSVersionTable.PSVersion");
+      arguments.add("Add-Type -AssemblyName System.Speech;");
+      arguments.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+      arguments.add("$speak.speak('HELLO !!!!');");
+      Runtime.execute(mouth.getWindowsPowerShell(), arguments, null, null, true);
+      // log.info(ret);
+
+      mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
+      mouth.setMimic();
+      mouth.speakBlocking("bork bork bork, hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
+      // speech.setTtsCommand("espeak \"{text}\" -w {filename}");
+      mouth.setEspeak();
+      log.info("tts command template is {}", mouth.getTtsCommand());
+      mouth.speakBlocking("i can speak some more");
+      mouth.speakBlocking("my name is bob");
+      mouth.speakBlocking("i have a job");
+      mouth.speakBlocking("and i can dance in a mob");
+      // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
+      // #LAUGH01_F# very funny");
+      // speech.getVoices();
+      // speech.setVoice("1");
+      /*
+       * speech.speak(String.format("hello yes yes yes, my voice name is %s",
+       * speech.getVoice().getName()));
+       * speech.speakBlocking("I am your R 2 D 2 here me speak #R2D2#");
+       * speech.speak("unicode éléphant");
+       */
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
 
   }
-
 }

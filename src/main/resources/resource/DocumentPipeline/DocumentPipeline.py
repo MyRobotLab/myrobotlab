@@ -5,7 +5,7 @@ from org.myrobotlab.service import Runtime
 from org.myrobotlab.document.transformer import WorkflowConfiguration
 from org.myrobotlab.document.transformer import StageConfiguration
 # create the pipeline service
-pipeline = Runtime.createAndStart("docproc", "DocumentPipeline")
+pipeline = runtime.start("docproc", "DocumentPipeline")
 # create a pipeline
 # pipeline.workflowName = "default";
 # create a workflow to load into that pipeline service
@@ -35,7 +35,7 @@ pipeline.setConfig(workflowConfig)
 # initialize the pipeline (load the config)
 pipeline.initalize()
 # create a connector that crawls MyRobotLab RSS url
-rss = Runtime.createAndStart("rss", "RSSConnector")
+rss = runtime.start("rss", "RSSConnector")
 # Attach the output of the rss connector to the pipeline
 rss.addDocumentListener(pipeline)
 # tell the RSS connector to start crawling the site

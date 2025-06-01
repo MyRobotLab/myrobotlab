@@ -12,6 +12,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.Bno055Config;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
@@ -47,7 +48,8 @@ import org.slf4j.Logger;
  * DEALINGS IN THE SOFTWARE. ===============================================
  */
 
-public class Bno055 extends Service implements I2CControl, PinListener {
+public class Bno055 extends Service<Bno055Config> implements I2CControl,PinListener
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -71,75 +73,137 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public enum register {
     // page 0 value
-    CHIP_ID((byte) 0x00, (byte) 0, "Chip ID"), ACC_ID((byte) 0x01, (byte) 0, "Accelerometer ID"), MAG_ID((byte) 0x02, (byte) 0, "Magnetometer ID"), GYR_ID((byte) 0x03, (byte) 0,
-        "Gyroscope ID"), SW_REV_ID_LSB((byte) 0x04, (byte) 0, "SW Revision ID"), SW_REV_ID_MSB((byte) 0x05, (byte) 0, ""), BL_REV_ID((byte) 0x06, (byte) 0,
-            "Bootloader Version"), PAGE_ID((byte) 0x07, (byte) 0, "Page ID"), ACC_DATA_X_LSB((byte) 0x08, (byte) 0, ""), ACC_DATA_X_MSB((byte) 0x09, (byte) 0,
-                ""), ACC_DATA_Y_LSB((byte) 0x0A, (byte) 0, ""), ACC_DATA_Y_MSB((byte) 0x0B, (byte) 0, ""), ACC_DATA_Z_LSB((byte) 0x0C, (byte) 0, ""), ACC_DATA_Z_MSB((byte) 0x0D,
-                    (byte) 0, ""), MAG_DATA_X_LSB((byte) 0x0E, (byte) 0, ""), MAG_DATA_X_MSB((byte) 0x0F, (byte) 0, ""), MAG_DATA_Y_LSB((byte) 0x10, (byte) 0, ""), MAG_DATA_Y_MSB(
-                        (byte) 0x11, (byte) 0, ""), MAG_DATA_Z_LSB((byte) 0x12, (byte) 0, ""), MAG_DATA_Z_MSB((byte) 0x13, (byte) 0, ""), GYR_DATA_X_LSB((byte) 0x14, (byte) 0,
-                            ""), GYR_DATA_X_MSB((byte) 0x15, (byte) 0, ""), GYR_DATA_Y_LSB((byte) 0x16, (byte) 0, ""), GYR_DATA_Y_MSB((byte) 0x17, (byte) 0, ""), GYR_DATA_Z_LSB(
-                                (byte) 0x18, (byte) 0, ""), GYR_DATA_Z_MSB((byte) 0x19, (byte) 0, ""), EUL_HEADING_LSB((byte) 0x1A, (byte) 0, "Euler Heading LSB"), EUL_HEADING_MSB(
-                                    (byte) 0x1B, (byte) 0, "Euler Heading MSB"), EUL_ROLL_LSB((byte) 0x1C, (byte) 0, "Euler Roll LSB"), EUL_ROLL_MSB((byte) 0x1D, (byte) 0,
-                                        "Euler Roll MSB"), EUL_PITCH_LSB((byte) 0x1E, (byte) 0, "Euler Pitch LSB"), EUL_PITCH_MSB((byte) 0x1F, (byte) 0,
-                                            "Euler Pitch MSB"), QUA_DATA_W_LSB((byte) 0x20, (byte) 0, ""), QUA_DATA_W_MSB((byte) 0x21, (byte) 0, ""), QUA_DATA_X_LSB((byte) 0x22,
-                                                (byte) 0, ""), QUA_DATA_X_MSB((byte) 0x23, (byte) 0, ""), QUA_DATA_Y_LSB((byte) 0x24, (byte) 0, ""), QUA_DATA_Y_MSB((byte) 0x25,
-                                                    (byte) 0, ""), QUA_DATA_Z_LSB((byte) 0x26, (byte) 0, ""), QUA_DATA_Z_MSB((byte) 0x27, (byte) 0, ""), LIA_DATA_X_LSB((byte) 0x28,
-                                                        (byte) 0, ""), LIA_DATA_X_MSB((byte) 0x29, (byte) 0, ""), LIA_DATA_Y_LSB((byte) 0x2A, (byte) 0, ""), LIA_DATA_Y_MSB(
-                                                            (byte) 0x2B, (byte) 0,
-                                                            ""), LIA_DATA_Z_LSB((byte) 0x2C, (byte) 0, ""), LIA_DATA_Z_MSB((byte) 0x2D, (byte) 0, ""), GRV_DATA_X_LSB((byte) 0x2E,
-                                                                (byte) 0, ""), GRV_DATA_X_MSB((byte) 0x2F, (byte) 0, ""), GRV_DATA_Y_LSB((byte) 0x30, (byte) 0, ""), GRV_DATA_Y_MSB(
-                                                                    (byte) 0x31, (byte) 0,
-                                                                    ""), GRV_DATA_Z_LSB((byte) 0x32, (byte) 0, ""), GRV_DATA_Z_MSB((byte) 0x33, (byte) 0, ""), TEMP((byte) 0x34,
-                                                                        (byte) 0, "Temperature"), CALIB_STAT((byte) 0x35, (byte) 0, "Calibration Status"), ST_RESULT((byte) 0x36,
-                                                                            (byte) 0, ""), INT_STA((byte) 0x37, (byte) 0, ""), SYS_CLK_STATUS((byte) 0x38, (byte) 0,
-                                                                                ""), SYS_STATUS((byte) 0x39, (byte) 0, ""), SYS_ERR((byte) 0x3A, (byte) 0, ""), UNIT_SEL(
-                                                                                    (byte) 0x3B, (byte) 0,
-                                                                                    "Unit Selection"), OPR_MODE((byte) 0x3D, (byte) 0, "Operation Mode"), PWR_MODE((byte) 0x3E,
-                                                                                        (byte) 0, "Power Mode"), SYS_TRIGGGER((byte) 0x3F, (byte) 0, "System Trigger"), TEMP_SOURCE(
-                                                                                            (byte) 0x40, (byte) 0, "Temperature Source"), AXIS_MAP_CONFIG((byte) 0x41, (byte) 0,
-                                                                                                "Configuration Axis Map"), AXIS_MAP_SIGN((byte) 0x42, (byte) 0,
-                                                                                                    "Axis Sign"), ACC_OFFSET_X_LSB((byte) 0x55, (byte) 0, ""), ACC_OFFSET_X_MSB(
-                                                                                                        (byte) 0x56, (byte) 0,
-                                                                                                        ""), ACC_OFFSET_Y_LSB((byte) 0x57, (byte) 0, ""), ACC_OFFSET_Y_MSB(
-                                                                                                            (byte) 0x58, (byte) 0,
-                                                                                                            ""), ACC_OFFSET_Z_LSB((byte) 0x59, (byte) 0, ""), ACC_OFFSET_Z_MSB(
-                                                                                                                (byte) 0x5A, (byte) 0,
-                                                                                                                ""), MAG_OFFSET_X_LSB((byte) 0x5B, (byte) 0, ""), MAG_OFFSET_X_MSB(
-                                                                                                                    (byte) 0x5C, (byte) 0, ""), MAG_OFFSET_Y_LSB((byte) 0x5D,
-                                                                                                                        (byte) 0, ""), MAG_OFFSET_Y_MSB((byte) 0x5E, (byte) 0,
-                                                                                                                            ""), MAG_OFFSET_Z_LSB((byte) 0x5F, (byte) 0,
-                                                                                                                                ""), MAG_OFFSET_Z_MSB((byte) 0x60, (byte) 0,
-                                                                                                                                    ""), GYR_OFFSET_X_LSB((byte) 0x61, (byte) 0,
-                                                                                                                                        ""), GYR_OFFSET_X_MSB((byte) 0x62, (byte) 0,
-                                                                                                                                            ""), GYR_OFFSET_Y_LSB((byte) 0x63,
-                                                                                                                                                (byte) 0,
-                                                                                                                                                ""), GYR_OFFSET_Y_MSB((byte) 0x64,
-                                                                                                                                                    (byte) 0, ""), GYR_OFFSET_Z_LSB(
-                                                                                                                                                        (byte) 0x65, (byte) 0,
-                                                                                                                                                        ""), GYR_OFFSET_Z_MSB(
-                                                                                                                                                            (byte) 0x66, (byte) 0,
-                                                                                                                                                            ""), ACC_RADIUS_LSB(
-                                                                                                                                                                (byte) 0x67,
-                                                                                                                                                                (byte) 0,
-                                                                                                                                                                ""), ACC_RADIUS_MSB(
-                                                                                                                                                                    (byte) 0x68,
-                                                                                                                                                                    (byte) 0,
-                                                                                                                                                                    ""), MAG_RADIUS_LSB(
-                                                                                                                                                                        (byte) 0x69,
-                                                                                                                                                                        (byte) 0,
-                                                                                                                                                                        ""), MAG_RADIUS_MSB(
-                                                                                                                                                                            (byte) 0x6A,
-                                                                                                                                                                            (byte) 0,
-                                                                                                                                                                            ""),
+    CHIP_ID((byte) 0x00, (byte) 0, "Chip ID"), ACC_ID((byte) 0x01, (byte) 0, "Accelerometer ID"),
+    MAG_ID((byte) 0x02, (byte) 0, "Magnetometer ID"), GYR_ID((byte) 0x03, (byte) 0,
+        "Gyroscope ID"),
+    SW_REV_ID_LSB((byte) 0x04, (byte) 0, "SW Revision ID"), SW_REV_ID_MSB((byte) 0x05, (byte) 0, ""),
+    BL_REV_ID((byte) 0x06, (byte) 0,
+        "Bootloader Version"),
+    PAGE_ID((byte) 0x07, (byte) 0, "Page ID"), ACC_DATA_X_LSB((byte) 0x08, (byte) 0, ""),
+    ACC_DATA_X_MSB((byte) 0x09, (byte) 0,
+        ""),
+    ACC_DATA_Y_LSB((byte) 0x0A, (byte) 0, ""), ACC_DATA_Y_MSB((byte) 0x0B, (byte) 0, ""),
+    ACC_DATA_Z_LSB((byte) 0x0C, (byte) 0, ""), ACC_DATA_Z_MSB((byte) 0x0D,
+        (byte) 0, ""),
+    MAG_DATA_X_LSB((byte) 0x0E, (byte) 0, ""), MAG_DATA_X_MSB((byte) 0x0F, (byte) 0, ""),
+    MAG_DATA_Y_LSB((byte) 0x10, (byte) 0, ""), MAG_DATA_Y_MSB(
+        (byte) 0x11, (byte) 0, ""),
+    MAG_DATA_Z_LSB((byte) 0x12, (byte) 0, ""), MAG_DATA_Z_MSB((byte) 0x13, (byte) 0, ""),
+    GYR_DATA_X_LSB((byte) 0x14, (byte) 0,
+        ""),
+    GYR_DATA_X_MSB((byte) 0x15, (byte) 0, ""), GYR_DATA_Y_LSB((byte) 0x16, (byte) 0, ""),
+    GYR_DATA_Y_MSB((byte) 0x17, (byte) 0, ""), GYR_DATA_Z_LSB(
+        (byte) 0x18, (byte) 0, ""),
+    GYR_DATA_Z_MSB((byte) 0x19, (byte) 0, ""), EUL_HEADING_LSB((byte) 0x1A, (byte) 0, "Euler Heading LSB"),
+    EUL_HEADING_MSB(
+        (byte) 0x1B, (byte) 0, "Euler Heading MSB"),
+    EUL_ROLL_LSB((byte) 0x1C, (byte) 0, "Euler Roll LSB"), EUL_ROLL_MSB((byte) 0x1D, (byte) 0,
+        "Euler Roll MSB"),
+    EUL_PITCH_LSB((byte) 0x1E, (byte) 0, "Euler Pitch LSB"), EUL_PITCH_MSB((byte) 0x1F, (byte) 0,
+        "Euler Pitch MSB"),
+    QUA_DATA_W_LSB((byte) 0x20, (byte) 0, ""), QUA_DATA_W_MSB((byte) 0x21, (byte) 0, ""), QUA_DATA_X_LSB((byte) 0x22,
+        (byte) 0, ""),
+    QUA_DATA_X_MSB((byte) 0x23, (byte) 0, ""), QUA_DATA_Y_LSB((byte) 0x24, (byte) 0, ""), QUA_DATA_Y_MSB((byte) 0x25,
+        (byte) 0, ""),
+    QUA_DATA_Z_LSB((byte) 0x26, (byte) 0, ""), QUA_DATA_Z_MSB((byte) 0x27, (byte) 0, ""), LIA_DATA_X_LSB((byte) 0x28,
+        (byte) 0, ""),
+    LIA_DATA_X_MSB((byte) 0x29, (byte) 0, ""), LIA_DATA_Y_LSB((byte) 0x2A, (byte) 0, ""), LIA_DATA_Y_MSB(
+        (byte) 0x2B, (byte) 0,
+        ""),
+    LIA_DATA_Z_LSB((byte) 0x2C, (byte) 0, ""), LIA_DATA_Z_MSB((byte) 0x2D, (byte) 0, ""), GRV_DATA_X_LSB((byte) 0x2E,
+        (byte) 0, ""),
+    GRV_DATA_X_MSB((byte) 0x2F, (byte) 0, ""), GRV_DATA_Y_LSB((byte) 0x30, (byte) 0, ""), GRV_DATA_Y_MSB(
+        (byte) 0x31, (byte) 0,
+        ""),
+    GRV_DATA_Z_LSB((byte) 0x32, (byte) 0, ""), GRV_DATA_Z_MSB((byte) 0x33, (byte) 0, ""), TEMP((byte) 0x34,
+        (byte) 0, "Temperature"),
+    CALIB_STAT((byte) 0x35, (byte) 0, "Calibration Status"), ST_RESULT((byte) 0x36,
+        (byte) 0, ""),
+    INT_STA((byte) 0x37, (byte) 0, ""), SYS_CLK_STATUS((byte) 0x38, (byte) 0,
+        ""),
+    SYS_STATUS((byte) 0x39, (byte) 0, ""), SYS_ERR((byte) 0x3A, (byte) 0, ""), UNIT_SEL(
+        (byte) 0x3B, (byte) 0,
+        "Unit Selection"),
+    OPR_MODE((byte) 0x3D, (byte) 0, "Operation Mode"), PWR_MODE((byte) 0x3E,
+        (byte) 0, "Power Mode"),
+    SYS_TRIGGGER((byte) 0x3F, (byte) 0, "System Trigger"), TEMP_SOURCE(
+        (byte) 0x40, (byte) 0, "Temperature Source"),
+    AXIS_MAP_CONFIG((byte) 0x41, (byte) 0,
+        "Configuration Axis Map"),
+    AXIS_MAP_SIGN((byte) 0x42, (byte) 0,
+        "Axis Sign"),
+    ACC_OFFSET_X_LSB((byte) 0x55, (byte) 0, ""), ACC_OFFSET_X_MSB(
+        (byte) 0x56, (byte) 0,
+        ""),
+    ACC_OFFSET_Y_LSB((byte) 0x57, (byte) 0, ""), ACC_OFFSET_Y_MSB(
+        (byte) 0x58, (byte) 0,
+        ""),
+    ACC_OFFSET_Z_LSB((byte) 0x59, (byte) 0, ""), ACC_OFFSET_Z_MSB(
+        (byte) 0x5A, (byte) 0,
+        ""),
+    MAG_OFFSET_X_LSB((byte) 0x5B, (byte) 0, ""), MAG_OFFSET_X_MSB(
+        (byte) 0x5C, (byte) 0, ""),
+    MAG_OFFSET_Y_LSB((byte) 0x5D,
+        (byte) 0, ""),
+    MAG_OFFSET_Y_MSB((byte) 0x5E, (byte) 0,
+        ""),
+    MAG_OFFSET_Z_LSB((byte) 0x5F, (byte) 0,
+        ""),
+    MAG_OFFSET_Z_MSB((byte) 0x60, (byte) 0,
+        ""),
+    GYR_OFFSET_X_LSB((byte) 0x61, (byte) 0,
+        ""),
+    GYR_OFFSET_X_MSB((byte) 0x62, (byte) 0,
+        ""),
+    GYR_OFFSET_Y_LSB((byte) 0x63,
+        (byte) 0,
+        ""),
+    GYR_OFFSET_Y_MSB((byte) 0x64,
+        (byte) 0, ""),
+    GYR_OFFSET_Z_LSB(
+        (byte) 0x65, (byte) 0,
+        ""),
+    GYR_OFFSET_Z_MSB(
+        (byte) 0x66, (byte) 0,
+        ""),
+    ACC_RADIUS_LSB(
+        (byte) 0x67,
+        (byte) 0,
+        ""),
+    ACC_RADIUS_MSB(
+        (byte) 0x68,
+        (byte) 0,
+        ""),
+    MAG_RADIUS_LSB(
+        (byte) 0x69,
+        (byte) 0,
+        ""),
+    MAG_RADIUS_MSB(
+        (byte) 0x6A,
+        (byte) 0,
+        ""),
     // page 1 value
-    ACC_CONFIG((byte) 0x08, (byte) 1, "Accelerometer Config"), MAG_CONFIG((byte) 0x09, (byte) 1, "Magetometer Config"), GYR_CONFIG_0((byte) 0x0A, (byte) 1,
-        "Gyroscope Config 0"), GYR_CONFIG_1((byte) 0x0B, (byte) 1, "Gyroscope Config 1"), ACC_SLEEP_CONFIG((byte) 0x0C, (byte) 1, ""), GYR_SLEEP_CONFIG((byte) 0x0D, (byte) 1,
-            ""), INT_MSK((byte) 0x0F, (byte) 1, ""), INT_EN((byte) 0x10, (byte) 1, ""), ACC_AM_THRES((byte) 0x11, (byte) 1,
-                "Any Motion Accelerometer"), ACC_INT_SETTINGS((byte) 0x12, (byte) 1, "Accelerometer Interrupt Setting"), ACC_HG_DURATION((byte) 0x13, (byte) 1,
-                    ""), ACC_HG_THRES((byte) 0x14, (byte) 1, ""), ACC_NM_THRES((byte) 0x15, (byte) 0, "Accelerometer No Motion Threshold"), ACC_NM_SET((byte) 0x16, (byte) 1,
-                        "Accelerometer No Motion Setting"), GYR_INT_SETTING((byte) 0x17, (byte) 1, ""), GYR_HR_X_SET((byte) 0x18, (byte) 1, ""), GYR_DUR_X((byte) 0x19, (byte) 1,
-                            ""), GYR_HR_Y_SET((byte) 0x1A, (byte) 1, ""), GYR_DUR_Y((byte) 0x1B, (byte) 1, ""), GYR_HR_Z_SET((byte) 0x1C, (byte) 1,
-                                ""), GYR_DUR_Z((byte) 0x1D, (byte) 1, ""), GYR_AM_THRES((byte) 0x1E, (byte) 1, ""), GYR_AM_SET((byte) 0x1F, (byte) 1, "");
+    ACC_CONFIG((byte) 0x08, (byte) 1, "Accelerometer Config"), MAG_CONFIG((byte) 0x09, (byte) 1, "Magetometer Config"),
+    GYR_CONFIG_0((byte) 0x0A, (byte) 1,
+        "Gyroscope Config 0"),
+    GYR_CONFIG_1((byte) 0x0B, (byte) 1, "Gyroscope Config 1"), ACC_SLEEP_CONFIG((byte) 0x0C, (byte) 1, ""),
+    GYR_SLEEP_CONFIG((byte) 0x0D, (byte) 1,
+        ""),
+    INT_MSK((byte) 0x0F, (byte) 1, ""), INT_EN((byte) 0x10, (byte) 1, ""), ACC_AM_THRES((byte) 0x11, (byte) 1,
+        "Any Motion Accelerometer"),
+    ACC_INT_SETTINGS((byte) 0x12, (byte) 1, "Accelerometer Interrupt Setting"), ACC_HG_DURATION((byte) 0x13, (byte) 1,
+        ""),
+    ACC_HG_THRES((byte) 0x14, (byte) 1, ""), ACC_NM_THRES((byte) 0x15, (byte) 0, "Accelerometer No Motion Threshold"),
+    ACC_NM_SET((byte) 0x16, (byte) 1,
+        "Accelerometer No Motion Setting"),
+    GYR_INT_SETTING((byte) 0x17, (byte) 1, ""), GYR_HR_X_SET((byte) 0x18, (byte) 1, ""),
+    GYR_DUR_X((byte) 0x19, (byte) 1,
+        ""),
+    GYR_HR_Y_SET((byte) 0x1A, (byte) 1, ""), GYR_DUR_Y((byte) 0x1B, (byte) 1, ""), GYR_HR_Z_SET((byte) 0x1C, (byte) 1,
+        ""),
+    GYR_DUR_Z((byte) 0x1D, (byte) 1, ""), GYR_AM_THRES((byte) 0x1E, (byte) 1, ""),
+    GYR_AM_SET((byte) 0x1F, (byte) 1, "");
+
     public byte value;
     public byte pageId;
     public String description;
@@ -152,7 +216,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum Device {
-    ACCELEROMETER((byte) 0x00, "Accelerometer"), MAGNETOMETER((byte) 0x01, "Magnetometer"), GYROSCOPE((byte) 0x02, "Gyroscope");
+    ACCELEROMETER((byte) 0x00, "Accelerometer"), MAGNETOMETER((byte) 0x01, "Magnetometer"),
+    GYROSCOPE((byte) 0x02, "Gyroscope");
+
     public byte value;
     public String description;
 
@@ -164,6 +230,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public enum PowerMode {
     NORMAL((byte) 0x00, "Normal"), LOW((byte) 0x01, "Low"), SUSPEND((byte) 0x02, "Suspend");
+
     public byte value;
     public String description;
 
@@ -179,9 +246,14 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     // data
     // only
     MAGONLY((byte) 0x02, "Magnetometer Only"), // raw magnetometer only
-    GYROONLY((byte) 0x03, "Gyroscope Only"), ACCMAG((byte) 0x04, "Accelerometer and Magnetometer"), ACCGYRO((byte) 0x05, "Accelerometer and Gyroscope"), MAGGYRO((byte) 0x06,
-        "Magnetometer and Gyroscope"), AMG((byte) 0x07, "Accelerometer, Magnetometer, Gyroscope"), IMU((byte) 0x08, "IMU"), COMPASS((byte) 0x09,
-            "Compass"), M4G((byte) 0x0A, "Magnet for Gyroscope"), NDOF_FMC_OFF((byte) 0x0B, "NDOF Fast Magnetometer Calibration Off"), NDOF((byte) 0x0C, "NDOF");
+    GYROONLY((byte) 0x03, "Gyroscope Only"), ACCMAG((byte) 0x04, "Accelerometer and Magnetometer"),
+    ACCGYRO((byte) 0x05, "Accelerometer and Gyroscope"), MAGGYRO((byte) 0x06,
+        "Magnetometer and Gyroscope"),
+    AMG((byte) 0x07, "Accelerometer, Magnetometer, Gyroscope"), IMU((byte) 0x08, "IMU"), COMPASS((byte) 0x09,
+        "Compass"),
+    M4G((byte) 0x0A, "Magnet for Gyroscope"), NDOF_FMC_OFF((byte) 0x0B, "NDOF Fast Magnetometer Calibration Off"),
+    NDOF((byte) 0x0C, "NDOF");
+
     public byte value;
     public String description;
 
@@ -192,15 +264,27 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum AccelerometerConfig {
-    RANGE_2G((byte) 0x00, (byte) 0x03, 0, "Range 2G"), RANGE_4G((byte) 0x01, (byte) 0x03, 0, "Range 4G"), RANGE_8G((byte) 0x02, (byte) 0x03, 0, "Range 8G"), RANGE_16G((byte) 0x03,
-        (byte) 0x03, 0, "Range 16G"), BANDWITH_7_81HZ((byte) 0x00, (byte) 0b11100, 2, "Bandwith 7.81Hz"), BANDWITH_15_63HZ((byte) 0x01, (byte) 0b11100, 2,
-            "Bandwith 15.63Hz"), BANDWITH_31_25HZ((byte) 0x02, (byte) 0b11100, 2, "Bandwith 31.25Hz"), BANDWITH_62_5HZ((byte) 0x03, (byte) 0b11100, 2,
-                "Bandwith 62.5Hz"), BANDWITH_125HZ((byte) 0x04, (byte) 0b11100, 2, "Bandwith 125Hz"), BANDWITH_250HZ((byte) 0x05, (byte) 0b11100, 2,
-                    "Bandwith 250Hz"), BANDWITH_500HZ((byte) 0x06, (byte) 0b11100, 2, "Bandwith 500Hz"), BANDWITH_1000HZ((byte) 0x07, (byte) 0b11100, 2,
-                        "Bandwith 1000Hz"), OPR_MODE_NORMAL((byte) 0x00, (byte) 0b11100000, 5, "Operation Mode Normal"), OPR_MODE_SUSPEND((byte) 0x01, (byte) 0b11100000, 5,
-                            "Operation Mode Suspend"), OPR_MODE_LOW_POWER_1((byte) 0x02, (byte) 0b11100000, 5, "Operation Mode Low Power 1"), OPR_MODE_STANBY((byte) 0x03,
-                                (byte) 0b11100000, 5, "Operation Mode Stanby"), OPR_MODE_LOW_POWER_2((byte) 0x04, (byte) 0b11100000, 5,
-                                    "Operation Mode Low Power 2"), OPR_MODE_DEEP_SUSPEND((byte) 0x05, (byte) 0b11100000, 5, "Operation Mode Deep Suspend");
+    RANGE_2G((byte) 0x00, (byte) 0x03, 0, "Range 2G"), RANGE_4G((byte) 0x01, (byte) 0x03, 0, "Range 4G"),
+    RANGE_8G((byte) 0x02, (byte) 0x03, 0, "Range 8G"), RANGE_16G((byte) 0x03,
+        (byte) 0x03, 0, "Range 16G"),
+    BANDWITH_7_81HZ((byte) 0x00, (byte) 0b11100, 2, "Bandwith 7.81Hz"), BANDWITH_15_63HZ((byte) 0x01, (byte) 0b11100, 2,
+        "Bandwith 15.63Hz"),
+    BANDWITH_31_25HZ((byte) 0x02, (byte) 0b11100, 2, "Bandwith 31.25Hz"),
+    BANDWITH_62_5HZ((byte) 0x03, (byte) 0b11100, 2,
+        "Bandwith 62.5Hz"),
+    BANDWITH_125HZ((byte) 0x04, (byte) 0b11100, 2, "Bandwith 125Hz"), BANDWITH_250HZ((byte) 0x05, (byte) 0b11100, 2,
+        "Bandwith 250Hz"),
+    BANDWITH_500HZ((byte) 0x06, (byte) 0b11100, 2, "Bandwith 500Hz"), BANDWITH_1000HZ((byte) 0x07, (byte) 0b11100, 2,
+        "Bandwith 1000Hz"),
+    OPR_MODE_NORMAL((byte) 0x00, (byte) 0b11100000, 5, "Operation Mode Normal"),
+    OPR_MODE_SUSPEND((byte) 0x01, (byte) 0b11100000, 5,
+        "Operation Mode Suspend"),
+    OPR_MODE_LOW_POWER_1((byte) 0x02, (byte) 0b11100000, 5, "Operation Mode Low Power 1"), OPR_MODE_STANBY((byte) 0x03,
+        (byte) 0b11100000, 5, "Operation Mode Stanby"),
+    OPR_MODE_LOW_POWER_2((byte) 0x04, (byte) 0b11100000, 5,
+        "Operation Mode Low Power 2"),
+    OPR_MODE_DEEP_SUSPEND((byte) 0x05, (byte) 0b11100000, 5, "Operation Mode Deep Suspend");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -215,16 +299,33 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum GyroscopeConfig {
-    RANGE_2000DPS((byte) 0x00, (byte) 0b111, 0, (byte) 0, "Range 2000 dps"), RANGE_1000DPS((byte) 0x01, (byte) 0b111, 0, (byte) 0, "Range 1000 dps"), RANGE_500DPS((byte) 0x02,
-        (byte) 0b111, 0, (byte) 0, "Range 500 dps"), RANGE_250DPS((byte) 0x03, (byte) 0b111, 0, (byte) 0, "Range 250 dps"), RANGE_125DPS((byte) 0x04, (byte) 0b111, 0, (byte) 0,
-            "Range 125 dps"), BANDWITH_523Hz((byte) 0x00, (byte) 0b111000, 3, (byte) 0, "Bandwith 523Hz"), BANDWITH_230Hz((byte) 0x01, (byte) 0b111000, 3, (byte) 0,
-                "Bandwith 230Hz"), BANDWITH_116Hz((byte) 0x02, (byte) 0b111000, 3, (byte) 0, "Bandwith 116Hz"), BANDWITH_47Hz((byte) 0x03, (byte) 0b111000, 3, (byte) 0,
-                    "Bandwith 47Hz"), BANDWITH_23Hz((byte) 0x04, (byte) 0b111000, 3, (byte) 0, "Bandwith 23Hz"), BANDWITH_12Hz((byte) 0x05, (byte) 0b111000, 3, (byte) 0,
-                        "Bandwith 12Hz"), BANDWITH_64Hz((byte) 0x06, (byte) 0b111000, 3, (byte) 0, "Bandwith 64Hz"), BANDWITH_32Hz((byte) 0x07, (byte) 0b111000, 3, (byte) 0,
-                            "Bandwith 32Hz"), OPR_MODE_NORMAL((byte) 0x00, (byte) 0b111, 0, (byte) 1, "Operation Mode Normal"), OPR_MODE_FAST_POWER_UP((byte) 0x01, (byte) 0b111, 0,
-                                (byte) 1, "Operation Mode Fast Power Up"), OPR_MODE_DEEP_SUSPEND((byte) 0x02, (byte) 0b111, 0, (byte) 1,
-                                    "Operation Mode Deep Suspend"), OPR_MODE_SUSPEND((byte) 0x03, (byte) 0b111, 0, (byte) 1,
-                                        "Operation Mode Suspend"), OPR_MODE_ADVANCE_POWERSAVE((byte) 0x04, (byte) 0b111, 0, (byte) 1, "Operation Mode Advance Powersave");
+    RANGE_2000DPS((byte) 0x00, (byte) 0b111, 0, (byte) 0, "Range 2000 dps"),
+    RANGE_1000DPS((byte) 0x01, (byte) 0b111, 0, (byte) 0, "Range 1000 dps"), RANGE_500DPS((byte) 0x02,
+        (byte) 0b111, 0, (byte) 0, "Range 500 dps"),
+    RANGE_250DPS((byte) 0x03, (byte) 0b111, 0, (byte) 0, "Range 250 dps"),
+    RANGE_125DPS((byte) 0x04, (byte) 0b111, 0, (byte) 0,
+        "Range 125 dps"),
+    BANDWITH_523Hz((byte) 0x00, (byte) 0b111000, 3, (byte) 0, "Bandwith 523Hz"),
+    BANDWITH_230Hz((byte) 0x01, (byte) 0b111000, 3, (byte) 0,
+        "Bandwith 230Hz"),
+    BANDWITH_116Hz((byte) 0x02, (byte) 0b111000, 3, (byte) 0, "Bandwith 116Hz"),
+    BANDWITH_47Hz((byte) 0x03, (byte) 0b111000, 3, (byte) 0,
+        "Bandwith 47Hz"),
+    BANDWITH_23Hz((byte) 0x04, (byte) 0b111000, 3, (byte) 0, "Bandwith 23Hz"),
+    BANDWITH_12Hz((byte) 0x05, (byte) 0b111000, 3, (byte) 0,
+        "Bandwith 12Hz"),
+    BANDWITH_64Hz((byte) 0x06, (byte) 0b111000, 3, (byte) 0, "Bandwith 64Hz"),
+    BANDWITH_32Hz((byte) 0x07, (byte) 0b111000, 3, (byte) 0,
+        "Bandwith 32Hz"),
+    OPR_MODE_NORMAL((byte) 0x00, (byte) 0b111, 0, (byte) 1, "Operation Mode Normal"),
+    OPR_MODE_FAST_POWER_UP((byte) 0x01, (byte) 0b111, 0,
+        (byte) 1, "Operation Mode Fast Power Up"),
+    OPR_MODE_DEEP_SUSPEND((byte) 0x02, (byte) 0b111, 0, (byte) 1,
+        "Operation Mode Deep Suspend"),
+    OPR_MODE_SUSPEND((byte) 0x03, (byte) 0b111, 0, (byte) 1,
+        "Operation Mode Suspend"),
+    OPR_MODE_ADVANCE_POWERSAVE((byte) 0x04, (byte) 0b111, 0, (byte) 1, "Operation Mode Advance Powersave");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -241,15 +342,27 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum MagnetometerConfig {
-    DATA_OUTPUT_RATE_2HZ((byte) 0x00, (byte) 0b111, 0, "Data Output Rate 2Hz"), DATA_OUTPUT_RATE_6HZ((byte) 0x01, (byte) 0b111, 0, "Data Output Rate 6Hz"), DATA_OUTPUT_RATE_8HZ(
-        (byte) 0x02, (byte) 0b111, 0, "Data Output Rate 8Hz"), DATA_OUTPUT_RATE_10HZ((byte) 0x03, (byte) 0b111, 0, "Data Output Rate 10Hz"), DATA_OUTPUT_RATE_15HZ((byte) 0x04,
-            (byte) 0b111, 0,
-            "Data Output Rate 15Hz"), DATA_OUTPUT_RATE_20HZ((byte) 0x05, (byte) 0b111, 0, "Data Output Rate 20Hz"), DATA_OUTPUT_RATE_25HZ((byte) 0x06, (byte) 0b111, 0,
-                "Data Output Rate 25Hz"), DATA_OUTPUT_RATE_30HZ((byte) 0x07, (byte) 0b111, 0, "Data Output Rate 30Hz"), OPR_MODE_LOW_POWER((byte) 0x00, (byte) 0b11000, 3,
-                    "Operation Mode Low Power"), OPR_MODE_REGULAR((byte) 0x01, (byte) 0b11000, 3, "Operation Mode Regular"), OPR_MODE_ENHANCED_REGULAR((byte) 0x02, (byte) 0b11000,
-                        3, "Operation Mode Enhanced Regular"), OPR_MODE_HIGH_ACCURACY((byte) 0x03, (byte) 0b11000, 3, "Operation Mode High Accuracy"), PWR_MODE_NORMAL((byte) 0x00,
-                            (byte) 0b1100000, 5, "Power Mode Normal"), PWR_MODE_SLEEP((byte) 0x01, (byte) 0b1100000, 5, "Power Mode Sleep"), PWR_MODE_SUSPEND((byte) 0x02,
-                                (byte) 0b1100000, 5, "Power Mode Suspend"), PWR_MODE_FORCE_MODE((byte) 0x03, (byte) 0b1100000, 5, "Power Mode Force Mode");
+    DATA_OUTPUT_RATE_2HZ((byte) 0x00, (byte) 0b111, 0, "Data Output Rate 2Hz"),
+    DATA_OUTPUT_RATE_6HZ((byte) 0x01, (byte) 0b111, 0, "Data Output Rate 6Hz"), DATA_OUTPUT_RATE_8HZ(
+        (byte) 0x02, (byte) 0b111, 0, "Data Output Rate 8Hz"),
+    DATA_OUTPUT_RATE_10HZ((byte) 0x03, (byte) 0b111, 0, "Data Output Rate 10Hz"), DATA_OUTPUT_RATE_15HZ((byte) 0x04,
+        (byte) 0b111, 0,
+        "Data Output Rate 15Hz"),
+    DATA_OUTPUT_RATE_20HZ((byte) 0x05, (byte) 0b111, 0, "Data Output Rate 20Hz"),
+    DATA_OUTPUT_RATE_25HZ((byte) 0x06, (byte) 0b111, 0,
+        "Data Output Rate 25Hz"),
+    DATA_OUTPUT_RATE_30HZ((byte) 0x07, (byte) 0b111, 0, "Data Output Rate 30Hz"),
+    OPR_MODE_LOW_POWER((byte) 0x00, (byte) 0b11000, 3,
+        "Operation Mode Low Power"),
+    OPR_MODE_REGULAR((byte) 0x01, (byte) 0b11000, 3, "Operation Mode Regular"),
+    OPR_MODE_ENHANCED_REGULAR((byte) 0x02, (byte) 0b11000,
+        3, "Operation Mode Enhanced Regular"),
+    OPR_MODE_HIGH_ACCURACY((byte) 0x03, (byte) 0b11000, 3, "Operation Mode High Accuracy"), PWR_MODE_NORMAL((byte) 0x00,
+        (byte) 0b1100000, 5, "Power Mode Normal"),
+    PWR_MODE_SLEEP((byte) 0x01, (byte) 0b1100000, 5, "Power Mode Sleep"), PWR_MODE_SUSPEND((byte) 0x02,
+        (byte) 0b1100000, 5, "Power Mode Suspend"),
+    PWR_MODE_FORCE_MODE((byte) 0x03, (byte) 0b1100000, 5, "Power Mode Force Mode");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -264,7 +377,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum AxisMapConfig {
-    X_AXIS((byte) 0x00, (byte) 0b11, 0, "Axis X"), Y_AXIS((byte) 0x01, (byte) 0b1100, 2, "Axis Y"), Z_AXIS((byte) 0x02, (byte) 0b110000, 4, "Axis Z");
+    X_AXIS((byte) 0x00, (byte) 0b11, 0, "Axis X"), Y_AXIS((byte) 0x01, (byte) 0b1100, 2, "Axis Y"),
+    Z_AXIS((byte) 0x02, (byte) 0b110000, 4, "Axis Z");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -279,11 +394,18 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum Unit {
-    ACC_M_S2((byte) 0x00, (byte) 0b1, 0, "m/s2"), ACC_MG((byte) 0x01, (byte) 0b1, 0, "mg"), ANGULAR_RATE_DPS((byte) 0x00, (byte) 0b10, 1, "dps"), ANGULAR_RATE_RPS((byte) 0x01,
-        (byte) 0b10, 1, "rps"), EULER_ANGLE_DEG((byte) 0x00, (byte) 0b100, 2, "degree"), EULER_ANGLE_RAD((byte) 0x01, (byte) 0b100, 2, "radian"), TEMP_C((byte) 0x00,
-            (byte) 0b10000, 4,
-            "C"), TEMP_F((byte) 0x01, (byte) 0b10000, 4, "F"), OUTPUT_FORMAT_WINDOWS((byte) 0x00, (byte) 0b10000000, 7, "Output Format Window"), OUTPUT_FORMAT_ANDROID((byte) 0x01,
-                (byte) 0b10000000, 7, "Output Format Android"), MAG((byte) 0x00, (byte) 0b0, 0, "Micro Tesla"), QUAT((byte) 0x00, (byte) 0b0, 0, "");
+    ACC_M_S2((byte) 0x00, (byte) 0b1, 0, "m/s2"), ACC_MG((byte) 0x01, (byte) 0b1, 0, "mg"),
+    ANGULAR_RATE_DPS((byte) 0x00, (byte) 0b10, 1, "dps"), ANGULAR_RATE_RPS((byte) 0x01,
+        (byte) 0b10, 1, "rps"),
+    EULER_ANGLE_DEG((byte) 0x00, (byte) 0b100, 2, "degree"), EULER_ANGLE_RAD((byte) 0x01, (byte) 0b100, 2, "radian"),
+    TEMP_C((byte) 0x00,
+        (byte) 0b10000, 4,
+        "C"),
+    TEMP_F((byte) 0x01, (byte) 0b10000, 4, "F"),
+    OUTPUT_FORMAT_WINDOWS((byte) 0x00, (byte) 0b10000000, 7, "Output Format Window"), OUTPUT_FORMAT_ANDROID((byte) 0x01,
+        (byte) 0b10000000, 7, "Output Format Android"),
+    MAG((byte) 0x00, (byte) 0b0, 0, "Micro Tesla"), QUAT((byte) 0x00, (byte) 0b0, 0, "");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -298,8 +420,11 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum CalibStat {
-    MAG((byte) 0x00, (byte) 0b11, 0, "Magnetometer Calibration Status"), ACC((byte) 0x01, (byte) 0b1100, 2, "Accelerometer Calibration Status"), GYR((byte) 0x02, (byte) 0b110000,
-        4, "Gyroscope Calibration Status"), SYS((byte) 0x03, (byte) 0b11000000, 6, "System Calibration Status");
+    MAG((byte) 0x00, (byte) 0b11, 0, "Magnetometer Calibration Status"),
+    ACC((byte) 0x01, (byte) 0b1100, 2, "Accelerometer Calibration Status"), GYR((byte) 0x02, (byte) 0b110000,
+        4, "Gyroscope Calibration Status"),
+    SYS((byte) 0x03, (byte) 0b11000000, 6, "System Calibration Status");
+
     public byte value;
     public byte mask;
     public int shift;
@@ -314,8 +439,11 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   }
 
   public enum InterruptType {
-    ACC_NM((byte) 0x00, (byte) 0b10000000), ACC_SM((byte) 0x01, (byte) 0b10000000), ACC_AM((byte) 0x02, (byte) 0b1000000), ACC_HG((byte) 0x03, (byte) 0b100000), GYR_HR((byte) 0x04,
-        (byte) 0b1000), GYR_AM((byte) 0x05, (byte) 0b100);
+    ACC_NM((byte) 0x00, (byte) 0b10000000), ACC_SM((byte) 0x01, (byte) 0b10000000),
+    ACC_AM((byte) 0x02, (byte) 0b1000000), ACC_HG((byte) 0x03, (byte) 0b100000), GYR_HR((byte) 0x04,
+        (byte) 0b1000),
+    GYR_AM((byte) 0x05, (byte) 0b100);
+
     public byte value;
     public byte mask;
 
@@ -329,11 +457,11 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   private PinArrayControl pinControl = null;
 
-  private Integer pin = null;
+  private String pin = null;
 
-  private boolean isEnabled = false;
+  protected boolean isEnabled = false;
 
-  public boolean isActive = false;
+  protected boolean isActive = false;
 
   public class Bno055Data {
     public double w;
@@ -366,7 +494,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
     try {
 
-      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
+      int[] buffer = new int[] { 0xff, 0xd0 };
       int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
       log.info("0xffd0 should be -48 is = {}", a);
 
@@ -484,7 +612,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       byte[] wbuffer = new byte[] { register.PAGE_ID.value, reg.pageId };
       controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length);
     }
-    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), new byte[] { reg.value }, 1, data, length);
+    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), new byte[] { reg.value },
+        1, data, length);
   }
 
   private byte i2cWriteReadRegByte(register reg) {
@@ -515,11 +644,12 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     // Integer.decode(deviceAddress), wbuffer, wbuffer.length);
     // controller.i2cRead(this, Integer.parseInt(deviceBus),
     // Integer.decode(deviceAddress), rbuffer, rbuffer.length);
-    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length, rbuffer, rbuffer.length);
+    controller.i2cWriteRead(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), wbuffer, wbuffer.length,
+        rbuffer, rbuffer.length);
     log.info("Bno055 i2c Read return {}", rbuffer);
-    event.orientation.x = (((int) (rbuffer[0] & 0xFF)) | (((int) (rbuffer[1])) << 8)) / 16.0;
-    event.orientation.y = (((int) (rbuffer[2] & 0xFF)) | (((int) (rbuffer[3])) << 8)) / 16.0;
-    event.orientation.z = (((int) (rbuffer[4] & 0xFF)) | (((int) (rbuffer[5])) << 8)) / 16.0;
+    event.orientation.x = ((rbuffer[0] & 0xFF) | (((rbuffer[1])) << 8)) / 16.0;
+    event.orientation.y = ((rbuffer[2] & 0xFF) | (((rbuffer[3])) << 8)) / 16.0;
+    event.orientation.z = ((rbuffer[4] & 0xFF) | (((rbuffer[5])) << 8)) / 16.0;
     return event;
 
   }
@@ -539,7 +669,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   // wake mode (1-4) default = 4
   // Threshold = value that must be exceed to enter wake mode or not exceed to
   // enter sleep mode (in mg) mg = milli G force
-  public void setPowerModeLow(boolean detectX, boolean detectY, boolean detectZ, int sleepDuration, double sleepThreshold, int wakeDuration, double wakeThreshold) {
+  public void setPowerModeLow(boolean detectX, boolean detectY, boolean detectZ, int sleepDuration,
+      double sleepThreshold, int wakeDuration, double wakeThreshold) {
     byte acc_nm_set_value = 0;
     if (sleepDuration < 0) {
       log.info("BNO055 minimum Duration = 0");
@@ -649,7 +780,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
       log.info("BNO055 AzisRemap: duplicate axis definition");
       return;
     }
-    byte axis_map_config = (byte) ((zAxis.value << zAxis.shift) | (yAxis.value << yAxis.shift) | (xAxis.value << xAxis.shift));
+    byte axis_map_config = (byte) ((zAxis.value << zAxis.shift) | (yAxis.value << yAxis.shift)
+        | (xAxis.value << xAxis.shift));
     OperationMode modeback = this.mode;
     setMode(OperationMode.CONFIG);
     i2cWrite(register.AXIS_MAP_CONFIG, axis_map_config);
@@ -757,9 +889,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -783,13 +915,14 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.GYR_DATA_X_LSB, data, data.length);
-    byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.ANGULAR_RATE_DPS.mask) >> Unit.ANGULAR_RATE_DPS.shift);
+    byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL)
+        & Unit.ANGULAR_RATE_DPS.mask) >> Unit.ANGULAR_RATE_DPS.shift);
     retval.unit = Unit.ANGULAR_RATE_DPS;
     if (unit == Unit.ANGULAR_RATE_RPS.value) {
       retval.unit = Unit.ANGULAR_RATE_RPS;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8) / 900);
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8) / 900);
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8) / 900);
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8) / 900;
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8) / 900;
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8) / 900;
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
@@ -802,13 +935,14 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     Bno055Data retval = new Bno055Data();
     byte[] data = new byte[6];
     i2cWriteReadReg(register.EUL_HEADING_LSB, data, data.length);
-    byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL) & Unit.EULER_ANGLE_DEG.mask) >> Unit.EULER_ANGLE_DEG.shift);
+    byte unit = (byte) ((i2cWriteReadRegByte(register.UNIT_SEL)
+        & Unit.EULER_ANGLE_DEG.mask) >> Unit.EULER_ANGLE_DEG.shift);
     retval.unit = Unit.EULER_ANGLE_DEG;
     if (unit == Unit.EULER_ANGLE_RAD.value) {
       retval.unit = Unit.EULER_ANGLE_RAD;
-      retval.yaw = (double) ((data[0] & 0xFF) + ((data[1]) << 8) / 900);
-      retval.roll = (double) ((data[2] & 0xFF) + ((data[3]) << 8) / 900);
-      retval.pitch = (double) ((data[4] & 0xFF) + ((data[5]) << 8) / 900);
+      retval.yaw = (data[0] & 0xFF) + ((data[1]) << 8) / 900;
+      retval.roll = (data[2] & 0xFF) + ((data[3]) << 8) / 900;
+      retval.pitch = (data[4] & 0xFF) + ((data[5]) << 8) / 900;
     } else {
       retval.yaw = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 16;
       retval.roll = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 16;
@@ -837,9 +971,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -856,9 +990,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.ACC_M_S2;
     if (unit == Unit.ACC_MG.value) {
       retval.unit = Unit.ACC_MG;
-      retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8));
-      retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8));
-      retval.z = (double) ((data[4] & 0xFF) + ((data[5]) << 8));
+      retval.x = (data[0] & 0xFF) + ((data[1]) << 8);
+      retval.y = (data[2] & 0xFF) + ((data[3]) << 8);
+      retval.z = (data[4] & 0xFF) + ((data[5]) << 8);
     } else {
       retval.x = (double) ((data[0] & 0xFF) + ((data[1]) << 8)) / 100;
       retval.y = (double) ((data[2] & 0xFF) + ((data[3]) << 8)) / 100;
@@ -888,9 +1022,9 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     retval.unit = Unit.TEMP_C;
     if (unit == Unit.TEMP_F.value) {
       retval.unit = Unit.TEMP_F;
-      retval.temperature = (double) (data * 2);
+      retval.temperature = data * 2;
     } else {
-      retval.temperature = (double) (data);
+      retval.temperature = (data);
     }
     return retval;
   }
@@ -1061,12 +1195,14 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     setMode(OperationMode.CONFIG);
     switch (device) {
       case ACCELEROMETER: {
-        int retval = (i2cWriteReadRegByte(register.ACC_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.ACC_RADIUS_MSB)) << 8);
+        int retval = (i2cWriteReadRegByte(register.ACC_RADIUS_LSB) & 0xFF)
+            + ((i2cWriteReadRegByte(register.ACC_RADIUS_MSB)) << 8);
         setMode(modeback);
         return retval;
       }
       case MAGNETOMETER: {
-        int retval = (i2cWriteReadRegByte(register.MAG_RADIUS_LSB) & 0xFF) + ((i2cWriteReadRegByte(register.MAG_RADIUS_MSB)) << 8);
+        int retval = (i2cWriteReadRegByte(register.MAG_RADIUS_LSB) & 0xFF)
+            + ((i2cWriteReadRegByte(register.MAG_RADIUS_MSB)) << 8);
         setMode(modeback);
         return retval;
       }
@@ -1091,7 +1227,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     i2cWrite(register.INT_MSK, int_msk);
   }
 
-  public void enableInterrupt(InterruptType it, boolean xAxis, boolean yAxis, boolean zAxis, float threshold, int duration) {
+  public void enableInterrupt(InterruptType it, boolean xAxis, boolean yAxis, boolean zAxis, float threshold,
+      int duration) {
     byte int_en = (byte) (i2cWriteReadRegByte(register.INT_EN) | (0xFF & it.mask));
     byte int_msk = (byte) (i2cWriteReadRegByte(register.INT_MSK) | (0xFF & it.mask));
     OperationMode modeback = this.mode;
@@ -1281,7 +1418,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
           gyr_int_set &= 0b11011011;
         // gyr_int_set |= 0b1000000;
         i2cWrite(register.GYR_INT_SETTING, gyr_int_set);
-        duration = ((int) (duration / 4) - 1) & 0b11;
+        duration = (duration / 4 - 1) & 0b11;
         // duration |= 0b1100;
         i2cWrite(register.GYR_AM_SET, (byte) duration);
         GyroscopeConfig range = getGyrRange();
@@ -1484,8 +1621,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
   public void attachInterruptPin(PinArrayControl control, int pin) {
     pinControl = control;
-    this.pin = pin;
-    control.attach(this, pin);
+    this.pin = String.format("%d", pin);
+    control.attachPinListener(this, pin);
   }
 
   @Override
@@ -1555,7 +1692,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -1571,6 +1708,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -1588,6 +1726,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -1609,7 +1748,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -1661,7 +1800,37 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
+  @Override
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  @Override
+  public String getPin() {
+    return pin;
+  }
+
 }

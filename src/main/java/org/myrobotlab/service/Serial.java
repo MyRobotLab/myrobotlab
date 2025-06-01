@@ -32,6 +32,7 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
+import org.myrobotlab.service.config.SerialConfig;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
@@ -45,7 +46,7 @@ import org.slf4j.Logger;
  * Serial - a service that allows reading and writing to a serial port device.
  *
  */
-public class Serial extends Service implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
+public class Serial extends Service<SerialConfig> implements SerialControl, QueueSource, SerialDataListener, RecordControl, SerialDevice, PortPublisher, PortConnector {
 
   /**
    * general read timeout - 0 is infinite &gt; 0 is number of milliseconds to
@@ -204,7 +205,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    *          - offset into bytes
    * @param length
    *          - length of data to convert
-   * @return
+   * @return the integer that represents the bytes
    */
   public static int bytesToInt(int[] bytes, int offset, int length) {
     return (int) bytesToLong(bytes, offset, length);
@@ -214,9 +215,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * conversion utility TODO - support endianess
    * 
    * @param bytes
+   *          the input array
    * @param offset
+   *          where to start
    * @param length
-   * @return
+   *          how many bytes
+   * @return the decoded long
+   * 
    */
   public static long bytesToLong(int[] bytes, int offset, int length) {
 
@@ -235,6 +240,11 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
+   * 
+   * @param n
+   *          name
+   * @param id
+   *          instance ide
    */
 
   public Serial(String n, String id) {
@@ -267,6 +277,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * definitely NOT get a direct reference to the service
    * 
    * @param name
+   *          the name of the listener
+   * 
    */
   public void addByteListener(String name) {
     log.info("Add Byte Listener for Name {}", name);
@@ -299,6 +311,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * method similar to InputStream's
    */
+  @Override
   public int available() {
     return blockingRX.size();
   }
@@ -306,6 +319,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * clears the rx buffer
    */
+  @Override
   public void clear() {
     blockingRX.clear();
   }
@@ -314,10 +328,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * for backwards compatibility
    * 
    */
+  @Override
   public void connect(String name) throws IOException {
     open(name);
   }
 
+  @Override
   public void connect(String name, int baudRate, int dataBits, int stopBits, int parity) throws IOException {
     open(name);
     setParams(baudRate, dataBits, stopBits, parity);
@@ -369,6 +385,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * connect = open + listen
    * 
    */
+  @Override
   public void open(String inPortName, int rate, int dataBits, int stopBits, int parity) throws IOException {
 
     info("connect to port %s %d|%d|%d|%d", inPortName, rate, dataBits, stopBits, parity);
@@ -376,8 +393,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     this.dataBits = dataBits;
     this.stopBits = stopBits;
     this.parity = parity;
-
-    lastPortName = portName;
 
     // two possible logics to see if we are connected - look at the
     // state of the port
@@ -400,7 +415,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (ports.containsKey(inPortName)) {
       info("#2 connect to a pre-existing port");
       connectPort(ports.get(inPortName), null);
-      lastPortName = portName;
       return;
     }
 
@@ -419,7 +433,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // #2.5 - Platform is in virtual mode - create a virtual uart
 
-    if (Platform.isVirtual()) {
+    if (isVirtual()) {
       connectVirtualUart(inPortName);
       connect(inPortName);
       return;
@@ -476,6 +490,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     // we have a portName and we are connected
     portName = port.getName();
+    lastPortName = portName;
 
     // save(); why?
     broadcastState();
@@ -582,6 +597,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * disconnect = close + remove listeners all ports on serial network
    */
+  @Override
   public void disconnect() {
     if (portName != null && !connectedPorts.containsKey(portName)) {
       info("disconnect unknown port %s", portName);
@@ -645,6 +661,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * get the port name this serial service is currently attached to
    */
+  @Override
   public String getPortName() {
     return portName;
   }
@@ -733,6 +750,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return timeoutMS;
   }
 
+  @Override
   public boolean isConnected() {
     // really? shouldn't this be something like...
     // if the port is actually connected?
@@ -798,6 +816,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * successful connection event
    * 
    */
+  @Override
   public String publishConnect(String portName) {
     info("%s publishConnect %s", getName(), portName);
     return portName;
@@ -807,6 +826,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * disconnect event
    * 
    */
+  @Override
   public String publishDisconnect(String portName) {
     return portName;
   }
@@ -823,7 +843,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * publish a byte array of data that was read from the serial port.
    * 
    * @param bytes
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public byte[] publishBytes(byte[] bytes) {
     // log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
@@ -834,7 +856,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * Publishing receive data to and end point
    * 
    * @param data
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public int publishRX(Integer data) {
     return data;
@@ -844,7 +868,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * Publishing transmit data to a publishing point
    * 
    * @param data
-   * @return
+   *          in
+   * @return out
+   * 
    */
   public Integer publishTX(Integer data) {
     return data;
@@ -873,9 +899,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * return a byte array represending all the input pending data at the time
    * it's called. If there is no input data, null is returned.
    * 
-   * @return
+   * @return byte array
    * @throws IOException
+   *           boom
    * @throws InterruptedException
+   *           boom
+   * 
    */
   synchronized public byte[] readBytes() throws IOException, InterruptedException {
     int size = blockingRX.size();
@@ -1009,6 +1038,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return null;
   }
 
+  @Override
   public void record() throws FileNotFoundException {
     recordRx = new FileOutputStream(String.format("%s.rx.%s", getName(), Serial.format));
     recordTx = new FileOutputStream(String.format("%s.tx.%s", getName(), Serial.format));
@@ -1071,6 +1101,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     timeoutMS = timeout;
   }
 
+  @Override
   public void stopRecording() {
     try {
       if (recordRx != null) {
@@ -1089,8 +1120,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   @Override
-  public void stopService() {
-    super.stopService();
+  public void releaseService() {
+    super.releaseService();
     disconnect();
     stopRecording();
   }
@@ -1132,6 +1163,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   // TODO: remove this method use write(int[] b) instead
+  @Override
   synchronized public void write(int b) throws Exception {
 
     if (connectedPorts.size() == 0) {
@@ -1155,6 +1187,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   // ============= write methods begin ====================
   // write(String data) not in OutputStream
+  @Override
   public void write(String data) throws Exception {
     write(data.getBytes());
   }
@@ -1190,6 +1223,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     connect(lastPortName);
   }
 
+  @Override
   public boolean isRecording() {
     return (recordRx != null) || (recordTx != null);
   }
@@ -1202,18 +1236,22 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public void flush() {
   }
 
+  @Override
   public int getRate() {
     return rate;
   }
 
+  @Override
   public int getDataBits() {
     return dataBits;
   }
 
+  @Override
   public int getStopBits() {
     return stopBits;
   }
 
+  @Override
   public int parity() {
     return parity;
   }
@@ -1254,6 +1292,30 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     tcpSerialHub.stop();
   }
 
+  @Override
+  public SerialConfig getConfig() {
+    super.getConfig();
+    // FIXME remove fields and use config only
+    config.port = lastPortName;
+    return config;
+  }
+
+  @Override
+  public SerialConfig apply(SerialConfig c) {
+    super.apply(c);
+
+    if (c.port != null) {
+      try {
+        if (isConnected()) {
+          connect(c.port);
+        }
+      } catch (Exception e) {
+        log.error("load connecting threw", e);
+      }
+    }
+    return c;
+  }
+
   public static void main(String[] args) {
 
     LoggingFactory.init(Level.INFO);
@@ -1276,7 +1338,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     try {
 
-      Platform.setVirtual(true);
+      Runtime.getInstance().setVirtual(true);
 
       Serial s = (Serial) Runtime.start("s1", "Serial");
       String vport1 = "vport1";

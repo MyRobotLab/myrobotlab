@@ -26,7 +26,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 67;
+  static final Integer MRLCOMM_VERSION = 68;
 
   private String ackEnabled = "true";
 
@@ -220,6 +220,7 @@ public class ArduinoMsgGenerator {
 
     idlToJava = idlToJava.replace("%arduino%", "arduino");
     idlToJava = idlToJava.replace("%javaClass%", "Msg");
+    idlToJava = idlToJava.replace("%invokeIfService%", "true");
     idlToJava = idlToJava.replace("%javaArduinoClass%", MrlCommPublisher.class.getSimpleName());
     // Msg doesn't publish acks back to MrlComm
     idlToJava = idlToJava.replace("%publishAcks%", "");
@@ -231,6 +232,8 @@ public class ArduinoMsgGenerator {
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
     virtualJava = virtualJava.replace("%ackEnabled%", "false");
+    virtualJava = virtualJava.replace("%invokeIfService%", "false");
+
     // virtual message should publish an ack after each processCommand call.
     virtualJava = virtualJava.replace("%publishAcks%", "publishAck(method);");
     // virtual message doesn't need to wait for a begin message to be clear to

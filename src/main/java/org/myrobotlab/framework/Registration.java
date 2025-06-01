@@ -1,6 +1,12 @@
 package org.myrobotlab.framework;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.ForeignProcessUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -26,6 +32,14 @@ public class Registration {
   protected String typeKey;
 
   /**
+   * The list of interfaces that a service being registered implements.
+   * This list must contain the fully qualified names of Java interfaces,
+   * and is only used for proxy generation. When generating proxies,
+   * this list must contain at least the fully qualified name of ServiceInterface.
+   */
+  public List<String> interfaces = List.of();
+
+  /**
    * current serialized state of the service - default encoding is json for all
    * remote registration
    */
@@ -36,25 +50,43 @@ public class Registration {
    * remote
    */
   transient public ServiceInterface service = null;
-
-  public Registration(String id, String name, String typeKey) {
+  
+  
+  public Registration(String id, String name, String typeKey) {    
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
   }
+  
+
+  public Registration(String id, String name, String typeKey, ArrayList<String> interfaces) {
+    this.id = id;
+    this.name = name;
+    this.typeKey = typeKey;
+    this.interfaces = interfaces;
+  }
 
   public Registration(ServiceInterface service) {
-    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getTypeKey());
     this.id = service.getId();
     this.name = service.getName();
-    this.typeKey = service.getType();
-    // when this registration is re-broadcasted to remotes it will use this
+    this.typeKey = service.getTypeKey();
+    // When this registration is re-broadcasted to remotes it will use this
     // serialization to init state
-    this.state = CodecUtils.toJson(service);
+    
+    // FIXME: This switch would not be necessary
+    // if Java remote services were handled the same way, would not need to do this
+    if (ForeignProcessUtils.isValidJavaClassName(service.getTypeKey())) {
+      this.state = CodecUtils.toJson(service);
+    } else {
+      this.state = service.toString();
+    }
+    
     // if this is a local registration - need reference to service
     this.service = service;
   }
 
+  @Override
   public String toString() {
     return String.format("%s %s %s", id, name, typeKey);
   }
@@ -86,5 +118,18 @@ public class Registration {
   public boolean hasInterface(Class<?> interfaze) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Registration that = (Registration) o;
+    return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(typeKey, that.typeKey) && Objects.equals(state, that.state) && Objects.equals(service, that.service);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, typeKey, state, service);
   }
 }

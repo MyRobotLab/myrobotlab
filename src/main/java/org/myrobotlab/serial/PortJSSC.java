@@ -63,6 +63,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     return new ArrayList<String>();
   }
 
+  @Override
   public boolean isCTS() {
     try {
       return port.isCTS();
@@ -71,6 +72,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     return false;
   }
 
+  @Override
   public boolean isDSR() {
     try {
       return port.isDSR();
@@ -87,6 +89,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       port.setParams(rate, dataBits, stopBits, parity);
       // add self as a event listener, and listen to MASK_RXCHAR
       port.addEventListener(this, SerialPort.MASK_RXCHAR);
+      // jssc uses own listening thread to push events
+      listening = true;
     } catch (Exception e) {
       throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
@@ -107,6 +111,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port = null;
   }
 
+  @Override
   public byte[] readBytes() {
     try {
       // read what's available
@@ -158,6 +163,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port.writeInt(data);
   }
 
+  @Override
   public void write(byte[] data) throws Exception {
     if (debug && debugTX) {
       String dataString = StringUtil.byteArrayToIntString(data);

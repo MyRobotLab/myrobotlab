@@ -1,0 +1,64 @@
+<div class="col-md-6">
+
+<h5>Controllers</h5>
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>name</th>
+      <th>x</th>
+      <th>y</th>
+      <th>z</th>
+      <th>pitch</th>
+      <th>roll</th>
+      <th>yaw</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="pose in poses">
+      <td>{{pose.name}}</td>
+      <td>{{pose.position.x.toFixed(2)}}</td>
+      <td>{{pose.position.y.toFixed(2)}}</td>
+      <td>{{pose.position.z.toFixed(2)}}</td>
+      <td>{{pose.orientation.pitch.toFixed(2)}}</td>
+      <td>{{pose.orientation.roll.toFixed(2)}}</td>
+      <td>{{pose.orientation.yaw.toFixed(2)}}</td>
+    </tr>
+  </tbody>
+</table><br/>
+
+<h5>Events</h5>  
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>handedness</th>
+      <th>type</th>
+      <th>value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="event in events">
+      <td>{{event.id}}</td>
+      <td>{{event.meta.handedness}}</td>
+      <td>{{event.type}}</td>
+      <td>{{event.value}}</td>
+    </tr>
+  </tbody>
+</table><br/>
+
+<h5>Joint Angles</h5>
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>joint</th>
+      <th>angle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="(key, value) in jointAngles">
+      <td>{{key}}</td>
+      <td>{{value.toFixed(2)}}</td>
+    </tr>
+  </tbody>
+</table>
+</div>

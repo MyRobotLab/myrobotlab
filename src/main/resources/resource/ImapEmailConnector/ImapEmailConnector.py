@@ -1,2 +1,2 @@
 # start the service
-imapemailconnector = Runtime.start("imapemailconnector","ImapEmailConnector")
+imapemailconnector = runtime.start("imapemailconnector","ImapEmailConnector")

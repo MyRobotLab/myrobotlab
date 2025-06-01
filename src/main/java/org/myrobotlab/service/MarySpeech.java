@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.MarySpeechConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
@@ -35,7 +36,7 @@ import marytts.util.data.audio.MaryAudioUtils;
  * More info at : http://mary.dfki.de/
  * 
  */
-public class MarySpeech extends AbstractSpeechSynthesis {
+public class MarySpeech extends AbstractSpeechSynthesis<MarySpeechConfig> {
 
   public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
 
@@ -51,6 +52,14 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   synchronized MaryInterface getMaryTts() {
+    // If the javaVersion is just 2 numbers, like 11, 12,13... we need to add a
+    // .0 to it, so that
+    // mary tts will recognize it as being newer than java8.. (lame I know.)
+    String javaVersion = System.getProperty("java.version");
+    if (javaVersion.matches("[1-9][0-9]")) {
+      System.setProperty("java.version", javaVersion + ".0");
+    }
+
     if (marytts != null) {
       return marytts;
     }
@@ -143,6 +152,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   /**
    * default cache file type for Mary
    */
+  @Override
   public String getAudioCacheExtension() {
     return ".wav";
   }
@@ -166,7 +176,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
   }
 
   @Override
-  protected void loadVoices() throws MalformedURLException, IOException, SAXException {
+  public void loadVoices() throws MalformedURLException, IOException, SAXException {
     getMaryTts();
     // It is great that we can query to get voices - but regrettably they are
     // lacking a lot of useful meta-data
@@ -212,22 +222,24 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
 
+  @Override
   public String setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
     return audioEffects;
   }
 
   public static void main(String[] args) throws IOException {
+    System.setProperty("java.version", "11.0");
     LoggingFactory.init(Level.INFO);
 
     try {
 
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
+      // Runtime.start("gui", "SwingGui");
+      // Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
 
       // mary.grabRemoteAudioEffect("LAUGH01_F");
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
 
       // examples are generously copied from
       // marytts.signalproc.effects.EffectsApplier.java L319-324

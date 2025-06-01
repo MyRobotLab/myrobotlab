@@ -1,0 +1,28 @@
+!!org.myrobotlab.service.config.InMoov2HandConfig
+listeners: null
+peers:
+  index:
+    autoStart: true
+    name: inmoov2hand.index
+    type: Servo
+  majeure:
+    autoStart: true
+    name: inmoov2hand.majeure
+    type: Servo
+  pinky:
+    autoStart: true
+    name: inmoov2hand.pinky
+    type: Servo
+  ringFinger:
+    autoStart: true
+    name: inmoov2hand.ringFinger
+    type: Servo
+  thumb:
+    autoStart: true
+    name: inmoov2hand.thumb
+    type: Servo
+  wrist:
+    autoStart: true
+    name: inmoov2hand.wrist
+    type: Servo
+type: InMoov2Hand

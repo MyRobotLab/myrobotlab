@@ -9,9 +9,9 @@ virtual = True
 port = "COM99"
 
 # start the services
-serial = Runtime.start("serial","Serial")
-python = Runtime.start("python","Python")
-gui = Runtime.start("gui","SwingGui")
+serial = runtime.start("serial","Serial")
+python = runtime.start("python","Python")
+gui = runtime.start("gui","SwingGui")
 uart = None
 
 # start optional virtual serial service, used for test

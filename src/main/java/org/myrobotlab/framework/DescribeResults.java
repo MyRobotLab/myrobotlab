@@ -25,6 +25,7 @@ public class DescribeResults {
     this.status = status;
   }
 
+  @Override
   public String toString() {
     return CodecUtils.toJson(this);
   }

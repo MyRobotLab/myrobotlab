@@ -2,65 +2,108 @@
 # NeoPixel.py
 # more info @: http://myrobotlab.org/service/NeoPixel
 #########################################
+# Example of controlling a NeoPixel
+# NeoPixel is a strip of RGB LEDs
+# in this example we are using a 256 pixel strip
+# and an Arduino Mega.
+# The Mega is connected to the NeoPixel strip
+# via pin 3
+# The Mega is connected to the computer via USB
+# Onboard animations are available
+# as well as the ability to set individual pixels
+# [Stop, Theater Chase Rainbow, Rainbow, Larson Scanner, Flash Random,
+# Theater Chase, Rainbow Cycle, Ironman, Color Wipe]
+# There are now pre defined flashes which can be used
+# [warn, speaking, heartbeat, success, pir, error, info]
 
-# virtual = True
-port = "COM3"
-# optional but recommended neopixel connected on a dedicated arduino
-rxtxPort = "Serial2"
+from time import sleep
 
-# start optional virtual arduino service, used for internal test
-if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
-    virtualArduino.connect(port)
-# end used for internal test
+port = "/dev/ttyACM72"
+pin = 3
+pixelCount = 256
 
-#Starting Arduino Service
-arduino = Runtime.start("arduino","Arduino")
-arduino.setBoardMega() #or arduino.setBoardUno()
-arduino.connect(port)
+# starting mega
+mega = runtime.start("mega", "Arduino")
+mega.connect(port)
 
-#Starting NeoPixel Service
-neopixel = Runtime.start("neopixel","NeoPixel")
+# starting neopixle
+neopixel = runtime.start("neopixel", "NeoPixel")
+neopixel.setPin(pin)
+neopixel.setPixelCount(pixelCount)
 
-#neopixel.attach(arduino, pin, number of pixel)
-if ('virtual' in globals() and virtual):
-  #Attach Neopixel to main arduino
-  neopixel.attach(arduino, 2, 16)
-else:
-  #Starting optional RX/TX connected slave arduino and Attach Neopixel to slave arduino
-  arduinoNano = Runtime.start("arduinoNano","Arduino")
-  arduinoNano.setBoardNano() #or arduino.setBoardUno()
-  arduinoNano.connect(arduino,rxtxPort)
-  neopixel.attach(arduinoNano, 2, 16)
+# attach the two services
+neopixel.attach(mega)
+
+# brightness 0-255
+neopixel.setBrightness(128)
+
+# fuschia - setColor(R, G, B)
+neopixel.setColor(120, 10, 30)
+
+# Fun with flashing
+print(neopixel.getFlashNames())
+
+for flash in neopixel.getFlashNames():
+    print('using flash', flash)
+    neopixel.flash(flash)
+
+# clear all pixels    
+neopixel.clear()
 
 
-#Animations;
-#"Color Wipe"
-#"Larson Scanner"
-#"Theater Chase"
-#"Theater Chase Rainbow"
-#"Rainbow"
-#"Rainbow Cycle"
-#"Flash Random"
-#"Ironman"
+# 1 to 50 Hz default is 10
+neopixel.setSpeed(10)
 
-#speed: 1-65535   1=full speed, 2=2x slower than 1, 10=10x slower than 1
-#starting a animation
-#neopixel.setAnimation("Animation Name", red, green, blue, speed)
-neopixel.setAnimation("Theater Chase", 255, 0, 0, 1) #running Theater Chase with color red at full speed
+# Fun with animations
+# get a list of animations
+print(neopixel.getAnimations())
 
-sleep(10)
-neopixel.animationStop()
+for animation in neopixel.getAnimations():
+    print(animation)
+    neopixel.playAnimation(animation)
+    sleep(3)
 
-#run an animation with python script
-#turn off all the pixels
-for pixel in range (1,neopixel.numPixel + 1):
-  neopixel.setPixel(pixel, 0, 0, 0)  #setPixel(pixel, red, green, blue)
-neopixel.writeMatrix() #send the pixel data to the Neopixel hardware 
-for loop in range(0,10): #do 10 loop
-  for pixel in range(1, neopixel.numPixel +1):
-    neopixel.setPixel(pixel, 255, 0, 0) #set the pixel to red
-    neopixel.writeMatrix()
-    sleep(0.03) #give a bit of delay before next step
-    neopixel.setPixel(pixel, 0, 0, 0) #turn off the pixel
-neopixel.writeMatrix()
+# clear all pixels
+neopixel.clear()
+
+neopixel.fill("cyan")
+sleep(1)
+neopixel.fill("yellow")
+sleep(1)
+neopixel.fill("pink")
+sleep(1)
+neopixel.fill("orange")
+sleep(1)
+neopixel.fill("black")
+sleep(1)
+neopixel.fill("magenta")
+sleep(1)
+neopixel.fill("green")
+sleep(1)
+neopixel.fill("#FFFFEE")
+sleep(1)
+neopixel.fill("#FF0000")
+sleep(1)
+neopixel.fill("#00FF00")
+sleep(1)
+neopixel.fill("#0000FF")
+sleep(1)
+neopixel.fill("#cccccc")
+sleep(1)
+neopixel.fill("#cc7528")
+sleep(1)
+neopixel.fill("#123456")
+sleep(1)
+neopixel.fill("#654321")
+sleep(1)
+neopixel.fill("#000000")
+
+# if you want voice modulation of a neopixel this is one
+# way to do it
+# mouth = runtime.start('mouth', 'Polly')
+# audio = runtime.start('mouth.audioFile', 'AudioFile')
+# audio.addListener('publishPeak', 'neopixel')
+# mouth.speak('Is my voice modulating the neopixel?')
+
+print('done')    
+    

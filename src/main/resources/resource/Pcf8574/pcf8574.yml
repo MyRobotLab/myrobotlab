@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.Pcf8574Config
+address: '0x20'
+bus: '1'
+controller: null
+listeners: null
+peers: null
+rateHz: 1.0
+type: Pcf8574

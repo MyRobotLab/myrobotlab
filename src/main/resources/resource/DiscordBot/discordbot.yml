@@ -1,0 +1,6 @@
+!!org.myrobotlab.service.config.DiscordBotConfig
+connect: true
+listeners: null
+peers: null
+token: null
+type: DiscordBot

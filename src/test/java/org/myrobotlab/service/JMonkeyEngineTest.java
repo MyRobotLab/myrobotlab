@@ -16,7 +16,7 @@ public class JMonkeyEngineTest extends AbstractTest {
   static JMonkeyEngine jme = null;
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineTest.class);
-  static SwingGui swing = null;
+//  static SwingGui swing = null;
 
   static final String TEST_DIR = "src/test/resources/JMonkeyEngine/";
   static final String TEST_FACE_FILE_JPEG = "src/test/resources/JMonkeyEngine/multipleFaces.jpg";
@@ -37,10 +37,6 @@ public class JMonkeyEngineTest extends AbstractTest {
 
       test.putTextTest();
 
-      boolean quitNow = true;
-      if (quitNow) {
-        return;
-      }
     } catch (Exception e) {
       log.error("main threw", e);
     }
@@ -49,18 +45,11 @@ public class JMonkeyEngineTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
-    // Runtime.setLogLevel("info");
-    if (!isHeadless()) {
-      swing = (SwingGui) Runtime.start("gui", "SwingGui");
-    }
   }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     jme.releaseService();
-    if (!isHeadless()) {
-      // Runtime.release("gui");
-    }
   }
 
   @Test
@@ -99,12 +88,11 @@ public class JMonkeyEngineTest extends AbstractTest {
      * </pre>
      */
 
-
-    InMoov i01 = (InMoov) Runtime.create("i01", "InMoov");// has attach ...
+    InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");// has attach ...
                                                           // runtime does
                                                           // dynamic binding
                                                           // anyway...
-    InMoovHead head = i01.startHead("COM98");
+    InMoov2Head head = (InMoov2Head)i01.startPeer("head");
     Servo s = (Servo) Runtime.getService("i01.head.rothead");
     Servo jaw = (Servo) Runtime.getService("i01.head.jaw");
 
@@ -114,7 +102,7 @@ public class JMonkeyEngineTest extends AbstractTest {
     // FIXME - there has to be a "default" speed for virtual servos
     s.setVelocity(40.0);
     s.moveTo(0.0); // goes to 30 for rothead - because "min" <-- WRONG 0 should
-                 // be 30 .. but start position should be 90 !!!
+    // be 30 .. but start position should be 90 !!!
     s.moveTo(180.0);
     s.moveTo(90.0);
     s.moveTo(0.0);

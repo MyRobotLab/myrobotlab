@@ -1,0 +1,14 @@
+!!org.myrobotlab.service.config.OpenWeatherMapConfig
+currentTown: null
+currentUnits: null
+httpClient:
+  autoStart: true
+  name: httpClient
+  type: HttpClient
+listeners: null
+peers:
+  httpClient:
+    autoStart: true
+    name: openweathermap.httpClient
+    type: HttpClient
+type: OpenWeatherMap

@@ -1,0 +1,12 @@
+!!org.myrobotlab.service.config.LidarConfig
+listeners: null
+peers:
+  topStom:
+    autoStart: true
+    name: lidar.topStom
+    type: Serial
+serial:
+  autoStart: true
+  name: serial
+  type: Serial
+type: Lidar

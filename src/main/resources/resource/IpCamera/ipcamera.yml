@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.ServiceConfig
+listeners: null
+peers: null
+type: IpCamera

@@ -85,10 +85,10 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
 
   int x0, y0, x1, y1;
 
-  public CvRect rect = new CvRect();
+  transient public CvRect rect = new CvRect();
   public boolean makeTemplate = false;
-  CvPoint textpt = cvPoint(10, 20);
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvPoint textpt = cvPoint(10, 20);
+  transient private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   public int matchRatio = Integer.MAX_VALUE;
 
@@ -140,7 +140,9 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
       cvSetImageROI(image, rect);
       cvCopy(image, template, null);
       cvResetImageROI(image);
-      invoke("publishTemplate", name, toBufferedImage(template), 0);
+      CloseableFrameConverter converter = new CloseableFrameConverter();
+      invoke("publishTemplate", name, converter.toBufferedImage(template), 0);
+      converter.close();
       invoke("publishIplImageTemplate", template); // FYI -
       // IplImage
       // is not
@@ -188,6 +190,7 @@ public class OpenCVFilterMatchTemplate extends OpenCVFilter {
     samplePoint((int) (x * width), (int) (y * height));
   }
 
+  @Override
   public void samplePoint(Integer x, Integer y) {
     // MouseEvent me = (MouseEvent)params[0];
     // if (event.getButton() == 1) {

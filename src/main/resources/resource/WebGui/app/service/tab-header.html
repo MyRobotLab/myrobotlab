@@ -1,119 +1,124 @@
-<div class="col-md-12">
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-            <img ng-src="{{::service.simpleName}}.png" alt="" width="32">
-            &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}@{{::service.id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{::service.serviceVersion}}<span class="caret"></span>
+<div class="tab-header col-md-12">
+  <table>
+    <tr>
+      <td valign="top">
+        <button class="btn btn-default" ng-click="mrl.goBack()" title="back">
+          <span class="glyphicon glyphicon-arrow-left"></span>
         </button>
-        <ul class="dropdown-menu">
+      </td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+            <img ng-src="{{::service.simpleName}}.png" alt="" width="16" />
+            &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{::service.serviceVersion}}
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
             <li class="dropdown-header">service functions</li>
             <li>
-                <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
-                    <i class="glyphicon glyphicon-question-sign"></i>
-                    &nbsp;&nbsp;help
-                
-                </a>
+              <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
+                <i class="glyphicon glyphicon-question-sign"></i>
+                &nbsp;&nbsp;help
+              </a>
             </li>
             <li>
-                <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
-                    <i class="glyphicon glyphicon-remove"></i>
-                    &nbsp;&nbsp;release
-                
-                </a>
+              <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
+                <i class="glyphicon glyphicon-refresh"></i>
+                &nbsp;&nbsp;refresh
+              </a>
             </li>
             <li>
-                <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
-                    <i class="glyphicon glyphicon-refresh"></i>
-                    &nbsp;&nbsp;refresh
-                </a>
+              <a href="" target="_blank" width="100%">
+                <i class="glyphicon glyphicon-equalizer"></i>
+                <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>
+                <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>
+              </a>
             </li>
-             <li>
-                <a href="#">About Us</a>
-            </li>
-            <li>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
-                &nbsp;&nbsp;virtualize      
-                
-                <span>
-                    <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
-                </span>
-            </li>
-            <li>
-                <a href="" target="_blank" ng-click="export()">
-                    <i class="glyphicon glyphicon-save-file"></i>
-                    &nbsp;&nbsp;export
-                
-                </a>
-            </li>
-          
             <li class="divider"></li>
             <li class="dropdown-header">json</li>
-                      <li>
-                <!-- a href="" target="_blank" ng-click="showProperties=!showProperties" -->
-                <a href="/api/service/{{::service.name}}" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;properties            
-                </a>
+            <li>
+              <!-- a href="" target="_blank" ng-click="showProperties=!showProperties" -->
+              <a href="/api/service/{{::service.name}}" target="_blank">
+                <i class="glyphicon glyphicon-list-alt"></i>
+                &nbsp;&nbsp;properties
+              </a>
             </li>
             <li>
-                <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-                <a href="/api/service/{{::service.name}}/" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;methods
-                </a>
+              <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
+              <a href="/api/service/{{::service.name}}/" target="_blank">
+                <i class="glyphicon glyphicon-list-alt"></i>
+                &nbsp;&nbsp;methods
+              </a>
             </li>
-             <li>
-                <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-                <a href="/api/service/runtime/getNotifyEntries" target="_blank">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;subscriptions
-                </a>
+            <li>
+              <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
+              <a href='/api/service/runtime/getNotifyEntries/"{{service.name}}"' target="_blank">
+                <i class="glyphicon glyphicon-list-alt"></i>
+                &nbsp;&nbsp;subscriptions
+              </a>
             </li>
-           
-        </ul>
-    </div>
-</div>
-<!--  BAD IDEA - turns out all these vars are attached to the scope - and updates from servo position cause horrendous slowness in updating the gui !!!
-
-<div ng-show="showProperties">
-    <h3>properties <a href="/api/service/{{::service.name}}" target="_blank">json</a> </h3>
-    <table class="table table-striped">
-        <tr ng-repeat="(key, value) in properties">
-            
-            <td>{{value[0]}}</td>
-            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
-            <td ng-show="statusControlMode!='status'">
-                <input type="text">
-            </td>
-            <td>
-           
-            {{value[2]}}
-                    </td>
+          </ul>
+        </div>
+      </td>
+      <td>
+        <button class="btn btn-default" ng-click="release()" title="stops and releases a service">
+          <span class="glyphicon glyphicon-remove red"></span>
+          release
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-default" ng-click="save()" title="save current configuration">
+          <span class="glyphicon glyphicon-save-file"></span>
+          save
+        </button>
+      </td>
+      <td>
+        <button class="btn btn-default" ng-click="apply()" title="load and apply configuration">
+          <span class="glyphicon glyphicon-open-file"></span>
+          apply
+        </button>
+      </td>
+    </tr>
+  </table>
+  <div ng-show="parentPanel.showPeerTable">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col">key</th>
+          <th scope="col">name</th>
+          <th scope="col">state</th>
+          <th scope="col"></th>
         </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="(key, value) in service.config.peers">
+          <td>
+            <span>
+              <a href="" ng-click="mrl.changeTab(peer.getActualName(service, key))">
+                <img width="32" ng-src="/{{value.type + '.png'}}" width="48" />
+              </a>
+              {{peer.getActualName(service, key)}}
+            </span>
+          </td>
+          <td>
+            {{value.key}}
+            <br />
+            {{value.type}}
+          </td>
+          <td>{{value.state}}</td>
+          <td>
+            <toggle
+              width="30"
+              height="28"
+              ng-model="service['is' + key[0].toUpperCase() + key.substring(1) + 'Started']"
+              ng-change="service['is' + key[0].toUpperCase() + key.substring(1) + 'Started']?startPeer(key):releasePeer(key)"
+              on=""
+              off=""
+            />
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
     </table>
+  </div>
 </div>
-<div ng-show="showMethods">
-    <h3>methods  <a href="/api/service/{{::service.name}}/" target="_blank">json</a> </h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Function</th>
-                <th>Arguments</th>
-                <th>Return type</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{name}}                            
-            
-            <tr ng-repeat="(key, value) in msg._interface.temp.methodMap track by $index">
-                <td>{{value.name}}</td>
-                <td>
-                    <div ng-repeat="arg in value.parameterTypeNames track by $index">
-                        {{arg}}<br>
-                    </div>
-                </td>
-                <td>{{value.returnTypeName}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
--->

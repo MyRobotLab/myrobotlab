@@ -2,11 +2,10 @@ package org.myrobotlab.opencv;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterOutputTest  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterOutputTest extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {

@@ -17,7 +17,7 @@ public abstract class AbstractTransformable<T extends AbstractTransformable<T>> 
   @SuppressWarnings("unchecked")
   public T set(Matrix4f m) {
     transform = m;
-    return (T)this;
+    return (T) this;
   }
 
   @Override
@@ -109,7 +109,7 @@ public abstract class AbstractTransformable<T extends AbstractTransformable<T>> 
   public T preRotate(Matrix3f m) {
     return preMultiply(new Matrix4f().rotate(m));
   }
-  
+
   @Override
   public T lookat(Vector3f eye, Vector3f center, Vector3f up) {
     return set(Matrix4f.lookat(eye, center, up));
@@ -132,7 +132,7 @@ public abstract class AbstractTransformable<T extends AbstractTransformable<T>> 
   public Quaternion getRotation() {
     return getTransform().toRotationQuat();
   }
-  
+
   public T untranslate() {
     return translate(getTranslation().scale(-1));
   }

@@ -1,2 +1,2 @@
 # start the service
-wiibot = Runtime.start("wiibot","WiiBot")
+wiibot = runtime.start("wiibot","WiiBot")

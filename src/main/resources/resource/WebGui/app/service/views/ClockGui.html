@@ -1,15 +1,14 @@
 <div class="row">
-    <div class="col-md-3">
-        <h3>{{pulseData}}</h3>
-    </div>
+        <h3>{{onTime}}</h3>
 </div>
 <div class="row">
-    <div class="col-md-3">
+        <h3>{{onEpoch}}</h3>
+</div>
+<div class="row">
         <form class="form-inline">
-            <label>Interval</label>
-            <input class="form-control" type="text" ng-model="service.interval" ng-disabled="service.isClockRunning" ng-trim="false" unit-ms/>
-            <button class="btn btn-default" ng-if="!service.isClockRunning" ng-click="msg.setInterval(toNumber(service.interval)); msg.startClock();">Start</button>
-            <button class="btn btn-default" ng-if="service.isClockRunning" ng-click="msg.stopClock();">Stop</button>
+            pulse interval in ms<br/>
+            <input class="form-control" type="text" ng-model="service.config.interval" ng-disabled="service.config.running" ng-trim="false"/>
+            <button class="btn btn-default" ng-if="!service.config.running" ng-click="msg.setInterval(service.config.interval); msg.startClock();">start</button>
+            <button class="btn btn-default" ng-if="service.config.running" ng-click="msg.stopClock();">stop</button>
         </form>
-    </div>
 </div>

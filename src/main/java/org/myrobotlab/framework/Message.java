@@ -27,9 +27,11 @@ package org.myrobotlab.framework;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -92,11 +94,11 @@ public class Message implements Serializable {
 
   public String status;
 
-  public String dataEncoding; // null == none |json|cli|xml|stream ...
+  public String encoding; // null == none |json|cli|xml|stream ...
+
   /**
    * the method which will be invoked on the destination @see Service
    */
-
   public String method;
 
   /**
@@ -137,17 +139,23 @@ public class Message implements Serializable {
 
   final public void set(final Message other) {
     msgId = other.msgId;
-    name = other.getName();
+    name = other.name;
     sender = other.sender;
     sendingMethod = other.sendingMethod;
-    // FIXED - not valid making a copy of a message
-    // to send and copying there history list
-    // historyList = other.historyList;
+    // FIXMED AGAIN - 20210320 - it "is valid"
+    // adding history is for sending remote - if we relay
+    // we should add - and history should be checked for
+    // loop back "from" remote
+    // deep copy
+
     historyList = new ArrayList<String>();
+    historyList.addAll(other.historyList);
+
     status = other.status;
-    dataEncoding = other.dataEncoding;
+    encoding = other.encoding;
     method = other.method;
     // you know the dangers of reference copy
+    // shallow data copy
     data = other.data;
   }
 
@@ -214,6 +222,9 @@ public class Message implements Serializable {
   }
 
   public String getId() {
+    if (name == null) {
+      return null;
+    }
     int p = name.indexOf("@");
     if (p > 0) {
       return name.substring(p + 1);
@@ -277,4 +288,32 @@ public class Message implements Serializable {
     return method;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Message message = (Message) o;
+    return msgId == message.msgId
+            && Objects.equals(name, message.name)
+            && Objects.equals(sender, message.sender)
+            && Objects.equals(sendingMethod, message.sendingMethod)
+            && Objects.equals(historyList, message.historyList)
+            && Objects.equals(properties, message.properties)
+            && Objects.equals(status, message.status)
+            && Objects.equals(encoding, message.encoding)
+            && Objects.equals(method, message.method)
+            && Arrays.deepEquals(data, message.data);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(
+                    msgId, name, sender,
+                    sendingMethod, historyList,
+                    properties, status, encoding,
+                    method
+    );
+    result = 31 * result + Arrays.hashCode(data);
+    return result;
+  }
 }

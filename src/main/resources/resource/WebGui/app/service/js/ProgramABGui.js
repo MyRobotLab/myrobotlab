@@ -1,6 +1,6 @@
-angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl', ['$scope', '$compile', '$log', 'mrl', '$uibModal', '$sce', function($scope, $compile, $log, mrl, $uibModal, $sce) {
+angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl', ['$scope', '$compile', 'mrl', '$uibModal', '$sce', function($scope, $compile, mrl, $uibModal, $sce) {
     // $modal ????
-    $log.info('ProgramABGuiCtrl')
+    console.info('ProgramABGuiCtrl')
     // grab the self and message
     var _self = this
     var startDialog = null
@@ -12,7 +12,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.utterance = ''
     $scope.currentSessionKey = null
     $scope.status = null
-
+    $scope.predicates = []
     $scope.currentBotImage = null
 
     $scope.aimlEditor = null
@@ -41,9 +41,6 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         properties: false
     }
 
-    // grab defaults.
-    $scope.newUserName = $scope.service.currentUserName
-
     $scope.chatLog = []
 
     // start info status
@@ -54,7 +51,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         // use another scope var to transfer/merge selection
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
-        $scope.currentUserName = service.currentUserName
+        $scope.currentUserName = service.config.currentUserName
         $scope.service = service
         $scope.currentSessionKey = $scope.getCurrentSessionKey()
 
@@ -69,7 +66,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     this.onMsg = function(inMsg) {
-        $log.info("ProgramABGui.onMsg(" + inMsg.method + ')')
+        // console.info("ProgramABGui.onMsg(" + inMsg.method + ')')
         let data = inMsg.data[0]
 
         switch (inMsg.method) {
@@ -80,7 +77,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             break
 
         case 'onBotImage':
-            $scope.currentBotImage = data;
+            $scope.currentBotImage = data
             $scope.$apply()
             break
 
@@ -89,10 +86,26 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
             $scope.$apply()
             break
 
+        case 'onTopic':
+            $scope.service.currentTopic = data
+            $scope.$apply()
+            break
+
         case 'onAimlFile':
             $scope.aimlFileData.data = data
             $scope.$apply()
             break
+
+        case 'onPredicates':
+            $scope.predicates = data
+            $scope.$apply()
+            break
+
+        case 'onPredicate':
+            $scope.predicates[data.name] = data.value
+            $scope.$apply()
+            break
+                
 
         case 'onRequest':
             var textData = data
@@ -101,17 +114,16 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('onRequest', textData)
+            console.info('onRequest', textData)
             $scope.$apply()
             break
-        case 'onText':
+        case 'onResponse':
             var textData = data
             $scope.chatLog.unshift({
                 type: 'Bot',
-                name: $scope.service.currentBotName,
-                text: $sce.trustAsHtml(textData)
+                name: $scope.service.config.currentBotName,
+                text: $sce.trustAsHtml(data.msg)
             })
-            $log.info('onText', textData)
             $scope.lastResponse = textData
             $scope.$apply()
             break
@@ -142,11 +154,11 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
                 name: " > oob <",
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('currResponse', textData)
+            console.info('currResponse', textData)
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -154,24 +166,30 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.getAimlFile = function(filename) {
         $scope.aimlFile = filename
         console.log('getting aiml file ' + filename)
-        msg.send('getAimlFile', $scope.service.currentBotName, filename)
+        msg.send('getAimlFile', $scope.service.config.currentBotName, filename)
         $scope.tabs.selected = 2
     }
 
     $scope.saveAimlFile = function() {
-        msg.send("saveAimlFile", $scope.service.currentBotName, $scope.aimlFile, $scope.aimlFileData.data)
+        msg.send("saveAimlFile", $scope.service.config.currentBotName, $scope.aimlFile, $scope.aimlFileData.data)
     }
 
     $scope.setSessionKey = function() {
-        msg.send("setCurrentUserName", $scope.service.currentUserName)
-        msg.send("setCurrentBotName", $scope.service.currentBotName)
+        msg.send("setCurrentUserName", $scope.service.config.currentUserName)
+        msg.send("setCurrentBotName", $scope.service.config.currentBotName)
     }
 
     $scope.getBotInfo = function() {
-        return $scope.service.bots[$scope.service.currentBotName]
+        if ($scope.service && $scope.service.bots){
+            return $scope.service.bots[$scope.service.config.currentBotName]
+        }
+        return null
     }
 
     $scope.getCurrentSession = function() {
+        if (!$scope.service.sessions){
+            return null
+        }
         if ($scope.getCurrentSessionKey()in $scope.service.sessions) {
             return $scope.service.sessions[$scope.getCurrentSessionKey()]
         }
@@ -179,7 +197,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getCurrentSessionKey = function() {
-        return $scope.service.currentUserName + ' <-> ' + $scope.service.currentBotName
+        return $scope.service.config.currentUserName + ' <-> ' + $scope.service.config.currentBotName
     }
 
     $scope.test = function(session, utterance) {
@@ -187,12 +205,12 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getSessionResponse = function(utterance) {
-        $log.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.currentBotName + ")")
-        $scope.getResponse($scope.currentUserName, $scope.service.currentBotName, utterance)
+        console.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.config.currentBotName + ")")
+        $scope.getResponse($scope.currentUserName, $scope.service.config.currentBotName, utterance)
     }
 
     $scope.getResponse = function(username, botname, utterance) {
-        $log.info("USER BOT RESPONSE (" + username + " " + botname + ")")
+        console.info("USER BOT RESPONSE (" + username + " " + botname + ")")
         msg.send("getResponse", username, botname, utterance)
         $scope.utterance = ""
     }
@@ -225,11 +243,21 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getProperties = function() {
+        if (!$scope.getBotInfo()){
+            return null
+        }
         return $scope.getBotInfo()['properties']
     }
 
     $scope.getProperty = function(propName) {
-        return $scope.getBotInfo()['properties'][propName]
+        try {
+            if ($scope.getBotInfo() && $scope.getBotInfo()['properties']){
+                return $scope.getBotInfo()['properties'][propName]                
+            }
+        } catch (error){
+            console.warn('getProperty(' + propName + ') not found')
+            return null
+        }
     }
 
     $scope.removeBotProperty = function(propName) {
@@ -248,6 +276,14 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         console.log('aceChanged')
     }
 
+    $scope.getBotPath = function(e) {
+        if ($scope.service?.bots && $scope.service?.bots[$scope.service?.config?.currentBotName]?.path){
+            return $scope.service?.bots[$scope.service?.config.currentBotName].path
+        }
+        return null
+    }
+    
+    
     $scope.getStatusLabel = function(level) {
         if (level == 'error') {
             return 'row label col-md-12 label-danger'
@@ -260,11 +296,18 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     // subscribe to the response from programab.
+    msg.subscribe('publishTopic')
     msg.subscribe('publishRequest')
-    msg.subscribe('publishText')
+    msg.subscribe('publishResponse')
     msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')
+    msg.subscribe('getPredicates')
+    msg.subscribe('publishPredicate')
     msg.subscribe('getAimlFile')
+
+
+    msg.send('getPredicates')
+    
     msg.subscribe(this)
 }
 ])

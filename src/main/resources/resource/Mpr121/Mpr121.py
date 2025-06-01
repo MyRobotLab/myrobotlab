@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-mpr121 = Runtime.start('mpr121','Mpr121')
+mpr121 = runtime.start('mpr121','Mpr121')

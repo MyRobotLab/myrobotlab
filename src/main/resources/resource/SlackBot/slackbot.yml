@@ -1,0 +1,6 @@
+!!org.myrobotlab.service.config.SlackBotConfig
+appToken: null
+botToken: null
+listeners: null
+peers: null
+type: SlackBot

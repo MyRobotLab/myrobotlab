@@ -1,2 +1,2 @@
 # start the service
-log = Runtime.start("log","Log")
+log = runtime.start("log","Log")

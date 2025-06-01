@@ -7,15 +7,13 @@ import java.util.Locale;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.slf4j.Logger;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 // TODO: this unit test is so loud!  we need a way to run it in mute mode
 // also it's long based on the length of the audio being generated/played.
@@ -49,20 +47,17 @@ public class SpeechSynthesisTest {
     // Locale.setDefault(t);
 
     Locale[] locales = Locale.getAvailableLocales();
-    String[] isoLanguages = Locale.getISOLanguages();
-    String[] isoCountries = Locale.getISOCountries();
 
     // is Locale serializable
-    Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-    String json = gson.toJson(locale);
-    Locale l = gson.fromJson(json, Locale.class);
+    String json = CodecUtils.toJson(locale);
+    Locale l = CodecUtils.fromJson(json, Locale.class);
 
     Locale br = new Locale("en", "BR", "variant");
     log.info("br getLanguage - {}", br.getLanguage());
     log.info("br getDisplayLanguage - {}", br.getDisplayLanguage());
     br.toLanguageTag();
-    json = gson.toJson(br);
-    l = gson.fromJson(json, Locale.class);
+    json = CodecUtils.toJson(br);
+    l = CodecUtils.fromJson(json, Locale.class);
     br.equals(l);
 
     l = new Locale("en_BR_variant");

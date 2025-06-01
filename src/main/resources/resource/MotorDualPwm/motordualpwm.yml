@@ -1,0 +1,17 @@
+!!org.myrobotlab.service.config.MotorDualPwmConfig
+axis: null
+controller: null
+leftPwmPin: null
+listeners: null
+locked: false
+mapper:
+  clip: true
+  inverted: false
+  maxIn: 100.0
+  maxOut: 100.0
+  minIn: -100.0
+  minOut: -100.0
+peers: null
+pwmFreq: null
+rightPwmPin: null
+type: MotorDualPwm

@@ -16,6 +16,7 @@ public class Rectangle {
     this.height = height;
   }
 
+  @Override
   public String toString() {
     return String.format("x %.2f y %.2f w %.2f h %.2f", x, y, width, height);
   }

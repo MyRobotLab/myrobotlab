@@ -3,8 +3,8 @@
 	<repositories>
 		<repository>
 			<id>myrobotlab</id>
-			<name>repo.myrobotlab.org</name>
-			<url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+			<name>myrobotlab-repo.s3.amazonaws.com</name>
+			<url>https://myrobotlab-repo.s3.amazonaws.com/artifactory/myrobotlab</url>
 		</repository>
 		<repository>
 			<id>bintray</id>

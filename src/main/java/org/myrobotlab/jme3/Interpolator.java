@@ -23,6 +23,7 @@ public class Interpolator {
     public int direction;
     public String axis;
 
+    @Override
     public String toString() {
       return String.format("%s %s %.2f %.2f %d", name, method, newPos, speed, startTs);
     }
@@ -88,7 +89,6 @@ public class Interpolator {
       // animation
       // jme.rotateTo(move.name, null, interPos);
       util.rotateTo(name, move.axis, interPos);
-      ;
 
       if (Math.abs(interPos - move.newPos) < 0.5 /* if we're close enough */
           || /* or we overrun */ (move.direction < 0 && interPos < move.newPos)

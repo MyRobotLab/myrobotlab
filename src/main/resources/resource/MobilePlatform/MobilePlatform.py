@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-mobileplatform = Runtime.start('mobileplatform','MobilePlatform')
+mobileplatform = runtime.start('mobileplatform','MobilePlatform')

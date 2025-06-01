@@ -42,6 +42,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.XmppConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
@@ -54,7 +56,8 @@ import org.slf4j.Logger;
  * @author GROG
  *
  */
-public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatMessageListener, MessageListener, RosterListener, ConnectionListener {// ,
+public class Xmpp extends Service<XmppConfig> implements Gateway,ChatManagerListener,ChatMessageListener,MessageListener,RosterListener,ConnectionListener
+{// ,
 
   public static class Contact {
     public String user;
@@ -63,6 +66,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     public String name;
     public String status;
 
+    @Override
     public String toString() {
       return String.format("user: %s, name: %s, presence: %s, type: %s, status: %s", user, name, type, presence, status);
     }
@@ -98,9 +102,11 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   String serviceName = "myrobotlab.org"; // xmpp.myrobotlab.org
 
   int port = 5222;
-  transient XMPPTCPConnectionConfiguration config;
+  transient XMPPTCPConnectionConfiguration configx;
   transient XMPPTCPConnection connection;
   transient ChatManager chatManager;
+
+  protected ServiceConfig config;
 
   transient Roster roster = null;
 
@@ -122,7 +128,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     super(n, id);
   }
 
-  public void addBuddy(String user) throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {
+  public void addBuddy(String user)
+      throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {
     Roster roster = Roster.getInstanceFor(connection);
     roster.setSubscriptionMode(SubscriptionMode.accept_all);
     // jid: String, user: String, groups: String[]
@@ -135,6 +142,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     // FIXME - implement direct callback or pub sub support ??
   }
 
+  @Override
   public void chatCreated(Chat chat, boolean locallyCreated) {
     // test if locallyCreated
     if (!locallyCreated) {
@@ -272,6 +280,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   /**
    * Process received messages
    */
+  @Override
   public void processMessage(Chat chat, Message message) {
     XmppMsg xmppMsg = new XmppMsg(chat, message);
     invoke("publishXmppMsg", xmppMsg);
@@ -288,7 +297,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         try {
           // org.myrobotlab.framework.Message msg =
           // CodecUri.decodePathInfo(pathInfo);
-          org.myrobotlab.framework.Message msg = CodecUtils.cliToMsg(null, getName(), null, pathInfo);
+          org.myrobotlab.framework.Message msg = CodecUtils.pathToMsg(getName(), pathInfo);
 
           // FIXME - do the same as InProcessCli & WebGui
           Object ret = null;
@@ -522,11 +531,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   @Override
   public boolean isLocal(org.myrobotlab.framework.Message msg) {
     return Runtime.getInstance().isLocal(msg);
-  }
-
-  @Override
-  public org.myrobotlab.framework.Message getDescribeMsg(String connId) {
-    return Runtime.getInstance().getDescribeMsg(connId);
   }
 
 }

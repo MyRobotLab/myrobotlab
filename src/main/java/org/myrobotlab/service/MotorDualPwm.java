@@ -1,19 +1,20 @@
 package org.myrobotlab.service;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.config.MotorDualPwmConfig;
 
-public class MotorDualPwm extends AbstractMotor {
+public class MotorDualPwm extends AbstractMotor<MotorDualPwmConfig> {
   private static final long serialVersionUID = 1L;
 
-  public String leftPwmPin;
-  public String rightPwmPin;
-  Integer pwmFreq;
+  protected String leftPwmPin;
+  protected String rightPwmPin;
+  protected Integer pwmFreq;
 
   public List<String> pwmPinList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
 
@@ -66,32 +67,58 @@ public class MotorDualPwm extends AbstractMotor {
     this.pwmFreq = pwmfreq;
   }
 
-  public static void main(String[] args) throws InterruptedException {
-
-    LoggingFactory.init(Level.INFO);
-    String arduinoPort = "COM5";
-
-    VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-    try {
-      virtual.connect(arduinoPort);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
-
-    MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");
-    Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
-    arduino.connect(arduinoPort);
-    motor.setPwmPins(10, 11);
-    try {
-      motor.attach(arduino);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
+  @Override
+  public MotorDualPwmConfig getConfig() {
+    // FIXME - may need to do call super.config for config that has parent :(
+    super.getConfig();
+    config.leftPwmPin = leftPwmPin;
+    config.rightPwmPin = rightPwmPin;
+    config.pwmFreq = pwmFreq;
+    return config;
   }
 
+  public MotorDualPwmConfig apply(MotorDualPwmConfig c) {
+    super.apply(c);
+    if (c.leftPwmPin != null) {
+      setLeftPwmPin(c.leftPwmPin);
+    }
+    if (c.rightPwmPin != null) {
+      setRightPwmPin(c.rightPwmPin);
+    }
+    if (c.pwmFreq != null) {
+      setPwmFreq(c.pwmFreq);
+    }
+    return c;
+  }
+
+  public static void main(String[] args) {
+    try {
+      LoggingFactory.init(Level.INFO);
+      String arduinoPort = "COM5";
+
+      Runtime.getInstance().setVirtual(true);
+      Runtime.startConfig("dev");
+      Runtime.start("webgui", "WebGui");
+      MotorDualPwm motor = (MotorDualPwm) Runtime.start("motor", "MotorDualPwm");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      arduino.connect(arduinoPort);
+      motor.setPwmPins(10, 11);
+
+      motor.attach(arduino);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void attachMotorController(String controller) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void detachMotorController(String controller) {
+    // TODO Auto-generated method stub
+    
+  }
 }

@@ -1,60 +1,37 @@
-/**
- *                    
- * @author GroG (at) myrobotlab.org
- *  
- * This file is part of MyRobotLab (http://myrobotlab.org).
- *
- * MyRobotLab is free software: you can redistribute it and/or modify
- * it under the terms of the Apache License 2.0 as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version (subject to the "Classpath" exception
- * as provided in the LICENSE.txt file that accompanied this code).
- *
- * MyRobotLab is distributed in the hope that it will be useful or fun,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * Apache License 2.0 for more details.
- *
- * All libraries in thirdParty bundle are subject to their own license
- * requirements - please refer to http://myrobotlab.org/libraries for 
- * details.
- * 
- * Enjoy !
- * 
- * */
-
 package org.myrobotlab.service;
 
+import java.util.Set;
+
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
-import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
+import org.myrobotlab.service.data.ServoMove;
 import org.slf4j.Logger;
 
 /**
+ * Servos have both input and output. Input is usually of the range of integers
+ * between 0.0 - 180.0, and output can relay those values directly to the
+ * servo's firmware (Arduino ServoLib, I2C controller, etc)
+ * 
+ * However there can be the occasion that the input comes from a system which
+ * does not have the same range. Such that input can vary from 0.0 to 1.0. For
+ * example, OpenCV coordinates are often returned in this range. When a mapping
+ * is needed Servo.map can be used. For this mapping Servo.map(0.0, 1.0, 0, 180)
+ * might be desired. Reversing input would be done with Servo.map(180, 0, 0,
+ * 180)
+ * 
+ * outputY - is the values sent to the firmware, and should not necessarily be
+ * confused with the inputX which is the input values sent to the servo
+ * 
+ * FIXME - inherit from AbstractMotor ..
+ * 
  * @author GroG
- * 
- *         Servos have both input and output. Input is usually of the range of
- *         integers between 0.0 - 180.0, and output can relay those values
- *         directly to the servo's firmware (Arduino ServoLib, I2C controller,
- *         etc)
- * 
- *         However there can be the occasion that the input comes from a system
- *         which does not have the same range. Such that input can vary from 0.0
- *         to 1.0. For example, OpenCV coordinates are often returned in this
- *         range. When a mapping is needed Servo.map can be used. For this
- *         mapping Servo.map(0.0, 1.0, 0, 180) might be desired. Reversing input
- *         would be done with Servo.map(180, 0, 0, 180)
- * 
- *         outputY - is the values sent to the firmware, and should not
- *         necessarily be confused with the inputX which is the input values
- *         sent to the servo
- * 
- *         FIXME - inherit from AbstractMotor ..
- * 
  */
-
-public class Servo extends AbstractServo implements ServoControl {
+public class Servo extends AbstractServo<ServoConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -74,19 +51,19 @@ public class Servo extends AbstractServo implements ServoControl {
    * @param blocking
    * @param timeoutMs
    */
+  @Override
   protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
-    // FIXME - implement encoder blocking ...
-    // FIXME - when and what should a servo publish and when ?
-    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
-    // the servo, targetPos is
-    // the desired position of the servo - currentPos should NEVER be set in
-    // this function
-    // even with no hardware encoder a servo can have a TimeEncoder from which
-    // position would be guessed - but
     if (newPos == null) {
-      error("cannot move to null position - not moving");
+      log.info("servo processMove(null) not valid position");
       return false;
     }
+
+    double minLimit = Math.min(mapper.minX, mapper.maxX);
+    double maxLimit = Math.max(mapper.minX, mapper.maxX);
+    newPos = (newPos < minLimit) ? minLimit : newPos;
+    newPos = (newPos > maxLimit) ? maxLimit : newPos;
+
+    log.debug("{} processMove {}", getName(), newPos);
 
     // This is to allow attaching disabled
     // then delay enabling until the first moveTo command
@@ -96,14 +73,14 @@ public class Servo extends AbstractServo implements ServoControl {
       firstMove = false;
     }
 
-    if (idleDisabled && !enabled) {
+    if (config.autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
     // purge any timers currently in process
     // if currently configured to autoDisable - the timer starts now
     // we cancel any pre-existing timer if it exists
-    purgeTask("idleDisable");
+    purgeTask("disable");
     // blocking move will be idleTime out enabled later.
 
     if (!enabled) {
@@ -111,7 +88,7 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     targetPos = newPos;
-    log.info("pos {} output {}", targetPos, getTargetOutput());
+    log.debug("pos {} output {}", targetPos, getTargetOutput());
 
     /**
      * <pre>
@@ -137,6 +114,12 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+
+    // broadcast("publishServoMoveTo", new ServoMove(getName(), newPos,
+    // mapper.calcOutput(newPos))); apparently we want input here
+    // THIS IS CONSUMED BY ARDUINO CONTROLLER - IT USES ServoMove.outputPos !!!!
+    broadcast("publishServoMoveTo", new ServoMove(getName(), newPos, mapper.calcOutput(newPos)));
+
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
       // if isBlocking already, and incoming request is a blocking one - we
@@ -168,39 +151,24 @@ public class Servo extends AbstractServo implements ServoControl {
     // movement
     // usually knowing about encoder type is "bad" but the timer encoder is the
     // default native encoder
-    Long blockingTimeMs = null;
+    long blockingTimeMs = 0;
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), getTargetPos(), getSpeed());
     }
-    // grog: I think in the long run this direct call vs using invoke/send is
-    // less preferrable
-    // thinking on a distributed network level you can't do this when the other
-    // thing is in
-    // a different process
-    // This still need adjustment - if we do not mandate jme must be a servo
-    // controller
-    // then this control needs to be able to broadcast "control" angles !!! -
-    // and that
-    // might be without a controller !
-    if (controller == null) { // <-- NOT NEEDED :)
-      log.info("controller is null");
-      // FIXME - need to still go through the default 'move'
-    } else {
-      broadcast("publishServoMoveTo", this);
-    }
-    // invoke("publishServoMoveTo", this);
-    broadcastState();
+
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
-      // to continue or timeout (if supplied) has been reached
+      // to continue or timeout (if supplied) has been reached - "cheesy" need
+      // to
+      // re-work for real monitor callbacks from real encoders
       sleep(blockingTimeMs);
       isBlocking = false;
       isMoving = false;
-      if (autoDisable) {
+      if (config.autoDisable) {
         // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
     return true;
@@ -211,9 +179,14 @@ public class Servo extends AbstractServo implements ServoControl {
     setAutoDisable(value);
   }
 
-  @Deprecated
-  public void setMaxVelocity(Double velocity) {
-    log.warn("SetMaxVelocity does nothing and is deprecated. please update your python scripts, and use fullSpeed() instead");
+  @Override
+  public ServiceConfig getFilteredConfig() {
+    ServoConfig sc = (ServoConfig) super.getFilteredConfig();
+    Set<String> removeList = Set.of("onServoEnable", "onServoDisable", "onEncoderData", "onServoSetSpeed", "onServoWriteMicroseconds", "onServoMoveTo", "onServoStop");
+    if (sc.listeners != null) {
+      sc.listeners.removeIf(listener -> removeList.contains(listener.callback));
+    }
+    return sc;
   }
 
   public static void main(String[] args) throws InterruptedException {
@@ -221,88 +194,40 @@ public class Servo extends AbstractServo implements ServoControl {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo" });
-      // LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
+      // Runtime runtime = Runtime.getInstance();
+
+      Runtime.start("clock", "Servo");
+      Runtime runtime = Runtime.getInstance();
+      // runtime.connect("http://localhost:8888");
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+
+      tilt.setPin(4);
+      pan.setPin(5);
+      tilt.setMinMax(10, 100);
+      pan.setMinMax(5, 105);
+      tilt.setInverted(true);
+
+      mega.connect("/dev/ttyACM0");
+
+      mega.attach(tilt);
+      mega.attach(pan);
 
       boolean done = true;
       if (done) {
         return;
       }
-
-      mega.connect("/dev/ttyACM1");
-      // mega.setBoardMega();
-
-      log.info("servo pos {}", tilt.getCurrentInputPos());
-
-      // double pos = 170;
-      // servo03.setPosition(pos);
-      tilt.setPin(3);
-
-      double min = 3;
-      double max = 170;
-      double speed = 60; // degree/s
-
-      mega.attach(tilt);
-      // mega.attach(servo03,3);
-
-      for (int i = 0; i < 100; ++i) {
-        tilt.moveTo(20.0);
-      }
-
-      tilt.sweep(min, max, speed);
-
-      /*
-       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
-       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
-       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
-       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
-       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
-       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
-       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
-       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
-       * Runtime.start("servo12", "Servo");
-       */
-      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
-
-      // servo03.attach(mega, 8, 38.0);
-      /*
-       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
-       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
-       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
-       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
-       * servo12.attach(mega, 12, 38.0);
-       */
-
-      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
-      // "TestCatcher");
-      // servo03.attach((ServoEventListener)catcher);
-
-      // servo.setPin(12);
-
-      /*
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       */
-
-      // servo.sweepDelay = 3;
-      // servo.save();
-      // servo.load();
-      // servo.save();
-      // log.info("sweepDely {}", servo.sweepDelay);
 
     } catch (Exception e) {
       log.error("main threw", e);

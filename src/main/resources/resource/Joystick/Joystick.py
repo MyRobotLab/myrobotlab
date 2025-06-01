@@ -4,8 +4,8 @@
 # more info @: http://myrobotlab.org/service/Joystick
 #########################################
 # start the services
-joy = Runtime.start("joy","Joystick")
-python = Runtime.start("python","Python")
+joy = runtime.start("joy","Joystick")
+python = runtime.start("python","Python")
 #this set which kind of controller you want to poll data from
 #it is the number you can see in the Joystick GUI when you open the list of devices
 joy.setController(5)

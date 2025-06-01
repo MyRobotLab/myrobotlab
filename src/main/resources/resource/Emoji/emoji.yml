@@ -1,0 +1,16 @@
+!!org.myrobotlab.service.config.EmojiConfig
+emojiSourceUrlTemplate: https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/{size}/emoji_{code}.png
+listeners: null
+map: {
+  }
+peers:
+  display:
+    autoStart: true
+    name: emoji.display
+    type: ImageDisplay
+  http:
+    autoStart: true
+    name: emoji.http
+    type: HttpClient
+size: 512
+type: Emoji

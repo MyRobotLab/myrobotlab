@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.GoogleCloudConfig;
 import org.slf4j.Logger;
 
 import com.google.cloud.vision.v1.AnnotateImageRequest;
@@ -40,7 +41,8 @@ import com.google.protobuf.ByteString;
 
 //[END import_libraries]
 
-public class GoogleCloud extends Service {
+public class GoogleCloud extends Service<GoogleCloudConfig>
+{
 
   private static final long serialVersionUID = 1L;
   final static Logger log = LoggerFactory.getLogger(GoogleCloud.class);
@@ -61,11 +63,11 @@ public class GoogleCloud extends Service {
    * Detects entities,sentiment and syntax in a document using the Vision API.
    * 
    * @param args
-   *          input args
+   *             input args
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           errors.
+   *                     errors.
    */
   public static void main(String[] args) throws Exception, IOException {
     argsHelper(args, System.out);
@@ -73,17 +75,24 @@ public class GoogleCloud extends Service {
 
   /**
    * Helper that handles the input passed to the program.
+   * 
+   * @param args
+   *             the passed args
+   * @param out
+   *             the output stream to print to
    *
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void argsHelper(String[] args, PrintStream out) throws Exception, IOException {
     if (args.length < 1) {
       out.println("Usage:");
-      out.printf("\tmvn exec:java -DDetect -Dexec.args=\"<command> <path-to-image>\"\n" + "Commands:\n" + "\tfaces | labels | landmarks | logos | text | safe-search | properties"
-          + "| web | crop \n" + "Path:\n\tA file path (ex: ./resources/wakeupcat.jpg) or a URI for a Cloud Storage " + "resource (gs://...)\n");
+      out.printf("\tmvn exec:java -DDetect -Dexec.args=\"<command> <path-to-image>\"\n" + "Commands:\n"
+          + "\tfaces | labels | landmarks | logos | text | safe-search | properties"
+          + "| web | crop \n" + "Path:\n\tA file path (ex: ./resources/wakeupcat.jpg) or a URI for a Cloud Storage "
+          + "resource (gs://...)\n");
       return;
     }
     String command = args[0];
@@ -159,13 +168,13 @@ public class GoogleCloud extends Service {
    * Detects faces in the specified local image.
    *
    * @param filePath
-   *          The path to the file to perform face detection on.
+   *                 The path to the file to perform face detection on.
    * @param out
-   *          A {@link PrintStream} to write detected features to.
+   *                 A {@link PrintStream} to write detected features to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectFaces(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -190,7 +199,8 @@ public class GoogleCloud extends Service {
         // For full list of available annotations, see
         // http://g.co/cloud/vision/docs
         for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
-          out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(), annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
+          out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(),
+              annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
               annotation.getBoundingPoly());
         }
       }
@@ -201,14 +211,14 @@ public class GoogleCloud extends Service {
    * Detects faces in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform
-   *          face detection on.
+   *                The path to the remote file on Google Cloud Storage to perform
+   *                face detection on.
    * @param out
-   *          A {@link PrintStream} to write detected features to.
+   *                A {@link PrintStream} to write detected features to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectFacesGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -233,7 +243,8 @@ public class GoogleCloud extends Service {
         // For full list of available annotations, see
         // http://g.co/cloud/vision/docs
         for (FaceAnnotation annotation : res.getFaceAnnotationsList()) {
-          out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(), annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
+          out.printf("anger: %s\njoy: %s\nsurprise: %s\nposition: %s", annotation.getAngerLikelihood(),
+              annotation.getJoyLikelihood(), annotation.getSurpriseLikelihood(),
               annotation.getBoundingPoly());
         }
       }
@@ -244,13 +255,13 @@ public class GoogleCloud extends Service {
    * Detects labels in the specified local image.
    *
    * @param filePath
-   *          The path to the file to perform label detection on.
+   *                 The path to the file to perform label detection on.
    * @param out
-   *          A {@link PrintStream} to write detected labels to.
+   *                 A {@link PrintStream} to write detected labels to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLabels(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -285,14 +296,14 @@ public class GoogleCloud extends Service {
    * Detects labels in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform
-   *          label detection on.
+   *                The path to the remote file on Google Cloud Storage to perform
+   *                label detection on.
    * @param out
-   *          A {@link PrintStream} to write detected features to.
+   *                A {@link PrintStream} to write detected features to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLabelsGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -326,13 +337,13 @@ public class GoogleCloud extends Service {
    * Detects landmarks in the specified local image.
    *
    * @param filePath
-   *          The path to the file to perform landmark detection on.
+   *                 The path to the file to perform landmark detection on.
    * @param out
-   *          A {@link PrintStream} to write detected landmarks to.
+   *                 A {@link PrintStream} to write detected landmarks to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLandmarks(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -367,13 +378,13 @@ public class GoogleCloud extends Service {
    * Detects landmarks in the specified URI.
    *
    * @param uri
-   *          The path to the file to perform landmark detection on.
+   *            The path to the file to perform landmark detection on.
    * @param out
-   *          A {@link PrintStream} to write detected landmarks to.
+   *            A {@link PrintStream} to write detected landmarks to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLandmarksUrl(String uri, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -408,14 +419,14 @@ public class GoogleCloud extends Service {
    * Detects landmarks in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform
-   *          landmark detection on.
+   *                The path to the remote file on Google Cloud Storage to perform
+   *                landmark detection on.
    * @param out
-   *          A {@link PrintStream} to write detected landmarks to.
+   *                A {@link PrintStream} to write detected landmarks to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLandmarksGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -450,13 +461,13 @@ public class GoogleCloud extends Service {
    * Detects logos in the specified local image.
    *
    * @param filePath
-   *          The path to the local file to perform logo detection on.
+   *                 The path to the local file to perform logo detection on.
    * @param out
-   *          A {@link PrintStream} to write detected logos to.
+   *                 A {@link PrintStream} to write detected logos to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLogos(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -491,14 +502,14 @@ public class GoogleCloud extends Service {
    * Detects logos in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to perform
-   *          logo detection on.
+   *                The path to the remote file on Google Cloud Storage to perform
+   *                logo detection on.
    * @param out
-   *          A {@link PrintStream} to write detected logos to.
+   *                A {@link PrintStream} to write detected logos to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectLogosGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -532,13 +543,13 @@ public class GoogleCloud extends Service {
    * Detects text in the specified image.
    *
    * @param filePath
-   *          The path to the file to detect text in.
+   *                 The path to the file to detect text in.
    * @param out
-   *          A {@link PrintStream} to write the detected text to.
+   *                 A {@link PrintStream} to write the detected text to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectText(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -574,14 +585,15 @@ public class GoogleCloud extends Service {
    * Detects text in the specified remote image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect text
-   *          in.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                text
+   *                in.
    * @param out
-   *          A {@link PrintStream} to write the detected text to.
+   *                A {@link PrintStream} to write the detected text to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectTextGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -617,13 +629,13 @@ public class GoogleCloud extends Service {
    * image.
    *
    * @param filePath
-   *          The path to the file to detect properties.
+   *                 The path to the file to detect properties.
    * @param out
-   *          A {@link PrintStream} to write
+   *                 A {@link PrintStream} to write
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectProperties(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -649,7 +661,8 @@ public class GoogleCloud extends Service {
         // http://g.co/cloud/vision/docs
         DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
         for (ColorInfo color : colors.getColorsList()) {
-          out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(), color.getColor().getGreen(), color.getColor().getBlue());
+          out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(),
+              color.getColor().getGreen(), color.getColor().getBlue());
         }
       }
     }
@@ -660,14 +673,14 @@ public class GoogleCloud extends Service {
    * image on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect
-   *          properties on.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                properties on.
    * @param out
-   *          A {@link PrintStream} to write
+   *                A {@link PrintStream} to write
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectPropertiesGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -692,7 +705,8 @@ public class GoogleCloud extends Service {
         // http://g.co/cloud/vision/docs
         DominantColorsAnnotation colors = res.getImagePropertiesAnnotation().getDominantColors();
         for (ColorInfo color : colors.getColorsList()) {
-          out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(), color.getColor().getGreen(), color.getColor().getBlue());
+          out.printf("fraction: %f\nr: %f, g: %f, b: %f\n", color.getPixelFraction(), color.getColor().getRed(),
+              color.getColor().getGreen(), color.getColor().getBlue());
         }
       }
     }
@@ -703,13 +717,13 @@ public class GoogleCloud extends Service {
    * moderate.
    *
    * @param filePath
-   *          The path to the local file used for safe search detection.
+   *                 The path to the local file used for safe search detection.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                 A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectSafeSearch(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -734,7 +748,8 @@ public class GoogleCloud extends Service {
         // For full list of available annotations, see
         // http://g.co/cloud/vision/docs
         SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
-        out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(), annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
+        out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(),
+            annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
       }
     }
   }
@@ -744,14 +759,14 @@ public class GoogleCloud extends Service {
    * features you would want to moderate.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect
-   *          safe-search on.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                safe-search on.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectSafeSearchGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -775,7 +790,8 @@ public class GoogleCloud extends Service {
         // For full list of available annotations, see
         // http://g.co/cloud/vision/docs
         SafeSearchAnnotation annotation = res.getSafeSearchAnnotation();
-        out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(), annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
+        out.printf("adult: %s\nmedical: %s\nspoofed: %s\nviolence: %s\n", annotation.getAdult(),
+            annotation.getMedical(), annotation.getSpoof(), annotation.getViolence());
       }
     }
   }
@@ -784,13 +800,13 @@ public class GoogleCloud extends Service {
    * Finds references to the specified image on the web.
    *
    * @param filePath
-   *          The path to the local file used for web annotation detection.
+   *                 The path to the local file used for web annotation detection.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                 A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectWebDetections(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -844,14 +860,14 @@ public class GoogleCloud extends Service {
    * features you would want to moderate.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect
-   *          safe-search on.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                safe-search on.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectWebDetectionsGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -903,13 +919,13 @@ public class GoogleCloud extends Service {
    * Suggests a region to crop to for a local file.
    *
    * @param filePath
-   *          The path to the local file used for web annotation detection.
+   *                 The path to the local file used for web annotation detection.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                 A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectCropHints(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -945,14 +961,14 @@ public class GoogleCloud extends Service {
    * Suggests a region to crop to for a remote file on Google Cloud Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect
-   *          safe-search on.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                safe-search on.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectCropHintsGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -987,13 +1003,13 @@ public class GoogleCloud extends Service {
    * Performs document text detection on a local image file.
    *
    * @param filePath
-   *          The path to the local file to detect document text on.
+   *                 The path to the local file to detect document text on.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                 A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectDocumentText(String filePath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();
@@ -1050,14 +1066,14 @@ public class GoogleCloud extends Service {
    * Storage.
    *
    * @param gcsPath
-   *          The path to the remote file on Google Cloud Storage to detect
-   *          document text on.
+   *                The path to the remote file on Google Cloud Storage to detect
+   *                document text on.
    * @param out
-   *          A {@link PrintStream} to write the results to.
+   *                A {@link PrintStream} to write the results to.
    * @throws Exception
-   *           on errors while closing the client.
+   *                     on errors while closing the client.
    * @throws IOException
-   *           on Input/Output errors.
+   *                     on Input/Output errors.
    */
   public static void detectDocumentTextGcs(String gcsPath, PrintStream out) throws Exception, IOException {
     List<AnnotateImageRequest> requests = new ArrayList<>();

@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-lex = Runtime.start('lex','Lex')
+lex = runtime.start('lex','Lex')

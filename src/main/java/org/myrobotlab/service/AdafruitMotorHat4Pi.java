@@ -19,6 +19,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotorController;
+import org.myrobotlab.service.config.AbstractMotorControllerConfig;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/overview
  */
 
-public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CControl {
+public class AdafruitMotorHat4Pi extends AbstractMotorController<AbstractMotorControllerConfig> implements I2CControl {
 
   /** version of the library */
   static public final String VERSION = "0.9";
@@ -409,7 +410,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -430,6 +431,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -447,6 +449,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -468,7 +471,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -532,6 +535,26 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   public List<String> getPorts() {
     // This type of motordriver does not use any ports
     return null;
+  }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
   }
 
 }

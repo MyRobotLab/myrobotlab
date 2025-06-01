@@ -4,8 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -23,12 +21,16 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   public final static Logger log = LoggerFactory.getLogger(RepoTest.class);
   ArrayList<Status> status = new ArrayList<Status>();
-  
+
   @AfterClass
   public static void lastCleanup() {
     Repo repo = Repo.getInstance();
     repo.clear();
     installed = false;
+  }
+  
+  public String getName() {
+    return "RepoTest";
   }
 
   @Override
@@ -50,8 +52,7 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   }
 
   @Test
-  public void testAddStatusListener() throws ParseException, IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+  public void testAddStatusListener() throws Exception {
     Repo repo = Repo.getInstance();
     repo.addStatusPublisher(this);
     repo.install("Arduino");
@@ -59,7 +60,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testClear() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.clear();
     File check = new File("libraries");
@@ -68,14 +68,12 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testGetLocalInstance() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     assertTrue(repo != null);
   }
 
   @Test
   public void testGetUnfulfilledDependencies() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     repo.clear();
     Set<ServiceDependency> deps = repo.getUnfulfilledDependencies("Serial");
@@ -85,8 +83,7 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   }
 
   @Test
-  public void testIsInstalled() throws ParseException, IOException {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
+  public void testIsInstalled() throws Exception {
     Repo repo = Repo.getInstance();
     repo.clear();
     repo.install("Arduino");
@@ -95,7 +92,6 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
 
   @Test
   public void testSave() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
     FileIO.rm(repo.getRepoPath());
     assertFalse(new File(repo.getRepoPath()).exists());

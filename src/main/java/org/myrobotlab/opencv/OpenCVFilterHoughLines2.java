@@ -41,6 +41,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.opencv_core.AbstractCvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvSeq;
@@ -60,14 +61,14 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
   double lowThreshold = 0.0;
   double highThreshold = 50.0;
   int apertureSize = 5;
-  Pointer storage = null;
+  transient Pointer storage = null;
   transient IplImage inlines = null;
 
-  CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
+  transient CvFont font = new CvFont(CV_FONT_HERSHEY_PLAIN);
 
-  CvPoint p0 = cvPoint(0, 0);
+  transient CvPoint p0 = cvPoint(0, 0);
 
-  CvPoint p1 = cvPoint(0, 0);
+  transient CvPoint p1 = cvPoint(0, 0);
 
   public OpenCVFilterHoughLines2(String name) {
     super(name);
@@ -93,7 +94,7 @@ public class OpenCVFilterHoughLines2 extends OpenCVFilter {
     }
 
     if (storage == null) {
-      storage = CvMemStorage.create();
+      storage = AbstractCvMemStorage.create();
     }
 
     if (inlines == null) {

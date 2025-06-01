@@ -1,6 +1,6 @@
 # create services
-python = Runtime.start("python", "Python")
-keyboard = Runtime.start("keyboard", "Keyboard")
+python = runtime.start("python", "Python")
+keyboard = runtime.start("keyboard", "Keyboard")
 python.subscribe("keyboard", "publishMouseMoved")
 
 # non blocking event example

@@ -41,7 +41,9 @@ public interface MrlCommPublisher {
   public String publishMRLCommError(String errorMsg);
 
   public PinData[] publishPinArray(int[] data);
-
+  
+  public boolean isConnecting();
+  
   public String getName();
 
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime);

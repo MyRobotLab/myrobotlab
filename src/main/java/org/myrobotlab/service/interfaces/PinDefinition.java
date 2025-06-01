@@ -2,12 +2,18 @@ package org.myrobotlab.service.interfaces;
 
 import java.io.Serializable;
 
-public class PinDefinition extends SensorDefinition implements Serializable {
+public class PinDefinition implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * label or name of the pin e.g. P0, A5, D1, D2, GPIO 2, etc...
+   */
   String pin;
 
+  /**
+   * the address of the pin
+   */
   Integer address;
 
   /**
@@ -19,6 +25,8 @@ public class PinDefinition extends SensorDefinition implements Serializable {
    * pin mode INPUT or OUTPUT, other...
    */
   String mode;
+  
+  public String serviceName;
 
   /**
    * statistics
@@ -28,8 +36,14 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   int max;
   int avg;
 
+  /**
+   * if the pin is capable of analog values
+   */
   boolean isAnalog = false;
 
+  /**
+   * if the pin is capable of pwm
+   */
   boolean isPwm = false;
 
   boolean isDigital = true;
@@ -38,16 +52,53 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   boolean isTx = false;
 
+  public boolean isSda() {
+    return isSda;
+  }
+
+  public void setSda(boolean isSda) {
+    this.isSda = isSda;
+  }
+
+  public boolean isScl() {
+    return isScl;
+  }
+
+  public void setScl(boolean isScl) {
+    this.isScl = isScl;
+  }
+
+  boolean isSda = false;
+
+  boolean isScl = false;
+
   boolean canRead = true;
 
   boolean canWrite = true;
 
-  Double value;
+  /**
+   * the last read value of the pin
+   */
+  Integer value;
+
+  /**
+   * the last written value of the pin
+   */
+  Integer state;
 
   transient Object pinImpl;
 
+  /**
+   * rate in Hz for which the pin will be polled 0 == no rate imposed
+   */
+  int pollRateHz = 0;
+  
+  public PinDefinition() {
+  }
+  
+
   public PinDefinition(String serviceName, int address, String pin) {
-    super(serviceName);
+    this.serviceName = serviceName;
     this.address = address;
     this.pin = pin;
   }
@@ -60,12 +111,16 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return value.intValue();
   }
 
-  public void setValue(Double value) {
+  public void setValue(int value) {
     this.value = value;
   }
 
-  public void setValue(int value) {
-    this.value = new Double(value);
+  public Integer getState() {
+    return state.intValue();
+  }
+
+  public void setState(int value) {
+    this.state = value;
   }
 
   public String getPinName() {
@@ -120,6 +175,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     return pinImpl;
   }
 
+  @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("pin def ");
@@ -196,6 +252,22 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   public void canRead(boolean canRead) {
     this.canRead = canRead;
+  }
+
+  public void setPollRate(int rateHz) {
+    this.pollRateHz = rateHz;
+  }
+
+  public int getPollRate() {
+    return pollRateHz;
+  }
+
+  public String getPin() {
+    return pin;
+  }
+  
+  public void setPin(String pin) {
+    this.pin = pin;
   }
 
 }

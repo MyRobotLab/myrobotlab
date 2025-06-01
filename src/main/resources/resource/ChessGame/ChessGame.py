@@ -10,12 +10,12 @@ virtual = True
 port="COM3"
 
 # start services
-arduino = Runtime.start("arduino","Arduino")
-chessgame = Runtime.start("chessgame","ChessGame")
+arduino = runtime.start("arduino","Arduino")
+chessgame = runtime.start("chessgame","ChessGame")
 
 # start optional virtual arduino service, used for test
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 #you have to replace COMX with your arduino serial port number

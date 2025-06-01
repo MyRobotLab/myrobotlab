@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import edu.cmu.sphinx.api.Configuration;
+import edu.cmu.sphinx.api.LiveSpeechRecognizer;
 import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -50,13 +52,13 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
+import org.myrobotlab.service.config.SpeechRecognizerConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.slf4j.Logger;
 
 import edu.cmu.sphinx.frontend.util.Microphone;
-import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
@@ -67,7 +69,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  * 
  */
 @Deprecated /* we need another offline solution - one that doesn't suck */
-public class Sphinx extends AbstractSpeechRecognizer {
+public class Sphinx extends AbstractSpeechRecognizer<SpeechRecognizerConfig> {
 
   class SpeechProcessor extends Thread {
     Sphinx myService = null;
@@ -89,43 +91,45 @@ public class Sphinx extends AbstractSpeechRecognizer {
         String newPath = FileIO.getCfgDir() + File.separator + myService.getName() + ".xml";
         File localGramFile = new File(newPath);
 
+        warn("CONFIG NOT IMPLEMENTED, ONLY SUPPORTS BASE EN-US");
+
         info("loading grammar file");
         if (localGramFile.exists()) {
           info(String.format("grammar config %s", newPath));
-          cm = new ConfigurationManager(newPath);
         } else {
           // resource in jar default
           info(String.format("grammar /resource/Sphinx/simple.xml"));
-          cm = new ConfigurationManager(this.getClass().getResource(FileIO.gluePaths(getResourceDir(), "/Sphinx/simple.xml")));
         }
 
         info("starting recognizer");
         // start the word recognizer
-        recognizer = (Recognizer) cm.lookup("recognizer");
-        recognizer.allocate();
+//        recognizer = cm.lookup("recognizer");
+        Configuration configuration = new Configuration();
 
-        info("starting microphone");
-        microphone = (Microphone) cm.lookup("microphone");
-        if (!microphone.startRecording()) {
-          log.error("Cannot start microphone.");
-          recognizer.deallocate();
-        }
+        configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
+        configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
+        configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
+        recognizer = new LiveSpeechRecognizer(configuration);
+        recognizer.startRecognition(true);
+        
+        SpeechRecognizerConfig c = config;
+
 
         // loop the recognition until the program exits.
-        isListening = true;
+        c.listening = true;
         while (isRunning) {
 
-          info("listening: %b", isListening);
+          info("listening: %b", c.listening);
           invoke("listeningEvent", true);
-          Result result = recognizer.recognize();
+          Result result = recognizer.getResult().getResult();
 
-          if (!isListening) {
+          if (!c.listening) {
             // we could have stopped listening
             Thread.sleep(250);
             continue;
           }
 
-          log.info("Recognized Loop: {}  Listening: {}", result, isListening);
+          log.info("Recognized Loop: {}  Listening: {}", result, c.listening);
           // log.error(result.getBestPronunciationResult());
 
           if (result != null) {
@@ -135,7 +139,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
               continue;
             }
             log.info("recognized: " + resultText + '\n');
-            if (resultText.length() > 0 && isListening) {
+            if (resultText.length() > 0 && c.listening) {
               if (lockPhrases.size() > 0 && !lockPhrases.contains(resultText) && !confirmations.containsKey(resultText)) {
                 log.info("but locked on {}", resultText);
                 continue;
@@ -216,7 +220,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   public final static Logger log = LoggerFactory.getLogger(Sphinx.class.getCanonicalName());
   transient Microphone microphone = null;
   transient ConfigurationManager cm = null;
-  transient Recognizer recognizer = null;
+  transient LiveSpeechRecognizer recognizer = null;
 
   transient SpeechProcessor speechProcessor = null;
 
@@ -316,6 +320,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
   }
 
+  @Override
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName(), "onText");
   }
@@ -362,6 +367,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * recognizedText); }
    */
 
+  @Override
   public void clearLock() {
     lockPhrases.clear();
   }
@@ -403,7 +409,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     simplexml = simplexml.replaceAll("name=\"grammarName\" value=\"simple\"", "name=\"grammarName\" value=\"" + grammarFileName + "\"");
     try {
       FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "xml"), simplexml);
-      save("xml", simplexml);
+      // save("xml", simplexml);
 
       String gramdef = "#JSGF V1.0;\n" + "grammar " + grammarFileName + ";\n" + "public <greet> = (" + grammar + ");";
       FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, grammarFileName, "gram"), gramdef);
@@ -428,12 +434,14 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * 
    */
   public synchronized boolean onIsSpeaking(Boolean talking) {
+    SpeechRecognizerConfig c = config;
+
     if (talking) {
-      isListening = false;
+      c.listening = false;
       log.info("I'm talking so I'm not listening"); // Gawd, ain't that
       // the truth !
     } else {
-      isListening = true;
+      c.listening = true;
       log.info("I'm not talking so I'm listening"); // mebbe
     }
     return talking;
@@ -470,6 +478,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
    * linguist.allocate(); }
    */
 
+  @Override
   public void lockOutAllGrammarExcept(String lockPhrase) {
     this.lockPhrases.add(lockPhrase);
   }
@@ -492,7 +501,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public synchronized void pauseListening() {
     log.info("Pausing Listening");
-    isListening = false;
+    SpeechRecognizerConfig c = config;
+
+    c.listening = false;
     if (microphone != null && recognizer != null) {
       // TODO: what does reset monitors do? maybe clear the microphone?
       // maybe neither of these do anything useful
@@ -525,12 +536,10 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public void resumeListening() {
     log.info("resuming listening");
-    isListening = true;
-    if (microphone != null) {
-      // TODO: no idea if this does anything useful.
-      microphone.clear();
-      microphone.startRecording();
-    }
+    SpeechRecognizerConfig c = (SpeechRecognizerConfig)config;
+
+    c.listening = true;
+    recognizer.startRecognition(true);
   }
 
   // FYI - grammar must be created BEFORE we start to listen
@@ -574,8 +583,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
   public void startRecordingx() {
-    microphone.clear();
-    microphone.startRecording();
+    recognizer.startRecognition(true);
   }
 
   /**
@@ -585,11 +593,12 @@ public class Sphinx extends AbstractSpeechRecognizer {
    */
   @Override
   public void stopListening() {
-    if (microphone != null) {
-      microphone.stopRecording();
-      microphone.clear();
+    SpeechRecognizerConfig c = config;
+
+    c.listening = false;
+    if (recognizer != null) {
+      recognizer.stopRecognition();
     }
-    isListening = false;
     if (speechProcessor != null) {
       speechProcessor.isRunning = false;
     }
@@ -600,14 +609,6 @@ public class Sphinx extends AbstractSpeechRecognizer {
   public void stopService() {
     super.stopService();
     stopListening();
-    if (recognizer != null) {
-      recognizer.deallocate();
-      recognizer = null;
-    }
-    if (microphone != null) {
-      microphone.stopRecording();
-      microphone = null;
-    }
   }
 
   @Override
@@ -629,6 +630,11 @@ public class Sphinx extends AbstractSpeechRecognizer {
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

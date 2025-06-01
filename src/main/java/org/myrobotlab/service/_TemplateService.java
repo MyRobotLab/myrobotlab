@@ -4,9 +4,11 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config._TemplateServiceConfig;
 import org.slf4j.Logger;
 
-public class _TemplateService extends Service {
+public class _TemplateService extends Service<_TemplateServiceConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -22,8 +24,7 @@ public class _TemplateService extends Service {
       LoggingFactory.init(Level.INFO);
 
       Runtime.start("template", "_TemplateService");
-      Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);

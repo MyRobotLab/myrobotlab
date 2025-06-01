@@ -10,21 +10,21 @@ xServoPin = 13   #change this to the right servo pin if needed, for inmoov this 
 yServoPin = 12   #change this to the right servo pin if needed, for inmoov this is right
 
 # create a servo controller and a servo
-arduino = Runtime.start("arduino","Arduino")
-xServo = Runtime.start("xServo","Servo")
-yServo = Runtime.start("yServo","Servo")
+arduino = runtime.start("arduino","Arduino")
+xServo = runtime.start("xServo","Servo")
+yServo = runtime.start("yServo","Servo")
 
 # start optional virtual arduino service, used for test
 #virtual=1
 if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
+    virtualArduino = runtime.start("virtualArduino", "VirtualArduino")
     virtualArduino.connect(port)
 
 arduino.connect(port)
 xServo.attach(arduino.getName(), xServoPin)
 yServo.attach(arduino.getName(), yServoPin)
 
-tracker = Runtime.start("tracker", "Tracking")
+tracker = runtime.start("tracker", "Tracking")
 
 opencv=tracker.getOpenCV()
 
@@ -32,7 +32,7 @@ opencv=tracker.getOpenCV()
 xServo.setMinMax(30, 150)  #minimum and maximum settings for the X servo
 # servoX.setInverted(True) # invert if necessary
 
-xServo.setMinMax(30, 150)  #minimum and maximum settings for the Y servo
+yServo.setMinMax(30, 150)  #minimum and maximum settings for the Y servo
 # servoY.setInverted(True) # invert if necessary
 
 # changing Pid values change the 

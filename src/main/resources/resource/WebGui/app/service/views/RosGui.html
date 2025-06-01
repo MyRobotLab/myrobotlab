@@ -1,0 +1,84 @@
+<div class="row">
+    ROS Installation and Starting instructions
+    <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
+    <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
+</div>
+<div class="row" ng-show="showInstructions">
+
+    <ul>
+        <li><a href="http://wiki.ros.org/ROS/Installation">Install ROS </a></li>
+        <li><a href="http://wiki.ros.org/rosbridge_suite/Tutorials/RunningRosbridge">Install and start ROS Bridge</a></li>
+    </ul>
+    <br/>
+</div>
+
+
+<div class="row">
+    <form class="form-inline">
+    <img ng-show="service.connected" src="/connected.png"/>
+    <img ng-hide="service.connected" src="/disconnected.png"/>
+    <input class="form-control" type="text" tooltip="ws://localhost:9090" ng-model="service.config.bridgeUrl" ng-disabled="service.connected"/>
+    <button ng-show="service.connected" class="btn btn-default" ng-click="disconnect()">disconnect</button>
+    <button ng-hide="service.connected" class="btn btn-default" ng-click="connect()">connect</button>
+    </form>
+</div>
+
+<div class="row">
+    <form class="form-inline">
+        <input class="form-control" type="text" tooltip="topic e.g. /mytopic" ng-model="state.selectedTopic"/>
+        <button class="btn btn-default" ng-click="subscribe()">subscribe</button>
+        <button class="btn btn-default" ng-click="unsubscribe()">unsubscribe</button>
+    </form>
+</div>
+<div class="row">
+    <form class="form-inline">
+        <textarea class="form-control"  tooltip="{ topic:}" ng-model="publishMsg"></textarea>
+        <button class="btn btn-default" ng-click="publish()">publish</button>
+        <button class="btn btn-default" ng-click="callService()">call service</button>
+    </form>
+</div>
+<table>
+    <tr>
+        <td valign="top">
+            <h3>topics <a href="" ng-click="msg.getTopics()"><span class="glyphicon glyphicon-refresh" style="color:grey"></span></a>
+            </h3>
+            <div ng-repeat="topic in topics">
+                <small><a href="" ng-click="state.selectedTopic=topic;subscribe()"><span class="glyphicon glyphicon-plus" style="color:grey"></span> {{topic}}</a></small>
+                <br/>
+            </div>
+        </td>
+        <td valign="top">
+        &nbsp;&nbsp;&nbsp;
+        </td>
+        <td valign="top">
+            <h3>subscriptions</h3>
+            <div ng-repeat="s in service.config.subscriptions">
+                <small><a href="" ng-click="state.selectedTopic=s;unsubscribe()"><span class="glyphicon glyphicon-minus" style="color:grey"></span>{{s}}</a></small>
+                <br/>
+            </div>
+        </td>
+</table>
+</div>
+<h3>messages {{rowCount}} <a href="" ng-click="clear()"><span class="glyphicon glyphicon-remove-circle" style="color:grey"></span></a>
+</h3>
+<table class="table table-hover">
+    <!--
+    <thead>
+        <tr>
+            <th scope="col">level</th>
+            <th scope="col">detail</th>
+        </tr>
+    </thead>
+
+     table-danger
+      class="alert alert-danger"
+-->
+    <tbody>
+        <tr ng-repeat="e in log" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}">
+            <td><small>{{e.ts}}</small></td>
+            <td><small>{{e.topic}}</small></td>
+            <td><small>{{e.msg}}</small></td>
+        </tr>
+    </tbody>
+</table>
+

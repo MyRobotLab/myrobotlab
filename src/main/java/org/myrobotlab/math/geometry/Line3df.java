@@ -17,6 +17,7 @@ public class Line3df {
     this.p1 = p1;
   }
 
+  @Override
   public String toString() {
     return String.format("(%s,%s)", p0, p1);
   }

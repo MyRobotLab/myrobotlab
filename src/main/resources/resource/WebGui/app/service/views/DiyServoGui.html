@@ -1,0 +1,236 @@
+<!-- ServoGui.html -->
+<div class="col-md-12">
+    <uib-tabset active="activeTabIndex">
+        <uib-tab heading="Control" index="0" class="servoController">
+            <div class="row">
+                <div class="col-md-12">
+                    <nav class="settingsbar prevent-drag-select">
+                        <span>
+                            <h6>
+                                You need to attach a controller to a servo.<br />For example real and virtual
+                                controller.
+
+                            </h6>
+                        </span>
+                    </nav>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="tableController" border="0">
+                        <tr>
+                            <td>Controller</td>
+                            <td>Pin</td>
+                            <td>&nbsp;</td>
+                            <td>Enable</td>
+                            <td>&nbsp;Invert</td>
+                            <td>&nbsp;&nbsp;AutoDisable</td>
+                            <td ng-show="service.autoDisable">TimeOut = {{service.idleTimeout/1000}} s</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <!-- controller FIXME - replace with attach directive -->
+                                <select ng-disabled="service.controller != null" class="form-control" ng-model="state.controller">
+                                    <option ng-repeat="controller in possibleControllers" value="{{controller}}">
+                                        {{controller}} </option>
+                                </select>
+                            </td>
+                            <td>
+                                <!-- pin -->
+                                <select class="form-control" ng-model="service.pin" ng-change="setPin()"
+                                    ng-options="item for item in pinList">
+                                    <option>{{item}}</option>
+                                </select>
+                            </td>
+                            <td>
+                                <!-- TODO - send pos ! ??? -->
+                                <button ng-show="!state.attached" class="btn btn-default"
+                                    ng-click="attachController()">attach</button>
+                                <button ng-show="state.attached" class="btn btn-default"
+                                    ng-click="msg.detach()">detach</button>
+                            </td>
+                            <td>
+                                <toggle ng-model="service.enabled" class="miniBTN" title="Energize the servo"
+                                    ng-change="service.enabled?msg.enable():msg.disable()" on="" off="" size="btn-lg" />
+                                </toggle>
+                            </td>
+                            <td>
+                                <toggle ng-model="service.mapper.inverted" class="miniBTN"
+                                    title="Inverts servo direction"
+                                    ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg" />
+                            </td>
+                            <td>
+                                &nbsp;&nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" title="Stops energizing the servo after a given time but will energize again when moving the servo slider"
+                                    ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg" />
+                            </td>
+                            <td>
+                                <input class="base-slider slider-width100" ng-show="service.autoDisable" type="range" name="idleSeconds"
+                                    ng-model="idleSeconds" min="1" max="10" ng-change="setIdleTimeout(idleSeconds)">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- /.col-md-12 -->
+            </div>
+        </uib-tab>
+        <uib-tab heading="Basic" index="1">
+            <div id="servo-basic" class="row">
+                <div class="col-md-12">
+                    <table class="servo-limits-table" border="0">
+                        <tr>
+                            <td>Sweep</td>
+                            <td>Track</td>
+                            <td>Speed</td>
+                            <td>
+                                <!-- engergized begin -->
+                                <div ng-show="service.enabled">
+                                    <div class="energizedZone">
+                                        <div title="the servo is energized"
+                                            class="energizedBar progress-bar progress-bar-success progress-bar-striped active"
+                                            role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                                            style="width: 82%">
+                                            <span class="glyphicon glyphicon-flash"></span>
+                                            ENERGIZED
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- engergized end -->
+                            </td>
+                            <td>&nbsp;
+                                <!-- speed °/s value -->
+                            </td>
+                            <td>Limits</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <toggle class="miniBTN" title="Servo will move from one position to the opposite"
+                                    ng-model="service.isSweeping" ng-change="service.isSweeping?msg.sweep():msg.stop()"
+                                    on="" off="" size="btn-lg" />
+                            </td>
+                            <td>
+                                <toggle class="miniBTN" title="When enabled will output encoder position"
+                                    ng-model="state.useEncoderData" ng-change="toggleEncoderData()" size="btn-lg" />
+                            </td>
+                            <td colspan="2">
+                                <input class="base-slider slider-width100" type="range" name="speedRange" ng-model="service.speed"
+                                    min="1" max="201" ng-change="setSpeed()" />
+                            </td>
+                            <td>{{speedDisplay}}°/s &nbsp;</td>
+                            <td>
+                                <toggle class="miniBTN" title="This will display the limit mappings"
+                                    ng-model="state.showLimits" on="" off="" />
+                            </td>
+                            <td>
+                                <button class="restColor" ng-click="pos.value=restSlider.value;msg.rest()" title="Servo moves to Rest">Rest</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!------------- SERVO SLIDER AND LIMIT DISPLAY BEGIN ------------------->
+                    <table class="servo-limits-table" border="0">
+                        <tr>   
+                            <td colspan="3">
+                                <div class="limitsZone">
+                                    <!-- Cursors Begin -->
+                                    <div class="servo-control-position prevent-drag-select"
+                                        style="left: calc(100% - (({{100 -(service.targetPos*100/180)}}%) + 1px));">
+                                        <span class="prevent-drag-select">{{service.targetPos}}º</span>
+                                        <div class="servoCursor"></div>
+                                    </div>
+                                    <div class="servo-position prevent-drag-select"
+                                        style="left: calc(100% - (({{100 -(service.currentInputPos*100/180)}}%) + 1px));">
+                                        <span class="prevent-drag-select">{{service.currentInputPos.toFixed(0)}}º</span>
+                                        <div class="servoOutputCursor"></div>
+                                    </div>
+                                    <div class="rest-position"
+                                        style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
+                                        <span class="prevent-drag-select">{{service.rest}}º</span>
+                                        <div class="restCursor"></div>
+                                    </div>
+                                    <!-- Cursors Begin -->
+                                    <div class="output-limit prevent-drag-select" 
+                                        style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));">
+                                    </div>
+                                    <div class="servo-input-limit prevent-drag-select"
+                                        style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));">
+                                    </div>
+                                </div>
+                                <input class="servo-move-to-slider" type="range" name="targetPos"
+                                    ng-model="service.targetPos" min="0" max="180"
+                                    ng-change="moveTo(service.targetPos)" ng-mousedown="disableUpdates()" ng-mouseup="enableUpdates()">
+                            </td>
+                        </tr>
+                        <!------------- SERVO SLIDER AND LIMIT DISPLAY END ------------------->
+                        <tr>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                        </tr>
+                                <!------------- LIMIT DETAILS BEGIN ------------------->
+                        <tr ng-show="state.showLimits" class="restColor">
+                            <td><label class="rest-text">Rest</label>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr ng-show="state.showLimits">
+                            <td colspan="3">
+                                <input class="base-slider rest-slider" type="range" name="inputMin" ng-model="service.rest" min="0"
+                                    max="180" ng-change="setRest()">
+                            </td>
+                        </tr>
+                        <tr ng-show="state.showLimits" class="inputColor">
+                            <td>
+                                Min {{service.mapper.minX}}
+                            </td>
+                            <td>Input</td>
+                            <td class="align-right">
+                                Max {{service.mapper.maxX}}
+                            </td>
+                        </tr>
+                        <tr ng-show="state.showLimits" class="inputColor">
+                            <td colspan="3">
+                                <input class="base-slider minX-slider" name="minInput" type="range" ng-model="service.mapper.minX"
+                                    min="0" max="180" ng-change="map()"/>
+                                <input class="base-slider maxX-slider" type="range" ng-model="service.mapper.maxX"
+                                    min="0" max="180" ng-change="map()"/>
+                            </td>
+                        </tr>
+                        <tr ng-show="state.showLimits" class="outputColor">        
+                            <td>
+                                Min  {{service.mapper.minY}}
+                            </td>
+                            <td>
+                            Output Lock  
+                            <toggle ng-model="lockInputOutput" class="miniBTN"
+                                    ng-change="toggleLock()" on="" off="" size="btn-lg" />
+                            </td>
+                            <td class="align-right">
+                                Max  {{service.mapper.maxY}}
+                            </td>
+                        </tr>
+                        <tr ng-show="state.showLimits" class="outputColor">
+                            <td colspan="3">
+                                <input class="base-slider minY-slider" type="range" ng-model="service.mapper.minY"
+                                    min="0" max="180" ng-change="map()"/>
+                                <input class="base-slider maxY-slider" type="range" ng-model="service.mapper.maxY"
+                                    min="0" max="180" ng-change="map()"/>
+                            </td>
+                        </tr>
+                        <!------------- LIMIT DETAILS END ------------------->
+                    </table>
+                </div>
+                <!-- /row -->
+            </div>
+            <!-- /md-12 -->
+        </uib-tab>
+        <!------------- BASIC END ------------------->
+    </uib-tabset>
+</div>

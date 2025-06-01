@@ -206,7 +206,7 @@ public class CRC {
     long mask = (topBit << 1) - 1;
 
     for (int i = 0; i < data.length; i++) {
-      long curByte = ((long) (data[i])) & 0x00FFL;
+      long curByte = ((data[i])) & 0x00FFL;
       if (crcParams.reflectIn) {
         curByte = reflect(curByte, 8);
       }

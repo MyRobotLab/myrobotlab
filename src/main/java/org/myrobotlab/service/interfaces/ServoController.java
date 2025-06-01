@@ -26,6 +26,8 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.ServoSpeed;
 
 public interface ServoController extends Attachable {
 
@@ -34,7 +36,9 @@ public interface ServoController extends Attachable {
    * servo.setPin(int) then servoController.attach(servo)
    * 
    * @param servo
+   *          - servo reference
    * @param pinOrAddress
+   *          - pin or address to attach
    * @throws Exception
    */
   @Deprecated /* use attachServo(ServoControl sc) */
@@ -47,6 +51,7 @@ public interface ServoController extends Attachable {
    * ServoContro.attach(ServoController sc)
    * 
    * @param sc
+   *          - servo reference
    */
   void attachServoControl(ServoControl sc);
 
@@ -55,14 +60,16 @@ public interface ServoController extends Attachable {
    * ServoControl is passed as a parameter such that the controller can get all
    * the necessary information to process the move correctly
    * 
-   * @param servo
+   * @param move
+   *          - servo reference
    */
-  void onServoMoveTo(ServoControl servo);
+  void onServoMoveTo(ServoMove move);
 
   /**
    * Stop the servo regardless of where it is in its move
    * 
    * @param servo
+   *          - servo reference
    */
   void onServoStop(ServoControl servo);
 
@@ -70,31 +77,34 @@ public interface ServoController extends Attachable {
    * A direct call using micro-seconds instead of degrees
    * 
    * @param servo
+   *          - servo reference
    * @param uS
+   *          - micro seconds of pwm
    */
   void onServoWriteMicroseconds(ServoControl servo, int uS);
 
   /**
    * set the speed of the servo
    * 
-   * @param servo
+   * @param speed
+   *          - contains the servo name and desired speed
    */
-  void onServoSetSpeed(ServoControl servo);
+  void onServoSetSpeed(ServoSpeed speed);
 
   /**
-   * enable the pwm to a servo
+   * enable the pwm on this servo
    * 
-   * @param servo
-   *          - the servo to enable
+   * @param servoName
+   *          - name of servo
    */
-  void onServoEnable(ServoControl servo);
+  void onServoEnable(String servoName);
 
   /**
-   * disable the pwm to a servo
+   * disable servo
    * 
-   * @param servo
-   *          - the servo to disable
+   * @param servoName
+   *          - name of servo
    */
-  void onServoDisable(ServoControl servo);
+  void onServoDisable(String servoName);
 
 }

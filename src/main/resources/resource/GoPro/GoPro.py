@@ -1,4 +1,4 @@
-gopro = Runtime.start("gopro","GoPro")
+gopro = runtime.start("gopro","GoPro")
 
 #declare which kind of GoPro Family you want to control "HERO3", "HERO4"
 gopro.setCameraModel("HERO4")

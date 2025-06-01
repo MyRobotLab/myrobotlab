@@ -1,34 +1,37 @@
 package org.myrobotlab.service.interfaces;
 
+import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.ServoSpeed;
+
+/**
+ * Servo will invoke these when various control methods are called.
+ * ServoControlListeners will be informed of the control message.
+ * 
+ */
 public interface ServoControlPublisher {
-  /**
-   * publishing servo's move
-   * 
-   * @param sc
-   * @return
+
+  public ServoMove publishServoMoveTo(ServoMove pos);
+
+  public ServoControl publishMoveTo(ServoControl sc);
+
+  // FIXME - IMPLEMENTED AS A STATIC WITH A BODY - NOT REACHABLE BY METHOD CACHE
+  public ServoSpeed publishServoSetSpeed(ServoControl sc);
+  /*
+   * { return new ServoSpeed(sc.getName(), sc.getSpeed()); }
    */
-  /**
-   * control message publishing moveTo
-   * 
-   * @param sc
-   * @return
+
+  public String publishServoEnable(ServoControl sc);
+
+  public String publishServoDisable(ServoControl sc);
+
+  /*
+   * FIXME these should be returning name - the event itself is enough info -
+   * sending whole servo is excessive
    */
-  ServoControl publishServoMoveTo(ServoControl sc);
+  public ServoControl publishServoStop(ServoControl sc);
 
-  ServoControl publishMoveTo(ServoControl sc);
+  public String publishServoEnable(String name);
 
-  ServoControl publishServoSetSpeed(ServoControl sc);
-
-  ServoControl publishServoEnable(ServoControl sc);
-
-  ServoControl publishServoDisable(ServoControl sc);
-
-  /**
-   * Publishing topic for a servo stop event - returns position
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishServoStop(ServoControl sc);
+  public void attachServoControlListener(String name);
 
 }

@@ -1,0 +1,89 @@
+<br/><br/><br/>
+&nbsp;<div class="row">
+        <table class="padded-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="(key, value) in service.props">
+              <td>{{ key }}</td>
+              <td>
+                <span ng-if="!editMode[key]">{{ value }}</span>
+                <input ng-if="editMode[key]" type="text" ng-model="service.props[key]" />
+              </td>
+              <td>
+                <!--
+                <button ng-click="toggleEdit(key)">
+                  <span ng-if="!editMode[key]">✏️</span>
+                  <span ng-if="editMode[key]">✔️</span>
+                </button>
+                -->
+                <button ng-click="removeProp(key)">❌</button>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="text" ng-model="newProp.name" placeholder="New Name" /></td>
+              <td><input type="text" ng-model="newProp.value" placeholder="New Value" /></td>
+              <td><button ng-click="addProp()">➕</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+<br/>
+<div class="email-container">
+  <div class="row">
+    <table class="padded-table">
+      <tr>
+        <td>To:</td>
+        <td>
+          <input type="email" ng-model="service.config.to" placeholder="Recipient Email" />
+        </td>
+      </tr>
+      <tr>
+        <td>From:</td>
+        <td>
+          <input type="email" ng-model="service.config.from" placeholder="Sender Email" />
+        </td>
+      </tr>
+      <tr>
+        <td>Subject:</td>
+        <td>
+          <input type="text" ng-model="emailSubject" placeholder="Subject" />
+        </td>
+      </tr>
+      <tr>
+        <td>Message:</td>
+        <td>
+          <textarea ng-model="emailMessage" rows="5" placeholder="Type your message here..."></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>Format:</td>
+        <td>
+          <select id="emailFormat" ng-model="service.config.format" ng-init="service.config.format='html'">
+            <option value="text">text</option>
+            <option value="html">html</option>
+          </select>        
+        </td>
+
+      </tr>    
+  </table>
+
+
+      <button ng-click="sendEmail()">📧 Send Email</button>
+    </div>
+    
+  </div>
+</div>
+
+     <!-- Minimal Padding for Table -->
+     <style>
+      .padded-table th, .padded-table td {
+        padding: 5px;
+      }
+    </style>
+    

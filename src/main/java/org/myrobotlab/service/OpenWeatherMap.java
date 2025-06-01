@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.config.OpenWeatherMapConfig;
 import org.slf4j.Logger;
 
 /**
@@ -16,14 +17,14 @@ import org.slf4j.Logger;
  * ( 3 hours TO 5 days forecast )
  * 
  */
-public class OpenWeatherMap extends HttpClient {
+  public class OpenWeatherMap extends HttpClient<OpenWeatherMapConfig>  {
 
   private static final long serialVersionUID = 1L;
   private String apiForecast = "http://api.openweathermap.org/data/2.5/forecast/?q=";
   private String units = "imperial"; // or metric
   private String localUnits = "fahrenheit"; // or celcius
   private String lang = "en";
-  private String location = "Paris,FR";
+  private String location = null;// "Paris,FR";
   private Integer period = 1; // next 3 hours by default
 
   // OWM objects
@@ -51,10 +52,13 @@ public class OpenWeatherMap extends HttpClient {
     JSONObject obj = null;
     try {
       apiUrl = apiForecast + URLEncoder.encode(location, "utf-8") + "&appid=" + getKey() + "&mode=json&units=" + units + "&lang=" + lang + "&cnt=" + hourPeriod;
-      String response = this.get(apiUrl);
+      String response = get(apiUrl);
       log.info("apiUrl: {}", apiUrl);
       log.info("Response: {}", response);
       obj = new JSONObject(response);
+      if (obj.getInt("cod") != 200) {
+        error(obj.getString("message"));
+      }
     } catch (Exception e) {
       error("Cannot get json from OWM : %s", e);
       e.printStackTrace();
@@ -65,6 +69,8 @@ public class OpenWeatherMap extends HttpClient {
   /**
    * retrieve a string list of weather for the period indicated by hourPeriod 1
    * greater or equal hourPeriod is 3 hours per index is 24 hours is 8.
+   * 
+   * @return forcast info
    */
   public String[] fetchForecast() {
     String[] result = new String[11];
@@ -161,7 +167,7 @@ public class OpenWeatherMap extends HttpClient {
    */
   public void setLocation(String location) {
     this.location = location;
-    if (!location.contains(",")) {
+    if (location != null && !location.contains(",")) {
       warn("Recommended location for OWM is TOWN,COUNTRY CODE, exemple : paris,FR");
     }
   }
@@ -240,15 +246,41 @@ public class OpenWeatherMap extends HttpClient {
     return localUnits;
   }
 
+  public String getApiKey() {
+    return Runtime.getSecurity().getKey("OPENWEATHERMAP");
+  }
+
+  @Override
+  public OpenWeatherMapConfig getConfig() {
+    super.getConfig();
+    // FIXME - remove local fields in favor of only config
+    config.currentUnits = units;
+    config.currentTown = location;
+    return config;
+  }
+
+  @Override
+  public OpenWeatherMapConfig apply(OpenWeatherMapConfig c) {
+    super.apply(c);
+    // FIXME - remove local fields in favor of only config
+    if (c.currentUnits != null) {
+      setUnits(c.currentUnits);
+    }
+    if (c.currentTown != null) {
+      setLocation(c.currentTown);
+    }
+    return c;
+  }
+
   public static void main(String[] args) {
     OpenWeatherMap owm = (OpenWeatherMap) Runtime.start("weather", "OpenWeatherMap");
     // owm.setKey("XXX");
-    owm.setLocation("Paris,FR");
-    owm.setPeriod(1);
-    owm.startService();
+    // owm.setLocation("Paris,FR");
+    owm.setLocation("Portland,US");
+    // owm.setPeriod(1);
 
     // tomorrow is 8 ( 3 * 8 )
-    owm.setUnits("metric");
+    // owm.setUnits("metric");
     String sentence = "( Raw code : " + owm.getWeatherCode() + "), In " + owm.getLocation() + " the weather is " + owm.getWeatherDescription() + ".  " + owm.getDegrees()
         + " degrees " + owm.getLocalUnits() + " humidity " + owm.getHumidity() + " Min Degrees " + owm.getMinDegrees() + " max Degrees " + owm.getMaxDegrees() + " pressure "
         + owm.getPressure() + " Wind Speed " + owm.getWindSpeed() + " Wind Orientation " + owm.getWindOrientation();

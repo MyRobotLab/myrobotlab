@@ -1,0 +1,51 @@
+<div class="row">
+    How to create a discord bot
+    <a href="" ng-show="!showInstructions" ng-click="showInstructions=true">show</a>
+    <a href="" ng-show="showInstructions" ng-click="showInstructions=false">hide</a>
+</div>
+<div class="row" ng-show="showInstructions">
+    Official Documentation : <a href="https://discord.com/developers/docs/intro">Discord Developers Docs</a>
+    <br/>
+</div>
+<div class="row">
+    <img ng-show="service.connected" src="/connected.png"/>
+    <button ng-show="service.connected" class="btn btn-default" ng-click="msg.disconnect();msg.broadcastState()">disconnect</button>
+    <img ng-hide="service.connected" src="/disconnected.png"/>
+    <button ng-hide="service.connected" class="btn btn-default" ng-click="msg.connect();msg.broadcastState()">connect</button>
+</div>
+<div class="row" ng-show="service.connected">
+    <form class="form-inline">
+        text<br/>
+        <input class="form-control" type="text" ng-model="text" placeholder="send text" title="send text">
+        <button class="btn btn-default" ng-click="msg.sendUtterance(text)">send text</button><br/>
+        <button class="btn btn-default" ng-click="msg.sendReaction(text)">send reaction</button>
+        <button class="btn btn-default" ng-click="text='U+1F604';msg.sendReaction(text)">😄</button>
+        <button class="btn btn-default" ng-click="text='U+1F923';msg.sendReaction(text)">🤣</button>
+        <button class="btn btn-default" ng-click="text='U+1F913';msg.sendReaction(text)">🤓</button>
+        <button class="btn btn-default" ng-click="text='U+1F4A9';msg.sendReaction(text)">💩</button>
+    </form>
+</div>
+<div class="row">
+    <form class="form-inline">
+        token<br/>
+        <input class="form-control" type="password" ng-model="service.token" placeholder="bot token" title="token">
+        <button class="btn btn-default" ng-click="msg.setToken(service.token);msg.save()">save</button>
+    </form>
+</div>
+<div class="row">
+    <table class="table table-hover">
+        <tbody>
+            <tr ng-repeat="e in utterances" >
+                <td>
+                    <small>{{e.username}}</small>
+                </td>
+                <td>
+                    <small>{{e.channel}}</small>
+                </td>
+                <td>
+                    <small>[{{e.text}}]</small>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

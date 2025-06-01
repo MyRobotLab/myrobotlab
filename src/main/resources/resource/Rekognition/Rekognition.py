@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-rekognition = Runtime.start('rekognition','Rekognition')
+rekognition = runtime.start('rekognition','Rekognition')

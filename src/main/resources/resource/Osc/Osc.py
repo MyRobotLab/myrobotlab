@@ -1,5 +1,5 @@
 # start the service
-osc = Runtime.start("osc","Osc")
+osc = runtime.start("osc","Osc")
 
 # connect - which is not 'really' connecting - but
 # specifying the host/port of where we'll be sending 

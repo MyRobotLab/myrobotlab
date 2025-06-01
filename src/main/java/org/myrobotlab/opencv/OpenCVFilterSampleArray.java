@@ -41,8 +41,6 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 
   transient IplImage buffer = null;
 
-  transient BufferedImage frameBuffer = null;
-
   ColoredPoint points[] = new ColoredPoint[] { new ColoredPoint() };
 
   public OpenCVFilterSampleArray() {
@@ -61,19 +59,16 @@ public class OpenCVFilterSampleArray extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
-
-    frameBuffer = toBufferedImage(image);// image.getBufferedImage();
-
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage frameBuffer = converter.toBufferedImage(image);// image.getBufferedImage();
     points[0].x = image.width() / 2;
     points[0].y = image.height() - 20;
-
     for (int i = 0; i < points.length; ++i) {
       points[i].color = frameBuffer.getRGB(points[i].x, points[i].y);
       frameBuffer.setRGB(points[0].x, points[0].y, 0x00ff22);
     }
-
     invoke("publish", (Object) points);
-
+    converter.close();
     return image;
 
   }

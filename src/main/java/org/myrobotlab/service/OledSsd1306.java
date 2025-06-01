@@ -19,6 +19,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.OledSsd1306Config;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  *         pin and VCC
  * 
  */
-public class OledSsd1306 extends Service implements I2CControl {
+public class OledSsd1306 extends Service<OledSsd1306Config> implements I2CControl {
 
   private static final long serialVersionUID = 1L;
 
@@ -416,7 +417,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     // I2C
     byte control = 0x00; // Co = 0, D/C = 0
     byte buffer[] = { control, (byte) c };
-    controller.i2cWrite((I2CControl) this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
+    controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
   }
 
   // startscrollright
@@ -545,7 +546,7 @@ public class OledSsd1306 extends Service implements I2CControl {
       }
       i--;
       // Wire.endTransmission();
-      controller.i2cWrite((I2CControl) this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
+      controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writeBuffer, writeBuffer.length);
     }
 
   }
@@ -848,7 +849,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
+    attach(Runtime.getService(service));
   }
 
   @Override
@@ -864,6 +865,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
   }
 
+  @Override
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
 
     if (isAttached && this.controller != controller) {
@@ -881,6 +883,7 @@ public class OledSsd1306 extends Service implements I2CControl {
     broadcastState();
   }
 
+  @Override
   public void attachI2CController(I2CController controller) {
 
     if (isAttached(controller))
@@ -902,7 +905,7 @@ public class OledSsd1306 extends Service implements I2CControl {
   // TODO: This default code could be in Attachable
   @Override
   public void detach(String service) {
-    detach((Attachable) Runtime.getService(service));
+    detach(Runtime.getService(service));
   }
 
   @Override
@@ -963,7 +966,27 @@ public class OledSsd1306 extends Service implements I2CControl {
     if (controller != null && controller.getName().equals(instance.getName())) {
       return isAttached;
     }
-    ;
     return false;
   }
+
+  @Override
+  public void setBus(String bus) {
+    setDeviceBus(bus);
+  }
+
+  @Override
+  public void setAddress(String address) {
+    setDeviceAddress(address);
+  }
+
+  @Override
+  public String getBus() {
+    return deviceBus;
+  }
+
+  @Override
+  public String getAddress() {
+    return deviceAddress;
+  }
+
 }

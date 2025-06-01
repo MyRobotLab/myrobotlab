@@ -3,10 +3,11 @@ package org.myrobotlab.service.abstracts;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.VideoSink;
 import org.myrobotlab.service.interfaces.VideoSource;
 
-public abstract class AbstractVideoSink extends Service implements VideoSink {
+public abstract class AbstractVideoSink<C extends ServiceConfig> extends Service<C> implements VideoSink {
 
   private static final long serialVersionUID = 1L;
 
@@ -14,6 +15,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     super(n, id);
   }
 
+  @Override
   public boolean attach(VideoSource vs) {
     subscribe(vs.getName(), "publishDisplay");
     return true;
@@ -30,6 +32,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     return false;
   }
 
+  @Override
   public boolean detach(VideoSource vs) {
     unsubscribe(vs.getName(), "publishDisplay");
     return true;
@@ -46,6 +49,7 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
     return false;
   }
 
+  @Override
   abstract public void onDisplay(SerializableImage img);
 
 }

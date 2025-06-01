@@ -44,26 +44,32 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.ColorModel;
 import java.awt.image.PixelGrabber;
 import java.awt.image.RescaleOp;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point2f;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.RotatedRect;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.opencv.CloseableFrameConverter;
 import org.myrobotlab.opencv.DetectedText;
 import org.slf4j.Logger;
 
@@ -89,13 +95,16 @@ public class Util {
   // array [r][g][b]
   // TODO - fix arrggh head hurts
   final static String[][][] colorNameCube = {
-      { { "black", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "navy", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+      { { "black", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "navy", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" } },
 
-      { { "maroon", "xxx", "xxx" }, { "green", "xxx", "xxx" }, { "blue", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "gray", "xxx" }, { "xxx", "xxx", "xxx" },
+      { { "maroon", "xxx", "xxx" }, { "green", "xxx", "xxx" }, { "blue", "xxx", "xxx" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "gray", "xxx" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" } },
 
-      { { "red", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "lime", "y0", "z0" }, { "xxx", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "x0", "y0", "z0" }, { "xxx", "xxx", "xxx" },
+      { { "red", "xxx", "xxx" }, { "xxx", "xxx", "xxx" }, { "lime", "y0", "z0" }, { "xxx", "xxx", "xxx" },
+          { "xxx", "xxx", "xxx" }, { "x0", "y0", "z0" }, { "xxx", "xxx", "xxx" },
           { "xxx", "xxx", "xxx" }, { "x0", "y0", "white" } } };
 
   public static BufferedImage brighten(BufferedImage bufferedImage, float amount) {
@@ -109,7 +118,7 @@ public class Util {
    * Produces a copy of the supplied image
    * 
    * @param image
-   *          The original image
+   *              The original image
    * @return The new BufferedImage
    */
   public static BufferedImage copyImage(BufferedImage image) {
@@ -120,14 +129,15 @@ public class Util {
    * Creates an image compatible with the current display
    * 
    * @param width
-   *          int
+   *               int
    * @param height
-   *          int
+   *               int
    * 
    * @return A BufferedImage with the appropriate color model
    */
   public static BufferedImage createCompatibleImage(int width, int height) {
-    GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+    GraphicsConfiguration configuration = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+        .getDefaultConfiguration();
     return configuration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
   }
 
@@ -208,7 +218,7 @@ public class Util {
 
   // get images & image icons - with defaults
   public static Image getImage(String path) {
-    return getImage(path, "unknown.png");
+    return getImage(path, "Unknown.png");
   }
 
   /**
@@ -218,8 +228,11 @@ public class Util {
    * resourceName)
    * 
    * @param path
+   *                     the path to the image
    * @param defaultImage
-   * @return
+   *                     a default image to use
+   * @return an image
+   * 
    */
   @Deprecated
   public static Image getImage(String path, String defaultImage) {
@@ -268,21 +281,13 @@ public class Util {
    * 
    * @return current resource directory
    */
-  @Deprecated
+  @Deprecated /*
+               * Resource references do not belong here - the ServiceType and
+               * perhaps even the ServiceName are needed in order to provide context. This
+               * method should be removed, or parameters provided for ServiceType or
+               * ServiceName
+               */
   public static String getResourceDir() {
-    // first try for the resource.dir system property
-    /*
-     * THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE String resourceDir
-     * = System.getProperty("resource.dir"); if (resourceDir != null) { //
-     * log.info("Returning {}", resourceDir); return resourceDir; } if
-     * (!FileIO.isJar()) { //
-     * log.info("Not in a jar...you're running in an IDE likely."); resourceDir
-     * = System.getProperty("user.dir") + File.separator +
-     * "src"+File.separator+"main"+File.separator+"resources"+File.separator+
-     * "resource"; } else { resourceDir = System.getProperty("user.dir") +
-     * File.separator + "resource"; }
-     */
-    // log.info("Returning {}", resourceDir);
     return Service.getResourceRoot();
   }
 
@@ -290,7 +295,7 @@ public class Util {
    * Check if file exist from current resource directory
    * 
    * @param element
-   *          - element to be tested
+   *                - element to be tested
    * @return boolean
    */
   @Deprecated /* expect full path - don't use getResourceDir */
@@ -450,7 +455,7 @@ public class Util {
       BufferedImage img = ImageIO.read(file);
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ImageIO.write(img, "png", bos);
-      return String.format("data:image/%s;base64,%s", type, Base64.getEncoder().encodeToString(bos.toByteArray()));
+      return String.format("data:image/%s;base64,%s", type, CodecUtils.toBase64(bos.toByteArray()));
     } catch (IOException e) {
       return null;
     }
@@ -460,11 +465,11 @@ public class Util {
    * Produces a resized image that is of the given dimensions
    * 
    * @param image
-   *          The original image
+   *               The original image
    * @param width
-   *          The desired width
+   *               The desired width
    * @param height
-   *          The desired height
+   *               The desired height
    * @return The new BufferedImage
    */
   public static BufferedImage scaledImage(BufferedImage image, int width, int height) {
@@ -569,14 +574,15 @@ public class Util {
     return cropped;
   }
 
-  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {
+  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes,
+      ArrayList<Float> confidences, float nmsThreshold) {
     RectVector boxesRV = new RectVector();
     for (RotatedRect rr : boxes) {
       boxesRV.push_back(rr.boundingRect());
     }
     FloatPointer confidencesFV = arrayListToFloatPointer(confidences);
     IntPointer indicesIp = new IntPointer();
-    NMSBoxes(boxesRV, confidencesFV, (float) threshold, nmsThreshold, indicesIp);
+    NMSBoxes(boxesRV, confidencesFV, threshold, nmsThreshold, indicesIp);
     ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
     for (int m = 0; m < indicesIp.limit(); m++) {
       int i = indicesIp.get(m);
@@ -602,6 +608,99 @@ public class Util {
     // reset the pointer position back to the head.
     confidencesFV.position(0);
     return confidencesFV;
+  }
+
+  /**
+   * deserialize from a png byte array to a base64 encoded string
+   * for display inline in html.
+   * 
+   * @param bytes
+   * @return
+   */
+  public static String bytesToBase64Jpg(byte[] bytes) {
+    //
+    // let's assume we're a buffered image .. those are serializable :)
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    try {
+      BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+      ImageIO.write(bufImage, "jpg", os);
+      os.close();
+    } catch (IOException e) {
+      // TODO: we should probably just return null and let the caller figure this out.
+      return "ERROR converting image to jpg base64.";
+    }
+
+    String data = String.format("data:image/%s;base64,%s", "jpg", CodecUtils.toBase64(os.toByteArray()));
+    return data;
+  }
+
+  /**
+   * Helper method to serialize an IplImage into a byte array. returns the bytes
+   * of an image in for format specified, png, jpg, bmp,.etc...
+   * 
+   * @param image
+   *               input iage
+   * @param format
+   *               defaults to jpg..
+   * @return byte array of image
+   * @throws IOException
+   *                     boom
+   * 
+   */
+  public static byte[] imageToBytes(IplImage image, String format) throws IOException {
+
+    // lets make a buffered image
+    CloseableFrameConverter converter = new CloseableFrameConverter();
+    BufferedImage buffImage = converter.toBufferedImage(image);
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(buffImage, format, stream);
+    } catch (IOException e) {
+      // This *shouldn't* happen with a ByteArrayOutputStream, but if it
+      // somehow does happen, then we don't want to just ignore it
+      throw new RuntimeException(e);
+    }
+    converter.close();
+    return stream.toByteArray();
+  }
+
+  /**
+   * Helper method to serialize an IplImage into a byte array. returns a jpg
+   * version of the original image
+   * 
+   * @param image
+   *              input iage
+   * @return byte array of image
+   * @throws IOException
+   *                     boom
+   * 
+   */
+  public static byte[] imageToBytes(IplImage image) throws IOException {
+    return Util.imageToBytes(image, "jpg");
+  }
+
+  /**
+   * Uses ImageIO to read the byte array into a buffered image.
+   * It then converts it to an IplImage
+   * 
+   * @param bytes
+   *              input bytes
+   * @return an iplimage
+   * @throws IOException
+   *                     boom
+   * 
+   */
+  public static IplImage bytesToImage(byte[] bytes) throws IOException {
+    //
+    // let's assume we're a buffered image .. those are serializable :)
+    BufferedImage bufImage = ImageIO.read(new ByteArrayInputStream(bytes));
+    ToIplImage iplConverter = new OpenCVFrameConverter.ToIplImage();
+    Java2DFrameConverter java2dConverter = new Java2DFrameConverter();
+    IplImage iplImage = iplConverter.convert(java2dConverter.convert(bufImage));
+    // now convert the buffered image to ipl image
+    return iplImage;
+    // Again this could be try with resources but the original example was in
+    // Scala
   }
 
 }

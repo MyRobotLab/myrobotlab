@@ -1,10 +1,16 @@
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.HtmlFilterConfig;
+import org.myrobotlab.service.interfaces.TextFilter;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 
@@ -15,28 +21,14 @@ import org.myrobotlab.service.interfaces.TextPublisher;
  * @author kwatters
  *
  */
-public class HtmlFilter extends Service implements TextListener, TextPublisher {
+public class HtmlFilter extends Service<HtmlFilterConfig> implements TextListener, TextPublisher, TextFilter {
 
   private static final long serialVersionUID = 1L;
 
-  // true will strip html, false will add html
-  private boolean stripHtml = true;
-  // if stripHtml is false these tags are used to wrap the input text
-  private String preHtmlTag = "<pre>";
-  private String postHtmlTag = "</pre>";
-
-  public static void main(String[] args) {
-    LoggingFactory.init("INFO");
-
-    try {
-      Runtime.createAndStart("gui", "SwingGui");
-      Runtime.createAndStart("python", "Python");
-      HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
-      log.info(">>>>>>>>>>" + htmlFilter.stripHtml("This is <a>foo</a> bar."));
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
+  /**
+   * set of text publishers publishing text "to" us
+   */
+  protected Set<String> publishers = new HashSet<>();
 
   public HtmlFilter(String n, String id) {
     super(n, id);
@@ -44,7 +36,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 
   // helper function to add html tags
   public String addHtml(String text) {
-    return preHtmlTag + text + postHtmlTag;
+    return config.preHtmlTag + text + config.postHtmlTag;
   }
 
   public void addTextListener(TextListener service) {
@@ -52,27 +44,48 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   public String getPostHtmlTag() {
-    return postHtmlTag;
+    return config.postHtmlTag;
   }
 
   public String getPreHtmlTag() {
-    return preHtmlTag;
+    return config.preHtmlTag;
   }
 
   public boolean isStripHtml() {
-    return stripHtml;
+    return config.stripHtml;
   }
 
   @Override
   public void onText(String text) {
     // process the text and then publish the new text.
-    if (stripHtml) {
-      String cleanText = stripHtml(text);
-      invoke("publishText", cleanText);
+    processText(text);
+  }
+
+  @Override
+  public String processText(String text) {
+    
+
+    invoke("publishRawText", text);
+
+    String processedText = text;
+
+    if (config.stripHtml) {
+      // clean text
+      processedText = stripHtml(text);
     } else {
-      String htmlText = addHtml(text);
-      invoke("publishText", htmlText);
+      processedText = addHtml(text);
     }
+
+    if (config.stripUrls) {
+      processedText = stripUrls(processedText);
+    }
+
+    invoke("publishText", processedText);
+    return processedText;
+  }
+
+  public String publishRawText(String text) {
+    return text;
   }
 
   @Override
@@ -87,7 +100,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
    *          - a string to append to the text
    */
   public void setPostHtmlTag(String postHtmlTag) {
-    this.postHtmlTag = postHtmlTag;
+    
+    config.postHtmlTag = postHtmlTag;
   }
 
   /**
@@ -97,7 +111,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
    *          - a string to prepend to the text.
    */
   public void setPreHtmlTag(String preHtmlTag) {
-    this.preHtmlTag = preHtmlTag;
+    config.preHtmlTag = preHtmlTag;
   }
 
   /**
@@ -108,7 +122,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
    *          - if true, all content between &lt;and &gt; will be removed.
    */
   public void setStripHtml(boolean stripHtml) {
-    this.stripHtml = stripHtml;
+    config.stripHtml = stripHtml;
   }
 
   // helper function to strip html tags.
@@ -119,22 +133,66 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     return cleanText.trim();
   }
 
+  public String stripUrls(String text) {
+    String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+    // String urlPattern =
+    // "<\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]>";
+    Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+    Matcher m = p.matcher(text);
+    int i = 0;
+    while (m.find()) {
+      text = text.replace(m.group(i), "").trim();
+      i++;
+    }
+    return text;
+    // return text.replaceAll("http.*?\\s", "");
+  }
+
   @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
-      log.warn("{}.attachTextListener(null)");
+      log.warn("{}.attachTextListener(null)", getName());
       return;
     }
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
 
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {
+      log.error("{}.attachTextPublisher(null)", getName());
+      return;
+    }
+    attachTextPublisher(service.getName());
+  }
+
+  @Override
+  public void attachTextPublisher(String serviceName) {
+    if (serviceName == null) {
+      log.error("{}.attachTextPublisher(null)", getName());
+      return;
+    }
+    subscribe(serviceName, "publishText");
+    publishers.add(serviceName);
+  }
+
+  public void detachTextPublisher(TextPublisher service) {
+    if (service == null) {
       log.warn("{}.attachTextPublisher(null)");
       return;
     }
-    subscribe(service.getName(), "publishText");
+    unsubscribe(service.getName(), "publishText");
+    publishers.remove(service.getName());
   }
 
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
+  public static void main(String[] args) {
+    LoggingFactory.init("INFO");
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.createAndStart("htmlFilter", "HtmlFilter");
+    log.info(">>>>>>>>>>" + HtmlFilter.stripHtml("This is <a>foo</a> bar."));
+  }
 }

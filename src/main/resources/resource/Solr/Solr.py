@@ -1,7 +1,7 @@
 from org.apache.solr.common import SolrInputDocument
 from org.apache.solr.common import SolrDocument
  
-solr = Runtime.createAndStart("solr", "Solr");
+solr = runtime.start("solr", "Solr");
 solr.setSolrUrl("http://localhost:8983/solr")
  
 doc = SolrInputDocument()

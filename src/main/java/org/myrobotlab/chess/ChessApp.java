@@ -180,7 +180,7 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
     Iterator<HMove> i = validMoves.iterator();
     boolean found = false;
     while (i.hasNext()) {
-      if (board.makeMove((HMove) i.next())) {
+      if (board.makeMove(i.next())) {
         board.takeBack();
         found = true;
         break;
@@ -298,7 +298,7 @@ public final class ChessApp extends JApplet implements Constants, VetoableChange
     Iterator<HMove> i = validMoves.iterator();
     HMove m = null;
     while (i.hasNext()) {
-      m = (HMove) i.next();
+      m = i.next();
       if (m.getFrom() == from && m.getTo() == to && m.promote == promote) {
         found = true;
         break;

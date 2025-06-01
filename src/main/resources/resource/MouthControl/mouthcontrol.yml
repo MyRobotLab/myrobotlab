@@ -1,0 +1,12 @@
+!!org.myrobotlab.service.config.MouthControlConfig
+delaytime: 75
+delaytimeletter: 45
+delaytimestop: 150
+jaw: null
+listeners: null
+mouth: null
+mouthClosedPos: 0
+mouthOpenedPos: 180
+neoPixel: null
+peers: null
+type: MouthControl

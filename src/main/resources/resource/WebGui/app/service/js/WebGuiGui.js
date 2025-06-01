@@ -27,6 +27,8 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onStatus':
+            break            
         case 'onShowAll':
             // panelSvc.showAll(inMsg.data[0]) TODO - fix
             break
@@ -52,7 +54,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     msg.subscribe('publishShow')
     msg.subscribe('publishSet')
     msg.subscribe('publishPanel')
-    msg.send("publishPanels")
+    // msg.send("publishPanels")
     // msg.subscribe('loadPanels')
     msg.subscribe(this)
 }

@@ -1,6 +1,5 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -12,18 +11,11 @@ public class KeyboardMeta extends MetaData {
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
-   * 
    */
-  public KeyboardMeta(String name) {
-
-    super(name);
-    Platform platform = Platform.getLocalInstance();
-
+  public KeyboardMeta() {
     addDescription("keyboard interface");
     addCategory("control");
-
     addDependency("com.1stleg", "jnativehook", "2.0.3");
-
   }
 
 }

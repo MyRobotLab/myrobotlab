@@ -9,6 +9,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.config.SpeechSynthesisConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -20,7 +21,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
+public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis<SpeechSynthesisConfig> {
 
   private static final long serialVersionUID = 1L;
 
@@ -45,7 +46,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
      * We start this service as mute until the user presses the unmute button
      */
 
-    setMute(true);
+    // setMute(true);
   }
 
   /**
@@ -71,15 +72,21 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
    * This method is called by the browser, and it populates the list of voices.
    * 
    * @param index
+   *          i
    * @param name
+   *          n
    * @param lang
+   *          l
    * @param def
+   *          d
+   * 
    */
   public void addWebKitVoice(Integer index, String name, String lang, Boolean def) {
     nameToIndex.put(name, index);
     addVoice(name, null, lang, null);
   }
 
+  @Override
   public boolean setVoice(String name) {
     if (voices.containsKey(name)) {
       voice = voices.get(name);
@@ -101,7 +108,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
    * https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/getVoices
    */
   @Override
-  protected void loadVoices() throws Exception {
+  public void loadVoices() throws Exception {
     // done in the webbrowser - this method is a NOOP
 
   }
@@ -110,19 +117,23 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
+//      Platform.setVirtual(true);
+//      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
 
+      Runtime.start("python", "Python");
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      WebkitSpeechSynthesis webkit = (WebkitSpeechSynthesis) Runtime.start("webkit", "WebkitSpeechSynthesis");
+      
+      
       boolean done = true;
       if (done) {
         return;
       }
-
-      WebkitSpeechSynthesis webkit = (WebkitSpeechSynthesis) Runtime.start("webkit", "WebkitSpeechSynthesis");
+      
 
       for (int i = 0; i < 1000; ++i) {
         webkit.setVoice("Google UK English Female");
@@ -141,6 +152,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
         webkit.speak("Ubriaco come una scimmia");
 
       }
+
 
     } catch (Exception e) {
       log.error("main threw", e);

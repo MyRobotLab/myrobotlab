@@ -1,0 +1,8 @@
+!!org.myrobotlab.service.config.Ssc32UsbServoControllerConfig
+listeners: null
+peers:
+  serial:
+    autoStart: true
+    name: ssc32usbservocontroller.serial
+    type: Serial
+type: Ssc32UsbServoController

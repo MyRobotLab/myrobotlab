@@ -92,7 +92,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
    * to use it.
    */
   public static boolean isPortInUse(String pname) {
-    Boolean inuse = (Boolean) ports.get(pname);
+    Boolean inuse = ports.get(pname);
     if (inuse != null) {
       return inuse.booleanValue();
     }
@@ -123,6 +123,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     computeSafetyFault();
   }
 
+  @Override
   public boolean connect(String portid) {
     logmsg("connecting to port '" + portid + "'");
     portname = portid;
@@ -141,7 +142,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
 
     if (connected) {
       // log in the global ports hash if the port is in use now or not
-      ports.put(portname, new Boolean(connected));
+      ports.put(portname, Boolean.valueOf(connected));
       sensorsValid = false;
     } else {
       disconnect();
@@ -160,7 +161,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
     connected = false;
 
     // log in the global ports hash if the port is in use now or not
-    ports.put(portname, new Boolean(connected));
+    ports.put(portname, Boolean.valueOf(connected));
 
     /*
      * try { // do io streams need to be closed first? if (input != null)

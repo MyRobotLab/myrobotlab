@@ -9,9 +9,11 @@ import java.sql.Statement;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.DatabaseConfig;
 import org.slf4j.Logger;
 
-public class Database extends Service {
+public class Database extends Service<DatabaseConfig>
+{
 
   private static final long serialVersionUID = 1L;
 
@@ -28,7 +30,8 @@ public class Database extends Service {
     super(n, id);
   }
 
-  public static void connect() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+  public static void connect()
+      throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
     Class.forName(driver);
     connection = DriverManager.getConnection(connectionString, jdbcUser, jdbcPassword);
@@ -57,7 +60,8 @@ public class Database extends Service {
     return statement.execute(sql);
   }
 
-  public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+  public static void main(String[] args)
+      throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
     LoggingFactory.init("INFO");
 

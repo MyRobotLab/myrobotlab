@@ -2,7 +2,7 @@
 # Crawls a directory and publishes a docment for each files found
 def onDocument(doc):
     print(doc)
-fc = Runtime.start("fc","FileConnector")
+fc = runtime.start("fc","FileConnector")
 fc.addListener("publishDocument","python","onDocument")
 # start crawling
 fc.setDirectory(".myrobotlab")

@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-motorpulse = Runtime.start('motorpulse','MotorPulse')
+motorpulse = runtime.start('motorpulse','MotorPulse')

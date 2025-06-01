@@ -3,22 +3,25 @@ package org.myrobotlab.document.workflow;
 import java.util.HashMap;
 
 import org.myrobotlab.document.transformer.WorkflowConfiguration;
+import org.myrobotlab.service.DocumentPipeline;
 
 public class WorkflowServer {
 
   private static WorkflowServer instance = null;
 
   private HashMap<String, Workflow> workflowMap;
+  private final DocumentPipeline pipeline;
 
   // singleton, the constructor is private.
-  private WorkflowServer() {
+  private WorkflowServer(DocumentPipeline pipeline) {
     workflowMap = new HashMap<String, Workflow>();
+    this.pipeline = pipeline;
   }
 
   // This is a singleton also
-  public static WorkflowServer getInstance() {
+  public static WorkflowServer getInstance(DocumentPipeline pipeline) {
     if (instance == null) {
-      instance = new WorkflowServer();
+      instance = new WorkflowServer(pipeline);
       return instance;
     } else {
       return instance;
@@ -31,7 +34,7 @@ public class WorkflowServer {
 
   public void addWorkflow(WorkflowConfiguration config) throws ClassNotFoundException {
     Workflow w = new Workflow(config);
-    w.initialize();
+    w.initialize(pipeline);
     workflowMap.put(w.getName(), w);
   }
 
@@ -47,10 +50,11 @@ public class WorkflowServer {
   }
 
   public void flush(String workflow) {
-    // TODO Auto-generated method stub
+    // flush the workflow/pipeline
     Workflow w = workflowMap.get(workflow);
     w.flush();
-
+    // publish that we have flushed (a workflow, pass the flush down the line?) 
+    pipeline.invoke("publishFlush");
   }
 
   public String[] listWorkflows() {
@@ -59,5 +63,4 @@ public class WorkflowServer {
     workflowMap.keySet().toArray(ws);
     return ws;
   }
-
 }

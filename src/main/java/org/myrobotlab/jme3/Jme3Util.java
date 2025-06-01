@@ -3,7 +3,9 @@ package org.myrobotlab.jme3;
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.LoggerFactory;
@@ -30,6 +32,9 @@ public class Jme3Util {
   public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
 
   JMonkeyEngine jme;
+
+  Set<String> nullUserData = new HashSet<>();
+
   public static String defaultColor = "00FF00"; // green
 
   public Jme3Util(JMonkeyEngine jme) {
@@ -105,9 +110,6 @@ public class Jme3Util {
     log.info(String.format("setTranslation %s, %.2f,%.2f,%.2f", name, x, y, z));
     Spatial s = jme.get(name);
     s.setLocalTranslation((float) x, (float) y, (float) z);
-    if (currentMenuView != null && s == selectedForView) {
-      currentMenuView.putText(selectedForView);
-    }
   }
 
   public void setRotation(String name, double xRot, double yRot, double zRot) {
@@ -118,9 +120,6 @@ public class Jme3Util {
     float zRotInit = (float) zRot * FastMath.DEG_TO_RAD;
     q.fromAngles(zRotInit, xRotInit, yRotInit);
     s.setLocalRotation(q);
-    if (currentMenuView != null && s == selectedForView) {
-      currentMenuView.putText(selectedForView);
-    }
   }
 
   public static Integer getIndexFromUnitVector(Vector3f vector) {
@@ -145,49 +144,61 @@ public class Jme3Util {
    * absolute (local) rotation ..
    * 
    * @param name
+   *          the name to rotate
+   * @param axis
+   *          which axis to rotate
    * @param degrees
+   *          the degrees
+   * 
    */
   public void rotateTo(String name, String axis, double degrees) {
-    UserData o = jme.getUserData(name);
-    if (o == null) {
-      jme.error("no user data for %s", name);
-      return;
-    }
+    try {
+      UserData o = jme.getUserData(name);
+      // error once
+      if (o == null && !nullUserData.contains(name)) {
+        // error only once
+        jme.error("no user data for %s", name);
+        nullUserData.add(name);
+        return;
+      } else if (o == null) {
+        log.info("{} not found");
+        return;
+      }
+      
+      // default rotation is around Y axis unless specified
+      Vector3f rotMask = Vector3f.UNIT_Y;
+      if (axis == null && o.rotationMask != null) {
+        axis = o.rotationMask;
+      }
 
-    // default rotation is around Y axis unless specified
-    Vector3f rotMask = Vector3f.UNIT_Y;
-    if (o.rotationMask != null) {
-      rotMask = o.rotationMask;
-    }
+      // highest priority override is if the parameter is supplied
+      if (axis != null) {
+        rotMask = getUnitVector(axis);
+      }
 
-    // highest priority override is if the parameter is supplied
-    if (axis != null) {
-      rotMask = getUnitVector(axis);
-    }
+      log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
+      // int angleIndex = getIndexFromUnitVector(rotMask);
+      if (o.mapper != null) {
+        degrees = o.mapper.calcOutput(degrees);
+        log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
+      }
 
-    log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
-    // int angleIndex = getIndexFromUnitVector(rotMask);
-    if (o.mapper != null) {
-      degrees = o.mapper.calcOutput(degrees);
-      log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
-    }
+      // get current local rotations
+      Node n = o.getNode();
 
-    // get current local rotations
-    Node n = o.getNode();
+      // convert current local to euler representation
+      Quaternion q = n.getLocalRotation();
+      float[] euler = new float[3];
+      q.toAngles(euler);
 
-    // convert current local to euler representation
-    Quaternion q = n.getLocalRotation();
-    float[] euler = new float[3];
-    q.toAngles(euler);
+      // find the masking axis - replace that value with desired value
+      int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
+      euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
+      q.fromAngles(euler[0], euler[1], euler[2]);
+      n.setLocalRotation(q);
 
-    // find the masking axis - replace that value with desired value
-    int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
-    euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
-    q.fromAngles(euler[0], euler[1], euler[2]);
-    n.setLocalRotation(q);
-
-    if (currentMenuView != null && n == selectedForView) {
-      currentMenuView.putText(selectedForView);
+    } catch (Exception e) {
+      log.error("{}.rotateTo threw", jme.getName(), e);
     }
   }
 
@@ -354,17 +365,15 @@ public class Jme3Util {
   }
 
   Spatial selectedForView;
-  MainMenuState currentMenuView;
 
-  public void setSelectedForView(MainMenuState menu, Spatial selectedForView) {
-    this.currentMenuView = menu;
+  public void setSelectedForView(Spatial selectedForView) {
     this.selectedForView = selectedForView;
   }
 
   public void addNode(String name) {
     Spatial s = jme.find(name);
     if (s != null) {
-      log.error("addNode({}} already exists", name);
+      log.error("addNode({}) already exists", name);
       return;
     }
     Node n = new Node(name);

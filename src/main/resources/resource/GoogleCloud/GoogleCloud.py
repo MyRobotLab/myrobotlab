@@ -5,7 +5,7 @@
 # possibly more info @: http://myrobotlab.org/service/GoogleCloud
 #########################################
 # start the service
-googlecloud = Runtime.start("googlecloud","GoogleCloud")
+googlecloud = runtime.start("googlecloud","GoogleCloud")
 
 # connect to the google cloud back end with the vision api
 # this authorization api json file needs to be created 

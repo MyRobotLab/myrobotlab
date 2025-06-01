@@ -1,0 +1,48 @@
+!!org.myrobotlab.service.config.WorkEConfig
+listeners: null
+peers:
+  brain:
+    autoStart: false
+    name: worke.brain
+    type: ProgramAB
+  controller:
+    autoStart: false
+    name: worke.controller
+    type: Arduino
+  emoji:
+    autoStart: false
+    name: worke.emoji
+    type: Emoji
+  eye:
+    autoStart: false
+    name: worke.eye
+    type: OpenCV
+  git:
+    autoStart: false
+    name: worke.git
+    type: Git
+  motorLeft:
+    autoStart: false
+    name: worke.motorLeft
+    type: MotorPort
+  motorRight:
+    autoStart: false
+    name: worke.motorRight
+    type: MotorPort
+  mouth:
+    autoStart: false
+    name: worke.mouth
+    type: Polly
+  python:
+    autoStart: true
+    name: python
+    type: Python
+  simulator:
+    autoStart: false
+    name: worke.simulator
+    type: JMonkeyEngine
+  webgui:
+    autoStart: true
+    name: webgui
+    type: WebGui
+type: WorkE

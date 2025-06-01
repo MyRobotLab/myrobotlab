@@ -11,6 +11,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvWarpAffine;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvBox2D;
 import org.bytedeco.opencv.opencv_core.CvMat;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
@@ -103,7 +104,7 @@ public class OpenCVFilterAffine extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    dst = IplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
+    dst = AbstractIplImage.create(image.height(), image.width(), image.depth(), image.nChannels());
   }
 
   public float getAngle() {

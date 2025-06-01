@@ -20,13 +20,16 @@ public class ChaosMonkey extends Thread {
     ChaosMonkey monkey = new ChaosMonkey(monkeyParty.size(), playTime, sleepTime, service, methodName, params);
     monkeyParty.add(monkey);
   }
+
   static public void giveToMonkey(Object service, String methodName) throws Exception {
     giveToMonkey(null, null, service, methodName, (Object[]) null);
   }
+
   static public void giveToMonkey(Object service, String methodName, Object... params) throws Exception {
     giveToMonkey(null, null, service, methodName, params);
   }
-                                  static public String monkeyReport() {
+
+  static public String monkeyReport() {
     StringBuffer sb = new StringBuffer();
     boolean hasError = false;
     for (int i = 0; i < monkeyParty.size(); ++i) {
@@ -57,9 +60,11 @@ public class ChaosMonkey extends Thread {
 
     return ret.toString();
   }
+
   static public void startMonkeys() throws InterruptedException {
     startMonkeys(null);
   }
+
   static public void startMonkeys(Long playTime) throws InterruptedException {
     if (monkeyParty.size() == 0) {
       log.warn("no monkeys in haus!");
@@ -76,6 +81,7 @@ public class ChaosMonkey extends Thread {
       monkey.join();
     }
   }
+
   // seconds
   public long endTs;
   transient Exception exceptionDeath = null;

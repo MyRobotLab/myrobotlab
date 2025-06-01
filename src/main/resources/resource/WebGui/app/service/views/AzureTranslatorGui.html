@@ -1,23 +1,43 @@
-<div class="col-md-12">     
-    <div class="col-lg-4">
-     <input class="form-control" type="text" ng-model="clientID" placeholder="Client ID">
-<input class="form-control" type="text" ng-model="clientSecret" placeholder="Client Secret">
-  <button class="btn btn-default"  ng-click="msg.setCredentials(clientID,clientSectret)">Set credentials</button>
-</div>  
-   <div class="col-lg-4">
-        <textarea ng-model="text" class="form-control"  rows="4" cols="50"></textarea>     
-        </div>
-         <div class="col-lg-4">
-     <span class="input-group-btn">
-          <label>from</label> <select class="btn btn-default" id="from" ng-model="from" ng-change="msg.fromLanguage(from)" ng-options="o as o for o in service.languages">
-          </select>
-            <label>to</label> <select class="btn btn-default" id="to" ng-model="to" ng-change="msg.toLanguage(to)" ng-options="o as o for o in service.languages">
-          </select>
-          <button class="btn btn-default"  ng-click="msg.translate(text)">Translate</button>
-     </span>
-      </div>
-        <div class="col-lg-4">
-        <textarea ng-model="translatedText" id="translatedText"  rows="4" cols="50" readonly>
-</textarea>	 
+<br/>
+<br/>
+<br/>
+<div class="row">
+    <div class="col-md-4">
+        <b>{{detectTitle}}</b> {{languageDetected}}
+        <textarea ng-model="text" class="form-control" rows="4" cols="50"></textarea>
     </div>
-</div>       
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <input type="checkbox" ng-model="service.detect" ng-change="msg.setDetect(service.detect)"/>  detect language<br/>
+        <span class="input-group-btn">
+            <ui-select ng-disabled="service.detect" ng-model="service.from" ng-change="setFrom(service.from)" theme="bootstrap"> 
+                <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{service.from}}</ui-select-match>
+                <ui-select-choices repeat="language in service.languages | filter: $select.search">{{language}}</ui-select-choices>
+            </ui-select>
+            <br/>
+            <ui-select ng-model="service.to" ng-change="setTo(service.to)" theme="bootstrap">
+                <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{service.to}}</ui-select-match>
+                <ui-select-choices repeat="language in service.languages | filter: $select.search">{{language}}</ui-select-choices>
+            </ui-select>
+            <button class="btn btn-default" ng-click="msg.translate(text)">Translate</button>
+        </span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <textarea ng-model="translatedText" class="form-control" id="translatedText" rows="4" cols="50" readonly></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <br/>
+        <ui-select ng-model="service.location" ng-change="msg.setLocation(service.location)" theme="bootstrap">
+            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;location&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{service.location}}</ui-select-match>
+            <ui-select-choices repeat="location in locations | filter: $select.search">{{location}}</ui-select-choices>
+        </ui-select>
+        <input class="form-control" type="password" ng-model="key" placeholder="Client Secret">
+        <button class="btn btn-default" ng-click="msg.setKey(key);msg.getKey()">set key</button>
+    </div>
+    <div class="col-md-8">&nbsp;</div>
+</div>

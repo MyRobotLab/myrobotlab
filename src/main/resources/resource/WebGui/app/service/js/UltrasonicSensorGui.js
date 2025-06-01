@@ -1,143 +1,106 @@
-angular.module('mrlapp.service.UltrasonicSensorGui', [])
-.controller('UltrasonicSensorGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('UltrasonicSensorGuiCtrl');
-    var _self = this;
-    var msg = this.msg;
-    
+angular.module('mrlapp.service.UltrasonicSensorGui', []).controller('UltrasonicSensorGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('UltrasonicSensorGuiCtrl')
+    var _self = this
+    var msg = this.msg
+
+    $scope.controller = null
+    $scope.continuous = true
+    $scope.range = 0
+    // $scope.service = {}
+    // $scope.service.name = 'blah'
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;
+        $scope.service = service
+        // if first - to not reset form
+        $scope.options.attachName = service.controllerName
+        $scope.options.isAttached = service.isAttached
     }
-    ;
-   
-    
+
     // init scope variables
-    $scope.pulseData = '';
-    
+    $scope.pulseData = ''
+
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
+
         switch (inMsg.method) {
         case 'onState':
-                _self.updateState(inMsg.data[0]);
-            break;
-        case 'onPulse':
-                $scope.pulseData = inMsg.data[0];
-            break;
+            _self.updateState(data)
+            $scope.$apply()
+            break
+        case 'onRange':
+            $scope.service.pingCount++
+            $scope.range = data
+            if ($scope.service.min == null || data < $scope.service.min) {
+                $scope.service.min = data
+            }
+            if ($scope.service.max == null || data > $scope.service.max) {
+                $scope.service.max = data
+            }
+            $scope.$apply()
+            break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
-            break;
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            break
         }
     }
-    ;
+
+    this.selectController = function(controller) {
+        $scope.controller = controller
+    }
 
     $scope.options = {
-            chart: {
-                type: 'multiBarHorizontalChart',
-                height: 450,
-                x: function(d){return d.label;},
-                y: function(d){return d.value;},
-                showControls: true,
-                showValues: true,
-                duration: 500,
-                xAxis: {
-                    showMaxMin: false
-                },
-                yAxis: {
-                    axisLabel: 'Values',
-                    tickFormat: function(d){
-                        return d3.format(',.2f')(d);
-                    }
-                }
-            }
-        };
+        interface: 'UltrasonicSensorController',
+        attach: this.selectController,
+        // callback: function...
+        attachName: null
+    }
 
-        $scope.data = [
-            {
-                "key": "Series1",
-                "color": "#d62728",
-                "values": [
-                    {
-                        "label" : "Group A" ,
-                        "value" : -1.8746444827653
-                    } ,
-                    {
-                        "label" : "Group B" ,
-                        "value" : -8.0961543492239
-                    } ,
-                    {
-                        "label" : "Group C" ,
-                        "value" : -0.57072943117674
-                    } ,
-                    {
-                        "label" : "Group D" ,
-                        "value" : -2.4174010336624
-                    } ,
-                    {
-                        "label" : "Group E" ,
-                        "value" : -0.72009071426284
-                    } ,
-                    {
-                        "label" : "Group F" ,
-                        "value" : -0.77154485523777
-                    } ,
-                    {
-                        "label" : "Group G" ,
-                        "value" : -0.90152097798131
-                    } ,
-                    {
-                        "label" : "Group H" ,
-                        "value" : -0.91445417330854
-                    } ,
-                    {
-                        "label" : "Group I" ,
-                        "value" : -0.055746319141851
-                    }
-                ]
-            },
-            {
-                "key": "Series2",
-                "color": "#1f77b4",
-                "values": [
-                    {
-                        "label" : "Group A" ,
-                        "value" : 25.307646510375
-                    } ,
-                    {
-                        "label" : "Group B" ,
-                        "value" : 16.756779544553
-                    } ,
-                    {
-                        "label" : "Group C" ,
-                        "value" : 18.451534877007
-                    } ,
-                    {
-                        "label" : "Group D" ,
-                        "value" : 8.6142352811805
-                    } ,
-                    {
-                        "label" : "Group E" ,
-                        "value" : 7.8082472075876
-                    } ,
-                    {
-                        "label" : "Group F" ,
-                        "value" : 5.259101026956
-                    } ,
-                    {
-                        "label" : "Group G" ,
-                        "value" : 0.30947953487127
-                    } ,
-                    {
-                        "label" : "Group H" ,
-                        "value" : 0
-                    } ,
-                    {
-                        "label" : "Group I" ,
-                        "value" : 0
-                    }
-                ]
-            }
-        ];
-    
-    msg.subscribe('range');
-    msg.subscribe(this);
+    $scope.attach = function() {
+        msg.send('setTriggerPin', $scope.service.trigPin)
+        msg.send('setEchoPin', $scope.service.echoPin)
+        msg.send('attach', $scope.controller)
+    }
+
+    $scope.detach = function() {
+        // FIXME - fix this in the mrl framework
+        // so I can call msg.send('detach')
+        if ($scope.service.controllerName) {
+            msg.send('detach', $scope.service.controllerName)
+        }
+
+    }
+
+    $scope.toggleRanging = function() {
+        if (!$scope.service.isRanging) {
+            msg.send('startRanging')
+        } else {
+            msg.send('stopRanging')
+        }
+        msg.send('broadcastState')
+        $scope.$apply()
+    }
+
+    $scope.toggleRate = function() {
+        if (!$scope.service.useRate) {
+            msg.send('maxRate')
+        } else {
+            msg.send('useRate')
+        }
+        msg.send('broadcastState')
+        $scope.$apply()
+    }
+
+    $scope.setRate = function() {
+        const parsed = parseInt($scope.service.rateHz)
+        msg.send('setRate', $scope.service.rateHz)
+        msg.broadcastState()
+    }
+
+    // FIXME - which i could get rid of this
+    // makes attach directive worky on first load
+
+    msg.subscribe('publishRange')
+    msg.subscribe(this)
 }
-]);
+])

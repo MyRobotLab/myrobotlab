@@ -1,0 +1,156 @@
+<!-- file menu button bar begin -->
+<div class="row">
+    <table>
+        <tr>
+            <td colspan="5">
+                <img ng-src="{{ clients.length === 0 ? 'disconnected.png' : 'connected.png' }}" alt="Connected clients" width="16"/>&nbsp;{{clients.length}} {{service.scriptRootDir}}
+            
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button ng-click="addScript()" class="btn btn-default">
+                    <span class="glyphicon glyphicon-file"/>new
+                </button>
+                <button class="btn btn-default" ng-click="openScript()">
+                    <span class="glyphicon glyphicon-open-file"/>open
+                </button>
+                <button class="btn btn-default" ng-click="saveScript()">
+                    <span class="glyphicon glyphicon-save-file"/>save 
+                </button>
+            </td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <button class="btn btn-default" ng-click="exec()">
+                    <span class="glyphicon glyphicon-play"></span>
+                    execute     
+                </button>
+                <button class="btn btn-default" ng-click="msg.stop()">
+                    <span class="glyphicon glyphicon-stop"></span>
+                    stop
+                </button>
+            </td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <div class="btn-group" uib-dropdown is-open="status.isopen">
+                    <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
+                    <ul uib-dropdown-menu>
+                        <li id="newService">
+                            <form class="navbar-form">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <input class="form-control" type="text" ng-model="newType" press-enter="msg.openExampleScript(newType.simpleName);newType=''" placeholder="Service Type" title="service type example" uib-typeahead="service as service.simpleName for service in getPossibleServices() | filter:{simpleName:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+            <td>&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <button ng-click="installPackage()" class="btn btn-default">
+                    <span class="glyphicon glyphicon-file"/>Install new package
+                </button>
+            </td>
+
+        </tr>
+    </table>
+</div>
+<div class="row">
+    <div ng-show="loadFile">
+        <input type="file" file-model="myFile"/>
+        <button ng-click="uploadFile()">upload me</button>
+    </div>
+</div>
+<div class="row">
+    <!--
+    Active key: {{ activeKey  }}  activeScript: {{service.openedScripts[activeKey]}} <br/> -->
+    <uib-tabset>
+        <uib-tab ng-repeat="(key, value) in service.openedScripts" select="tabSelected(value)">
+            <uib-tab-heading>
+                <span>
+                    {{key}}&nbsp;&nbsp;&nbsp;
+                    <button type="button" class="close" data-ng-click="closeScript(key)" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </span>
+            </uib-tab-heading>
+            <div ng-model="service.openedScripts[key].code" style="height: 500px;width: 100%;" id="$index" ui-ace="{
+		                                       useWrapMode : false,
+		                                       showGutter: true,		                                       
+                                               theme:'chrome',
+		                                       mode: 'python',
+		                                       firstLineNumber: 1,
+		                                       onLoad: aceLoaded,		                                       
+		                                       onChange: aceChanged}"></div>
+        </uib-tab>
+    </uib-tabset>
+</div>
+<div class="row">
+    <span>
+        console 
+         <button ng-click="clear();service.logs = [];$apply();" class="btn btn-default">
+            <span class="glyphicon glyphicon-remove"/>
+        </button>
+    </span>
+</div>
+<br/>
+<table>
+    <tbody>
+        <tr ng-repeat="e in service.logs track by $index">
+            <td><small>{{e}}</small></td>
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/ng-template" id="installPackage.html">
+    <div class="modal-header">
+        Enter Package Name
+    </div>
+    <div class="modal-body">
+        <input type="text" ng-keyup="checkEnterKey($event)" ng-model="packageName" class="form-control" placeholder="Package Name" autofocus>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">OK</button>
+        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="addScript.html">
+    <div class="modal-header">
+      Enter Filename
+    </div>
+    <div class="modal-body">
+      <input type="text" ng-keyup="checkEnterKey($event)" ng-model="filename" class="form-control" placeholder="Filename" autofocus>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" ng-click="ok()">OK</button>
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="openScript.html">
+    <div class="modal-header">
+    </div>
+    <div class="modal-body">
+	 <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Select a file
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <li>
+        <input type="text" ng-model="filter" placeholder="Filter" class="form-control">
+      </li>
+	<li ng-repeat="filename in scriptList | filter:filter">
+        <a ng-click="ok(filename)">{{ filename }}</a>
+      </li>
+    </ul>
+  </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+

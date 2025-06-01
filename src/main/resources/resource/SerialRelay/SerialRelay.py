@@ -6,4 +6,4 @@
 #########################################
 
 # start the service
-serialrelay = Runtime.start('serialrelay','SerialRelay')
+serialrelay = runtime.start('serialrelay','SerialRelay')

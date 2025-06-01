@@ -9,7 +9,7 @@ if ('virtual' in globals() and virtual):virtual=True
 else:virtual=False
 
 # start the service
-database = Runtime.start('database','Database')
+database = runtime.start('database','Database')
 database.connectionString="jdbc:mysql://HOST/DATABASE"
 database.jdbcUser="user"
 database.jdbcPassword="password"

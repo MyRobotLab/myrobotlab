@@ -11,7 +11,7 @@ def onDocument(doc):
     print(doc)
 
 # start the service
-csvconnector = Runtime.start("csvconnector","CsvConnector")
+csvconnector = runtime.start("csvconnector","CsvConnector")
 
 csvconnector.setFilename("crazybigdata.csv")
 

@@ -130,11 +130,11 @@ public class CollisionDectection {
         // if d < radius item 1 + radius item 2 then there is a possible
         // collision
         double rad1 = item.getRadius();
-        if (tk[0] <= (double) 0.0 || tk[0] >= (double) 1.0) {
+        if (tk[0] <= 0.0 || tk[0] >= 1.0) {
           rad1 = 0;
         }
         double rad2 = citem.getRadius();
-        if (tk[1] == (double) 0.0 || tk[1] == (double) 1.0) {
+        if (tk[1] == 0.0 || tk[1] == 1.0) {
           rad2 = 0;
         }
         item.haveDone(citem.getName());

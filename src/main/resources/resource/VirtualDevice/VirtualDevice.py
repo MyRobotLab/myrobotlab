@@ -1,2 +1,2 @@
 # start the service
-virtualdevice = Runtime.start("virtualdevice","VirtualDevice")
+virtualdevice = runtime.start("virtualdevice","VirtualDevice")

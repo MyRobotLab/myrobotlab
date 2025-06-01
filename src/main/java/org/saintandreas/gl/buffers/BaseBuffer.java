@@ -1,6 +1,10 @@
 package org.saintandreas.gl.buffers;
 
-import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -29,7 +33,6 @@ public class BaseBuffer {
   public static void unbind(int target) {
     glBindBuffer(target, 0);
   }
-
 
   public void setData(ByteBuffer data) {
     setData(data, GL_STATIC_DRAW);
@@ -62,7 +65,7 @@ public class BaseBuffer {
   public void setData(ShortBuffer data, int usage) {
     glBufferData(target, data, usage);
   }
-  
+
   public void destroy() {
     glDeleteBuffers(buffer);
     buffer = -1;

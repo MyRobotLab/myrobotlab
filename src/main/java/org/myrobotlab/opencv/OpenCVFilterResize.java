@@ -33,6 +33,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -65,7 +66,7 @@ public class OpenCVFilterResize extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    resized = IplImage.createCompatible(image);
+    resized = AbstractIplImage.createCompatible(image);
   }
 
   private Mat resizeImage(Mat img, int w, int h) {
@@ -88,7 +89,7 @@ public class OpenCVFilterResize extends OpenCVFilter {
   public static IplImage resizeImage(final IplImage img, float percent) {
     int newWidth = (int) (img.width() * percent);
     int newHeight = (int) (img.height() * percent);
-    IplImage ret = IplImage.create(newWidth, newHeight, img.depth(), img.nChannels());
+    IplImage ret = AbstractIplImage.create(newWidth, newHeight, img.depth(), img.nChannels());
     cvResize(img, ret, Imgproc.INTER_AREA);
     return ret;
   }
@@ -122,7 +123,7 @@ public class OpenCVFilterResize extends OpenCVFilter {
       scaledWidth = (scaledHeight * img.width()) / img.height();
     }
 
-    IplImage ret = IplImage.create(scaledWidth, scaledHeight, img.depth(), img.nChannels());
+    IplImage ret = AbstractIplImage.create(scaledWidth, scaledHeight, img.depth(), img.nChannels());
 
     // Imgproc.INTER_CUBIC
 
