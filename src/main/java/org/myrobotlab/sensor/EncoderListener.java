@@ -1,5 +1,9 @@
 package org.myrobotlab.sensor;
 
+/**
+ * Any device/service that wants to handle the onEncoderData method
+ * and encoder publisher will publish the encoder data to listeners.
+ */
 public interface EncoderListener {  
   
   public String getName();

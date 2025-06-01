@@ -2,6 +2,11 @@ package org.myrobotlab.sensor;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
 
+/**
+ * The EncoderPublisher interface is used with any device that publishes encoder data
+ * such as the AS5048A and the AMT203 encoders.  Analog pins (potentiometers) can also 
+ * emulate and publish encoder data.
+ */
 public interface EncoderPublisher extends NameProvider {
   
   // These are all the methods that the Encoder publisher should produce.
