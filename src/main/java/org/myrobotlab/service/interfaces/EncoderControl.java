@@ -2,7 +2,6 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.sensor.EncoderData;
-import org.myrobotlab.sensor.EncoderListener;
 
 public interface EncoderControl extends Attachable {
 
@@ -20,29 +19,25 @@ public interface EncoderControl extends Attachable {
    * publishes the EncoderData from the encoder
    * 
    * @param data
-   * @return data
+   *          the data to publish
+   * @return encoder data
    */
   public EncoderData publishEncoderData(EncoderData data);
 
   /**
-   * attaches an encoder listener to get the publishEncoderData
-   * to invoke the onEncoderData method of the listener.
+   * Attach a controller to an encoder control.
    * 
-   * @param listener
+   * @param controller
    */
-  public void attachEncoderListener(EncoderListener listener);
-  
+  public void attachEncoderController(EncoderController controller);
+
   /**
-   * return the state of streaming encoder data
-   * 
-   * @return
+   * @return the state of streaming encoder data
    */
   public Boolean isEnabled();
 
   /**
-   * the position of the encoder in degrees or cm for linear encoder ?
-   * 
-   * @return
+   * @return the position of the encoder in degrees or cm for linear encoder ?
    */
   public Double getPos();
 
