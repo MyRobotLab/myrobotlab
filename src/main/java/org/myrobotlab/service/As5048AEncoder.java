@@ -47,6 +47,7 @@ public class As5048AEncoder extends AbstractPinEncoder<ServiceConfig> implements
   
   public void updateEncoderData(EncoderData data) {
     // publish the updated encoder data (this is updated from the arduino..)
+    // log.info("Encoder data: {}", data);
     invoke("publishEncoderData", data); 
   }
 

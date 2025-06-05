@@ -1685,7 +1685,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   @Override
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // Also need to log this
-
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
     Double angle = null;
@@ -1706,6 +1705,7 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     // TODO: how do i publish the data from the encoder?
    // ec.publishEncoderData(data);
     // This will pass the encoder data to the encoder and the encoder will publish it to listeners.
+    //log.info("Encoder data! {}", data);
     ((EncoderControl)ec).updateEncoderData(data);
     //     invoke("publishEncoderData", data);
     // TODO: all this code needs to move out of here!

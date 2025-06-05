@@ -372,4 +372,12 @@ public class TimeEncoder implements Runnable, EncoderControl {
   public void attachEncoderController(EncoderController controller) {
     // NoOp, the TimeEncoder doesn't need a controller.
   }
+
+  @Override
+  public void updateEncoderData(EncoderData data) {
+    // NoOp, this encoder updates itself.
+    // TODO: should we publish an invoke here?
+    // invoke("publishEncoderData", data);
+    
+  }
 }
