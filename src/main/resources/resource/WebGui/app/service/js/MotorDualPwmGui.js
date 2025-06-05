@@ -85,7 +85,7 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
 
     $scope.update = function() {
         console.info('update')
-        msg.send('map', $scope.service.config.mapper.minIn, $scope.service.config.mapper.minIn, $scope.service.config.mapper.minOut, $scope.service.config.mapper.maxOut)
+        msg.send('map', $scope.service.config.mapper.minIn, $scope.service.config.mapper.maxIn, $scope.service.config.mapper.minOut, $scope.service.config.mapper.maxOut)
     }
 
     $scope.setController = function(c) {
@@ -110,7 +110,7 @@ angular.module('mrlapp.service.MotorDualPwmGui', []).controller('MotorDualPwmGui
 
     
     $scope.setSpeed = function() {
-        msg.send('setSpeed', $scope.requestedPower)
+        msg.send('move', $scope.requestedPower)
     }
 
 
