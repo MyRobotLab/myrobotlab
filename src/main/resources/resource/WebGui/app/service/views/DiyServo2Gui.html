@@ -1,4 +1,11 @@
 <!-- ServoGui.html -->
 <div class="col-md-12">
-	Diy Servo 2 !
+	Diy Servo 2 ! {{ serivce.targetPos }}
+	Diy Servo a..! {{ targetPos }}
+	Data {{ data }}
+	
+	<br/>
+	<input class="servo-move-to-slider" type="range" name="targetPos"
+           ng-model="service.targetPos" min="0" max="360"
+           ng-change="moveTo(service.targetPos)" ng-mousedown="disableUpdates()" ng-mouseup="enableUpdates()">
 </div>

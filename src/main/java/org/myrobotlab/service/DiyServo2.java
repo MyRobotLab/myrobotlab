@@ -28,6 +28,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
+import org.myrobotlab.service.config.DiyServo2Config;
 import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.data.ServoSpeed;
 import org.myrobotlab.service.interfaces.EncoderControl;
@@ -50,7 +51,7 @@ import org.myrobotlab.service.interfaces.ServoStatusPublisher;
  * The output of the pid control is then written to the motor control
  */
 
-public class DiyServo2 extends Service implements EncoderListener, ServoControl, ServoControlPublisher, ServoStatusPublisher {
+public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListener, ServoControl, ServoControlPublisher, ServoStatusPublisher {
 
   private static final long serialVersionUID = 1L;
   private volatile boolean enabled = true;
@@ -66,7 +67,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   private double kd = 0.001; // 0.020;
   public double setpoint = 90.0; // Intial
   // samples per second.
-  public int sampleTime = 20;
+  public int sampleTime = 4;
   static final public int MODE_AUTOMATIC = 1;
   
   transient MotorUpdater motorUpdater;
@@ -127,11 +128,15 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   }
 
   public Double moveTo(Double angle) {
+    log.info("Servo Move to {}", angle);
     // This updates the setpoint of the pid control.
     this.setpoint = angle;
     pid.setSetpoint(pidKey, angle);
     lastActivityTimeMS = System.currentTimeMillis();
     // Why does this return a boolean?
+    
+    // invoke("publishMoveTo", this);
+    invoke("publishServoEvent", angle);
     return angle;
   }
 
@@ -157,7 +162,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
       try {
         while (true) {
           if (isRunning()) {
-            log.info("Updating control loop");
+            // log.info("Updating control loop");
             // Calculate the new value for the motor
             if (pid.data.containsKey(pidKey)) {
               // Update the pid input value.
@@ -549,7 +554,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   @Override
   public Double moveTo(Integer newPos) {
     // TODO Auto-generated method stub
-    return null;
+    return moveTo(Double.valueOf(newPos));
   }
 
   @Override

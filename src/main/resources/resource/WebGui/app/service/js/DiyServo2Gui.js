@@ -8,6 +8,10 @@ angular.module('mrlapp.service.DiyServo2Gui', []).controller('DiyServo2GuiCtrl',
         $scope.service = service
     }
 
+    $scope.moveTo = function(pos) {
+        msg.send('moveTo', pos)
+    }
+
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0]
         switch (inMsg.method) {
@@ -16,6 +20,10 @@ angular.module('mrlapp.service.DiyServo2Gui', []).controller('DiyServo2GuiCtrl',
             $scope.$apply()
             break
         // TODO: figure out which callbacks we will subscribe to here.
+        case 'onServoEvent':
+            $scope.data = data
+            $scope.$apply()
+            break
         case 'onServoData':
             $scope.data = data
             $scope.$apply()
@@ -29,6 +37,6 @@ angular.module('mrlapp.service.DiyServo2Gui', []).controller('DiyServo2GuiCtrl',
 
     };
 
-    // msg.subscribe('publishEncoderData')
+    msg.subscribe('publishServoEvent')
     msg.subscribe(this)}
 ])
