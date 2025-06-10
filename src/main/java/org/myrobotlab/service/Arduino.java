@@ -503,6 +503,20 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
+    } else if (attachable instanceof As5048AEncoder) {
+      // TODO: reattach it!
+      As5048AEncoder enc = (As5048AEncoder)attachable;
+      log.info("================ re-attaching {} {} {} ================", enc.getName(), dm.getId(), enc.getPin());
+      msg.encoderAttach(dm.getId(), 1, Integer.valueOf(enc.getPin()));
+    } else if (attachable instanceof MotorDualPwm) {
+      // TODO: reattach it!
+      MotorDualPwm motor = (MotorDualPwm)attachable;
+      int[] pins = new int[] {Integer.valueOf(motor.getLeftPwmPin()), Integer.valueOf(motor.getRightPwmPin())};
+      // TODO: what's the type?!
+      int type = 0;
+      log.info("================ re-attaching {} {} {} ================", motor.getName(), dm.getId(), pins);
+      msg.motorAttach(dm.getId(),type, pins );
+      
     } else if (attachable instanceof UltrasonicSensorControl) {
       log.warn("UltrasonicSensorControl not implemented");
       // reattach logic

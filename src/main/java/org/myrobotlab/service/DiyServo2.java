@@ -67,7 +67,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   private double kd = 0.001; // 0.020;
   public double setpoint = 90.0; // Intial
   // samples per second.
-  public int sampleTime = 4;
+  public int sampleTime = 20;
   static final public int MODE_AUTOMATIC = 1;
   
   transient MotorUpdater motorUpdater;
@@ -136,7 +136,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
     // Why does this return a boolean?
     
     // invoke("publishMoveTo", this);
-    invoke("publishServoEvent", angle);
+    // invoke("publishServoEvent", angle.doubleValue());
     return angle;
   }
 
@@ -164,13 +164,17 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
           if (isRunning()) {
             // log.info("Updating control loop");
             // Calculate the new value for the motor
-            if (pid.data.containsKey(pidKey)) {
+            if (pid.data.containsKey(pidKey) && currentAngle != null && pidKey != null) {
               // Update the pid input value.
               // pass the current angle from the encoder to the pid controller
-              double output = pid.compute(pidKey, currentAngle);
+              Double output = pid.compute(pidKey, currentAngle);
+              if (output == null) {
+                continue;
+              }
               double delta = Math.abs(currentAngle - setpoint);
               if (delta < threshold ) {
                 log.info("Arrived!");
+                motorControl.move(0);
                 // TODO: some debouncing logic here.
                 // TODO: publish the servo events for started/stopped here.
               } else if (output != lastOutput) {
@@ -580,14 +584,14 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
     LoggingFactory.init("info");
     
-    
+    Runtime.start("python", "Python");
     WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
    
     // Compose the components of the diy servo and attach them.
     // Make one.. and stuff.
     // setup the encoder.
     Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
-    ard.connect("COM5");
+    ard.connect("COM3");
     // ard.setDebug(true);
     As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
     encoder.setPin(10);
@@ -617,12 +621,12 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
       //  diy.attachMotorControl(mot);
       // Tell the servo to move somewhere.
 
-      diy.moveTo(75.0);
-      Thread.sleep(2000);
+     // diy.moveTo(75.0);
+      //Thread.sleep(2000);
       // diy.disable();
       // Thread.sleep(1000);
       // diy.enable();
-      diy.moveTo(125.0);
+      diy.moveTo(250.0);
     }
     System.out.println("Press the any key");
     System.in.read();
