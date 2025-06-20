@@ -26,6 +26,7 @@ public class DiyServo2Config extends ServiceConfig {
     
     // TODO: how do we handle the controller for the encoder?  (could be different than the motor)
     As5048AEncoderConfig encoder = (As5048AEncoderConfig) plan.get(getPeerName("encoder"));
+    encoder.pin = 10;
     
     PidConfig pid = (PidConfig) plan.get(getPeerName("pid"));
     pid.data.put(name, new PidData());

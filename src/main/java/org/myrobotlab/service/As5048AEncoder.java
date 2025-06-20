@@ -1,13 +1,19 @@
 package org.myrobotlab.service;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.math3.util.Precision;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
+import org.myrobotlab.service.config.As5048AEncoderConfig;
+import org.myrobotlab.service.config.ProgramABConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
 
@@ -17,7 +23,7 @@ import org.myrobotlab.service.interfaces.EncoderControl;
  * @author kwatters
  *
  */
-public class As5048AEncoder extends AbstractPinEncoder<ServiceConfig> implements EncoderControl, EncoderPublisher {
+public class As5048AEncoder extends AbstractPinEncoder<As5048AEncoderConfig> implements EncoderControl, EncoderPublisher {
 
   private static final int HISTORY_SIZE = 5;
 
@@ -45,7 +51,8 @@ public class As5048AEncoder extends AbstractPinEncoder<ServiceConfig> implements
     ard.connect(port);
     ard.setDebug(true);
     As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
-    encoder.setPin(10);
+    As5048AEncoderConfig cfg = (As5048AEncoderConfig)(encoder.config);
+    encoder.setPin(cfg.pin);
     ard.attachEncoderControl(encoder);
     Thread.sleep(10000);
     encoder.setZeroPoint();
@@ -76,5 +83,26 @@ public class As5048AEncoder extends AbstractPinEncoder<ServiceConfig> implements
 
     invoke("publishEncoderData", filteredData); 
   }
+  
+  @Override
+  public As5048AEncoderConfig getConfig() {
+    return (As5048AEncoderConfig)super.getConfig();
+  }
+  
+  @Override
+  public As5048AEncoderConfig apply(As5048AEncoderConfig c) {
+    // TODO?? : controller ?  attach?  
+    this.setPin(c.pin);
+    return c;
+  }
+  
+  public void apply() {
+    // TODO?? 
+    As5048AEncoderConfig config = getConfig();
+    this.setPin(config.pin);
+  }
 
+  
 }
+
+
