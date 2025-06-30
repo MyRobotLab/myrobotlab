@@ -42,8 +42,53 @@ public class As5048AEncoder extends AbstractPinEncoder<As5048AEncoderConfig> imp
     log.warn("Setting the Zero point not supported on AS5048A because memory register is OTP");
   }
 
-  public static void main(String[] args) throws Exception {
+  public void updateEncoderData(EncoderData data) {
+    // publish the updated encoder data (this is updated from the arduino..)
+    // log.info("Encoder data: {}", data);
+    // pop the first value
+    if (history.remainingCapacity() == 0) {
+      history.poll();
+    }
+    history.offer(data);
+    // This is computing a moving average for the encoder value to smooth it out a bit.
+    double avgVal = history.stream().mapToDouble(EncoderData::getValue).average().orElse(0.0);
+    double avgAngle = Precision.round(history.stream().mapToDouble(EncoderData::getAngle).average().orElse(0.0), 1);    
+    // Precision.round(avgAngle, 2);
+    // double avgVal = (previousData.value + data.value)/2;
+    // double avgAngle = (previousData.angle + data.angle)/2;
+    // 0.1 degree resolution... truncate and filter the value for stability..
+    EncoderData filteredData = new EncoderData( data.source, data.pin, avgVal, avgAngle);
+    //  log.info("Original Angle: {}  Filtered Angle: {}", data.angle, filteredData.angle);
+    // previousData = data;
+    //invoke("publishEncoderData", data); 
+    invoke("publishEncoderData", filteredData); 
+  }
 
+  @Override
+  public As5048AEncoderConfig getConfig() {
+    return (As5048AEncoderConfig)super.getConfig();
+  }
+  
+  @Override
+  public As5048AEncoderConfig apply(As5048AEncoderConfig c) {
+    // TODO?? : controller ?  attach?  
+    this.setPin(c.pin);
+    // TODO: how we apply the config of the controller?
+    // String controllerName = c.controller;
+    // this.controller= null;    
+    // TODO: should we have a handle to our controller?
+    //this.controller = c.controller;
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return c;
+  }
+  
+  public static void main(String[] args) throws Exception {
     LoggingFactory.init("INFO");
     String port = "COM4";
     Runtime.start("gui", "SwingGui");
@@ -58,50 +103,6 @@ public class As5048AEncoder extends AbstractPinEncoder<As5048AEncoderConfig> imp
     encoder.setZeroPoint();
     log.info("Here we are..");
   }
-  
-  public void updateEncoderData(EncoderData data) {
-    // publish the updated encoder data (this is updated from the arduino..)
-    // log.info("Encoder data: {}", data);
-    // pop the first value
-    if (history.remainingCapacity() == 0) {
-      history.poll();
-    }
-    history.offer(data);
-    // This is computing a moving average for the encoder value to smooth it out a bit.
-    double avgVal = history.stream().mapToDouble(EncoderData::getValue).average().orElse(0.0);
-    double avgAngle = Precision.round(history.stream().mapToDouble(EncoderData::getAngle).average().orElse(0.0), 1);    
-    
-   // Precision.round(avgAngle, 2);
-   // double avgVal = (previousData.value + data.value)/2;
-   // double avgAngle = (previousData.angle + data.angle)/2;
-    // 0.1 degree resolution... truncate and filter the value for stability..
-    EncoderData filteredData = new EncoderData( data.source, data.pin, avgVal, avgAngle);
-   //  log.info("Original Angle: {}  Filtered Angle: {}", data.angle, filteredData.angle);
-    
-    // previousData = data;
-    //invoke("publishEncoderData", data); 
-
-    invoke("publishEncoderData", filteredData); 
-  }
-  
-  @Override
-  public As5048AEncoderConfig getConfig() {
-    return (As5048AEncoderConfig)super.getConfig();
-  }
-  
-  @Override
-  public As5048AEncoderConfig apply(As5048AEncoderConfig c) {
-    // TODO?? : controller ?  attach?  
-    this.setPin(c.pin);
-    return c;
-  }
-  
-  public void apply() {
-    // TODO?? 
-    As5048AEncoderConfig config = getConfig();
-    this.setPin(config.pin);
-  }
-
   
 }
 

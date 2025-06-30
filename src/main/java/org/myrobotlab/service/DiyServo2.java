@@ -105,6 +105,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   public void onEncoderData(EncoderData data) {
     // System.err.println("DIY Servo Encoder Data: " + data);
     this.currentAngle = data.angle;
+    // TODO: could we just update the PID here?
   }
 
   public void attachEncoderControl(EncoderControl enc) {
@@ -213,6 +214,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   public void disable() {
     // TODO: what do do here?
     // motorControl.disable();
+    // TODO: we should disable the encoder also here.. 
     motorControl.stop();
     enabled = false;
     // TODO: broadcast enabled/disabled messages?
@@ -222,7 +224,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   public void enable() {
     // TODO: what do to here?  
     // motorControl.enable();
-      enabled = true;
+    enabled = true;
   }
 
   @Override
@@ -241,7 +243,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   public void attach(ServoController listener) {
     // TODO: remove from ServoControl interface... NoOp here.
     // NoOp : no servo controllers here..
-    log.warn("Diy Servo doesn't use a controller..  no implemented.");
+    log.warn("Diy Servo 2 doesn't use a controller..  no implemented.");
   }
 
   @Override
@@ -253,7 +255,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
   @Override
   public String getController() {
     // TODO remove from interface?. we have no controller.
-    log.warn("Diy Servo doesn't use a controller..  no implemented.");
+    log.warn("Diy Servo 2 doesn't use a controller..  no implemented.");
     return null;
   }
 
@@ -394,7 +396,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public void setPin(Integer pin) {
-    // TODO: There are no pins!  we have no pins!
+    // TODO: There are no pins!  we have no pins! perhaps this could be the pin that the encoder is connected to?
     log.warn("setPin not implemented in DiyServo.");
   }
 
@@ -425,7 +427,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public void stop() {
-    // Stop the motor... anything else?
+    // Stop the motor.
     motorControl.move(0.0);
   }
 
@@ -441,10 +443,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public void waitTargetPos() {
-    // TODO Auto-generated method stub
-    // really? ok.
-    // here we should wait until we have "arrived"  ...
-    
+    // TODO: here we should wait until we have "arrived"  ...
   }
 
   @Override
@@ -453,12 +452,11 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
     log.warn("Write Microseconds not implemented for DiyServo.");
   }
 
-
-
   @Override
   public void fullSpeed() {
     // TODO: add a velocity control.
     // TODO: deprecated, remove from interface?
+    // This would disable any velocity control for the servo.
   }
 
   @Override
@@ -473,13 +471,13 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public Double moveToBlocking(Integer newPos) {
-    // TODO Auto-generated method stub
+    // TODO this should get implemented for certain.
     return null;
   }
 
   @Override
   public Double moveToBlocking(Integer newPos, Long timeoutMs) {
-    // TODO Auto-generated method stub
+    // TODO this should get implemented for certain.
     return null;
   }
 
@@ -509,7 +507,7 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public void attachServoControlListener(String name) {
-    // TODO Auto-generated method stub
+    // TODO: this should get implemented like the normal Servo
     
   }
 
@@ -545,8 +543,8 @@ public class DiyServo2 extends Service<DiyServo2Config> implements EncoderListen
 
   @Override
   public void attachServoController(String sc) {
-    // TODO Auto-generated method stub
-    
+   // NoOp for DiyServo2, the Motor Control and the Encoder will have their own controllers...
+    log.info("DiyServo2 doesn't use attachServoController");
   }
 
   @Override

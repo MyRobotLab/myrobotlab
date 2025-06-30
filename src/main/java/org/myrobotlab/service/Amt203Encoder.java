@@ -59,4 +59,23 @@ public class Amt203Encoder extends AbstractPinEncoder<Amt203EncoderConfig> imple
     invoke("publishEncoderData", data); 
   }
 
+  @Override
+  public Amt203EncoderConfig apply(Amt203EncoderConfig c) {
+    super.apply(c);  
+    this.setPin(c.pin);
+    // TODO: how we apply the config of the controller?
+    // String controllerName = c.controller;
+    // this.controller= null;    
+    // TODO: should we have a handle to our controller?
+    //this.controller = c.controller;
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return c;
+  }
+
 }
