@@ -18,8 +18,8 @@ public class SphinxMeta extends MetaData {
     // https://cmusphinx.github.io/wiki/tutorialsphinx4/
     // addDependency("javax.speech.recognition", "1.0");
     // addDependency("edu.cmu.sphinx", "4-1.0beta6");
-    addDependency("net.sf.phat", "sphinx4-core", "5prealpha-SNAPSHOT");
-    addDependency("net.sf.phat", "sphinx4-data", "5prealpha-SNAPSHOT");
+    addDependency("net.sf.phat", "sphinx4-core", "5prealpha");
+    addDependency("net.sf.phat", "sphinx4-data", "5prealpha");
   }
 
 }
