@@ -1497,15 +1497,15 @@
 
     <!-- Sphinx begin -->
     <dependency>
-      <groupId>edu.cmu.sphinx</groupId>
+      <groupId>net.sf.phat</groupId>
       <artifactId>sphinx4-core</artifactId>
-      <version>5prealpha-SNAPSHOT</version>
+      <version>5prealpha</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>edu.cmu.sphinx</groupId>
+      <groupId>net.sf.phat</groupId>
       <artifactId>sphinx4-data</artifactId>
-      <version>5prealpha-SNAPSHOT</version>
+      <version>5prealpha</version>
       <scope>provided</scope>
     </dependency>
     <!-- Sphinx end -->
@@ -1636,12 +1636,12 @@
     <!-- WebGui end -->
 
     <!-- Webcam begin -->
-    <dependency>
+  <dependency>
       <groupId>com.github.sarxos</groupId>
       <artifactId>webcam-capture-driver-v4l4j</artifactId>
-      <version>0.3.13-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+      <version>0.3.12</version>
+       <scope>provided</scope>
+ </dependency>
     <!-- Webcam end -->
 
     <!-- WebkitSpeechSynthesis begin -->
