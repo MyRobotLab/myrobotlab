@@ -140,6 +140,9 @@ public abstract class Repo {
       // FIXME reduce down to maven central bintray & repo.myrobotlab.org
       remotes = new ArrayList<RemoteRepo>();
       remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
+      remotes.add(new RemoteRepo("central2", "https://repo1.maven.org/maven2", "the mother load2"));
+      remotes.add(new RemoteRepo("mulesoft", "https://repository.mulesoft.org/nexus/content/repositories/public", "mulesoft public"));
+
       // remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com",
       // "the big kahuna"));
       // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more
