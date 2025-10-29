@@ -143,15 +143,15 @@ public class Locale {
   }
 
   public static Map<String, Locale> getDefaults() {
-// Pulls all languages available from the OS, not useful to us
-//    Map<String, Locale> locales = new TreeMap<>();
-//    java.util.Locale[] ls = java.util.Locale.getAvailableLocales();
-//    for (java.util.Locale l : ls) {
-//      Locale newLocale = new Locale(l.toString());
-//      if (l.toString() != null && l.toString().length() != 0) {
-//        locales.put(newLocale.tag, newLocale);
-//      }
-//    }
+    // Pulls all languages available from the OS, not useful to us
+    // Map<String, Locale> locales = new TreeMap<>();
+    // java.util.Locale[] ls = java.util.Locale.getAvailableLocales();
+    // for (java.util.Locale l : ls) {
+    // Locale newLocale = new Locale(l.toString());
+    // if (l.toString() != null && l.toString().length() != 0) {
+    // locales.put(newLocale.tag, newLocale);
+    // }
+    // }
     // We really only support a few Locales dictated by ProgramAB, Polly,
     // WebkitSpeechRecognition, & WebKitSpeechSynthesis - this should be
     // a rollup of other services ?
@@ -169,6 +169,7 @@ public class Locale {
     locales.put("pl-PL", new Locale("pl-PL"));
     locales.put("pt-PT", new Locale("pt-PT"));
     locales.put("ru-RU", new Locale("ru-RU"));
+    locales.put("sl-SI", new Locale("sl-SI"));
     locales.put("tr-TR", new Locale("tr-TR"));
     return locales;
   }

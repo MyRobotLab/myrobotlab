@@ -281,7 +281,7 @@ public class InMoov2 extends Service<InMoov2Config>
     super.apply(c);
     try {
 
-      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
+      locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "pl-PL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "sl-SI", "tr-TR");
 
       if (c.locale != null) {
         setLocale(c.locale);
@@ -1209,8 +1209,8 @@ public class InMoov2 extends Service<InMoov2Config>
   public void onPirOn() {
     log.info("onPirOn");
     if (config.flashOnPir == true) {
-        invoke("publishFlash", "pir");
-      }
+      invoke("publishFlash", "pir");
+    }
     ProgramAB chatBot = (ProgramAB) getPeer("chatBot");
     if (chatBot != null) {
       String botState = chatBot.getPredicate("botState");
@@ -2224,13 +2224,13 @@ public class InMoov2 extends Service<InMoov2Config>
 
     // chatbot getresponse attached to publishEvent
     addListener("publishEvent", getPeerName("chatBot"), "getResponse");
-    
+
     ServiceInterface p = getPeer("python");
     if (p != null) {
       try {
-        PythonConfig c = (PythonConfig)p.getConfig();
+        PythonConfig c = (PythonConfig) p.getConfig();
         c.scriptRootDir = "data" + fs + "InMoov2";
-      } catch(Exception e) {
+      } catch (Exception e) {
         log.error("setting python scriptRootDir failed", e);
       }
     }
@@ -2308,34 +2308,29 @@ public class InMoov2 extends Service<InMoov2Config>
     sendToPeer("leftArm", "waitTargetPos");
     sendToPeer("torso", "waitTargetPos");
   }
-  
+
   public Double getUltrasonicRightDistance() {
-    UltrasonicSensor uss = (UltrasonicSensor)getPeer("ultrasonicRight");
+    UltrasonicSensor uss = (UltrasonicSensor) getPeer("ultrasonicRight");
     if (uss != null) {
       return uss.range();
-    }
-    else
-    {
+    } else {
       warn("No ultrasonicRight attached");
       return 0.0;
     }
   }
-  
-  
+
   public Double getUltrasonicLeftDistance() {
-    UltrasonicSensor uss = (UltrasonicSensor)getPeer("ultrasonicLeft");
+    UltrasonicSensor uss = (UltrasonicSensor) getPeer("ultrasonicLeft");
     if (uss != null) {
       return uss.range();
-    }
-    else
-    {
+    } else {
       warn("No ultrasonicLeft attached");
       return 0.0;
     }
   }
-  
+
   public Map publishClassification(Map<String, Object> c) {
-    // log.info(c);    
+    // log.info(c);
     return c;
   }
 
