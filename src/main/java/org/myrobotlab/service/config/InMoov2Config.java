@@ -291,7 +291,7 @@ public class InMoov2Config extends ServiceConfig {
     chatBot.listeners.add(new Listener("publishSession", name));
 
     LLMConfig llm = (LLMConfig) plan.get(getPeerName("llm"));
-    llm.listeners.add(new Listener("publishText", name + ".python", "onFilterText"));
+    llm.listeners.add(new Listener("publishText", "python", "onFilterText"));
 
     HtmlFilterConfig htmlFilter = (HtmlFilterConfig) plan.get(getPeerName("htmlFilter"));
     htmlFilter.listeners.add(new Listener("publishText", name + ".mouth", "onText"));
