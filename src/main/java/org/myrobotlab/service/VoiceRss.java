@@ -149,7 +149,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
     addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
-    addVoice("Vid", "male", "sl-si", "sl-si"); // Slovenian (Slovenia)
+    //addVoice("Vid", "male", "sl-si", "sl-si"); // Slovenian (Slovenia)
   }
 
   public static void main(String[] args) {
