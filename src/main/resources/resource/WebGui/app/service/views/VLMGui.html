@@ -1,0 +1,110 @@
+<div class="row">
+    How to install Ollama (required - runs the vision model offline)
+    <a href="" ng-show="!showOllama" ng-click="showOllama=true">show</a>
+    <a href="" ng-show="showOllama" ng-click="showOllama=false">hide</a>
+</div>
+<div class="row" ng-show="showOllama">
+    <ul>
+        <li>Go to <a href="https://ollama.com/download">https://ollama.com/download</a> and install for your OS</li>
+        <li>Pull an open source vision model, e.g. <code>ollama pull llava</code></li>
+        <li>Ollama serves on <code>http://localhost:11434</code> by default</li>
+    </ul>
+</div>
+
+<div class="row">&nbsp;</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <table class="table table-striped table-hover">
+            <tr>
+                <td>URL</td>
+                <td><input class="form-control" ng-model="service.config.url" ng-change="dirty=true" /></td>
+                <td>Base url of the offline Ollama server.</td>
+            </tr>
+            <tr>
+                <td>Model</td>
+                <td><input class="form-control" ng-model="service.config.model" ng-change="dirty=true" /></td>
+                <td>
+                    <select id="modelSelect" class="form-control" ng-model="selectedModel" ng-change="onModelChange()">
+                        <option ng-repeat="model in visionModels" value="{{model}}">{{model}}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Temperature</td>
+                <td><input class="form-control" ng-model="service.config.temperature" ng-change="dirty=true" /></td>
+                <td>How creative the responses should be.</td>
+            </tr>
+            <tr>
+                <td>System Prompt</td>
+                <td><textarea rows="4" class="form-control" ng-model="service.config.system" ng-change="dirty=true"></textarea></td>
+                <td>Context / persona given to the vision model.</td>
+            </tr>
+            <tr>
+                <td>Prompt</td>
+                <td><textarea rows="3" class="form-control" ng-model="prompt" placeholder="ask something about the image"></textarea></td>
+                <td>The question or instruction sent along with the image.</td>
+            </tr>
+            <tr>
+                <td>
+                    <button class="btn btn-default" ng-click="saveValues()">save</button>
+                </td>
+                <td></td>
+                <td>
+                    <div ng-show="dirty">You must save configuration to make it persistent.</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">Image from URI</div>
+            <div class="panel-body">
+                <form class="form-inline">
+                    <input class="form-control" style="width: 60%" type="text" ng-model="imageUri"
+                        placeholder="http://... , file:///... or a local path" title="image uri">
+                    <button class="btn btn-primary" ng-click="analyzeUri()">analyze uri</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">Grab a frame from OpenCV</div>
+            <div class="panel-body">
+                <form class="form-inline">
+                    <select class="form-control" ng-model="cvName">
+                        <option ng-repeat="cv in cvServices" value="{{cv}}">{{cv}}</option>
+                    </select>
+                    <button class="btn btn-default" ng-click="loadCvServices()" title="refresh service list">refresh</button>
+                    <button class="btn btn-primary" ng-click="grabFrame()" ng-disabled="!cvName">grab &amp; analyze</button>
+                    <span ng-show="cvServices.length == 0">&nbsp;no image services found - start an OpenCV service</span>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr ng-repeat="e in utterances">
+                    <td style="width: 80px">
+                        <small><b>{{e.username}}</b></small>
+                    </td>
+                    <td>
+                        <img ng-show="e.img" ng-src="{{e.img}}" alt="" width="250" /><br ng-show="e.img" />
+                        <span>{{e.text}}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
