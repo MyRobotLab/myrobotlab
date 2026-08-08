@@ -524,6 +524,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // iterate through plan - check dependencies and licensing
   }
 
+  // ===== AGENT REGION: CREATE_START =====
+  // create/start services from name+type or CLI lists — see doc/agent/hotspot-map.md
+
   /**
    * Use {@link #start(String, String)} instead.
    *
@@ -882,6 +885,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return java.lang.Runtime.getRuntime().freeMemory();
   }
 
+  // ===== AGENT REGION: SINGLETON =====
+  // process singleton + options bootstrap — see doc/agent/hotspot-map.md
+
   /**
    * Get a handle to the Runtime singleton.
    *
@@ -1084,6 +1090,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     log.info("done");
     return ret;
   }
+
+  // ===== AGENT REGION: REGISTRY =====
+  // global service map, lookup, export — see doc/agent/hotspot-map.md
 
   /**
    * Gets a Map between service names and the service object of all services
@@ -1508,6 +1517,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return Platform.getLocalInstance().getBranch();
   }
 
+  // ===== AGENT REGION: INSTALL =====
+  // Ivy/repo install threads — see doc/agent/hotspot-map.md
+
   /**
    * Install all services
    *
@@ -1922,6 +1934,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return registration;
     }
   }
+
+  // ===== AGENT REGION: LIFECYCLE_RELEASE =====
+  // release one/all, shutdown — see doc/agent/hotspot-map.md
 
   /**
    * releases a service - stops the service, its threads, releases its
@@ -2416,6 +2431,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @param autoReconnect
    *          Whether the connection should be re-established if it is dropped
    */
+  // ===== AGENT REGION: NETWORK =====
+  // connect, route, remote services — see doc/agent/hotspot-map.md
+
   // FIXME - implement
   public void connect(String url, boolean autoReconnect) {
     if (!autoReconnect) {
@@ -2803,6 +2821,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return Runtime.getService(name);
     }
   }
+
+  // ===== AGENT REGION: CONFIG_PLAN =====
+  // load plan, YAML config paths — see doc/agent/hotspot-map.md
 
   public static Plan load(String name, String type) {
     synchronized (processLock) {
@@ -4528,6 +4549,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     Logging logging = LoggingFactory.getInstance();
     logging.removeAllAppenders();
   }
+
+  // ===== AGENT REGION: MAIN_CLI =====
+  // process entry, picocli options — see doc/agent/hotspot-map.md
 
   /**
    * Main entry point for the MyRobotLab Runtime Check CmdOptions for list of

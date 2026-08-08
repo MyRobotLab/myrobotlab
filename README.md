@@ -90,6 +90,15 @@ If you want to compile and skip the tests, you can use the standard maven approa
 
 ## Contributing
 
+**Agents / automated assistants:** start with [`AGENTS.md`](AGENTS.md) and [`doc/agent/`](doc/agent/).  
+**Humans:** see also [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+Fast PR-oriented tests:
+
+```bash
+mvn test -Pagent-tests
+```
+
 All development is done on the `develop` branch.  To contribute code, the typical approach is to create an issue about the feature/bug you're working on.
 
 From Github create a branch based off the "develop" branch with a descriptive name  (and associated Issue number if available)

@@ -7,6 +7,19 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.config._TemplateServiceConfig;
 import org.slf4j.Logger;
 
+/**
+ * Copy this class (plus {@code _TemplateServiceConfig} and
+ * {@code _TemplateServiceMeta}) when creating a new service.
+ * <p>
+ * Agent / API guidance:
+ * <ul>
+ * <li>Prefer typed fields on {@code *Config} and real Java methods over
+ * string-only {@code invoke("method")} as the primary surface.</li>
+ * <li>Declare runtime jars in {@code *Meta.addDependency}, and mirror them in
+ * {@code pom.xml} — see {@code doc/agent/dependency-updates.md}.</li>
+ * <li>Keep WebGui JS / resource scripts in sync when changing pub/sub topics.</li>
+ * </ul>
+ */
 public class _TemplateService extends Service<_TemplateServiceConfig>
 {
 

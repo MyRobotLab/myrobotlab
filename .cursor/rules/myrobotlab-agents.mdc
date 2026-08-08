@@ -1,0 +1,14 @@
+---
+description: Core MyRobotLab agent orientation — read AGENTS.md, prefer service triple, respect Meta/Ivy deps
+alwaysApply: true
+---
+
+# MyRobotLab agent rules
+
+- Read `AGENTS.md` and `doc/agent/` before large changes.
+- Prefer fixing `Service` + `Config` + `Meta` + `resource/<Service>/` over editing `Runtime.java` / `Service.java`.
+- Runtime deps live in `*Meta.addDependency` (Ivy → `libraries/`). Sync `pom.xml` too — see `doc/agent/dependency-updates.md`.
+- Never hand-edit generated `arduino/Msg.java` or `VirtualMsg.java`; edit `arduinoMsgs.schema` and regenerate.
+- InMoov2 / ProgramAB may live in sibling repos under `resource/` — confirm location before editing.
+- Verify with `mvn test -Pagent-tests` and a focused `-Dtest=...` for the area changed.
+- Prefer typed `*Config` / interfaces for new APIs over string-only `invoke`.
