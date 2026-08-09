@@ -1392,13 +1392,13 @@
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
-      <version>9.10.0</version>
+      <version>9.12.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>9.6.0</version>
+      <version>9.10.1</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1426,7 +1426,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-test-framework</artifactId>
-      <version>9.6.0</version>
+      <version>9.10.1</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1454,7 +1454,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>9.6.0</version>
+      <version>9.10.1</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
