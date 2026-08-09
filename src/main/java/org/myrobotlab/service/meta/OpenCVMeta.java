@@ -16,11 +16,11 @@ public class OpenCVMeta extends MetaData {
 
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    String javaCvVersion = "1.5.11";
+    String javaCvVersion = "1.5.13";
     // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     addDependency("org.bytedeco", "javacpp", javaCvVersion);
-    addDependency("org.bytedeco", "openblas", "0.3.28-" + javaCvVersion);
+    addDependency("org.bytedeco", "openblas", "0.3.31-" + javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {

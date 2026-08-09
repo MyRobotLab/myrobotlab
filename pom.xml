@@ -1032,19 +1032,19 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacv-platform</artifactId>
-      <version>1.5.11</version>
+      <version>1.5.13</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
-      <version>1.5.11</version>
+      <version>1.5.13</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>openblas</artifactId>
-      <version>0.3.28-1.5.11</version>
+      <version>0.3.31-1.5.13</version>
       <scope>provided</scope>
     </dependency>
     <!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
@@ -1519,13 +1519,13 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>tesseract</artifactId>
-      <version>5.5.0-1.5.11</version>
+      <version>5.5.2-1.5.13</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>tesseract-platform</artifactId>
-      <version>5.5.0-1.5.11</version>
+      <version>5.5.2-1.5.13</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -1535,7 +1535,7 @@
       <scope>provided</scope>
       <type>zip</type>
     </dependency>
-    <!-- Duplicate entry for org.bytedeco-openblas-0.3.28-1.5.11 skipping -->
+    <!-- Duplicate entry for org.bytedeco-openblas-0.3.31-1.5.13 skipping -->
     <!-- TesseractOcr end -->
 
     <!-- Test begin -->

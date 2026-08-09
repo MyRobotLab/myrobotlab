@@ -4,7 +4,6 @@ import static org.bytedeco.opencv.global.opencv_core.CV_64F;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.meanStdDev;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_THRESH_BINARY;
 import static org.bytedeco.opencv.global.opencv_imgproc.Laplacian;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
@@ -67,11 +66,12 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    // gray scale the image.
-    IplImage gray = cvCreateImage(image.cvSize(), 8, CV_THRESH_BINARY);
+    // gray scale the image. (1 channel — not CV_THRESH_BINARY, which is 0)
+    IplImage gray = cvCreateImage(image.cvSize(), 8, 1);
     cvCvtColor(image, gray, CV_BGR2GRAY);
     // compute the variance of the laplacian.
     data.setBlurriness(varianceOfLaplacian(gray));
+    gray.release();
     return image;
   }
 
