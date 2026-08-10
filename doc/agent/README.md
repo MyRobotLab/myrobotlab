@@ -10,6 +10,7 @@ Guides that make MyRobotLab easier for AI agents and new contributors.
 | [hotspot-map.md](hotspot-map.md) | Navigate Runtime / Service megaclass regions |
 | [../GENERATED.md](../GENERATED.md) | Files that must not be hand-edited |
 | [../service-life-cycle.md](../service-life-cycle.md) | start/load/apply/release flow |
+| [../docker.md](../docker.md) | Dockerfile, device passthrough, InMoov config mounts |
 
 ## Cursor rules
 

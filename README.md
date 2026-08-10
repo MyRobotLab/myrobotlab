@@ -36,6 +36,17 @@ This can take a long time depending on the speed of your internet connection.
 The subsequent starting of myrobotlab will skip the installation stage.  If a browser does not automatically start you
 can go to http://localhost:8888 to see the web user interface.
 
+### Docker
+
+Build and run with WebGui on port 8888. The image build runs a full service `--install`, so the container is ready without a first-boot dependency download (build needs network and can take a while):
+
+```bash
+docker build -t myrobotlab .
+docker run --rm -p 8888:8888 myrobotlab
+```
+
+See **[doc/docker.md](doc/docker.md)** for device access, Compose, and mounting a custom InMoov config (`-c inmoov`).
+
 ## Building Project
 MyRobotLab core is written in Java, it is a maven project - Any IDE which can load maven should work.  Its web ui is written in AngularJs and html.  
 A few services (e.g. InMoov2 & ProgramAB) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.

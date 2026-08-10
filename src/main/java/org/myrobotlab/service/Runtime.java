@@ -4269,8 +4269,18 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // already long form
       return shortname;
     }
+    // During Runtime bootstrap, getInstance() is not ready yet — do not recurse.
+    if (runtime == null) {
+      String bootstrapId = null;
+      if (options != null && options.id != null && !options.id.isEmpty()) {
+        bootstrapId = options.id;
+      } else {
+        bootstrapId = ConfigUtils.getId();
+      }
+      return String.format("%s@%s", shortname, bootstrapId);
+    }
     // if nothing is supplied assume local
-    return String.format("%s@%s", shortname, Runtime.getInstance().getId());
+    return String.format("%s@%s", shortname, runtime.getId());
   }
 
   @Override
