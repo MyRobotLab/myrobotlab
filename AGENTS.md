@@ -117,7 +117,7 @@ VS Code launch: `.vscode/launch.json` → **Runtime** (`-s webgui WebGui intro I
 
 Scripts: [`scripts/agent-smoke.ps1`](scripts/agent-smoke.ps1), [`scripts/agent-smoke.sh`](scripts/agent-smoke.sh).
 
-Docker: [`Dockerfile`](Dockerfile), [`doc/docker.md`](doc/docker.md) (full `--install` at image build, WebGui `:8888`, serial/video/GPU passthrough, InMoov `-c` config mounts).
+Docker: [`Dockerfile`](Dockerfile), [`doc/docker.md`](doc/docker.md) (full `--install` at image build, WebGui `:8888`, serial/video/GPU passthrough, Windows `usbipd-win` notes, InMoov `-c` config mounts).
 
 ### Test conventions
 

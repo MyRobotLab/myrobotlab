@@ -45,7 +45,7 @@ docker build -t myrobotlab .
 docker run --rm -p 8888:8888 myrobotlab
 ```
 
-See **[doc/docker.md](doc/docker.md)** for device access, Compose, and mounting a custom InMoov config (`-c inmoov`).
+See **[doc/docker.md](doc/docker.md)** for Linux device access, **Windows Docker Desktop** serial/webcam passthrough (`usbipd-win`), Compose, and mounting a custom InMoov config (`-c inmoov`).
 
 ## Building Project
 MyRobotLab core is written in Java, it is a maven project - Any IDE which can load maven should work.  Its web ui is written in AngularJs and html.  
