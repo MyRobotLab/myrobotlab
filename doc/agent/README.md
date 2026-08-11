@@ -5,6 +5,7 @@ Guides that make MyRobotLab easier for AI agents and new contributors.
 | Doc | Purpose |
 |-----|---------|
 | [../../AGENTS.md](../../AGENTS.md) | Start here — architecture, safe surfaces, commands |
+| [adding-a-service.md](adding-a-service.md) | Step-by-step: new service triple, WebGui, logo, tests |
 | [dependency-updates.md](dependency-updates.md) | How to bump jars (Meta + pom + Ivy) |
 | [service-domain-map.md](service-domain-map.md) | Categories → packages / key services |
 | [hotspot-map.md](hotspot-map.md) | Navigate Runtime / Service megaclass regions |

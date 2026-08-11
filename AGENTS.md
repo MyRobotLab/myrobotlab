@@ -21,7 +21,7 @@ More detail lives under [`doc/agent/`](doc/agent/).
 1. **One service**: `ServiceX.java` + `ServiceXConfig.java` + `ServiceXMeta.java` + `resource/ServiceX/`
 2. **Service UI**: `resource/WebGui/app/service/js/ServiceXGui.js` (+ related HTML/views)
 3. **Tests**: `src/test/java/...` mirroring the package under test
-4. **Templates**: copy `_TemplateService*` when adding a new service
+4. **Templates**: copy `_TemplateService*` when adding a new service — full steps in [`doc/agent/adding-a-service.md`](doc/agent/adding-a-service.md)
 
 ## Hotspots (high regression risk — minimize edits)
 
@@ -53,7 +53,10 @@ org.myrobotlab.service.Foo
 org.myrobotlab.service.config.FooConfig
 org.myrobotlab.service.meta.FooMeta
 src/main/resources/resource/Foo/   # scripts, yml samples, assets
+src/main/resources/resource/Foo.png  # 48×48 service logo (WebGui)
 ```
+
+How to add one: [`doc/agent/adding-a-service.md`](doc/agent/adding-a-service.md).
 
 ## Dual dependency system (critical)
 

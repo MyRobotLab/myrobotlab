@@ -1,0 +1,67 @@
+<div class="row">
+  <div class="col-md-12">
+    <h4>Vosk — offline speech recognition</h4>
+    <p class="text-muted">Models download once into <code>data/VoskSpeechRecognition/models/</code>. No cloud connection is required after install.</p>
+  </div>
+</div>
+
+<div class="row" style="margin-bottom: 10px;">
+  <div class="col-md-9">
+    <label>Model</label>
+    <select class="form-control" ng-model="modelToInstall"
+            ng-options="m.name as (m.language + ' — ' + m.description + ' (' + m.size + ') [' + m.name + ']') for m in modelOptions">
+      <option value="" disabled ng-if="!modelOptions.length">Loading models…</option>
+    </select>
+    <small class="text-muted">Language and description for each downloadable Vosk model.</small>
+  </div>
+  <div class="col-md-3" style="padding-top: 24px;">
+    <button class="btn btn-default" ng-click="installModel()" ng-disabled="!modelToInstall">Install / Download</button>
+    <button class="btn btn-default" ng-click="loadModel()" ng-disabled="!modelToInstall">Load</button>
+  </div>
+</div>
+
+<div class="row" style="margin-bottom: 10px;">
+  <div class="col-md-12">
+    <button class="btn btn-primary" ng-click="toggleListening()">
+      <span ng-if="!service.config.listening">Start listening</span>
+      <span ng-if="service.config.listening">Stop listening</span>
+    </button>
+    <span style="margin-left: 12px;">Status: {{service.status}}</span>
+  </div>
+</div>
+
+<div class="row" style="margin-bottom: 10px;">
+  <div class="col-md-6">
+    <label>Wake word</label>
+    <div class="input-group">
+      <input type="text" class="form-control" ng-model="service.config.wakeWord" placeholder="hey robot"/>
+      <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="msg.setWakeWord(service.config.wakeWord)">Set</button>
+        <button class="btn btn-default" ng-click="msg.unsetWakeWord()">Clear</button>
+      </span>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <label>Loaded model</label>
+    <div class="form-control" style="height: auto; min-height: 34px;">{{service.loadedModelPath || 'none'}}</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <label>Heard</label>
+    <div class="well well-sm" style="min-height: 48px;">
+      <div ng-if="partialText" class="text-muted"><em>{{partialText}}</em></div>
+      <div><strong>{{lastText}}</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <small>
+      <a href="https://alphacephei.com/vosk/models" target="_blank">Full Vosk model list</a>
+      — small models are best for desktop and Raspberry Pi.
+    </small>
+  </div>
+</div>

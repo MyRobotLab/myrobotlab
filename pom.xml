@@ -1616,6 +1616,15 @@
     </dependency>
     <!-- VoiceRss end -->
 
+    <!-- VoskSpeechRecognition begin -->
+    <dependency>
+      <groupId>com.alphacephei</groupId>
+      <artifactId>vosk</artifactId>
+      <version>0.3.45</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- VoskSpeechRecognition end -->
+
     <!-- WebGui begin -->
     <dependency>
       <groupId>org.jmdns</groupId>

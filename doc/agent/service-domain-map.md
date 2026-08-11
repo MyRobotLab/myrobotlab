@@ -22,7 +22,7 @@ Use this map to pick the right package when fixing a bug. Categories come from `
 | Scripting | `programming` | `Python`, `Py4j`, `JavaScript`, `Blocks` |
 | Vision | `vision`, `video` | `OpenCV`, `opencv/*`, `Webcam`, `BoofCV` |
 | Speech out | `speech`, `sound` | `MarySpeech`, `Polly`, `WebkitSpeechSynthesis`, abstracts in `meta/abstracts` |
-| Speech in | `speech recognition` | `WebkitSpeechRecognition`, `Sphinx` |
+| Speech in | `speech recognition` | `WebkitSpeechRecognition`, `Sphinx`, `VoskSpeechRecognition` |
 | Chat / AI | `ai`, `chatbot` | `ProgramAB` (sibling repo resources), `DiscordBot`, `LLM`, `Gpt3`, `OpenAI` |
 | Servo / motor | `servo`, `motor`, `control` | `Servo`, `DiyServo`, `Adafruit16CServoDriver`, `Sabertooth`, `RoboClaw` |
 | Microcontroller | `microcontroller`, `i2c` | `Arduino`, `VirtualArduino`, `RasPi`, `Esp8266`, `Mpu6050` |
@@ -53,8 +53,13 @@ If a bug is “InMoov face tracking” or “ProgramAB bot file”, confirm whet
 
 ## Adding a service
 
+Full walkthrough: **[adding-a-service.md](adding-a-service.md)** (triple, Meta/Config, resources, logo, WebGui, tests, checklist).
+
+Short version:
+
 1. Copy `_TemplateService`, `_TemplateServiceConfig`, `_TemplateServiceMeta`
-2. Rename types; set `addCategory`, deps, peers in Meta
-3. Add `resource/YourService/` samples
-4. Optional: WebGui `YourServiceGui.js`
+2. Rename types; set `addCategory`, `setAvailable(true)`, deps in Meta (mirror deps in `pom.xml`)
+3. Add `resource/YourService/` samples (`YourService.py`, `yourservice.yml`) and `resource/YourService.png`
+4. Optional but usual: WebGui `YourServiceGui.js` + `views/YourServiceGui.html`
 5. Add a focused `YourServiceTest` under `src/test/java`
+6. Update this domain map if the service is a notable new entry

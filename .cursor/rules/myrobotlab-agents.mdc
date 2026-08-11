@@ -7,6 +7,7 @@ alwaysApply: true
 
 - Read `AGENTS.md` and `doc/agent/` before large changes.
 - Prefer fixing `Service` + `Config` + `Meta` + `resource/<Service>/` over editing `Runtime.java` / `Service.java`.
+- New services: follow `doc/agent/adding-a-service.md` (copy `_TemplateService*`, WebGui, logo, tests).
 - Runtime deps live in `*Meta.addDependency` (Ivy → `libraries/`). Sync `pom.xml` too — see `doc/agent/dependency-updates.md`.
 - Never hand-edit generated `arduino/Msg.java` or `VirtualMsg.java`; edit `arduinoMsgs.schema` and regenerate.
 - InMoov2 / ProgramAB may live in sibling repos under `resource/` — confirm location before editing.

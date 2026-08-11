@@ -13,6 +13,7 @@ Start with **[`AGENTS.md`](AGENTS.md)** — architecture, safe edit surfaces, de
 Additional guides:
 
 - [`doc/agent/`](doc/agent/) — dependency cookbook, domain map, hotspot map
+- [`doc/agent/adding-a-service.md`](doc/agent/adding-a-service.md) — creating a new service (triple, WebGui, logo, tests)
 - [`doc/GENERATED.md`](doc/GENERATED.md) — do-not-edit artifacts
 - [`doc/service-life-cycle.md`](doc/service-life-cycle.md) — service lifecycle
 

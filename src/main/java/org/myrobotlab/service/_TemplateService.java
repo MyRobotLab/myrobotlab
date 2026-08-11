@@ -11,6 +11,8 @@ import org.slf4j.Logger;
  * Copy this class (plus {@code _TemplateServiceConfig} and
  * {@code _TemplateServiceMeta}) when creating a new service.
  * <p>
+ * Full checklist: {@code doc/agent/adding-a-service.md}
+ * <p>
  * Agent / API guidance:
  * <ul>
  * <li>Prefer typed fields on {@code *Config} and real Java methods over
