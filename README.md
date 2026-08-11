@@ -13,7 +13,7 @@ Open Source Framework for Robotics and Creative Machine Control
 
 ## Base Requirements
 
-You will need Java 11 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
+You will need Java 17 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
 
 ## Download the myrobotlab.zip
 Download
@@ -68,8 +68,8 @@ cd c:\dev\myrobotlab
 If you want to be making core changes, you will need to install a 
 Java developement environment
 
-#### Install Java 11
-https://www.oracle.com/java/technologies/downloads/#java11
+#### Install Java 17
+https://www.oracle.com/java/technologies/downloads/#java17
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:

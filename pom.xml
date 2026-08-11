@@ -95,8 +95,8 @@
     <!-- end env vars -->
     <!-- echoproperties / -->
 
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
   </properties>
@@ -1911,13 +1911,11 @@
         <inherited>true</inherited>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.13.0</version>
         <configuration>
-          <source>11</source>
-          <target>11</target>
-          <optimize>true</optimize>
+          <release>17</release>
+          <parameters>true</parameters>
           <debug>true</debug>
-          <compilerArgument>-parameters</compilerArgument>
         </configuration>
       </plugin>
 

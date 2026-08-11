@@ -9,7 +9,7 @@ More detail lives under [`doc/agent/`](doc/agent/).
 
 | Item | Value |
 |------|--------|
-| Language / JDK | Java 11 |
+| Language / JDK | Java 17 |
 | Build | Single-module Maven (`pom.xml`) |
 | Entry point | `org.myrobotlab.service.Runtime` |
 | Primary UI | AngularJS WebGui (`src/main/resources/resource/WebGui/`) |

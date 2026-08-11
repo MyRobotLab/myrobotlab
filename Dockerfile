@@ -3,7 +3,7 @@
 # Run:    see doc/docker.md
 
 # ---------- build ----------
-FROM maven:3.9.9-eclipse-temurin-11 AS build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /build
 
 COPY pom.xml assembly.xml ./
@@ -15,7 +15,7 @@ COPY src ./src
 RUN mvn -B -DskipTests -Dmaven.gitcommitid.skip=true package
 
 # ---------- runtime ----------
-FROM eclipse-temurin:11-jre-jammy
+FROM eclipse-temurin:17-jre-jammy
 
 LABEL org.opencontainers.image.title="MyRobotLab" \
       org.opencontainers.image.description="Open Source Framework for Robotics and Creative Machine Control" \
