@@ -1,5 +1,7 @@
 package org.myrobotlab.sensor;
 
+import java.util.Objects;
+
 public class EncoderData {
 
   /**
@@ -39,6 +41,55 @@ public class EncoderData {
    * mapped value of input
    */
   public double mappedValue;
+  
+  public String getPin() {
+    return pin;
+  }
+
+  public void setPin(String pin) {
+    this.pin = pin;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+  }
+
+  public Double getAngle() {
+    return angle;
+  }
+
+  public void setAngle(Double angle) {
+    this.angle = angle;
+  }
+
+  public double getValue() {
+    return value;
+  }
+
+  public void setValue(double value) {
+    this.value = value;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
+
 
   public EncoderData(String source, String pin, double value, Double angle) {
     this.timestamp = System.currentTimeMillis();
@@ -59,6 +110,25 @@ public class EncoderData {
     sb.append(" angle:");
     sb.append(angle);
     return sb.toString();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(angle, mappedValue, pin, source, timestamp, type, value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    EncoderData other = (EncoderData) obj;
+    return Objects.equals(angle, other.angle) && Double.doubleToLongBits(mappedValue) == Double.doubleToLongBits(other.mappedValue) && Objects.equals(pin, other.pin)
+        && Objects.equals(source, other.source) && timestamp == other.timestamp && Objects.equals(type, other.type)
+        && Double.doubleToLongBits(value) == Double.doubleToLongBits(other.value);
   }
 
 }

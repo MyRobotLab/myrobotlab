@@ -2,8 +2,9 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderPublisher;
 
-public interface EncoderControl extends Attachable {
+public interface EncoderControl extends EncoderPublisher, Attachable {
 
   /**
    * stop the stream of encoder data
@@ -41,4 +42,10 @@ public interface EncoderControl extends Attachable {
    */
   public Double getPos();
 
+  /**
+   * encoder controls can update their copy of the encoder data and then publish it to listeners.
+   * @param data
+   */
+  public void updateEncoderData(EncoderData data);
+  
 }

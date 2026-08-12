@@ -92,6 +92,8 @@ abstract public class AbstractMotor<C extends GeneralMotorConfig> extends Servic
    * isAttached is if that controller is or is not attached
    */
   protected boolean isAttached = false;
+  
+  protected EncoderData encData = null;
 
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -289,8 +291,13 @@ abstract public class AbstractMotor<C extends GeneralMotorConfig> extends Servic
 
   @Override
   public void onEncoderData(EncoderData data) {
-    // TODO Auto-generated method stub
-
+    // log.info("Encoder Data (to motor): {}", data);
+    // What do we want to do with encoder data here?
+    // grab a handle to the last encoder data returned
+    // TODO: does a motor need to be an encoder listener?  
+    // Nothing uses this!
+    this.encData = data;
+    
   }
 
   @Override

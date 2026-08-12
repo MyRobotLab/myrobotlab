@@ -1,7 +1,10 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
+import org.myrobotlab.service.config.Amt203EncoderConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.EncoderControl;
 
@@ -23,7 +26,7 @@ import org.myrobotlab.service.interfaces.EncoderControl;
  * @author kwatters
  *
  */
-public class Amt203Encoder extends AbstractPinEncoder<ServiceConfig> implements EncoderControl {
+public class Amt203Encoder extends AbstractPinEncoder<Amt203EncoderConfig> implements EncoderControl, EncoderPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -48,6 +51,31 @@ public class Amt203Encoder extends AbstractPinEncoder<ServiceConfig> implements 
     Thread.sleep(10000);
     encoder.setZeroPoint();
     log.info("Here we are..");
+  }
+
+  @Override
+  public void updateEncoderData(EncoderData data) {
+    // publish the updated encoder data (this is updated from the arduino..)
+    invoke("publishEncoderData", data); 
+  }
+
+  @Override
+  public Amt203EncoderConfig apply(Amt203EncoderConfig c) {
+    super.apply(c);  
+    this.setPin(c.pin);
+    // TODO: how we apply the config of the controller?
+    // String controllerName = c.controller;
+    // this.controller= null;    
+    // TODO: should we have a handle to our controller?
+    //this.controller = c.controller;
+    if (c.controller != null) {
+      try {
+        attach(c.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return c;
   }
 
 }

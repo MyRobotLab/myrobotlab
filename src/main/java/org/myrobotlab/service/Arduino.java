@@ -503,6 +503,24 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
+    } else if (attachable instanceof As5048AEncoder) {
+      // reattach it!
+      As5048AEncoder enc = (As5048AEncoder)attachable;
+      log.info("================ re-attaching {} {} {} ================", enc.getName(), dm.getId(), enc.getPin());
+      msg.encoderAttach(dm.getId(), 1, Integer.valueOf(enc.getPin()));
+    } else if (attachable instanceof Amt203Encoder) {
+      // reattach it!
+      Amt203Encoder enc = (Amt203Encoder)attachable;
+      log.info("================ re-attaching {} {} {} ================", enc.getName(), dm.getId(), enc.getPin());
+      msg.encoderAttach(dm.getId(), 0, Integer.valueOf(enc.getPin()));
+    } else if (attachable instanceof MotorDualPwm) {
+      // reattach it!
+      MotorDualPwm motor = (MotorDualPwm)attachable;
+      int[] pins = new int[] {Integer.valueOf(motor.getLeftPwmPin()), Integer.valueOf(motor.getRightPwmPin())};
+      // TODO: what's the type?!
+      int type = 0;
+      log.info("================ re-attaching {} {} {} ================", motor.getName(), dm.getId(), pins);
+      msg.motorAttach(dm.getId(),type, pins );
     } else if (attachable instanceof UltrasonicSensorControl) {
       log.warn("UltrasonicSensorControl not implemented");
       // reattach logic
@@ -511,7 +529,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
     } else if (attachable instanceof PinListener) {
       PinListener pl = (PinListener) attachable;
       attachPinListener(pl);
-
       // on reattach get back to its previous state enabled/disabled
       if (attachable instanceof Pir) {
         Pir pir = (Pir) attachable;
@@ -519,7 +536,6 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
           pir.enable();
         }
       }
-
     } else if (attachable instanceof I2CControl) {
       error("I2CControl sync not implemented");
     } else {
@@ -1685,25 +1701,31 @@ public class Arduino extends AbstractMicrocontroller<ArduinoConfig> implements I
   @Override
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // Also need to log this
-
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
     Double angle = null;
     if (ec instanceof Amt203Encoder) {
       // type = 0;
       pin = ((Amt203Encoder) ec).getPin();
+      // TODO: test this is this correct? is the resolution correct?
+      angle = 360.0 * position / ((Amt203Encoder) ec).resolution;
     } else if (ec instanceof As5048AEncoder) {
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
       angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
-      log.info("Angle : {}", angle);
+      // log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
-
+    // TODO: figure out how to handle analog pin data as encoder data.. 
     EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
     // log.info("Publish Encoder Data Raw {}", data);
-
+    // TODO: how do i publish the data from the encoder?
+   // ec.publishEncoderData(data);
+    // This will pass the encoder data to the encoder and the encoder will publish it to listeners.
+    //log.info("Encoder data! {}", data);
+    ((EncoderControl)ec).updateEncoderData(data);
+    //     invoke("publishEncoderData", data);
     // TODO: all this code needs to move out of here!
     return data;
   }

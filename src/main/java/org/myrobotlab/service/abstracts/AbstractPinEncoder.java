@@ -100,6 +100,7 @@ public abstract class AbstractPinEncoder<C extends ServiceConfig> extends Servic
 
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
+   //  log.info("Abstract pin encoder publish data {}", data);
     return data;
   }
 
