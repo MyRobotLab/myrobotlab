@@ -38,8 +38,15 @@ public class JMonkeyEngineMeta extends MetaData {
     // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
     // audio dependencies
     addDependency("de.jarnbjo", "j-ogg-all", "1.0.0");
-    addDependency("org.lwjgl", "lwjgl-opengl", "3.2.3");
-    addDependency("org.lwjgl", "lwjgl-glfw", "3.2.3");
+    // Keep LWJGL in lockstep with jme3-lwjgl3 (3.6.1 → LWJGL 3.3.2).
+    // Older 3.2.x pins broke Eclipse with NoClassDefFoundError: CallbackI$V
+    String lwjglVersion = "3.3.2";
+    addDependency("org.lwjgl", "lwjgl", lwjglVersion);
+    addDependency("org.lwjgl", "lwjgl-opengl", lwjglVersion);
+    addDependency("org.lwjgl", "lwjgl-glfw", lwjglVersion);
+    addDependency("org.lwjgl", "lwjgl-jemalloc", lwjglVersion);
+    addDependency("org.lwjgl", "lwjgl-openal", lwjglVersion);
+    addDependency("org.lwjgl", "lwjgl-opencl", lwjglVersion);
 
     addCategory("simulator");
 

@@ -2247,10 +2247,39 @@ public class InMoov2 extends Service<InMoov2Config>
     startPeer("torso");
   }
 
+  /**
+   * Start the JMonkeyEngine simulator peer.
+   * <p>
+   * Uses {@link Runtime#create(String, String)} + {@code startService()} rather
+   * than relying solely on legacy behavior; {@link Runtime#start} releases
+   * {@code processLock} before {@code startService} so LWJGL window init cannot
+   * pin the global lifecycle lock.
+   */
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-    Simulator si = (Simulator) startPeer("simulator");
-    return si;
+    String simName = getPeerName("simulator");
+    if (simName == null) {
+      simName = getName() + ".simulator";
+    }
+
+    ServiceInterface existing = Runtime.getService(simName);
+    if (existing != null) {
+      if (!existing.isRunning()) {
+        existing.startService();
+      }
+      return (Simulator) existing;
+    }
+
+    // Create under plan (InMoov node mappings). loadDelayed (inside
+    // startService) binds VinMoov and applies node mappers — do not touch the
+    // live scene graph again here from this thread (JME is not thread-safe).
+    JMonkeyEngine jme = (JMonkeyEngine) Runtime.create(simName, "JMonkeyEngine");
+    if (jme == null) {
+      error("could not create simulator peer %s", simName);
+      return null;
+    }
+    jme.startService();
+    return jme;
   }
 
   public void stop() {

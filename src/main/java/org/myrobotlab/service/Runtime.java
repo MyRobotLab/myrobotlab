@@ -2722,77 +2722,88 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return The started service
    */
   static public ServiceInterface start(String name, String type) {
+    // Create under processLock, but startService OUTSIDE it.
+    // Blocking services (notably JMonkeyEngine waiting on LWJGL future.get())
+    // must not pin the global lifecycle lock or the display never opens and
+    // other Runtime.start/create callers stall.
+    List<ServiceInterface> startOrder = new ArrayList<>();
+    ServiceInterface requestedService = null;
     synchronized (processLock) {
       try {
 
-        ServiceInterface requestedService = Runtime.getService(name);
+        requestedService = Runtime.getService(name);
         if (requestedService != null) {
           log.info("requested service already exists");
           if (requestedService.isRunning()) {
             log.info("requested service already running");
-          } else {
-            requestedService.startService();
+            return requestedService;
           }
-          return requestedService;
-        }
+          startOrder.add(requestedService);
+        } else {
 
-        Plan plan = Runtime.load(name, type);
+          Plan plan = Runtime.load(name, type);
 
-        Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
+          Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
 
-        if (services == null) {
-          Runtime.getInstance().error("cannot create instance of %s with type %s given current configuration", name, type);
-          return null;
-        }
-
-        requestedService = Runtime.getService(name);
-
-        // FIXME - does some order need to be maintained e.g. all children
-        // before
-        // parent
-        // breadth first, depth first, external order ordinal ?
-        for (ServiceInterface service : services.values()) {
-          if (service.getName().equals(name)) {
-            continue;
+          if (services == null) {
+            Runtime.getInstance().error("cannot create instance of %s with type %s given current configuration", name, type);
+            return null;
           }
-          if (!Runtime.isStarted(service.getName())) {
-            service.startService();
-          }
-        }
 
-        if (requestedService == null) {
-          Runtime.getInstance().error("could not start %s of type %s", name, type);
-          return null;
-        }
+          requestedService = Runtime.getService(name);
 
-        // getConfig() was problematic here for JMonkeyEngine
-        ServiceConfig sc = requestedService.getConfig();
-        // Map<String, Peer> peers = sc.getPeers();
-        // if (peers != null) {
-        // for (String p : peers.keySet()) {
-        // Peer peer = peers.get(p);
-        // log.info("peer {}", peer);
-        // }
-        // }
-        // recursive - start peers of peers of peers ...
-        Map<String, Peer> subPeers = sc.getPeers();
-        if (sc != null && subPeers != null) {
-          for (String subPeerKey : subPeers.keySet()) {
-            // IF AUTOSTART !!!
-            Peer subPeer = subPeers.get(subPeerKey);
-            if (subPeer.autoStart) {
-              Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+          // FIXME - does some order need to be maintained e.g. all children
+          // before
+          // parent
+          // breadth first, depth first, external order ordinal ?
+          for (ServiceInterface service : services.values()) {
+            if (service.getName().equals(name)) {
+              continue;
+            }
+            if (!Runtime.isStarted(service.getName())) {
+              startOrder.add(service);
             }
           }
-        }
 
-        requestedService.startService();
-        return requestedService;
+          if (requestedService == null) {
+            Runtime.getInstance().error("could not start %s of type %s", name, type);
+            return null;
+          }
+
+          // getConfig() was problematic here for JMonkeyEngine
+          ServiceConfig sc = requestedService.getConfig();
+          // recursive - create auto-start peers (start them after releasing the lock)
+          Map<String, Peer> subPeers = sc != null ? sc.getPeers() : null;
+          if (subPeers != null) {
+            for (String subPeerKey : subPeers.keySet()) {
+              Peer subPeer = subPeers.get(subPeerKey);
+              if (subPeer.autoStart) {
+                ServiceInterface peerSi = Runtime.create(sc.getPeerName(subPeerKey), subPeer.type);
+                if (peerSi != null && !peerSi.isRunning()) {
+                  startOrder.add(peerSi);
+                }
+              }
+            }
+          }
+
+          startOrder.add(requestedService);
+        }
+      } catch (Exception e) {
+        runtime.error(e);
+        return null;
+      }
+    }
+
+    for (ServiceInterface service : startOrder) {
+      try {
+        if (service != null && !service.isRunning()) {
+          service.startService();
+        }
       } catch (Exception e) {
         runtime.error(e);
       }
-      return null;
     }
+    return requestedService != null ? requestedService : Runtime.getService(name);
   }
 
   /**
@@ -2803,23 +2814,37 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return
    */
   static public ServiceInterface start(String name) {
+    List<ServiceInterface> startOrder = new ArrayList<>();
+    ServiceInterface requested = null;
     synchronized (processLock) {
       if (Runtime.getService(name) != null) {
         // already exists
-        ServiceInterface si = Runtime.getService(name);
-        if (!si.isRunning()) {
-          si.startService();
+        requested = Runtime.getService(name);
+        if (!requested.isRunning()) {
+          startOrder.add(requested);
+        } else {
+          return requested;
         }
-        return si;
+      } else {
+        Plan plan = Runtime.load(name, null);
+        Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
+        // FIXME - order ?
+        if (services != null) {
+          startOrder.addAll(services.values());
+        }
+        requested = Runtime.getService(name);
       }
-      Plan plan = Runtime.load(name, null);
-      Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
-      // FIXME - order ?
-      for (ServiceInterface service : services.values()) {
-        service.startService();
-      }
-      return Runtime.getService(name);
     }
+    for (ServiceInterface service : startOrder) {
+      try {
+        if (service != null && !service.isRunning()) {
+          service.startService();
+        }
+      } catch (Exception e) {
+        runtime.error(e);
+      }
+    }
+    return requested != null ? requested : Runtime.getService(name);
   }
 
   // ===== AGENT REGION: CONFIG_PLAN =====

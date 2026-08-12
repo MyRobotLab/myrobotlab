@@ -488,16 +488,77 @@
       <version>1.0.0</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Must match jme3-lwjgl3 3.6.1 transitive LWJGL (3.3.2). Pinning 3.2.x
+         caused Eclipse NoClassDefFoundError: org/lwjgl/system/CallbackI$V -->
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+      <version>3.3.2</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-opengl</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl-glfw</artifactId>
-      <version>3.2.3</version>
+      <version>3.3.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-jemalloc</artifactId>
+      <version>3.3.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-openal</artifactId>
+      <version>3.3.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-opencl</artifactId>
+      <version>3.3.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+      <version>3.3.2</version>
+      <classifier>natives-windows</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-opengl</artifactId>
+      <version>3.3.2</version>
+      <classifier>natives-windows</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-glfw</artifactId>
+      <version>3.3.2</version>
+      <classifier>natives-windows</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-jemalloc</artifactId>
+      <version>3.3.2</version>
+      <classifier>natives-windows</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-openal</artifactId>
+      <version>3.3.2</version>
+      <classifier>natives-windows</classifier>
       <scope>provided</scope>
     </dependency>
     <!-- JMonkeyEngine end -->

@@ -16,6 +16,11 @@ public class HudText {
 
   int y;
 
+  /** When true, y is ignored and text is anchored above the bottom edge. */
+  boolean fromBottom = false;
+
+  int marginBottom = 12;
+
   public HudText(JMonkeyEngine jme, String text, int x, int y) {
     this.jme = jme;
     this.x = x;
@@ -40,6 +45,15 @@ public class HudText {
     this.color = hexString;
   }
 
+  /**
+   * Anchor this HUD text to the lower-left area. {@code marginBottom} is pixels
+   * from the bottom of the window to the bottom of the text block.
+   */
+  public void setFromBottom(int marginBottom) {
+    this.fromBottom = true;
+    this.marginBottom = marginBottom;
+  }
+
   public void setText(String text, String color, int size) {
     this.color = color;
     this.size = size;
@@ -51,13 +65,31 @@ public class HudText {
   }
 
   public void update() {
-    if (!updateText.equals(currentText)) {
+    if (updateText != null && !updateText.equals(currentText)) {
       node.setText(updateText);
       currentText = updateText;
       if (color != null) {
         node.setColor(Jme3Util.toColor(color));
         node.setSize(size);
       }
+    }
+    applyTranslation();
+  }
+
+  private void applyTranslation() {
+    if (node == null || jme.getSettings() == null) {
+      return;
+    }
+    if (fromBottom) {
+      float textHeight = node.getHeight();
+      if (textHeight <= 0 && size > 0) {
+        // before first layout pass
+        int lines = currentText != null ? currentText.split("\n", -1).length : 1;
+        textHeight = size * 1.2f * lines;
+      }
+      node.setLocalTranslation(x, marginBottom + textHeight, 0);
+    } else {
+      node.setLocalTranslation(x, jme.getSettings().getHeight() - y, 0);
     }
   }
 }

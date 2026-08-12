@@ -247,7 +247,8 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       angleMap.put(jointName, angle % 360.0F);
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
-    invoke("publishJointAngles", angleMap);
+    // Synchronous delivery so InMoov2/arm listeners move before the next IK step
+    broadcast("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -285,7 +286,8 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
   @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
-      addListener("publishJointAngle", attachable.getName(), "onJointAngle");
+      // Matches IKJointAnglePublisher / IKJointAngleListener (plural)
+      addListener("publishJointAngles", attachable.getName(), "onJointAngles");
     }
   }
 
@@ -337,7 +339,7 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       // leftArm.omoplate.setMinMax(0, 180);
       // attach the publish joint angles to the on JointAngles for the inmoov
       // arm.
-      inversekinematics.addListener("publishJointAngle", leftArm.getName(), "onJointAngle");
+      inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
     }
 
     // Runtime.createAndStart("gui", "SwingGui");

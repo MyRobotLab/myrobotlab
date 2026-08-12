@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -52,6 +53,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ServoMove;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.SelectListener;
@@ -106,6 +108,7 @@ import com.jme3.scene.debug.Grid;
 import com.jme3.scene.plugins.blender.BlenderLoader;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
 import com.jme3.util.BufferUtils;
 
@@ -166,6 +169,29 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   protected String fontColor = "#66ff66"; // green
 
   protected int fontSize = 14;
+
+  /**
+   * When true, show left/right InMoov hand world positions in the lower-left HUD.
+   */
+  protected boolean showHandPositions = true;
+
+  /**
+   * Robot name prefix for hand nodes (e.g. {@code i01} → {@code i01.leftHand.wrist}).
+   */
+  protected String handPositionRobot = "i01";
+
+  protected static final String HAND_POSITION_HUD_KEY = "hand-positions";
+
+  protected static final String LEFT_HAND_MARKER = "_marker.leftHand";
+
+  protected static final String RIGHT_HAND_MARKER = "_marker.rightHand";
+
+  /** World-space radius of the left/right hand position dots. */
+  protected float handMarkerRadius = 0.05f;
+
+  protected transient Geometry leftHandMarker;
+
+  protected transient Geometry rightHandMarker;
 
   protected boolean fullscreen = false;
 
@@ -410,8 +436,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
      */
 
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
-      // non-batched - "instantaneous" move data subscription
+      // Instantaneous angle stream (TimeEncoder) and direct move commands
       subscribe(service.getName(), "publishEncoderData", getName(), "onEncoderData");
+      // Servo.processMove publishes ServoMove (not ServoControl) — handle both
+      subscribe(service.getName(), "publishServoMoveTo", getName(), "onServoMove");
+      subscribe(service.getName(), "publishMoveTo", getName(), "onServoMoveTo");
     }
 
     // backward attach ?
@@ -1243,39 +1272,140 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     JMonkeyEngineConfig c = (JMonkeyEngineConfig) config;
     Spatial model = null;
     try {
-      if (loadedModels.contains(assetPath)) {
-        log.info("model {} already loaded");
+      String basename = modelBasename(assetPath);
+      if (loadedModels.contains(assetPath) || loadedModels.contains(basename)
+          || isModelBasenameLoaded(basename)) {
+        log.info("model {} already loaded (skipping duplicate)", assetPath);
+        return null;
+      }
+
+      // Already have a VinMoov / robot root in the scene — do not attach another body
+      if (isVinMoovAsset(basename) && hasVinMoovOrRobotRoot()) {
+        log.info("VinMoov/robot root already in scene — skipping {}", assetPath);
+        loadedModels.add(basename);
+        loadedModels.add(assetPath);
         return null;
       }
       
       if (FileIO.checkDir(modelsDir + fs + assetPath)) {
-        log.info("skipping directory {}");
+        log.info("skipping directory {}", assetPath);
         return null;        
       }
       
       if (assetPath.toLowerCase().endsWith(".md") || assetPath.toLowerCase().endsWith(".txt") || assetPath.toLowerCase().endsWith(".bin")) {
-        log.info("skipping {} not and valid model type");
+        log.info("skipping {} not a valid model type", assetPath);
         return null;
       }
       
       log.info("loading {}", assetPath);
       model = assetManager.loadModel(assetPath);
-      log.info("loaded {}", assetPath);
+      log.info("loaded {} name={}", assetPath, model != null ? model.getName() : null);
       if (model != null) {
+        if (model.getName() == null || model.getName().isEmpty() || model.getName().equals(assetPath)) {
+          model.setName(basename);
+        }
         getRootNode().attachChild(model);
+        loadedModels.add(assetPath);
+        loadedModels.add(basename);
       } else {
-        error("%s model null");
+        error("%s model null", assetPath);
       }
       
       if (c.models == null) {
         c.models = new ArrayList<>();
       }
       
-      c.models.add(assetPath);
+      if (!c.models.contains(assetPath) && !c.models.contains(basename)) {
+        c.models.add(basename.endsWith(".j3o") || basename.contains(".") ? assetPath : basename + ".j3o");
+      }
     } catch(Exception e) {
       error(e);
     }
     return model;
+  }
+
+  private static String modelBasename(String assetPath) {
+    String simple = assetPath.replace('\\', '/');
+    int slash = simple.lastIndexOf('/');
+    if (slash >= 0) {
+      simple = simple.substring(slash + 1);
+    }
+    return simple;
+  }
+
+  private static String modelNameNoExt(String assetPath) {
+    String simple = modelBasename(assetPath);
+    int dot = simple.lastIndexOf('.');
+    if (dot > 0) {
+      return simple.substring(0, dot);
+    }
+    return simple;
+  }
+
+  private static boolean isVinMoovAsset(String basename) {
+    String n = modelNameNoExt(basename).toLowerCase();
+    return n.startsWith("vinmoov");
+  }
+
+  private boolean isModelBasenameLoaded(String basename) {
+    String noExt = modelNameNoExt(basename);
+    for (String loaded : loadedModels) {
+      if (modelBasename(loaded).equalsIgnoreCase(basename) || modelNameNoExt(loaded).equalsIgnoreCase(noExt)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean hasVinMoovOrRobotRoot() {
+    if (rootNode == null) {
+      return false;
+    }
+    for (Spatial child : rootNode.getChildren()) {
+      String n = child.getName();
+      if (n == null) {
+        continue;
+      }
+      if (n.equals("i01") || n.toLowerCase().startsWith("vinmoov")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Remove extra VinMoov clones so only one body remains (named robotName when possible).
+   */
+  public void removeDuplicateVinMoovRoots(String robotName) {
+    if (rootNode == null) {
+      return;
+    }
+    List<Spatial> bodies = new ArrayList<>();
+    for (Spatial child : new ArrayList<>(rootNode.getChildren())) {
+      String n = child.getName();
+      if (n == null) {
+        continue;
+      }
+      if (n.equals(robotName) || n.toLowerCase().startsWith("vinmoov")) {
+        bodies.add(child);
+      }
+    }
+    if (bodies.size() <= 1) {
+      if (bodies.size() == 1 && robotName != null && !robotName.equals(bodies.get(0).getName())) {
+        String old = bodies.get(0).getName();
+        bodies.get(0).setName(robotName);
+        log.info("Renamed sole body {} -> {}", old, robotName);
+      }
+      return;
+    }
+    // Keep the first; detach the rest
+    Spatial keep = bodies.get(0);
+    keep.setName(robotName != null ? robotName : keep.getName());
+    for (int i = 1; i < bodies.size(); i++) {
+      Spatial dup = bodies.get(i);
+      log.warn("Removing duplicate VinMoov body {}", dup.getName());
+      dup.removeFromParent();
+    }
   }
 
 
@@ -1718,6 +1848,150 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
   }
 
+  public void setShowHandPositions(boolean show) {
+    this.showHandPositions = show;
+    if (!show) {
+      removeHandPositionOverlays();
+    }
+  }
+
+  public boolean getShowHandPositions() {
+    return showHandPositions;
+  }
+
+  public void setHandPositionRobot(String robotName) {
+    this.handPositionRobot = robotName;
+  }
+
+  public String getHandPositionRobot() {
+    return handPositionRobot;
+  }
+
+  public void setHandMarkerRadius(float radius) {
+    this.handMarkerRadius = radius;
+    // recreate markers next frame with new size
+    detachHandMarker(leftHandMarker);
+    detachHandMarker(rightHandMarker);
+    leftHandMarker = null;
+    rightHandMarker = null;
+  }
+
+  /**
+   * Lower-left HUD + colored dots at InMoov left/right hand world positions.
+   * Blue = left, red = right. Called each frame from {@link #simpleUpdate(float)}.
+   */
+  protected void updateHandPositionHud() {
+    if (!showHandPositions || app == null || rootNode == null) {
+      return;
+    }
+
+    String robot = handPositionRobot;
+    if (robot == null || robot.isEmpty()) {
+      robot = inferRobotNameFromNodeConfig((JMonkeyEngineConfig) config);
+      if (robot == null) {
+        robot = "i01";
+      }
+    }
+
+    Spatial leftHand = findHandSpatial(robot, "left");
+    Spatial rightHand = findHandSpatial(robot, "right");
+    Vector3f left = leftHand != null ? leftHand.getWorldTranslation() : null;
+    Vector3f right = rightHand != null ? rightHand.getWorldTranslation() : null;
+
+    if (guiNode != null) {
+      String text = String.format("L hand: %s\nR hand: %s", formatHudVec(left), formatHudVec(right));
+      HudText hud = guiText.get(HAND_POSITION_HUD_KEY);
+      if (hud == null) {
+        hud = new HudText(this, text, 12, 0);
+        hud.setFromBottom(14);
+        hud.setText(text, fontColor, fontSize);
+        guiText.put(HAND_POSITION_HUD_KEY, hud);
+        app.getGuiNode().attachChild(hud.getNode());
+      } else {
+        hud.setText(text, fontColor, fontSize);
+      }
+    }
+
+    leftHandMarker = ensureHandMarker(leftHandMarker, LEFT_HAND_MARKER, ColorRGBA.Blue);
+    rightHandMarker = ensureHandMarker(rightHandMarker, RIGHT_HAND_MARKER, ColorRGBA.Red);
+    syncHandMarker(leftHandMarker, left);
+    syncHandMarker(rightHandMarker, right);
+  }
+
+  private void removeHandPositionOverlays() {
+    HudText hud = guiText.remove(HAND_POSITION_HUD_KEY);
+    if (hud != null && hud.getNode() != null && hud.getNode().getParent() != null) {
+      hud.getNode().removeFromParent();
+    }
+    detachHandMarker(leftHandMarker);
+    detachHandMarker(rightHandMarker);
+    leftHandMarker = null;
+    rightHandMarker = null;
+  }
+
+  private Geometry ensureHandMarker(Geometry existing, String name, ColorRGBA color) {
+    if (existing != null && existing.getParent() != null) {
+      return existing;
+    }
+    if (assetManager == null || rootNode == null) {
+      return existing;
+    }
+    Sphere sphere = new Sphere(12, 12, handMarkerRadius);
+    Geometry marker = new Geometry(name, sphere);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", color);
+    // Keep dots readable when briefly occluded by fingers/geometry
+    mat.getAdditionalRenderState().setDepthTest(true);
+    mat.getAdditionalRenderState().setDepthWrite(true);
+    marker.setMaterial(mat);
+    marker.setCullHint(CullHint.Never);
+    rootNode.attachChild(marker);
+    return marker;
+  }
+
+  private void syncHandMarker(Geometry marker, Vector3f worldPos) {
+    if (marker == null) {
+      return;
+    }
+    if (worldPos == null) {
+      marker.setCullHint(CullHint.Always);
+      return;
+    }
+    marker.setCullHint(CullHint.Never);
+    marker.setLocalTranslation(worldPos);
+  }
+
+  private void detachHandMarker(Geometry marker) {
+    if (marker != null && marker.getParent() != null) {
+      marker.removeFromParent();
+    }
+  }
+
+  private Spatial findHandSpatial(String robot, String side) {
+    // Prefer wrist (configured InMoov hand root); fall back to common aliases
+    String[] candidates = new String[] {
+        robot + "." + side + "Hand.wrist",
+        robot + "." + side + "Hand",
+        robot + "." + side + "Arm.hand",
+        side + "Hand.wrist",
+        side + "Hand"
+    };
+    for (String name : candidates) {
+      Spatial spatial = find(name);
+      if (spatial != null) {
+        return spatial;
+      }
+    }
+    return null;
+  }
+
+  private static String formatHudVec(Vector3f v) {
+    if (v == null) {
+      return "n/a";
+    }
+    return String.format("%.1f, %.1f, %.1f", v.x, v.y, v.z);
+  }
+
   public void rename(String name, String newName) {
     Spatial data = get(name);
     if (data == null) {
@@ -2156,11 +2430,24 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     new File(getDataDir()).mkdirs();
     new File(getResourceDir()).mkdirs();
 
+    // Refresh paths at app init — field initializers may have run before Runtime
+    // config was applied (Eclipse often uses src/main/resources/resource).
+    refreshAssetPaths();
+
     assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(modelsDir, FileLocator.class);
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
+    // Also register fallback model dirs (extracted /resource with VinMoov5.j3o)
+    for (String modelPath : getModelsSearchPaths()) {
+      assetManager.registerLocator(modelPath, FileLocator.class);
+      File parentAssets = new File(modelPath).getParentFile();
+      if (parentAssets != null) {
+        assetManager.registerLocator(parentAssets.getPath(), FileLocator.class);
+      }
+      log.info("Registered JME model locator {}", modelPath);
+    }
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
     /**
@@ -2273,6 +2560,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // start the clock on how much time we will take
     startUpdateTs = System.currentTimeMillis();
 
+    updateHandPositionHud();
+
     for (HudText hudTxt : guiText.values()) {
       hudTxt.update();
     }
@@ -2348,22 +2637,28 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       mainThread = new Thread() {
         @Override
         public void run() {
-          app.start();
+          try {
+            app.start();
+          } catch (Throwable t) {
+            log.error("JMonkeyEngine app.start() failed", t);
+          }
         }
       };
-
+      mainThread.setName(String.format("%s-jme", getName()));
+      mainThread.setDaemon(false);
       mainThread.start();
 
       Callable<String> callable = new Callable<String>() {
         @Override
         public String call() throws Exception {
-          System.out.println("Asynchronous Callable");
+          log.info("JMonkeyEngine app initialized");
           return "Callable Result";
         }
       };
       Future<String> future = app.enqueue(callable);
       try {
-        future.get();
+        // Timeout so a failed LWJGL/native init cannot hang Runtime forever
+        future.get(60, java.util.concurrent.TimeUnit.SECONDS);
 
         // default positioning
         moveTo(CAMERA, 0, 3, 6);
@@ -2371,6 +2666,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         rotateOnAxis(CAMERA, "x", -20);
         setFloorGrid(true);
 
+      } catch (java.util.concurrent.TimeoutException e) {
+        error("JMonkeyEngine failed to initialize within 60s — check LWJGL natives / display");
+        log.error("JMonkeyEngine init timeout", e);
       } catch (Exception e) {
         log.warn("future threw", e);
       }
@@ -2642,26 +2940,42 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   @Override
   public void onServoMoveTo(ServoControl servo) {
-    String name = servo.getName();
-    /*
-     * if (!servos.containsKey(name)) { log.error("servoMoveTo({})", servo);
-     * return; }
-     */
+    if (servo == null) {
+      return;
+    }
     Double velocity = servo.getSpeed();
     if (velocity == null || velocity == -1) {
       velocity = defaultServoSpeed;
     }
+    rotateNamedNode(servo.getName(), servo.getTargetPos(), velocity);
+  }
 
-    // String axis = rotationMap.get(name);
+  /**
+   * Callback for {@code Servo.publishServoMoveTo(ServoMove)} — the path used by
+   * {@link Servo#processMove}. Applies target input angle immediately so the
+   * simulator moves even if TimeEncoder is delayed/disabled.
+   */
+  public void onServoMove(ServoMove move) {
+    if (move == null || move.name == null || move.inputPos == null) {
+      return;
+    }
+    rotateNamedNode(move.name, move.inputPos, defaultServoSpeed);
+  }
 
+  private void rotateNamedNode(String name, double degrees, Double velocity) {
     String[] multi = multiMapped.get(name);
     if (multi != null) {
       for (String nodeName : multi) {
-        rotateOnAxis(nodeName, null, servo.getTargetPos(), velocity); // was
-                                                                      // getPos()
+        if (velocity != null) {
+          rotateOnAxis(nodeName, null, degrees, velocity);
+        } else {
+          addMsg("rotateTo", nodeName, null, degrees);
+        }
       }
+    } else if (velocity != null) {
+      rotateOnAxis(name, null, degrees, velocity);
     } else {
-      rotateOnAxis(name, null, servo.getTargetPos(), velocity);
+      addMsg("rotateTo", name, null, degrees);
     }
   }
 
@@ -2700,7 +3014,88 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * Scans and loads the default resource location and loads any models not already loaded
    */
   public void loadDefaultModels() {
-    loadModels(modelsDir);
+    refreshAssetPaths();
+    // Load each model basename at most once across all search directories
+    LinkedHashSet<String> pendingBasenames = new LinkedHashSet<>();
+    for (String dir : getModelsSearchPaths()) {
+      log.info("Scanning for JME models in {}", dir);
+      for (String name : scanForModels(dir)) {
+        String base = modelBasename(name);
+        if (!pendingBasenames.add(base)) {
+          log.info("Skipping duplicate model file {} also found in {}", base, dir);
+        }
+      }
+    }
+
+    int loaded = 0;
+    for (String base : pendingBasenames) {
+      Spatial spatial = loadModel(base);
+      if (spatial != null) {
+        loaded++;
+      }
+    }
+    removeDuplicateVinMoovRoots("i01");
+    if (loaded == 0 && !hasVinMoovOrRobotRoot()) {
+      error("No JME models loaded — place VinMoov5.j3o under resource/JMonkeyEngine/assets/Models/");
+    } else {
+      bindVinMoovRoot("i01");
+      removeDuplicateVinMoovRoots("i01");
+    }
+  }
+
+  /**
+   * Recompute assets/models dirs from the current resource root.
+   */
+  public void refreshAssetPaths() {
+    assetsDir = getResourceDir() + File.separator + "assets";
+    modelsDir = assetsDir + File.separator + "Models";
+  }
+
+  /**
+   * Candidate directories that may contain VinMoov / other models. Dev Eclipse
+   * configs often point resource at {@code src/main/resources/resource} (no large
+   * j3o), while the extracted model lives under {@code resource/...}.
+   */
+  public List<String> getModelsSearchPaths() {
+    List<String> paths = new ArrayList<>();
+    LinkedHashSet<String> unique = new LinkedHashSet<>();
+
+    refreshAssetPaths();
+    unique.add(modelsDir);
+    unique.add(FileIO.gluePaths("resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "JMonkeyEngine/assets/Models"));
+
+    for (String p : unique) {
+      File dir = new File(p);
+      if (dir.isDirectory()) {
+        paths.add(dir.getPath());
+      }
+    }
+    return paths;
+  }
+
+  /**
+   * Rename VinMoov* root spatial to the InMoov service name so peer node keys
+   * like {@code i01.leftArm.bicep} resolve.
+   */
+  public void bindVinMoovRoot(String robotName) {
+    if (robotName == null) {
+      return;
+    }
+    removeDuplicateVinMoovRoots(robotName);
+    if (get(robotName) != null) {
+      log.info("Scene already has root node {}", robotName);
+      return;
+    }
+    for (String candidate : new String[] { "VinMoov5", "VinMoov4", "VinMoov", "VinMoov5.j3o" }) {
+      Spatial spatial = get(candidate);
+      if (spatial != null) {
+        spatial.setName(robotName);
+        log.info("Bound model root {} -> {}", candidate, robotName);
+        return;
+      }
+    }
+    log.warn("Could not find VinMoov root to rename to {} — check loaded model node names", robotName);
   }
   
   /**
@@ -2727,20 +3122,59 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       loadDefaultModels();
     }
 
+    // Bind + mappers must run on the JME render thread. Doing this from the
+    // service/main thread after app.start() can deadlock and hang startService
+    // (demo never reaches ik3d / motion loops).
+    final String robotName = inferRobotNameFromNodeConfig(config);
+    final String lookAt = config.cameraLookAt;
+    Runnable sceneSetup = () -> {
+      if (robotName != null) {
+        bindVinMoovRoot(robotName);
+      }
+      applyNodeMappings(config);
+      if (lookAt != null) {
+        cameraLookAt(lookAt);
+      }
+    };
+
+    if (app != null) {
+      try {
+        app.enqueue(() -> {
+          sceneSetup.run();
+          return null;
+        }).get(30, java.util.concurrent.TimeUnit.SECONDS);
+      } catch (Exception e) {
+        log.error("loadDelayed scene setup failed or timed out — continuing without full node mappers", e);
+      }
+    } else {
+      sceneSetup.run();
+    }
+
+    return c;
+  }
+
+  /**
+   * Re-apply rotation axes / mappers from config after the model root is bound.
+   * Safe to call multiple times (e.g. after {@link #bindVinMoovRoot(String)}).
+   */
+  public void applyNodeMappings() {
+    applyNodeMappings((JMonkeyEngineConfig) config);
+  }
+
+  public void applyNodeMappings(JMonkeyEngineConfig config) {
+    if (config == null) {
+      return;
+    }
+    int applied = 0;
+    int missing = 0;
     if (config.nodes != null) {
-      // nodes.putAll(config.nodes);
       for (String path : config.nodes.keySet()) {
-        // getUserData(path)
         UserData ud = getUserData(path);
         UserDataConfig udc = config.nodes.get(path);
-        // UserData ud = new UserData(config.nodes.get(path));
-        // if (ud == null) {
-        // addNode(path);
-        // ud = nodes.get(path); // new UserData(config.nodes.get(path));
-        // }
 
         if (ud == null) {
-          log.error("could not find node for {}", path);
+          log.debug("could not find node for {}", path);
+          missing++;
           continue;
         }
 
@@ -2751,6 +3185,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         if (udc.rotationMask != null) {
           setRotation(path, udc.rotationMask);
         }
+        applied++;
       }
     }
 
@@ -2759,12 +3194,51 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         multiMap(name, config.multiMapped.get(name));
       }
     }
+    log.info("Applied {} node mappings ({} missing)", applied, missing);
+  }
 
-    if (config.cameraLookAt != null) {
-      cameraLookAt(config.cameraLookAt);
+  private static String inferRobotNameFromNodeConfig(JMonkeyEngineConfig config) {
+    if (config == null || config.nodes == null || config.nodes.isEmpty()) {
+      return null;
     }
+    for (String path : config.nodes.keySet()) {
+      if (path == null) {
+        continue;
+      }
+      int dot = path.indexOf('.');
+      if (dot > 0) {
+        return path.substring(0, dot);
+      }
+    }
+    return null;
+  }
 
-    return c;
+  /**
+   * Returns spatial names in the scene that contain the given substring (for
+   * diagnostics when servo↔node wiring fails).
+   */
+  public List<String> findSpatialNamesContaining(String fragment) {
+    List<String> matches = new ArrayList<>();
+    if (rootNode == null || fragment == null) {
+      return matches;
+    }
+    collectSpatialNamesContaining(rootNode, fragment, matches);
+    return matches;
+  }
+
+  private void collectSpatialNamesContaining(Spatial spatial, String fragment, List<String> matches) {
+    if (spatial == null) {
+      return;
+    }
+    String n = spatial.getName();
+    if (n != null && n.contains(fragment)) {
+      matches.add(n);
+    }
+    if (spatial instanceof Node) {
+      for (Spatial child : ((Node) spatial).getChildren()) {
+        collectSpatialNamesContaining(child, fragment, matches);
+      }
+    }
   }
 
   /**
