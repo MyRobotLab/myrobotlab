@@ -294,6 +294,37 @@ public class ProgramAB extends Service<ProgramABConfig>
     return response;
   }
 
+  /**
+   * Similar to get Response, but text only and no publishing. Useful if you store language dependet text in aiml files.
+   * This method gets the text for a given text-tag and does nothing else.
+   * @param inText language/bot independent text tag
+   * @return language/bot dependent text
+   */
+  public String getText(String inText) {
+
+    String currentUserName = getCurrentUserName();
+    String currentBotName = getCurrentBotName();
+
+    Session session = getSession(currentUserName, currentBotName);
+
+    // if a session with this user and bot does not exist
+    // attempt to create it
+    if (session == null) {
+      session = startSession(currentUserName, currentBotName);
+      if (session == null) {
+        error("username or bot name not valid %s %s", currentUserName, currentBotName);
+        return null;
+      }
+    }
+
+    // Get the actual bots aiml based response for this session
+    log.info("getResponse({})", inText);
+    Response response = session.getResponse(inText);
+
+    return  response.msg;
+  }        
+
+        
   private Bot getBot(String botName) {
     return bots.get(botName).getBot();
   }
