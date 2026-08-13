@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.test.AbstractTest;
@@ -77,16 +78,53 @@ public class VoskSpeechRecognitionTest extends AbstractTest {
     new File(fake, "am").mkdirs();
     new File(fake, "am/final.mdl").createNewFile();
 
+    File catalogModel = new File(ear.getModelsRoot(), "vosk-model-small-en-us-0.15");
+    catalogModel.mkdirs();
+    new File(catalogModel, "am").mkdirs();
+    new File(catalogModel, "am/final.mdl").createNewFile();
+
     assertTrue(VoskSpeechRecognition.isValidModelDir(fake));
     assertTrue(ear.isModelInstalled("fake-model-unit-test"));
 
     List<String> installed = ear.getInstalledModels();
     assertTrue(installed.contains("fake-model-unit-test"));
+    assertTrue(installed.contains("vosk-model-small-en-us-0.15"));
+
+    List<VoskSpeechRecognition.ModelInfo> installedInfo = ear.getInstalledModelInfo();
+    assertNotNull(installedInfo);
+    boolean foundFake = false;
+    boolean foundEn = false;
+    for (VoskSpeechRecognition.ModelInfo info : installedInfo) {
+      if ("fake-model-unit-test".equals(info.name)) {
+        foundFake = true;
+        assertEquals("Custom", info.language);
+        assertTrue(info.installed);
+      }
+      if ("vosk-model-small-en-us-0.15".equals(info.name)) {
+        foundEn = true;
+        assertEquals("English (US)", info.language);
+        assertEquals("40M", info.size);
+        assertTrue(info.installed);
+      }
+    }
+    assertTrue(foundFake);
+    assertTrue(foundEn);
+
+    List<VoskSpeechRecognition.ModelInfo> notified = ear.notifyInstalledModels();
+    assertNotNull(notified);
+    assertTrue(notified.size() >= 2);
+
+    String json = CodecUtils.toJson(ear);
+    assertTrue(json.contains("fake-model-unit-test"));
+    assertTrue(json.contains("installedModels"));
 
     // cleanup
     new File(fake, "am/final.mdl").delete();
     new File(fake, "am").delete();
     fake.delete();
+    new File(catalogModel, "am/final.mdl").delete();
+    new File(catalogModel, "am").delete();
+    catalogModel.delete();
 
     Runtime.release("voskTest2");
   }

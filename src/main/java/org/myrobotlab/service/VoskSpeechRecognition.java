@@ -60,6 +60,9 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    */
   private static final List<ModelInfo> MODEL_CATALOG;
 
+  /** Catalog keyed by model directory name for installed-model labels. */
+  private static final Map<String, ModelInfo> MODEL_CATALOG_BY_NAME;
+
   static {
     Map<String, String> defaults = new LinkedHashMap<>();
     defaults.put("en-US", "vosk-model-small-en-us-0.15");
@@ -213,6 +216,11 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     // Speaker identification (listed on models page; not ASR)
     catalog.add(model("vosk-model-spk-0.4", "und", "Speaker ID", "13M", "Speaker identification — all languages (not ASR)"));
 
+    Map<String, ModelInfo> byName = new LinkedHashMap<>();
+    for (ModelInfo info : catalog) {
+      byName.put(info.name, info);
+    }
+    MODEL_CATALOG_BY_NAME = Collections.unmodifiableMap(byName);
     MODEL_CATALOG = Collections.unmodifiableList(catalog);
   }
 
@@ -238,6 +246,8 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     public String description;
     /** Preformatted dropdown label: language — description (size) [name] */
     public String label;
+    /** True when this model is present under the local models directory. */
+    public boolean installed;
   }
 
   /**
@@ -256,6 +266,12 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    */
   protected List<ModelInfo> availableModels = MODEL_CATALOG;
 
+  /**
+   * Models already extracted under {@code data/VoskSpeechRecognition/models/}.
+   * Included in broadcastState for the WebGui "use this model" dropdown.
+   */
+  protected List<ModelInfo> installedModels = new ArrayList<>();
+
   transient private Model voskModel;
   transient private Recognizer voskRecognizer;
   transient private TargetDataLine microphone;
@@ -264,6 +280,12 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
 
   public VoskSpeechRecognition(String n, String id) {
     super(n, id);
+  }
+
+  @Override
+  public void startService() {
+    super.startService();
+    notifyInstalledModels();
   }
 
   @Override
@@ -322,22 +344,86 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    * @return list of installed model directory names under the models root
    */
   public List<String> getInstalledModels() {
-    List<String> installed = new ArrayList<>();
+    refreshInstalledModels();
+    List<String> names = new ArrayList<>();
+    for (ModelInfo info : installedModels) {
+      names.add(info.name);
+    }
+    return names;
+  }
+
+  /**
+   * Installed models with catalog language/size labels for the WebGui dropdown.
+   * Unknown (custom) directories still appear, labeled by folder name.
+   */
+  public List<ModelInfo> getInstalledModelInfo() {
+    refreshInstalledModels();
+    return installedModels;
+  }
+
+  /**
+   * Publishing point so WebGui subscribers get a fresh installed-model list
+   * after download/extract, without waiting for another getInstalledModelInfo
+   * request.
+   */
+  public List<ModelInfo> publishInstalledModelInfo(List<ModelInfo> models) {
+    return models;
+  }
+
+  /**
+   * Rescan disk and push the installed-model list to listeners (WebGui).
+   * Uses {@link #broadcast(String, Object...)} so the update is sent
+   * immediately even when called from inside {@link #installModel(String)}.
+   */
+  public synchronized List<ModelInfo> notifyInstalledModels() {
+    refreshInstalledModels();
+    broadcast("publishInstalledModelInfo", installedModels);
+    return installedModels;
+  }
+
+  /**
+   * Rescan {@code data/VoskSpeechRecognition/models/} and update
+   * {@link #installedModels} for broadcastState.
+   */
+  public synchronized void refreshInstalledModels() {
+    List<ModelInfo> list = new ArrayList<>();
     File root = new File(getModelsRoot());
-    if (!root.isDirectory()) {
-      return installed;
-    }
-    File[] kids = root.listFiles();
-    if (kids == null) {
-      return installed;
-    }
-    for (File kid : kids) {
-      if (kid.isDirectory() && isValidModelDir(kid)) {
-        installed.add(kid.getName());
+    if (root.isDirectory()) {
+      File[] kids = root.listFiles();
+      if (kids != null) {
+        List<String> names = new ArrayList<>();
+        for (File kid : kids) {
+          if (kid.isDirectory() && isValidModelDir(kid)) {
+            names.add(kid.getName());
+          }
+        }
+        Collections.sort(names);
+        for (String name : names) {
+          list.add(toInstalledInfo(name));
+        }
       }
     }
-    Collections.sort(installed);
-    return installed;
+    installedModels = list;
+  }
+
+  private static ModelInfo toInstalledInfo(String name) {
+    ModelInfo catalog = MODEL_CATALOG_BY_NAME.get(name);
+    ModelInfo info = new ModelInfo();
+    if (catalog != null) {
+      info.name = catalog.name;
+      info.locale = catalog.locale;
+      info.language = catalog.language;
+      info.size = catalog.size;
+      info.description = catalog.description;
+      info.label = catalog.label;
+    } else {
+      info.name = name;
+      info.language = "Custom";
+      info.description = "Installed locally";
+      info.label = name;
+    }
+    info.installed = true;
+    return info;
   }
 
   /**
@@ -410,6 +496,7 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     if (isValidModelDir(modelDir)) {
       info("model already installed: %s", modelDir.getAbsolutePath());
       status = "model ready: " + modelName;
+      notifyInstalledModels();
       broadcastState();
       return modelDir.getAbsolutePath();
     }
@@ -466,6 +553,7 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     }
 
     status = "model installed: " + modelName;
+    notifyInstalledModels();
     broadcastState();
     info("installed Vosk model at %s", modelDir.getAbsolutePath());
     return modelDir.getAbsolutePath();
@@ -513,13 +601,12 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     config.model = modelName;
     config.modelPath = null;
     String path;
-    if (config.autoDownloadModel || !isModelInstalled(modelName)) {
-      if (!config.autoDownloadModel && !isModelInstalled(modelName)) {
-        throw new IOException("model not installed and autoDownloadModel is false: " + modelName);
-      }
+    if (isModelInstalled(modelName)) {
+      path = getModelPath(modelName);
+    } else if (config.autoDownloadModel) {
       path = installModel(modelName);
     } else {
-      path = getModelPath(modelName);
+      throw new IOException("model not installed and autoDownloadModel is false: " + modelName);
     }
     return loadModelFromPath(path);
   }
@@ -850,6 +937,7 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     try {
       LoggingFactory.init(Level.INFO);
       VoskSpeechRecognition ear = (VoskSpeechRecognition) Runtime.start("ear", "VoskSpeechRecognition");
+      ear.setAfterSpeakingPause(500);
       Runtime.start("webgui", "WebGui");
       // ear.installModel("vosk-model-small-en-us-0.15");
       // ear.startListening();

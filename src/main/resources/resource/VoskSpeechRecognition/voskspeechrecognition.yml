@@ -1,5 +1,5 @@
 !!org.myrobotlab.service.config.VoskSpeechRecognitionConfig
-afterSpeakingPauseMs: 2000
+afterSpeakingPauseMs: 500
 autoDownloadModel: true
 listeners: null
 listening: false

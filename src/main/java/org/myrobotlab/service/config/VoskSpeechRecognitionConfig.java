@@ -1,9 +1,21 @@
 package org.myrobotlab.service.config;
 
+import org.myrobotlab.framework.Plan;
+
 /**
  * Configuration for offline Vosk speech recognition.
  */
 public class VoskSpeechRecognitionConfig extends SpeechRecognizerConfig {
+
+  public VoskSpeechRecognitionConfig() {
+    afterSpeakingPauseMs = 500;
+  }
+
+  @Override
+  public Plan getDefault(Plan plan, String name) {
+    afterSpeakingPauseMs = 500;
+    return super.getDefault(plan, name);
+  }
 
   /**
    * Vosk model directory name, e.g. {@code vosk-model-small-en-us-0.15}.
