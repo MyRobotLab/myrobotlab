@@ -113,4 +113,23 @@ public class DHRobotArmTest extends AbstractTest {
     }
   }
 
+  @Test
+  public void testDHLinkCopyOffset() {
+    DHLink src = new DHLink("omoplate", 0, 40, 0, 0);
+    src.setOffset(90.0);
+    DHLink copy = new DHLink(src);
+    assertEquals(90.0, copy.getOffset(), 1e-9);
+    assertEquals("omoplate", copy.getName());
+  }
+
+  @Test
+  public void testToolOffsetCopy() {
+    DHRobotArm arm = createArm();
+    arm.setToolOffset(1, 2, 3);
+    DHRobotArm copy = new DHRobotArm(arm);
+    assertEquals(1.0, copy.getToolOffset().getX(), 1e-9);
+    assertEquals(2.0, copy.getToolOffset().getY(), 1e-9);
+    assertEquals(3.0, copy.getToolOffset().getZ(), 1e-9);
+  }
+
 }

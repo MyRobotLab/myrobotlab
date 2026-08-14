@@ -1,19 +1,43 @@
 <div>
-	<h3>Inverse Kinematics 3D!</h3>
-	<!-- three js stuff in here? -->
-    <h4>Reset Configuration</h4>
-    <input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
-    <br/>
-	<div id='canvas' />
+	<h3>Inverse Kinematics 3D</h3>
+
+	<div class="well" style="margin-bottom: 12px;">
+		<h4 style="margin-top: 0;">World position</h4>
+		<div ng-if="worldPosition">
+			<table class="table table-condensed" style="margin-bottom: 4px; width: auto;">
+				<tr>
+					<th>X</th>
+					<th>Y</th>
+					<th>Z</th>
+				</tr>
+				<tr>
+					<td>{{worldPosition.x | number:4}}</td>
+					<td>{{worldPosition.y | number:4}}</td>
+					<td>{{worldPosition.z | number:4}}</td>
+				</tr>
+			</table>
+			<small class="text-muted" ng-if="service.config.worldFrame">meters (simulator / world frame)</small>
+			<small class="text-muted" ng-if="!service.config.worldFrame">DH millimeters (world calibration not applied)</small>
+		</div>
+		<div ng-if="!worldPosition" class="text-muted">No position yet — center joints or moveTo</div>
+	</div>
+
+	<h4>Reset Configuration</h4>
+	<input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
+	<input type="submit" ng-click="computePositionFromServos()" value="Compute from servos" title="Forward kinematics from current servo positions" />
+	<br/>
+	<div id='canvas'></div>
+	<small class="text-muted">Left-drag to orbit the view, mouse wheel to zoom</small>
 	<br />
-	<form novalidate class="search-form">
-		X,Y,Z: <input type="text" ng-model="x" value="1" /><input type="text"
-			ng-model="y" value="1" /><input type="text" ng-model="z" value="1" />
-		<input type="submit" ng-click="moveTo(x,y,z)" value="MoveTo" />
+	<form novalidate class="search-form" ng-submit="moveTo(x,y,z)">
+		World X,Y,Z:
+		<input type="number" step="0.01" ng-model="x" ng-change="moveTo(x,y,z)" />
+		<input type="number" step="0.01" ng-model="y" ng-change="moveTo(x,y,z)" />
+		<input type="number" step="0.01" ng-model="z" ng-change="moveTo(x,y,z)" />
+		<input type="submit" value="MoveTo" />
 	</form>
 
 	<br />
-	<!--  Positions : {{positions}}  -->
 	<h3>Positions</h3>
 	<table>
 		<tr ng-repeat="rowContent in positions track by $index">
@@ -39,21 +63,21 @@
 				<td>dX</td>
 				<td>dY</td>
 				<td>dZ</td>
-      </tr>
+			</tr>
 			<tr>
-				<td><input type="text" ng-model="dx" value="0" /></td>
-				<td><input type="text" ng-model="dy" value="0" /></td>
-				<td><input type="text" ng-model="dz" value="0" /></td>
-		  </tr>
-      <tr>
-        <td>Roll</td>
-        <td>Pitch</td>
-        <td>Yaw</td>
-      </tr>
+				<td><input type="text" ng-model="dx" /></td>
+				<td><input type="text" ng-model="dy" /></td>
+				<td><input type="text" ng-model="dz" /></td>
+			</tr>
 			<tr>
-				<td><input type="text" ng-model="roll" value="0" /></td>
-				<td><input type="text" ng-model="pitch" value="0" /></td>
-				<td><input type="text" ng-model="yaw" value="0" /></td>
+				<td>Roll</td>
+				<td>Pitch</td>
+				<td>Yaw</td>
+			</tr>
+			<tr>
+				<td><input type="text" ng-model="roll" /></td>
+				<td><input type="text" ng-model="pitch" /></td>
+				<td><input type="text" ng-model="yaw" /></td>
 			</tr>
 			<tr>
 				<td><input type="submit"
@@ -62,9 +86,7 @@
 		</table>
 	</form>
 
-    <h4>TRACKING</h4>  
-    
-    {{tracking}}
-    
+	<h4>TRACKING</h4>
+	{{tracking}}
 	<br/> That's All Folks!
 </div>

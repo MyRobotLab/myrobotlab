@@ -1,4 +1,11 @@
-!!org.myrobotlab.service.config.ServiceConfig
+!!org.myrobotlab.service.config.InverseKinematics3DConfig
 listeners: null
 peers: null
 type: InverseKinematics3D
+worldFrame: false
+originX: 0.0
+originY: 0.0
+originZ: 0.0
+scaleX: 1000.0
+scaleY: 1000.0
+scaleZ: 1000.0

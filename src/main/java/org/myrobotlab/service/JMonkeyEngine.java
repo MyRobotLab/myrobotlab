@@ -21,6 +21,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CVData;
@@ -42,6 +43,7 @@ import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.jme3.UserDataConfig;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
@@ -77,11 +79,18 @@ import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
+import com.jme3.input.RawInputListener;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -166,9 +175,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   
   protected ChaseCamera chaseCamera;
 
-  protected String fontColor = "#66ff66"; // green
+  protected String fontColor = "#000000"; // black
 
-  protected int fontSize = 14;
+  protected int fontSize = 20;
 
   /**
    * When true, show left/right InMoov hand world positions in the lower-left HUD.
@@ -186,12 +195,19 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   protected static final String RIGHT_HAND_MARKER = "_marker.rightHand";
 
+  protected static final String IK_LEFT_HAND_MARKER = "_marker.ikLeftHand";
+
   /** World-space radius of the left/right hand position dots. */
   protected float handMarkerRadius = 0.05f;
 
   protected transient Geometry leftHandMarker;
 
   protected transient Geometry rightHandMarker;
+
+  protected transient Geometry ikLeftHandMarker;
+
+  /** IK-predicted left hand in world coordinates (null to hide). */
+  protected Vector3f ikLeftHandWorld;
 
   protected boolean fullscreen = false;
 
@@ -257,11 +273,28 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   
   protected float orbitRadius = 10f;
   
-  protected float orbitSpeed = 0.5f;
+  protected float orbitSpeed = 1.0f;
+
+  protected float orbitMinDistance = 0.3f;
+
+  protected float orbitMaxDistance = 80f;
+
+  protected float panSpeed = 1.0f;
+
+  /** Extra translation applied to the orbit look-at point after panning. */
+  protected final Vector3f orbitPanOffset = new Vector3f();
+
+  /** True after the mouse has moved while a button is held (orbit/pan vs click-select). */
+  protected boolean viewDragging = false;
+
+  protected float viewDragAccum = 0f;
   
   protected float mouseX = 0f;
   
   protected float mouseY = 0f;
+
+  /** Radians of orbit per pixel dragged. */
+  protected float orbitRadiansPerPixel = 0.008f;
 
   // protected Set<String> modelPaths = new LinkedHashSet<>();
 
@@ -443,6 +476,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       subscribe(service.getName(), "publishMoveTo", getName(), "onServoMoveTo");
     }
 
+    if (service instanceof InverseKinematics3D) {
+      subscribe(service.getName(), "publishWorldPosition", getName(), "onWorldPosition");
+    }
+
     // backward attach ?
   }
 
@@ -519,10 +556,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
   
   public void resetView() {
-    // cam.setLocation(new Vector3f(0, 1, 2));
+    orbitPanOffset.set(0, 0, 0);
     camera.setLocalTransform(new Transform(new Vector3f(0, 3, 5)));
-//    camera.setLocalTransform(null);
-//    camera.move(0, 1, 2);;
     cameraLookAt("root");
   }
 
@@ -536,6 +571,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // thread processing
     // all the other moves & rotations !
     // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    orbitPanOffset.set(0, 0, 0);
     addMsg("lookAt", CAMERA, spatial.getName());
   }
 
@@ -1503,10 +1539,6 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public void onAction(String name, boolean keyPressed, float tpf) {
     log.debug("onAction {} {} {}", name, keyPressed, tpf);
 
-    if (name.equals("mouse-click-right")) {
-      mouseRightPressed = keyPressed;
-    }
-
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
     } else if ("select-root".equals(name)) {
@@ -1527,22 +1559,35 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       saveSpatial(selectedForView.getName());
     } else if ("mouse-click-left".equals(name)) {
       mouseLeft = keyPressed;
+      // Click (no drag) selects; drag orbits the view. Selecting on press would
+      // jump the orbit target mid-gesture.
       if (mouseLeft) {
-        Geometry target = checkCollision();
-        setSelected(target);
+        viewDragging = false;
+        viewDragAccum = 0f;
+        captureCursor();
+      } else {
+        if (!viewDragging) {
+          Geometry target = checkCollision();
+          setSelected(target);
+        }
+        viewDragging = false;
+        viewDragAccum = 0f;
       }
-    } 
-
-    else if ("mouse-click-middle".equals(name)) {
+    } else if ("mouse-click-middle".equals(name)) {
       mouseMiddle = keyPressed;
-      // USEFUL - but need a different key combo
-//      if (mouseMiddle && selectedForView != null) {
-//        cameraLookAt(selectedForView.getName());
-//      }
-    } 
-    
-    
-    else {
+      if (mouseMiddle) {
+        captureCursor();
+      } else {
+        viewDragging = false;
+      }
+    } else if ("mouse-click-right".equals(name)) {
+      mouseRightPressed = keyPressed;
+      if (mouseRightPressed) {
+        captureCursor();
+      } else {
+        viewDragging = false;
+      }
+    } else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
   }
@@ -1561,87 +1606,171 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public void onAnalog(String name, float keyPressed, float tpf) {
     log.debug("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
-    // selectedForMovement invariably is the camera
-    if (selectedForMovement == null) {
-      selectedForMovement = camera;// FIXME "new" selectedMove vs selected
-    }
-
-    // ROTATE ORBIT (should be middle button / mouse wheel button)
-    // currently wrong :P its rotating in place - you want to orbit on a selection at 10 pts out
-    if (mouseMiddle && !shiftLeft) {
-      
-      switch (name) {
-        case "mouse-axis-x":
-          selectedForMovement.rotate(0, -keyPressed, 0);
-          break;
-        case "mouse-axis-x-negative":
-          selectedForMovement.rotate(0, keyPressed, 0);
-          break;
-        case "mouse-axis-y":
-          selectedForMovement.rotate(-keyPressed, 0, 0);
-          break;
-        case "mouse-axis-y-negative":
-          selectedForMovement.rotate(keyPressed, 0, 0);
-          break;
-      }
-      
-      
-      if (name.equals("mouse-axis-x")) {
-        mouseX = inputManager.getCursorPosition().x;
-    } else if (name.equals("mouse-axis-y")) {
-        mouseY = inputManager.getCursorPosition().y;
-    }
- 
-      
-      
-    }
-
-    // PAN -- works(ish)
-    if (mouseMiddle && shiftLeft) {
-      log.debug("panning");
-      switch (name) {
-        case "mouse-axis-x":
-        case "mouse-axis-x-negative":
-          
-       // Get the local rotation of the camera
-          Quaternion rotation = selectedForMovement.getLocalRotation();
-
-          // Extract the X-axis rotation column from the quaternion
-          Vector3f rotationAxis = rotation.getRotationColumn(0);
-
-          // Define the direction and distance to pan
-          float direction = name.equals("mouse-axis-x") ? -0.13f : 0.13f;
-          float distance = 0.3f;
-
-          // Calculate the translation vector by multiplying the rotation axis with the direction and distance
-          Vector3f translation = rotationAxis.mult(direction).mult(distance);
-
-          // Move the camera by the translation vector
-          // camera.setLocation(camera.getLocation().add(translation));
-          // selectedForMovement.move(translation);
-          
-          // needs to be on the normal
-          // selectedForMovement.move(direction, 0, direction);
-          selectedForMovement.move(translation);
-          break;
-        case "mouse-axis-y":
-          selectedForMovement.move(0, keyPressed * 3, 0);
-          break;
-        case "mouse-axis-y-negative":
-          selectedForMovement.move(0, -keyPressed * 3, 0);
-          break;
-      }
-    }
-
-    // ZOOM
+    // Mouse X/Y analog does not fire with a visible cursor under LWJGL3.
+    // Orbit/pan is applied from cursor deltas in simpleUpdate instead.
     if (name.equals("mouse-wheel-up") || name.equals("mouse-wheel-down")) {
-
-      Quaternion normal = camera.getLocalRotation();
-      Vector3f rotationAxis = normal.getRotationColumn(2);
-      float direction = name.equals("mouse-wheel-up")?0.3f:-0.3f;
-      Vector3f translation = rotationAxis.mult(direction);
-      camera.move(translation);
+      zoomCamera(name.equals("mouse-wheel-up") ? -1f : 1f);
     }
+  }
+
+  private void captureCursor() {
+    if (inputManager == null) {
+      return;
+    }
+    Vector2f cursor = inputManager.getCursorPosition();
+    mouseX = cursor.x;
+    mouseY = cursor.y;
+  }
+
+  /**
+   * Orbit / pan from absolute cursor movement. Required because
+   * {@link MouseAxisTrigger} X/Y values are not delivered when the cursor is
+   * visible (LWJGL3 ungrabbed mouse). Wheel analog still works.
+   */
+  protected void updateViewDrag() {
+    if (inputManager == null || camera == null) {
+      return;
+    }
+    Vector2f cursor = inputManager.getCursorPosition();
+    boolean buttonDown = mouseLeft || mouseMiddle || mouseRightPressed;
+    if (!buttonDown) {
+      mouseX = cursor.x;
+      mouseY = cursor.y;
+      return;
+    }
+    float dx = cursor.x - mouseX;
+    float dy = cursor.y - mouseY;
+    mouseX = cursor.x;
+    mouseY = cursor.y;
+    if (dx == 0f && dy == 0f) {
+      return;
+    }
+    applyViewDrag(dx, dy);
+  }
+
+  /**
+   * Apply a pixel mouse delta: left/middle drag orbits, right or shift-drag pans.
+   */
+  protected void applyViewDrag(float dxPixels, float dyPixels) {
+    viewDragAccum += FastMath.abs(dxPixels) + FastMath.abs(dyPixels);
+    if (viewDragAccum > 3f) {
+      viewDragging = true;
+    }
+    boolean pan = mouseRightPressed || ((mouseLeft || mouseMiddle) && shiftLeft);
+    if (pan) {
+      panCameraPixels(dxPixels, dyPixels);
+    } else if (mouseLeft || mouseMiddle) {
+      float sens = orbitRadiansPerPixel * orbitSpeed;
+      orbitCamera(-dxPixels * sens, dyPixels * sens);
+    }
+  }
+
+  /**
+   * World-space point the camera orbits around: the configured look-at node, or
+   * the scene origin, plus any pan offset.
+   */
+  protected Vector3f getOrbitTarget() {
+    Spatial target = null;
+    if (config instanceof JMonkeyEngineConfig) {
+      String lookAt = ((JMonkeyEngineConfig) config).cameraLookAt;
+      if (lookAt != null) {
+        target = get(lookAt);
+      }
+    }
+    if (target == null) {
+      target = rootNode;
+    }
+    Vector3f base = target != null ? target.getWorldTranslation() : Vector3f.ZERO;
+    return base.add(orbitPanOffset);
+  }
+
+  /**
+   * Orbit the camera around {@link #getOrbitTarget()} by yaw (world Y) and pitch
+   * (camera right). Keeps looking at the target.
+   */
+  protected void orbitCamera(float yaw, float pitch) {
+    if (camera == null || (yaw == 0f && pitch == 0f)) {
+      return;
+    }
+    Vector3f target = getOrbitTarget();
+    Vector3f offset = camera.getWorldTranslation().subtract(target);
+    if (offset.lengthSquared() < 1e-8f) {
+      offset = new Vector3f(0f, 0f, orbitRadius);
+    }
+
+    Quaternion yawQ = new Quaternion();
+    yawQ.fromAngleAxis(-yaw, Vector3f.UNIT_Y);
+    offset = yawQ.mult(offset);
+
+    if (pitch != 0f) {
+      Vector3f right = Vector3f.UNIT_Y.cross(offset);
+      if (right.lengthSquared() < 1e-8f) {
+        right = Vector3f.UNIT_X.clone();
+      } else {
+        right.normalizeLocal();
+      }
+      Quaternion pitchQ = new Quaternion();
+      pitchQ.fromAngleAxis(-pitch, right);
+      Vector3f pitched = pitchQ.mult(offset);
+      Vector3f dir = pitched.normalize();
+      if (FastMath.abs(dir.y) < 0.98f) {
+        offset = pitched;
+      }
+    }
+
+    orbitRadius = offset.length();
+    camera.setLocalTranslation(target.add(offset));
+    camera.lookAt(target, Vector3f.UNIT_Y);
+  }
+
+  /**
+   * Pan the camera in its local X/Y plane using pixel mouse deltas, and keep
+   * the orbit target in sync so subsequent orbits stay around the new view
+   * center.
+   */
+  protected void panCameraPixels(float dxPixels, float dyPixels) {
+    if (camera == null || (dxPixels == 0f && dyPixels == 0f)) {
+      return;
+    }
+    Quaternion rotation = camera.getLocalRotation();
+    Vector3f right = rotation.getRotationColumn(0);
+    Vector3f up = rotation.getRotationColumn(1);
+    float dist = Math.max(camera.getWorldTranslation().subtract(getOrbitTarget()).length(), 1f);
+    float scale = dist / 600f;
+    Vector3f delta = right.mult(-dxPixels * scale).add(up.mult(dyPixels * scale));
+    orbitPanOffset.addLocal(delta);
+    camera.setLocalTranslation(camera.getLocalTranslation().add(delta));
+  }
+
+  /**
+   * Pan the camera in its local X/Y plane and keep the orbit target in sync so
+   * subsequent orbits stay around the new view center.
+   */
+  protected void panCamera(float x, float y) {
+    panCameraPixels(x, y);
+  }
+
+  /**
+   * Zoom toward or away from the orbit target. Positive {@code direction} zooms
+   * out.
+   */
+  protected void zoomCamera(float direction) {
+    if (camera == null) {
+      return;
+    }
+    Vector3f target = getOrbitTarget();
+    Vector3f offset = camera.getWorldTranslation().subtract(target);
+    float dist = offset.length();
+    if (dist < 1e-4f) {
+      offset = camera.getLocalRotation().mult(Vector3f.UNIT_Z).mult(orbitRadius);
+      dist = offset.length();
+    }
+    float factor = direction < 0f ? 0.92f : 1.08f;
+    float newDist = FastMath.clamp(dist * factor, orbitMinDistance, orbitMaxDistance);
+    offset.normalizeLocal().multLocal(newDist);
+    orbitRadius = newDist;
+    camera.setLocalTranslation(target.add(offset));
+    camera.lookAt(target, Vector3f.UNIT_Y);
   }
 
   /**
@@ -1897,13 +2026,16 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     Spatial rightHand = findHandSpatial(robot, "right");
     Vector3f left = leftHand != null ? leftHand.getWorldTranslation() : null;
     Vector3f right = rightHand != null ? rightHand.getWorldTranslation() : null;
+    Vector3f ikLeft = ikLeftHandWorld;
 
     if (guiNode != null) {
-      String text = String.format("L hand: %s\nR hand: %s", formatHudVec(left), formatHudVec(right));
+      String err = formatHudError(left, ikLeft);
+      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeft),
+          err != null ? "\nL err:  " + err : "");
       HudText hud = guiText.get(HAND_POSITION_HUD_KEY);
       if (hud == null) {
         hud = new HudText(this, text, 12, 0);
-        hud.setFromBottom(14);
+        hud.setFromBottom(18);
         hud.setText(text, fontColor, fontSize);
         guiText.put(HAND_POSITION_HUD_KEY, hud);
         app.getGuiNode().attachChild(hud.getNode());
@@ -1914,8 +2046,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     leftHandMarker = ensureHandMarker(leftHandMarker, LEFT_HAND_MARKER, ColorRGBA.Blue);
     rightHandMarker = ensureHandMarker(rightHandMarker, RIGHT_HAND_MARKER, ColorRGBA.Red);
+    ikLeftHandMarker = ensureHandMarker(ikLeftHandMarker, IK_LEFT_HAND_MARKER, ColorRGBA.Green);
     syncHandMarker(leftHandMarker, left);
     syncHandMarker(rightHandMarker, right);
+    syncHandMarker(ikLeftHandMarker, ikLeft);
   }
 
   private void removeHandPositionOverlays() {
@@ -1925,8 +2059,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
     detachHandMarker(leftHandMarker);
     detachHandMarker(rightHandMarker);
+    detachHandMarker(ikLeftHandMarker);
     leftHandMarker = null;
     rightHandMarker = null;
+    ikLeftHandMarker = null;
   }
 
   private Geometry ensureHandMarker(Geometry existing, String name, ColorRGBA color) {
@@ -1989,7 +2125,140 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (v == null) {
       return "n/a";
     }
-    return String.format("%.1f, %.1f, %.1f", v.x, v.y, v.z);
+    return String.format("%.3f, %.3f, %.3f", v.x, v.y, v.z);
+  }
+
+  private static String formatHudError(Vector3f sim, Vector3f ik) {
+    if (sim == null || ik == null) {
+      return null;
+    }
+    return String.format("%.3f m", sim.distance(ik));
+  }
+
+  /**
+   * Thread-safe world translation of a named spatial (meters, JME Y-up).
+   *
+   * @param name
+   *          node name, e.g. {@code i01.leftArm.omoplate}
+   * @return world position, or null if missing / JME not started
+   */
+  public Point3df getWorldTranslation(String name) {
+    if (app == null) {
+      log.warn("getWorldTranslation({}) — JME app not started", name);
+      return null;
+    }
+    try {
+      Future<Point3df> future = app.enqueue(() -> {
+        Spatial spatial = find(name);
+        if (spatial == null) {
+          return null;
+        }
+        Vector3f v = spatial.getWorldTranslation();
+        return new Point3df(v.x, v.y, v.z);
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldTranslation({}) failed", name, e);
+      return null;
+    }
+  }
+
+  /**
+   * Thread-safe snapshot of several spatial world translations (meters, JME
+   * Y-up). Missing names are omitted from the result.
+   */
+  public Map<String, Point3df> getWorldTranslations(String... names) {
+    Map<String, Point3df> empty = new LinkedHashMap<>();
+    if (app == null || names == null) {
+      log.warn("getWorldTranslations — JME app not started or no names");
+      return empty;
+    }
+    try {
+      Future<Map<String, Point3df>> future = app.enqueue(() -> {
+        Map<String, Point3df> out = new LinkedHashMap<>();
+        for (String name : names) {
+          if (name == null) {
+            continue;
+          }
+          Spatial spatial = find(name);
+          if (spatial == null) {
+            continue;
+          }
+          Vector3f v = spatial.getWorldTranslation();
+          out.put(name, new Point3df(v.x, v.y, v.z));
+        }
+        return out;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldTranslations failed", e);
+      return empty;
+    }
+  }
+
+  /**
+   * Omoplate, shoulder, rotate, bicep, and wrist world translations for one
+   * InMoov arm (meters).
+   */
+  public Map<String, Point3df> getArmChainWorldTranslations(String robot, String side) {
+    Map<String, Point3df> chain = getWorldTranslations(robot + "." + side + "Arm.omoplate", robot + "." + side + "Arm.shoulder", robot + "." + side + "Arm.rotate",
+        robot + "." + side + "Arm.bicep", robot + "." + side + "Hand.wrist");
+    if (!chain.containsKey(robot + "." + side + "Hand.wrist")) {
+      Point3df hand = getHandWorldTranslation(robot, side);
+      if (hand != null) {
+        chain.put(robot + "." + side + "Hand.wrist", hand);
+      }
+    }
+    return chain;
+  }
+
+  /**
+   * Thread-safe world translation of an InMoov hand / wrist node.
+   */
+  public Point3df getHandWorldTranslation(String robot, String side) {
+    if (app == null) {
+      log.warn("getHandWorldTranslation({}, {}) — JME app not started", robot, side);
+      return null;
+    }
+    try {
+      Future<Point3df> future = app.enqueue(() -> {
+        Spatial spatial = findHandSpatial(robot, side);
+        if (spatial == null) {
+          return null;
+        }
+        Vector3f v = spatial.getWorldTranslation();
+        return new Point3df(v.x, v.y, v.z);
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getHandWorldTranslation({}, {}) failed", robot, side, e);
+      return null;
+    }
+  }
+
+  /**
+   * InverseKinematics3D {@code publishWorldPosition} callback. Updates the green
+   * IK overlay to the latest world-frame palm (Compute from servos, MoveTo,
+   * Center All Joints).
+   */
+  public void onWorldPosition(Point position) {
+    if (position == null) {
+      setIkHandWorldPosition(null, null, null);
+      return;
+    }
+    setIkHandWorldPosition(position.getX(), position.getY(), position.getZ());
+  }
+
+  /**
+   * Show a green marker + HUD line at the IK-predicted left-hand world
+   * position. Pass nulls to hide.
+   */
+  public void setIkHandWorldPosition(Double x, Double y, Double z) {
+    if (x == null || y == null || z == null) {
+      ikLeftHandWorld = null;
+      return;
+    }
+    ikLeftHandWorld = new Vector3f(x.floatValue(), y.floatValue(), z.floatValue());
   }
 
   public void rename(String name, String newName) {
@@ -2471,11 +2740,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
      * </pre>
      */
 
-    // wheelmouse zoom (check)
-    // alt+ctrl+lmb - zoom <br>
-    // alt+lmb - rotate<br>
-    // alt+shft+lmb - pan
-    // rotate around selection -
+    // Left drag     orbit around selection / look-at
+    // Right drag    pan
+    // Shift+drag    pan
+    // Wheel         zoom toward look-at
+    // Left click    select (if the pointer did not drag)
     // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
     // wrap text of breadcrumbs
     // draggable - resize for menu - what you set is how it stays
@@ -2534,6 +2803,62 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     inputManager.addMapping("export", new KeyTrigger(KeyInput.KEY_E));
     inputManager.addListener(this, "export");
 
+    // Absolute cursor motion — MouseAxisTrigger X/Y is silent with a visible cursor.
+    inputManager.addRawInputListener(new RawInputListener() {
+      @Override
+      public void beginInput() {
+      }
+
+      @Override
+      public void endInput() {
+      }
+
+      @Override
+      public void onJoyAxisEvent(JoyAxisEvent evt) {
+      }
+
+      @Override
+      public void onJoyButtonEvent(JoyButtonEvent evt) {
+      }
+
+      @Override
+      public void onKeyEvent(KeyInputEvent evt) {
+      }
+
+      @Override
+      public void onMouseButtonEvent(MouseButtonEvent evt) {
+        boolean pressed = evt.isPressed();
+        int button = evt.getButtonIndex();
+        if (button == MouseInput.BUTTON_LEFT) {
+          mouseLeft = pressed;
+          if (pressed) {
+            viewDragging = false;
+            viewDragAccum = 0f;
+            captureCursor();
+          }
+        } else if (button == MouseInput.BUTTON_MIDDLE) {
+          mouseMiddle = pressed;
+          if (pressed) {
+            captureCursor();
+          }
+        } else if (button == MouseInput.BUTTON_RIGHT) {
+          mouseRightPressed = pressed;
+          if (pressed) {
+            captureCursor();
+          }
+        }
+      }
+
+      @Override
+      public void onMouseMotionEvent(MouseMotionEvent evt) {
+        updateViewDrag();
+      }
+
+      @Override
+      public void onTouchEvent(TouchEvent evt) {
+      }
+    });
+
     viewPort.setBackgroundColor(ColorRGBA.Gray);
 
     DirectionalLight sun = new DirectionalLight();
@@ -2583,13 +2908,19 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
 
+    // After queued lookAt/move so the user's drag wins this frame.
+    updateViewDrag();
+
     deltaMs = System.currentTimeMillis() - startUpdateTs;
     sleepMs = 33 - deltaMs;
 
     if (sleepMs < 0) {
       sleepMs = 0;
     }
-    sleep(sleepMs);
+    // Don't cap the frame rate while dragging — cursor sampling needs to keep up.
+    if (!(mouseLeft || mouseMiddle || mouseRightPressed)) {
+      sleep(sleepMs);
+    }
   }
 
   public SimpleApplication start() {

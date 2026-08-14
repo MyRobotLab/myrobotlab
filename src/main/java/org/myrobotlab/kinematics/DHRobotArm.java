@@ -22,6 +22,13 @@ public class DHRobotArm implements Serializable {
   // for debugging .. hmmm
   public transient InverseKinematics3D ik3D = null;
 
+  /**
+   * Fixed end-effector offset in the last link frame (mm). Applied after the DH
+   * chain so a wrist/palm node that is not the last joint origin still rotates
+   * with the arm. Not an IK joint.
+   */
+  private Point toolOffset = null;
+
   public DHRobotArm() {
     super();
     links = new ArrayList<DHLink>();
@@ -33,6 +40,9 @@ public class DHRobotArm implements Serializable {
     links = new ArrayList<DHLink>();
     for (DHLink link : copy.links) {
       links.add(new DHLink(link));
+    }
+    if (copy.toolOffset != null) {
+      toolOffset = new Point(copy.toolOffset);
     }
   }
 
@@ -109,42 +119,9 @@ public class DHRobotArm implements Serializable {
       return null;
     }
 
-    Matrix m = new Matrix(4, 4);
-    // TODO: init to the ident?
-
-    // initial frame orientated around x
-    m.elements[0][0] = 1;
-    m.elements[1][1] = 1;
-    m.elements[2][2] = 1;
-    m.elements[3][3] = 1;
-
-    // initial frame orientated around z
-    // m.elements[0][2] = 1;
-    // m.elements[1][1] = 1;
-    // m.elements[2][0] = 1;
-    // m.elements[3][3] = 1;
-
-    // log.debug("-------------------------");
-    // log.debug(m);
-    // TODO: validate this approach..
-    for (int i = 0; i <= index; i++) {
-      DHLink link = links.get(i);
-      Matrix s = link.resolveMatrix();
-      // log.debug(s);
-      m = m.multiply(s);
-      // log.debug("-------------------------");
-      // log.debug(m);
-    }
-    // now m should be the total translation for the arm
-    // given the arms current position
-    double x = m.elements[0][3];
-    double y = m.elements[1][3];
-    double z = m.elements[2][3];
-    // double ws = m.elements[3][3];
-    // log.debug("World Scale : " + ws);
-    Point jointPosition = new Point(x, y, z, 0, 0, 0);
-    return jointPosition;
-
+    Matrix m = getHomogeneousMatrix(index);
+    boolean includeTool = index == links.size() - 1;
+    return pointFromMatrix(m, includeTool);
   }
 
   /**
@@ -154,44 +131,91 @@ public class DHRobotArm implements Serializable {
    *         with this function
    */
   public Point getPalmPosition(String lastDHLink) {
-    // TODO Auto-generated method stub
-    // return the position of the end effector wrt the base frame
-    Matrix m = new Matrix(4, 4);
-    // TODO: init to the ident?
+    Matrix m = getHomogeneousMatrix(lastDHLink);
+    boolean includeTool = lastDHLink == null || (links.size() > 0 && lastDHLink.equals(links.get(links.size() - 1).getName()));
+    return pointFromMatrix(m, includeTool);
+  }
 
-    // initial frame orientated around x
-    m.elements[0][0] = 1;
-    m.elements[1][1] = 1;
-    m.elements[2][2] = 1;
-    m.elements[3][3] = 1;
+  /**
+   * Homogeneous transform from the DH base to the origin of {@code lastIndex}
+   * (inclusive), without the tool offset.
+   */
+  public Matrix getHomogeneousMatrix(int lastIndex) {
+    Matrix m = identity4();
+    int end = Math.min(lastIndex, links.size() - 1);
+    for (int i = 0; i <= end; i++) {
+      m = m.multiply(links.get(i).resolveMatrix());
+    }
+    return m;
+  }
 
-    // initial frame orientated around z
-    // m.elements[0][2] = 1;
-    // m.elements[1][1] = 1;
-    // m.elements[2][0] = 1;
-    // m.elements[3][3] = 1;
-
-    // log.debug("-------------------------");
-    // log.debug(m);
-    // TODO: validate this approach..
+  /**
+   * Homogeneous transform through {@code lastDHLink} (or the full chain if null).
+   */
+  public Matrix getHomogeneousMatrix(String lastDHLink) {
+    Matrix m = identity4();
     for (int i = 0; i < links.size(); i++) {
-      Matrix s = links.get(i).resolveMatrix();
-      // log.debug(s);
-      m = m.multiply(s);
-      // log.debug("-------------------------");
-      // log.debug(m);
+      m = m.multiply(links.get(i).resolveMatrix());
       if (links.get(i).getName() != null && links.get(i).getName().equals(lastDHLink)) {
         break;
       }
     }
-    // now m should be the total translation for the arm
-    // given the arms current position
+    return m;
+  }
+
+  public Matrix getHomogeneousMatrix() {
+    return getHomogeneousMatrix(links.size() - 1);
+  }
+
+  public Point getToolOffset() {
+    return toolOffset;
+  }
+
+  public void setToolOffset(Point toolOffset) {
+    this.toolOffset = toolOffset;
+  }
+
+  public void setToolOffset(double x, double y, double z) {
+    this.toolOffset = new Point(x, y, z);
+  }
+
+  /**
+   * Solve a last-frame tool offset so {@link #getPalmPosition()} equals
+   * {@code targetPalm} at the current joint thetas. The offset rotates with the
+   * arm; it is not a base-frame translation.
+   */
+  public Point fitToolOffset(Point targetPalm) {
+    toolOffset = null;
+    Matrix m = getHomogeneousMatrix();
+    double dx = targetPalm.getX() - m.elements[0][3];
+    double dy = targetPalm.getY() - m.elements[1][3];
+    double dz = targetPalm.getZ() - m.elements[2][3];
+    double tx = m.elements[0][0] * dx + m.elements[1][0] * dy + m.elements[2][0] * dz;
+    double ty = m.elements[0][1] * dx + m.elements[1][1] * dy + m.elements[2][1] * dz;
+    double tz = m.elements[0][2] * dx + m.elements[1][2] * dy + m.elements[2][2] * dz;
+    toolOffset = new Point(tx, ty, tz);
+    log.info("Fitted EE tool offset {} so palm matches {}", toolOffset, targetPalm);
+    return toolOffset;
+  }
+
+  private static Matrix identity4() {
+    Matrix m = new Matrix(4, 4);
+    m.elements[0][0] = 1;
+    m.elements[1][1] = 1;
+    m.elements[2][2] = 1;
+    m.elements[3][3] = 1;
+    return m;
+  }
+
+  private Point pointFromMatrix(Matrix m, boolean includeTool) {
     double x = m.elements[0][3];
     double y = m.elements[1][3];
     double z = m.elements[2][3];
-    // double ws = m.elements[3][3];
-    // log.debug("World Scale : " + ws);
-    // TODO: pass /compute the roll pitch and yaw ..
+    if (includeTool && toolOffset != null) {
+      x += m.elements[0][0] * toolOffset.getX() + m.elements[0][1] * toolOffset.getY() + m.elements[0][2] * toolOffset.getZ();
+      y += m.elements[1][0] * toolOffset.getX() + m.elements[1][1] * toolOffset.getY() + m.elements[1][2] * toolOffset.getZ();
+      z += m.elements[2][0] * toolOffset.getX() + m.elements[2][1] * toolOffset.getY() + m.elements[2][2] * toolOffset.getZ();
+    }
     double pitch = Math.atan2(-1.0 * (m.elements[2][0]), Math.sqrt(m.elements[0][0] * m.elements[0][0] + m.elements[1][0] * m.elements[1][0]));
     double roll = 0;
     double yaw = 0;
@@ -203,23 +227,7 @@ public class DHRobotArm implements Serializable {
       roll = Math.atan2(m.elements[2][1] / Math.cos(pitch), m.elements[2][2]) / Math.cos(pitch);
       yaw = Math.atan2(m.elements[1][0] / Math.cos(pitch), m.elements[0][0] / Math.cos(pitch)) - Math.PI / 2;
     }
-    // double pitch=0, roll=0, yaw=0; //attitude, bank, heading
-    // if (m.elements[1][0] > 0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = Math.PI/2;
-    // }
-    // else if (m.elements[1][0] < -0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = -Math.PI/2;
-    // }
-    // else {
-    // yaw = Math.atan2(-m.elements[2][0], m.elements[0][0]);
-    // roll = Math.atan2(-m.elements[1][2], m.elements[1][1]);
-    // pitch = Math.asin(m.elements[1][0]);
-    // }
-    Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
-
-    return palm;
+    return new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
   }
 
   public void centerAllJoints() {

@@ -36,50 +36,65 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Default DH lengths (mm) for a printed InMoov / VinMoov stick figure. The
+   * IK demo overwrites these from measured VinMoov node distances when the
+   * simulator is running.
+   */
+  public static final double DH_OMOPLATE_A_MM = 40.0;
+  public static final double DH_SHOULDER_D_MM = 80.0;
+  public static final double DH_ROTATE_D_MM = 280.0;
+  public static final double DH_BICEP_A_MM = 280.0;
+
+  /** Servo rest / limits matching {@link org.myrobotlab.service.config.InMoov2ArmConfig} (degrees). */
+  public static final double OMOPLATE_SERVO_MIN = 10.0;
+  public static final double OMOPLATE_SERVO_MAX = 80.0;
+  public static final double OMOPLATE_SERVO_REST = 10.0;
+  public static final double OMOPLATE_DH_OFFSET = 90.0;
+
+  public static final double SHOULDER_SERVO_MIN = 0.0;
+  public static final double SHOULDER_SERVO_MAX = 180.0;
+  public static final double SHOULDER_SERVO_REST = 30.0;
+  public static final double SHOULDER_DH_OFFSET = -45.0;
+
+  public static final double ROTATE_SERVO_MIN = 40.0;
+  public static final double ROTATE_SERVO_MAX = 180.0;
+  public static final double ROTATE_SERVO_REST = 90.0;
+  public static final double ROTATE_DH_OFFSET = 0.0;
+
+  public static final double BICEP_SERVO_MIN = 0.0;
+  public static final double BICEP_SERVO_MAX = 90.0;
+  public static final double BICEP_SERVO_REST = 0.0;
+  public static final double BICEP_DH_OFFSET = -90.0;
+
+  /**
+   * InMoov left/right arm DH chain aligned to servo rest.
+   *
+   * <p>
+   * Mapping used by InverseKinematics3D:
+   * {@code servo = deg(theta) + offset}. Constructor thetas are the DH angles
+   * at InMoov rest so the solver starts where VinMoov bind-pose Euler is ~0.
+   * Min/max are servo min/max through the same map so {@code centerAllJoints}
+   * cannot emit out-of-range servo commands.
+   * </p>
+   */
   public static DHRobotArm getDHRobotArm(String name, String side) {
 
-    // TODO: specify this correctly and document the reference frames!
     DHRobotArm arm = new DHRobotArm();
-    // d , r, theta , alpha
+    // d , r, theta , alpha — Standard DH, Y-up, origin at omoplate
 
-    // HashMap<String, Double> calibMap = new HashMap<String, Double>();
-    // calibMap.put("i01.leftArm.omoplate", 90.0);
-    // calibMap.put("i01.leftArm.shoulder", -90.0+45);
-    // calibMap.put("i01.leftArm.rotate", 0.0);
-    // calibMap.put("i01.leftArm.bicep", -90.0);
+    DHLink link1 = servoDhLink(String.format("%s.%sArm.omoplate", name, side), 0, DH_OMOPLATE_A_MM, -90, OMOPLATE_DH_OFFSET, OMOPLATE_SERVO_MIN, OMOPLATE_SERVO_MAX,
+        OMOPLATE_SERVO_REST);
 
-    // TODO: the DH links should take into account the encoder offsets and
-    // calibration maps
-    DHLink link1 = new DHLink(String.format("%s.%sArm.omoplate", name, side), 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
-    // dh model + 90 degrees = real
-    link1.setMin(MathUtils.degToRad(-90));
-    link1.setMax(MathUtils.degToRad(0));
-    link1.setOffset(90);
-
-    // -80 vs +80 difference between left/right arm.
-    double shoulderWidth = 80;
+    double shoulderWidth = DH_SHOULDER_D_MM;
     if (side.equalsIgnoreCase("right")) {
-      // TODO: there are probably other differnces between the 2 arms.
-      shoulderWidth = -80;
+      shoulderWidth = -DH_SHOULDER_D_MM;
     }
-    DHLink link2 = new DHLink(String.format("%s.%sArm.shoulder", name, side), shoulderWidth, 0, MathUtils.degToRad(90), MathUtils.degToRad(90));
-    // TODO: this is actually 90 to -90 ? validate if inverted.
-    // this link is inverted :-/
-    link2.setMin(MathUtils.degToRad(-90));
-    link2.setMax(MathUtils.degToRad(90));
-    link2.setOffset(-45);
+    DHLink link2 = servoDhLink(String.format("%s.%sArm.shoulder", name, side), shoulderWidth, 0, 90, SHOULDER_DH_OFFSET, SHOULDER_SERVO_MIN, SHOULDER_SERVO_MAX, SHOULDER_SERVO_REST);
 
-    DHLink link3 = new DHLink(String.format("%s.%sArm.rotate", name, side), 280, 0, MathUtils.degToRad(0), MathUtils.degToRad(90));
-    // TODO: check if this is inverted. i think it is.
-    link3.setMin(MathUtils.degToRad(-90));
-    link3.setMax(MathUtils.degToRad(90));
-    link3.setOffset(0);
+    DHLink link3 = servoDhLink(String.format("%s.%sArm.rotate", name, side), DH_ROTATE_D_MM, 0, 90, ROTATE_DH_OFFSET, ROTATE_SERVO_MIN, ROTATE_SERVO_MAX, ROTATE_SERVO_REST);
 
-    DHLink link4 = new DHLink(String.format("%s.%sArm.bicep", name, side), 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
-    // TODO: this is probably inverted? should be 90 to 0...
-    link4.setMin(MathUtils.degToRad(90));
-    link4.setMax(MathUtils.degToRad(180));
-    link4.setOffset(-90);
+    DHLink link4 = servoDhLink(String.format("%s.%sArm.bicep", name, side), 0, DH_BICEP_A_MM, 0, BICEP_DH_OFFSET, BICEP_SERVO_MIN, BICEP_SERVO_MAX, BICEP_SERVO_REST);
 
     arm.addLink(link1);
     arm.addLink(link2);
@@ -87,6 +102,19 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
     arm.addLink(link4);
 
     return arm;
+  }
+
+  /**
+   * Revolute DH link whose constructor theta / min / max are derived from InMoov
+   * servo rest and limits: {@code thetaDeg = servoDeg - offset}.
+   */
+  private static DHLink servoDhLink(String name, double d, double r, double alphaDeg, double offsetDeg, double servoMin, double servoMax, double servoRest) {
+    double thetaDeg = servoRest - offsetDeg;
+    DHLink link = new DHLink(name, d, r, MathUtils.degToRad(thetaDeg), MathUtils.degToRad(alphaDeg));
+    link.setOffset(offsetDeg);
+    link.setMin(MathUtils.degToRad(servoMin - offsetDeg));
+    link.setMax(MathUtils.degToRad(servoMax - offsetDeg));
+    return link;
   }
   
   @Deprecated /* use onMove(map) */
@@ -228,6 +256,13 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
     log.info("end {} moveToBlocking", getName());
   }
 
+  /**
+   * Legacy short-name IK mapping (gain + phaseShift). InverseKinematics3D
+   * publishes full servo names ({@code i01.leftArm.omoplate}) and must attach to
+   * {@link InMoov2#onJointAngles}, which applies {@code theta + offset} only.
+   * Do not attach IK to this arm service or both maps will fight.
+   */
+  @Deprecated
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {
     // We should walk though our list of servos and see if

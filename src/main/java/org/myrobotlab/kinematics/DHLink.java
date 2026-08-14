@@ -89,6 +89,7 @@ public class DHLink implements Serializable {
     this.servoMax = copy.servoMax;
     this.servoMin = copy.servoMin;
     this.currentPos = copy.currentPos;
+    this.offset = copy.offset;
   }
 
   /**
