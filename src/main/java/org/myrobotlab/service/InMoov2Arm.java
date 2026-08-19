@@ -4,14 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.JointFrame;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.service.config.InMoov2ArmConfig;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -37,86 +39,130 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   private static final long serialVersionUID = 1L;
 
   /**
-   * Default DH lengths (mm) for a printed InMoov / VinMoov stick figure. The
-   * IK demo overwrites these from measured VinMoov node distances when the
+   * Default DH lengths (meters) for a printed InMoov / VinMoov stick figure.
+   * The IK demo overwrites these from measured VinMoov node distances when the
    * simulator is running.
    */
-  public static final double DH_OMOPLATE_A_MM = 40.0;
-  public static final double DH_SHOULDER_D_MM = 80.0;
-  public static final double DH_ROTATE_D_MM = 280.0;
-  public static final double DH_BICEP_A_MM = 280.0;
+  public static final double DH_OMOPLATE_A = 0.040;
+  public static final double DH_SHOULDER_D = 0.080;
+  public static final double DH_ROTATE_D = 0.280;
+  public static final double DH_BICEP_A = 0.280;
 
   /** Servo rest / limits matching {@link org.myrobotlab.service.config.InMoov2ArmConfig} (degrees). */
   public static final double OMOPLATE_SERVO_MIN = 10.0;
   public static final double OMOPLATE_SERVO_MAX = 80.0;
   public static final double OMOPLATE_SERVO_REST = 10.0;
-  public static final double OMOPLATE_DH_OFFSET = 90.0;
 
   public static final double SHOULDER_SERVO_MIN = 0.0;
   public static final double SHOULDER_SERVO_MAX = 180.0;
   public static final double SHOULDER_SERVO_REST = 30.0;
-  public static final double SHOULDER_DH_OFFSET = -45.0;
 
   public static final double ROTATE_SERVO_MIN = 40.0;
   public static final double ROTATE_SERVO_MAX = 180.0;
   public static final double ROTATE_SERVO_REST = 90.0;
-  public static final double ROTATE_DH_OFFSET = 0.0;
 
   public static final double BICEP_SERVO_MIN = 0.0;
   public static final double BICEP_SERVO_MAX = 90.0;
   public static final double BICEP_SERVO_REST = 0.0;
-  public static final double BICEP_DH_OFFSET = -90.0;
+
+  /** Mesh rotation direction of each arm node, matching {@code InMoov2Config}. */
+  public static final double OMOPLATE_MESH_SLOPE_LEFT = 1;
+
+  public static final double OMOPLATE_MESH_SLOPE_RIGHT = -1;
+
+  public static final double SHOULDER_MESH_SLOPE = -1;
+
+  public static final double ROTATE_MESH_SLOPE_LEFT = 1;
+
+  public static final double ROTATE_MESH_SLOPE_RIGHT = -1;
+
+  public static final double BICEP_MESH_SLOPE = -1;
 
   /**
-   * InMoov left/right arm DH chain aligned to servo rest.
+   * VinMoov node mapper so 1° of InMoov servo is 1° of mesh rotation and rest
+   * maps to 0° (bind pose). {@code slope} is +1 or −1 for the mesh axis
+   * direction used in {@code InMoov2Config} simulator nodes.
+   */
+  public static MapperLinear vinMoovArmMapper(double restServo, double slope) {
+    return new MapperLinear(0.0, 180.0, -restServo * slope, slope * (180.0 - restServo), true, false);
+  }
+
+  /**
+   * The four arm joints as measured on a nominal printed InMoov, in an arm-root
+   * frame whose origin is the omoplate: {@code +X} out to the robot's left,
+   * {@code +Y} up, {@code +Z} forward (the JMonkeyEngine convention).
    *
    * <p>
-   * Mapping used by InverseKinematics3D:
-   * {@code servo = deg(theta) + offset}. Constructor thetas are the DH angles
-   * at InMoov rest so the solver starts where VinMoov bind-pose Euler is ~0.
-   * Min/max are servo min/max through the same map so {@code centerAllJoints}
-   * cannot emit out-of-range servo commands.
+   * Each joint is an origin plus a real rotation axis, not a set of
+   * Denavit-Hartenberg parameters. The rotation <em>direction</em> is carried by
+   * the simulator's node mapper slope, so the axes are identical for both arms
+   * and only the origins mirror in X — trying to mirror the axes as well would
+   * double-count the reversal.
+   * </p>
+   *
+   * <p>
+   * These are a fallback. Call
+   * {@link org.myrobotlab.service.InverseKinematics3D#calibrateFromSimulator} to
+   * replace them with values measured from VinMoov.
+   * </p>
+   */
+  public static List<JointFrame> getDefaultJointFrames(String name, String side) {
+    boolean right = "right".equalsIgnoreCase(side);
+    double mirror = right ? -1.0 : 1.0;
+    double omoplateSlope = right ? OMOPLATE_MESH_SLOPE_RIGHT : OMOPLATE_MESH_SLOPE_LEFT;
+    double rotateSlope = right ? ROTATE_MESH_SLOPE_RIGHT : ROTATE_MESH_SLOPE_LEFT;
+
+    double shoulderX = mirror * DH_OMOPLATE_A;
+    double rotateX = mirror * (DH_OMOPLATE_A + DH_SHOULDER_D);
+    double elbowY = -DH_ROTATE_D;
+
+    List<JointFrame> frames = new ArrayList<>();
+    frames.add(jointFrame(String.format("%s.%sArm.omoplate", name, side), 0, 0, 0, 0, 0, 1, "z", OMOPLATE_SERVO_REST, omoplateSlope, OMOPLATE_SERVO_MIN, OMOPLATE_SERVO_MAX));
+    frames.add(jointFrame(String.format("%s.%sArm.shoulder", name, side), shoulderX, 0, 0, 1, 0, 0, "x", SHOULDER_SERVO_REST, SHOULDER_MESH_SLOPE, SHOULDER_SERVO_MIN,
+        SHOULDER_SERVO_MAX));
+    frames.add(jointFrame(String.format("%s.%sArm.rotate", name, side), rotateX, 0, 0, 0, -1, 0, "y", ROTATE_SERVO_REST, rotateSlope, ROTATE_SERVO_MIN, ROTATE_SERVO_MAX));
+    frames.add(jointFrame(String.format("%s.%sArm.bicep", name, side), rotateX, elbowY, 0, 1, 0, 0, "x", BICEP_SERVO_REST, BICEP_MESH_SLOPE, BICEP_SERVO_MIN, BICEP_SERVO_MAX));
+    return frames;
+  }
+
+  /** Nominal wrist position for {@link #getDefaultJointFrames}, arm-root frame. */
+  public static Point getDefaultEndEffector(String side) {
+    double mirror = "right".equalsIgnoreCase(side) ? -1.0 : 1.0;
+    return new Point(mirror * (DH_OMOPLATE_A + DH_SHOULDER_D), -(DH_ROTATE_D + DH_BICEP_A), 0);
+  }
+
+  /**
+   * A joint frame whose servo map is taken from the same
+   * {@link #vinMoovArmMapper} the simulator uses, sampled at the servo limits.
+   * Because the map is affine, two points fix it exactly, and reusing the
+   * simulator's mapper means the solver cannot disagree with the mesh about
+   * direction or scale.
+   */
+  private static JointFrame jointFrame(String name, double ox, double oy, double oz, double ax, double ay, double az, String mask, double servoRest, double meshSlope,
+      double servoMin, double servoMax) {
+    MapperLinear mapper = vinMoovArmMapper(servoRest, meshSlope);
+    JointFrame frame = new JointFrame(name, new Point(ox, oy, oz), new Point(ax, ay, az));
+    frame.rotationMask = mask;
+    frame.angleDeg = mapper.calcOutput(servoRest);
+    frame.withServoMap(servoMin, servoMax, mapper.calcOutput(servoMin), mapper.calcOutput(servoMax));
+    return frame;
+  }
+
+  /**
+   * InMoov left/right arm kinematic chain.
+   *
+   * <p>
+   * Built from {@link #getDefaultJointFrames} so the link geometry is real joint
+   * axes and origins, and the servo mapping ({@code servo = servoSlope * thetaDeg
+   * + offset}) comes from the simulator's node mapper. That makes {@code theta}
+   * identical to the mesh rotation angle: zero at servo rest, one degree per
+   * servo degree, same sign.
    * </p>
    */
   public static DHRobotArm getDHRobotArm(String name, String side) {
-
-    DHRobotArm arm = new DHRobotArm();
-    // d , r, theta , alpha — Standard DH, Y-up, origin at omoplate
-
-    DHLink link1 = servoDhLink(String.format("%s.%sArm.omoplate", name, side), 0, DH_OMOPLATE_A_MM, -90, OMOPLATE_DH_OFFSET, OMOPLATE_SERVO_MIN, OMOPLATE_SERVO_MAX,
-        OMOPLATE_SERVO_REST);
-
-    double shoulderWidth = DH_SHOULDER_D_MM;
-    if (side.equalsIgnoreCase("right")) {
-      shoulderWidth = -DH_SHOULDER_D_MM;
-    }
-    DHLink link2 = servoDhLink(String.format("%s.%sArm.shoulder", name, side), shoulderWidth, 0, 90, SHOULDER_DH_OFFSET, SHOULDER_SERVO_MIN, SHOULDER_SERVO_MAX, SHOULDER_SERVO_REST);
-
-    DHLink link3 = servoDhLink(String.format("%s.%sArm.rotate", name, side), DH_ROTATE_D_MM, 0, 90, ROTATE_DH_OFFSET, ROTATE_SERVO_MIN, ROTATE_SERVO_MAX, ROTATE_SERVO_REST);
-
-    DHLink link4 = servoDhLink(String.format("%s.%sArm.bicep", name, side), 0, DH_BICEP_A_MM, 0, BICEP_DH_OFFSET, BICEP_SERVO_MIN, BICEP_SERVO_MAX, BICEP_SERVO_REST);
-
-    arm.addLink(link1);
-    arm.addLink(link2);
-    arm.addLink(link3);
-    arm.addLink(link4);
-
-    return arm;
+    return DHRobotArm.fromJointFrames(String.format("%s.%sArm", name, side), getDefaultJointFrames(name, side), getDefaultEndEffector(side));
   }
 
-  /**
-   * Revolute DH link whose constructor theta / min / max are derived from InMoov
-   * servo rest and limits: {@code thetaDeg = servoDeg - offset}.
-   */
-  private static DHLink servoDhLink(String name, double d, double r, double alphaDeg, double offsetDeg, double servoMin, double servoMax, double servoRest) {
-    double thetaDeg = servoRest - offsetDeg;
-    DHLink link = new DHLink(name, d, r, MathUtils.degToRad(thetaDeg), MathUtils.degToRad(alphaDeg));
-    link.setOffset(offsetDeg);
-    link.setMin(MathUtils.degToRad(servoMin - offsetDeg));
-    link.setMax(MathUtils.degToRad(servoMax - offsetDeg));
-    return link;
-  }
-  
   @Deprecated /* use onMove(map) */
   public void onMoveArm(HashMap<String, Double> map) {
     onMove(map);
@@ -257,10 +303,11 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   }
 
   /**
-   * Legacy short-name IK mapping (gain + phaseShift). InverseKinematics3D
-   * publishes full servo names ({@code i01.leftArm.omoplate}) and must attach to
-   * {@link InMoov2#onJointAngles}, which applies {@code theta + offset} only.
-   * Do not attach IK to this arm service or both maps will fight.
+   * Legacy short-name IK mapping (gain + phaseShift). InverseKinematics3D now
+   * publishes ready-to-use servo degrees under full names
+   * ({@code i01.leftArm.omoplate}) and must attach to
+   * {@link InMoov2#onJointAngles}, which just forwards them. Do not attach IK to
+   * this arm service or both maps will fight.
    */
   @Deprecated
   @Override

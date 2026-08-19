@@ -43,7 +43,9 @@ import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.jme3.UserDataConfig;
+import org.myrobotlab.kinematics.JointFrame;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
@@ -206,7 +208,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   protected transient Geometry ikLeftHandMarker;
 
-  /** IK-predicted left hand in world coordinates (null to hide). */
+  /** IK Cartesian goal in world coordinates (green marker). */
+  protected Vector3f ikLeftHandGoal;
+
+  /** Latest IK forward-kinematics palm (HUD). */
+  protected Vector3f ikLeftHandCurrent;
+
+  /** Displayed green marker: goal if set, otherwise current FK. */
   protected Vector3f ikLeftHandWorld;
 
   protected boolean fullscreen = false;
@@ -476,8 +484,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       subscribe(service.getName(), "publishMoveTo", getName(), "onServoMoveTo");
     }
 
-    if (service instanceof InverseKinematics3D) {
+    if (service instanceof InverseKinematics3D || service instanceof Fabrik) {
       subscribe(service.getName(), "publishWorldPosition", getName(), "onWorldPosition");
+      subscribe(service.getName(), "publishIkGoal", getName(), "onIkGoal");
     }
 
     // backward attach ?
@@ -900,38 +909,25 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     return getAngle(name, null);
   }
 
+  /**
+   * The joint's input (servo) angle. Read from the angle last applied by
+   * {@link Jme3Util#rotateTo}, which is exact — recovering it from the node's
+   * quaternion via Euler angles is lossy and clamps the Z axis to ±90°.
+   */
   public Float getAngle(String name, String axis) {
     Spatial s = get(name);
     if (s == null) {
       return null;
     }
-    Quaternion q = s.getLocalRotation();
-    float[] angles = new float[3];
-    q.toAngles(angles);
     UserData data = getUserData(name);
-    // default rotation is around Y axis unless specified
-    Vector3f rotMask = null;
-
-    if (axis != null) {
-      rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
-    } else {
-      rotMask = util.getUnitVector(data.rotationMask);
-    }
-
-    // Unit vectors just have a length of 1 and can be along multiple axes,
-    // for which getIndexFromUnitVector does not work.
-    Integer axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
-    if (axisIndex == null) {
-      error("rotMask is not a unit vector along a single axis.");
+    if (data == null) {
       return null;
     }
-    float rawAngle = angles[axisIndex] * 180 / FastMath.PI;
-
-    float result = rawAngle;
+    double meshAngle = data.getCurrentAngleDeg();
     if (data.mapper != null) {
-      result = Double.valueOf(data.mapper.calcInput(rawAngle)).floatValue();
+      return Double.valueOf(data.mapper.calcInput(meshAngle)).floatValue();
     }
-    return result;
+    return (float) meshAngle;
   }
 
   public Jme3App getApp() {
@@ -2030,8 +2026,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     if (guiNode != null) {
       String err = formatHudError(left, ikLeft);
-      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeft),
-          err != null ? "\nL err:  " + err : "");
+      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s\nL goal: %s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeftHandCurrent),
+          formatHudVec(ikLeftHandGoal), err != null ? "\nL err:  " + err : "");
       HudText hud = guiText.get(HAND_POSITION_HUD_KEY);
       if (hud == null) {
         hud = new HudText(this, text, 12, 0);
@@ -2164,6 +2160,50 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
+   * Thread-safe 4x4 world transform of a named spatial (meters, JME Y-up). Used
+   * as the InverseKinematics3D DH base so the arm chain shares the JME root
+   * origin.
+   */
+  public Matrix getWorldMatrix(String name) {
+    if (app == null) {
+      log.warn("getWorldMatrix({}) — JME app not started", name);
+      return null;
+    }
+    try {
+      Future<Matrix> future = app.enqueue(() -> {
+        Spatial spatial = find(name);
+        if (spatial == null) {
+          return null;
+        }
+        com.jme3.math.Vector3f t = spatial.getWorldTranslation();
+        com.jme3.math.Matrix3f r = spatial.getWorldRotation().toRotationMatrix();
+        Matrix m = Matrix.identity(4);
+        for (int row = 0; row < 3; row++) {
+          for (int col = 0; col < 3; col++) {
+            m.elements[row][col] = r.get(row, col);
+          }
+        }
+        m.elements[0][3] = t.x;
+        m.elements[1][3] = t.y;
+        m.elements[2][3] = t.z;
+        return m;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldMatrix({}) failed", name, e);
+      return null;
+    }
+  }
+
+  /**
+   * Fired after VinMoov is bound and node mappers are applied so InverseKinematics3D
+   * can sample the omoplate world pose.
+   */
+  public String publishSceneReady(String name) {
+    return name;
+  }
+
+  /**
    * Thread-safe snapshot of several spatial world translations (meters, JME
    * Y-up). Missing names are omitted from the result.
    */
@@ -2194,6 +2234,65 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       log.error("getWorldTranslations failed", e);
       return empty;
     }
+  }
+
+  /**
+   * The named nodes' rotation axes, axis origins, current joint angles and
+   * servo&rarr;mesh maps, sampled together on the render thread.
+   *
+   * <p>
+   * This is the measurement a kinematic solver needs: it fully describes each
+   * revolute joint of the rig, so a chain built from it reproduces the simulated
+   * arm for <em>any</em> joint angles. Missing nodes are skipped, so check the
+   * size of the result.
+   * </p>
+   *
+   * @param names
+   *          node names ordered parent to child, e.g.
+   *          {@code i01.leftArm.omoplate ... i01.leftArm.bicep}
+   */
+  public List<JointFrame> getJointFrames(String... names) {
+    List<JointFrame> frames = new ArrayList<>();
+    if (app == null || names == null) {
+      log.warn("getJointFrames — JME app not started or no names");
+      return frames;
+    }
+    try {
+      Future<List<JointFrame>> future = app.enqueue(() -> {
+        List<JointFrame> out = new ArrayList<>();
+        for (String name : names) {
+          if (name == null) {
+            continue;
+          }
+          UserData data = getUserData(name);
+          double[] axis = util.getWorldJointAxis(name);
+          if (data == null || axis == null) {
+            log.warn("getJointFrames - no node / rotation axis for {}", name);
+            continue;
+          }
+          JointFrame frame = new JointFrame(name, new Point(axis[0], axis[1], axis[2]), new Point(axis[3], axis[4], axis[5]));
+          frame.rotationMask = data.rotationMask;
+          frame.angleDeg = data.getCurrentAngleDeg();
+          if (data.mapper != null) {
+            frame.withServoMap(data.mapper.getMinX(), data.mapper.getMaxX(), data.mapper.getMinY(), data.mapper.getMaxY());
+          }
+          out.add(frame);
+        }
+        return out;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getJointFrames failed", e);
+      return frames;
+    }
+  }
+
+  /**
+   * {@link #getJointFrames(String...)} for one InMoov arm, in chain order.
+   */
+  public List<JointFrame> getArmJointFrames(String robot, String side) {
+    String prefix = robot + "." + side + "Arm.";
+    return getJointFrames(prefix + "omoplate", prefix + "shoulder", prefix + "rotate", prefix + "bicep");
   }
 
   /**
@@ -2237,28 +2336,48 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * InverseKinematics3D {@code publishWorldPosition} callback. Updates the green
-   * IK overlay to the latest world-frame palm (Compute from servos, MoveTo,
-   * Center All Joints).
+   * InverseKinematics3D / Fabrik {@code publishIkGoal} callback. Green marker is
+   * the Cartesian goal the solver is walking toward.
    */
-  public void onWorldPosition(Point position) {
+  public void onIkGoal(Point position) {
     if (position == null) {
-      setIkHandWorldPosition(null, null, null);
-      return;
+      ikLeftHandGoal = null;
+    } else {
+      ikLeftHandGoal = new Vector3f((float) position.getX(), (float) position.getY(), (float) position.getZ());
     }
-    setIkHandWorldPosition(position.getX(), position.getY(), position.getZ());
+    refreshIkMarker();
   }
 
   /**
-   * Show a green marker + HUD line at the IK-predicted left-hand world
-   * position. Pass nulls to hide.
+   * InverseKinematics3D {@code publishWorldPosition} callback. Updates the IK
+   * palm HUD; green stays on the goal when one is active.
+   */
+  public void onWorldPosition(Point position) {
+    if (position == null) {
+      ikLeftHandCurrent = null;
+    } else {
+      ikLeftHandCurrent = new Vector3f((float) position.getX(), (float) position.getY(), (float) position.getZ());
+    }
+    refreshIkMarker();
+  }
+
+  /**
+   * Show a green marker + HUD line at the IK goal (or current palm if no goal).
+   * Pass nulls to hide.
    */
   public void setIkHandWorldPosition(Double x, Double y, Double z) {
     if (x == null || y == null || z == null) {
-      ikLeftHandWorld = null;
+      ikLeftHandCurrent = null;
+      ikLeftHandGoal = null;
+      refreshIkMarker();
       return;
     }
-    ikLeftHandWorld = new Vector3f(x.floatValue(), y.floatValue(), z.floatValue());
+    ikLeftHandCurrent = new Vector3f(x.floatValue(), y.floatValue(), z.floatValue());
+    refreshIkMarker();
+  }
+
+  private void refreshIkMarker() {
+    ikLeftHandWorld = ikLeftHandGoal != null ? ikLeftHandGoal : ikLeftHandCurrent;
   }
 
   public void rename(String name, String newName) {
@@ -3481,6 +3600,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       sceneSetup.run();
     }
 
+    invoke("publishSceneReady", getName());
     return c;
   }
 
@@ -3516,6 +3636,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         if (udc.rotationMask != null) {
           setRotation(path, udc.rotationMask);
         }
+        // remember the authored pose now, before anything drives the joint, so
+        // joint angles are always measured from bind
+        ud.captureBindRotation();
         applied++;
       }
     }

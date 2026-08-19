@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.JointFrame;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
@@ -25,19 +27,26 @@ import org.slf4j.Logger;
 /**
  * InverseKinematics3D - 3D inverse kinematics from DH parameters using a
  * pseudo-inverse Jacobian gradient descent to move the end effector to a
- * desired x,y,z in the base frame.
+ * desired x,y,z.
  *
  * <p>
- * <b>Frames:</b> the DH solver works in <em>millimeters</em> with the origin at
- * the first joint (InMoov omoplate) and Y-up. Constructor thetas are InMoov
- * servo rest. The VinMoov / JMonkeyEngine simulator is <em>meters</em>, Y-up,
- * origin at the model root. {@link #calibrateToWorld} installs scale+translation
- * (omoplate origin, typically 1000 mm/m). A last-frame
- * {@link DHRobotArm#fitToolOffset} maps the DH palm onto the simulated wrist so
- * a bind-pose forward offset rotates with the arm.
+ * <b>Frames:</b> the solver and public API are <em>meters</em>, Y-up — the same
+ * as JMonkeyEngine. {@link #calibrateFromSimulator} measures each joint's real
+ * rotation axis and origin off the rig (see {@link JointFrame}) and rebuilds the
+ * chain from them, so forward kinematics reproduce the simulated arm at every
+ * pose rather than only at the one that was sampled.
  * </p>
  *
+ * <p>
+ * <b>Joint space:</b> {@code servoDeg = servoSlope * thetaDeg + offset}, with
+ * both terms taken from the simulator's own node mapper. Sharing that map is
+ * what keeps the solver, the mesh and the physical servo from disagreeing about
+ * the direction or scale of a joint.
+ * </p>
+ *
+ * <p>
  * Rotation and orientation of the end effector are not currently solved.
+ * </p>
  *
  * @author kwatters
  */
@@ -55,19 +64,25 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
   private Point joystickLinearVelocity = new Point(0, 0, 0, 0, 0, 0);
 
   /**
-   * JME / VinMoov world units are meters; DH / IK are millimeters.
+   * Legacy mm-per-meter factor. The solver is native meters; keep this for
+   * callers that still convert old millimeter samples.
    */
   public static final double IK_MM_PER_JME_METER = 1000.0;
 
   /** InMoov link lengths are tens of cm; reject scene-graph mistakes. */
-  public static final double MIN_DH_LINK_MM = 15.0;
+  public static final double MIN_DH_LINK_M = 0.015;
 
-  public static final double MAX_DH_LINK_MM = 450.0;
+  public static final double MAX_DH_LINK_M = 0.450;
+
+  /**
+   * Largest acceptable disagreement between the model and the rig during
+   * {@link #verifyAgainstSimulator}, meters.
+   */
+  public static final double VERIFY_TOLERANCE_M = 0.005;
 
   private Matrix inputMatrix = null;
-  private Point scale = null;
 
-  /** World-frame origin of the DH base (set by {@link #calibrateToWorld}). */
+  /** World-frame origin of the base (first joint of the calibrated chain). */
   private Point worldOrigin = null;
 
   /**
@@ -75,6 +90,23 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
    * {@link #publishTelemetry(String)} so WebGui can display it.
    */
   public Point worldPosition = null;
+
+  /**
+   * Active IK Cartesian goal (world meters). The simulator green marker tracks
+   * this, not the in-progress FK palm.
+   */
+  public Point ikGoal = null;
+
+  /** World-meter step along a straight line for {@link #moveTo}. */
+  public static final double CARTESIAN_STEP_M = 0.02;
+
+  /**
+   * Cap on {@link #moveTo} waypoints. Each one publishes a servo command, so a
+   * long move should not turn into a hundred of them.
+   */
+  public static final int MAX_CARTESIAN_STEPS = 25;
+
+  private boolean worldCalibrated = false;
 
   // check - http://myrobotlab.org/content/inverse-kinematics-update
   transient InputTrackingThread trackingThread = null;
@@ -86,8 +118,8 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
   @Override
   public InverseKinematics3DConfig apply(InverseKinematics3DConfig c) {
     super.apply(c);
-    if (c != null && c.worldFrame) {
-      calibrateToWorld(c.originX, c.originY, c.originZ, c.scaleX, c.scaleY, c.scaleZ);
+    if (c != null) {
+      installCalibrationFromConfig();
     }
     return c;
   }
@@ -174,39 +206,28 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
   }
 
   /**
-   * Move the current arm to a world-frame (or DH, if uncalibrated) point.
-   * Used by the WebGui MoveTo form.
+   * Move the current arm's palm to a point in the same frame as
+   * {@link #worldPosition} / {@link #currentPositionWorld}: JME world meters
+   * after calibration, or DH-local meters if the origin is still (0,0,0).
+   * Used by the WebGui MoveTo form — do not convert through
+   * {@link #toIkFrame}; the DH chain already applies {@code baseTransform}.
    */
-  public void moveTo(double x, double y, double z) {
+  public Point moveTo(double x, double y, double z) {
     String name = requireCurrentArm();
     if (name == null) {
-      return;
+      return null;
     }
-    moveTo(name, x, y, z);
+    return moveTo(name, x, y, z);
   }
 
-  public void moveTo(String arm, double x, double y, double z) {
-    // TODO: allow passing roll pitch and yaw
-    moveTo(arm, new Point(x, y, z, 0, 0, 0));
+  public Point moveTo(String arm, double x, double y, double z) {
+    return moveTo(arm, new Point(x, y, z, 0, 0, 0));
   }
 
   /**
-   * This create a rotation and translation matrix that will be applied on the
-   * "moveTo" call.
-   * 
-   * @param dx
-   *              - x axis translation
-   * @param dy
-   *              - y axis translation
-   * @param dz
-   *              - z axis translation
-   * @param roll
-   *              - rotation about z (in degrees)
-   * @param pitch
-   *              - rotation about x (in degrees)
-   * @param yaw
-   *              - rotation about y (in degrees)
-   * @return a matric that represents the rotation/translation matrix
+   * Legacy world→DH matrix kept for {@link #toIkFrame} when no arm is loaded.
+   * {@link #moveTo} does <em>not</em> apply this; the arm {@code baseTransform}
+   * already maps DH into world meters.
    */
   public Matrix createInputMatrix(double dx, double dy, double dz, double roll, double pitch, double yaw) {
     roll = MathUtils.degToRad(roll);
@@ -218,168 +239,68 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
     return inputMatrix;
   }
 
-  public Point createInputScale(double x, double y, double z) {
-    scale = new Point(x, y, z, 0, 0, 0);
-    return scale;
+  /**
+   * Place the base at a world translation, leaving the measured joint geometry
+   * alone. Rarely needed — {@link #calibrateFromSimulator} sets the base from the
+   * first joint it measures.
+   */
+  public void calibrateToWorld(double originX, double originY, double originZ) {
+    calibrateToWorld(originX, originY, originZ, 0, 0, 0);
   }
 
   /**
-   * Install the transform that maps simulator / world coordinates onto the DH
-   * frame: {@code p_ik = scale ⊙ (p_world − origin)}.
-   *
-   * <p>
-   * For VinMoov / JME the typical values are origin = omoplate world
-   * translation (meters) and scale = (1000, 1000, 1000) (or a negated axis if
-   * that axis is flipped relative to DH).
-   * </p>
-   *
-   * @param originX
-   *          world X of the DH base (omoplate)
-   * @param originY
-   *          world Y of the DH base
-   * @param originZ
-   *          world Z of the DH base
-   * @param scaleX
-   *          world-to-IK scale on X (mm per world unit)
-   * @param scaleY
-   *          world-to-IK scale on Y
-   * @param scaleZ
-   *          world-to-IK scale on Z
+   * Install the transform that maps chain-local meters onto the world / JME
+   * frame: {@code p_world = T(origin) R(roll,pitch,yaw) p_local}.
    */
-  public void calibrateToWorld(double originX, double originY, double originZ, double scaleX, double scaleY, double scaleZ) {
+  public void calibrateToWorld(double originX, double originY, double originZ, double rollDeg, double pitchDeg, double yawDeg) {
     worldOrigin = new Point(originX, originY, originZ);
-    createInputScale(scaleX, scaleY, scaleZ);
-    createInputMatrix(-scaleX * originX, -scaleY * originY, -scaleZ * originZ, 0, 0, 0);
+    createInputMatrix(-originX, -originY, -originZ, rollDeg, pitchDeg, yawDeg);
     if (config != null) {
       config.worldFrame = true;
       config.originX = originX;
       config.originY = originY;
       config.originZ = originZ;
-      config.scaleX = scaleX;
-      config.scaleY = scaleY;
-      config.scaleZ = scaleZ;
+      config.originRoll = rollDeg;
+      config.originPitch = pitchDeg;
+      config.originYaw = yawDeg;
     }
-    log.info("World calibration origin=({}, {}, {}) scale=({}, {}, {})", originX, originY, originZ, scaleX, scaleY, scaleZ);
+    DHRobotArm arm = currentArmModel();
+    if (arm != null) {
+      arm.setBaseTransform(originX, originY, originZ, rollDeg, pitchDeg, yawDeg);
+    }
+    log.info("World calibration origin=({}, {}, {}) rpy=({}, {}, {})", originX, originY, originZ, rollDeg, pitchDeg, yawDeg);
     if (currentArm != null && arms.containsKey(currentArm)) {
       worldPosition = currentPositionWorld(currentArm);
     }
   }
 
   /**
-   * Default InMoov / JME calibration: millimeters vs meters, same Y-up axes,
-   * origin at the given DH-base world position.
+   * Measure the arm off the first running JMonkeyEngine.
    */
-  public void calibrateToWorld(double originX, double originY, double originZ) {
-    calibrateToWorld(originX, originY, originZ, IK_MM_PER_JME_METER, IK_MM_PER_JME_METER, IK_MM_PER_JME_METER);
-  }
-
-  /**
-   * Infer per-axis world→IK scale from a paired sample (IK palm in mm vs
-   * end-effector minus origin in world units). Only the sign is inferred;
-   * magnitude is always {@link #IK_MM_PER_JME_METER}. Degenerate axes (near-zero
-   * IK or world component — typical for DH Z at the hanging pose) default to
-   * +1000 so a leftover millimeter value is never treated as meters.
-   *
-   * @param ikPalm
-   *          palm in the DH / IK frame (mm)
-   * @param worldRelative
-   *          {@code endEffectorWorld − originWorld}
-   * @return scale vector to pass to {@link #calibrateToWorld}
-   */
-  public Point inferWorldScale(Point ikPalm, Point worldRelative) {
-    double sx = inferAxisScale(ikPalm.getX(), worldRelative.getX());
-    double sy = inferAxisScale(ikPalm.getY(), worldRelative.getY());
-    double sz = inferAxisScale(ikPalm.getZ(), worldRelative.getZ());
-    Point inferred = new Point(sx, sy, sz);
-    log.info("Inferred world scale {} from IK {} vs world-relative {}", inferred, ikPalm, worldRelative);
-    return inferred;
-  }
-
-  static double inferAxisScale(double ikMm, double world) {
-    if (Math.abs(world) < 1e-4 || Math.abs(ikMm) < 1e-3) {
-      return IK_MM_PER_JME_METER;
+  public Point calibrateFromSimulator() {
+    for (org.myrobotlab.framework.interfaces.ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof JMonkeyEngine) {
+        return calibrateFromSimulator((JMonkeyEngine) si);
+      }
     }
-    return Math.signum(ikMm / world) * IK_MM_PER_JME_METER;
+    error("No JMonkeyEngine running — start the simulator first");
+    return null;
   }
 
   /**
-   * Sample the simulator and install the world-frame calibration so the IK palm
-   * maps onto the simulated hand at this pose.
+   * Rebuild the current arm from joints measured on the simulator's rig.
    *
    * <p>
-   * Axis signs are inferred from {@code endEffector − originNode}. The DH origin
-   * is then <em>fitted</em> to the end effector (not taken as the omoplate node
-   * translation). The hanging DH palm sits at Z=0 while the VinMoov wrist is
-   * forward of the shoulder; using the omoplate node as origin left a Z bias.
+   * Each of the arm's nodes contributes its real rotation axis, a point on that
+   * axis, its current angle and the servo&rarr;mesh map it was configured with.
+   * The end effector is the wrist node's world position, which depends only on
+   * the four arm joints. Nothing here guesses axis signs or fits DH parameters —
+   * the previous approach matched one pose by translation, which cannot detect a
+   * chain whose joint axes or rotation directions are wrong, so the error grew
+   * with every degree the arm moved.
    * </p>
    *
-   * @param originWorld
-   *          DH-base node in world coordinates (omoplate), used for axis signs
-   * @param ikPalm
-   *          current IK palm (mm, DH origin)
-   * @param endEffectorWorld
-   *          hand / wrist in world coordinates
-   * @return the inferred scale
-   */
-  public Point calibrateToSimulator(Point originWorld, Point ikPalm, Point endEffectorWorld) {
-    Point worldRelative = endEffectorWorld.subtract(originWorld);
-    Point inferred = inferWorldScale(ikPalm, worldRelative);
-    Point fittedOrigin = new Point(endEffectorWorld.getX() - ikPalm.getX() / inferred.getX(), endEffectorWorld.getY() - ikPalm.getY() / inferred.getY(),
-        endEffectorWorld.getZ() - ikPalm.getZ() / inferred.getZ());
-    log.info("Fitted DH origin {} from end effector {} and IK {}", fittedOrigin, endEffectorWorld, ikPalm);
-    calibrateToWorld(fittedOrigin.getX(), fittedOrigin.getY(), fittedOrigin.getZ(), inferred.getX(), inferred.getY(), inferred.getZ());
-    return inferred;
-  }
-
-  /**
-   * Map VinMoov bone lengths onto the 4 DH slots. Distances are world meters;
-   * DH d/a are millimeters. Left/right sign on shoulder {@code d} is preserved.
-   *
-   * @return true if at least one length was updated
-   */
-  public boolean fitVinMoovLinkLengths(String name, Point omoplateWorld, Point shoulderWorld, Point rotateWorld, Point bicepWorld, Point wristWorld) {
-    DHRobotArm arm = arms.get(name);
-    if (arm == null || arm.getNumLinks() < 4) {
-      error("Cannot fit VinMoov lengths — arm %s missing or short", name);
-      return false;
-    }
-    boolean updated = false;
-    updated |= setLinkLength(arm.getLink(0), true, distMm(omoplateWorld, shoulderWorld), "omoplate a");
-    double shoulderD = distMm(shoulderWorld, rotateWorld);
-    if (arm.getLink(1).getD() < 0) {
-      shoulderD = -shoulderD;
-    }
-    updated |= setLinkLength(arm.getLink(1), false, shoulderD, "shoulder d");
-    updated |= setLinkLength(arm.getLink(2), false, distMm(rotateWorld, bicepWorld), "rotate d");
-    updated |= setLinkLength(arm.getLink(3), true, distMm(bicepWorld, wristWorld), "bicep a");
-    return updated;
-  }
-
-  /**
-   * Map DH millimeters onto a simulator pose: origin at the omoplate node,
-   * per-axis scale (including a Y flip if the mesh rest is not hanging down),
-   * and a last-frame wrist offset. Call after DH thetas match the servos.
-   */
-  public Point calibrateFromWorldSamples(Point omoplateWorld, Point wristWorld) {
-    String name = requireCurrentArm();
-    if (name == null || omoplateWorld == null || wristWorld == null) {
-      error("calibrateFromWorldSamples needs a current arm, omoplate, and wrist");
-      return null;
-    }
-    DHRobotArm arm = arms.get(name);
-    arm.setToolOffset(null);
-    Point ikPalm = currentPosition(name);
-    Point worldRelative = wristWorld.subtract(omoplateWorld);
-    Point inferred = inferWorldScale(ikPalm, worldRelative);
-    calibrateToWorld(omoplateWorld.getX(), omoplateWorld.getY(), omoplateWorld.getZ(), inferred.getX(), inferred.getY(), inferred.getZ());
-    fitToolOffsetFromWorld(name, wristWorld);
-    Point world = currentPositionWorld(name);
-    log.info("Calibrated from world samples origin={} scale={} IK world {} sim wrist {} err={} m", omoplateWorld, inferred, world, wristWorld, world.distanceTo(wristWorld));
-    return world;
-  }
-
-  /**
-   * Sample VinMoov omoplate + wrist and {@link #calibrateFromWorldSamples}.
+   * @return the model's end effector in world meters, or null on failure
    */
   public Point calibrateFromSimulator(JMonkeyEngine jme) {
     if (jme == null) {
@@ -392,26 +313,182 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
     DHRobotArm arm = arms.get(name);
     String[] parsed = parseArmLinkName(arm.getLink(0) != null ? arm.getLink(0).getName() : null);
     if (parsed == null) {
-      warn("Cannot parse robot/side from DH link name {}", arm.getLink(0) != null ? arm.getLink(0).getName() : null);
+      error("Cannot parse robot/side from link name %s", arm.getLink(0) != null ? arm.getLink(0).getName() : null);
       return null;
     }
     String robot = parsed[0];
     String side = parsed[1];
-    Point omoplate = toPoint3(jme.getWorldTranslation(robot + "." + side + "Arm.omoplate"));
-    if (omoplate == null) {
-      omoplate = toPoint3(jme.getWorldTranslation(robot + "." + side + "Arm.shoulder"));
-    }
-    Point wrist = toPoint3(jme.getHandWorldTranslation(robot, side));
-    if (omoplate == null || wrist == null) {
-      warn("Simulator samples missing omoplate={} wrist={} — world overlay will not match VinMoov", omoplate, wrist);
+
+    List<JointFrame> frames = jme.getArmJointFrames(robot, side);
+    if (frames.size() != arm.getNumLinks()) {
+      error("Measured %d of %d %s arm joints — check VinMoov node names and that simulator node mappers were applied", frames.size(), arm.getNumLinks(), side);
       return null;
     }
-    Map<String, org.myrobotlab.math.geometry.Point3df> chain = jme.getArmChainWorldTranslations(robot, side);
-    Point shoulder = toPoint3(chain.get(robot + "." + side + "Arm.shoulder"));
-    Point rotate = toPoint3(chain.get(robot + "." + side + "Arm.rotate"));
-    Point bicep = toPoint3(chain.get(robot + "." + side + "Arm.bicep"));
-    fitVinMoovLinkLengths(name, omoplate, shoulder, rotate, bicep, wrist);
-    return calibrateFromWorldSamples(omoplate, wrist);
+    Point wrist = toPoint3(jme.getHandWorldTranslation(robot, side));
+    if (wrist == null) {
+      error("No wrist node for %s %s — cannot place the end effector", robot, side);
+      return null;
+    }
+    return calibrateFromJointFrames(name, frames, wrist);
+  }
+
+  /**
+   * Rebuild an arm from measured joints. See {@link #calibrateFromSimulator}.
+   */
+  public Point calibrateFromJointFrames(String name, List<JointFrame> frames, Point endEffectorWorld) {
+    DHRobotArm arm = arms.get(name);
+    if (arm == null) {
+      error("No arm named %s", name);
+      return null;
+    }
+    for (JointFrame frame : frames) {
+      log.info("measured {}", frame);
+    }
+    if (!arm.applyJointFrames(frames, endEffectorWorld)) {
+      error("Could not build %s from measured joints", name);
+      return null;
+    }
+    worldOrigin = arm.getBaseOrigin();
+    persistCalibration(arm, frames, endEffectorWorld);
+    worldCalibrated = true;
+    Point world = currentPositionWorld(name);
+    worldPosition = world;
+    invoke("publishWorldPosition", world);
+    invoke("publishIkGoal", world);
+    double residual = endEffectorWorld == null ? 0 : world.distanceTo(endEffectorWorld);
+    log.info("Calibrated {} from {} measured joints: origin {} end effector {} residual {} m, segments {}", name, frames.size(), worldOrigin, world, residual,
+        measuredSegmentLengths(frames, endEffectorWorld));
+    if (residual > 1e-6) {
+      warn("calibration residual %.4f m — the tool offset should reproduce the sampled pose exactly", residual);
+    }
+    return world;
+  }
+
+  /**
+   * Straight-line distances between consecutive measured joints, plus the last
+   * joint to the end effector. These are the arm's real link lengths, replacing
+   * the hand-entered defaults in {@code InMoov2Arm}.
+   */
+  static List<Double> measuredSegmentLengths(List<JointFrame> frames, Point endEffectorWorld) {
+    List<Double> lengths = new ArrayList<>();
+    for (int i = 1; i < frames.size(); i++) {
+      lengths.add(round4(frames.get(i - 1).origin.distanceTo(frames.get(i).origin)));
+    }
+    if (endEffectorWorld != null && !frames.isEmpty()) {
+      lengths.add(round4(frames.get(frames.size() - 1).origin.distanceTo(endEffectorWorld)));
+    }
+    return lengths;
+  }
+
+  private static double round4(double v) {
+    return Math.round(v * 10000.0) / 10000.0;
+  }
+
+  /**
+   * {@link #verifyAgainstSimulator(JMonkeyEngine, int)} against the first running
+   * simulator. Exposed for the WebGui "Verify against simulator" button.
+   *
+   * @return the worst disagreement in meters, or {@code NaN}
+   */
+  public double verifyAgainstSimulator() {
+    for (org.myrobotlab.framework.interfaces.ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof JMonkeyEngine) {
+        return verifyAgainstSimulator((JMonkeyEngine) si, 5);
+      }
+    }
+    error("No JMonkeyEngine running — start the simulator first");
+    return Double.NaN;
+  }
+
+  /**
+   * Sweep each joint across its range, command the rig directly and compare the
+   * simulated wrist to the model's end effector.
+   *
+   * <p>
+   * This is the check a single-pose fit cannot do. A model with the wrong joint
+   * axes or a mirrored rotation direction matches at rest and drifts everywhere
+   * else, so agreement has to be demonstrated across the workspace.
+   * </p>
+   *
+   * @param jme
+   *          the running simulator
+   * @param stepsPerJoint
+   *          how many angles to test per joint (minimum 2)
+   * @return the largest disagreement in meters, or {@code NaN} if it could not
+   *         run
+   */
+  public double verifyAgainstSimulator(JMonkeyEngine jme, int stepsPerJoint) {
+    String name = requireCurrentArm();
+    if (jme == null || name == null) {
+      return Double.NaN;
+    }
+    DHRobotArm arm = arms.get(name);
+    String[] parsed = parseArmLinkName(arm.getLink(0).getName());
+    if (parsed == null) {
+      return Double.NaN;
+    }
+    String robot = parsed[0];
+    String side = parsed[1];
+    int steps = Math.max(2, stepsPerJoint);
+
+    double[] restoreServo = new double[arm.getNumLinks()];
+    for (int i = 0; i < arm.getNumLinks(); i++) {
+      restoreServo[i] = arm.getLink(i).toServoDegrees();
+    }
+
+    double worst = 0;
+    String worstLabel = "none";
+    try {
+      for (int j = 0; j < arm.getNumLinks(); j++) {
+        DHLink link = arm.getLink(j);
+        double servoLo = Math.min(link.servoMin, link.servoMax);
+        double servoHi = Math.max(link.servoMin, link.servoMax);
+        for (int s = 0; s < steps; s++) {
+          double servo = servoLo + (servoHi - servoLo) * s / (double) (steps - 1);
+          jme.rotateOnAxis(link.getName(), null, servo);
+          link.setFromServoDegrees(servo);
+          sleep(150);
+          Point simWrist = toPoint3(jme.getHandWorldTranslation(robot, side));
+          if (simWrist == null) {
+            continue;
+          }
+          double err = arm.getPalmPosition().distanceTo(simWrist);
+          log.info("verify {} servo {} model {} sim {} err {} m", link.getName(), servo, arm.getPalmPosition(), simWrist, err);
+          if (err > worst) {
+            worst = err;
+            worstLabel = String.format("%s @ %.1f", link.getName(), servo);
+          }
+        }
+        // put this joint back before sweeping the next one
+        jme.rotateOnAxis(link.getName(), null, restoreServo[j]);
+        link.setFromServoDegrees(restoreServo[j]);
+        sleep(150);
+      }
+    } finally {
+      for (int i = 0; i < arm.getNumLinks(); i++) {
+        jme.rotateOnAxis(arm.getLink(i).getName(), null, restoreServo[i]);
+        arm.getLink(i).setFromServoDegrees(restoreServo[i]);
+      }
+      publishTelemetry(name);
+    }
+
+    if (worst > VERIFY_TOLERANCE_M) {
+      error("model disagrees with the simulator by %.4f m (worst at %s) — calibration is not valid across the workspace", worst, worstLabel);
+    } else {
+      log.info("model matches the simulator within {} m across {} joints (worst {})", round4(worst), arm.getNumLinks(), worstLabel);
+    }
+    return worst;
+  }
+
+  public Point onSceneReady(String jmeName) {
+    if (worldCalibrated) {
+      log.info("Simulator scene ready {} — keeping existing world calibration", jmeName);
+      String name = requireCurrentArm();
+      return name != null ? currentPositionWorld(name) : null;
+    }
+    log.info("Simulator scene ready {} — calibrating IK world frame", jmeName);
+    JMonkeyEngine jme = (JMonkeyEngine) Runtime.getService(jmeName);
+    return calibrateFromSimulator(jme);
   }
 
   static String[] parseArmLinkName(String linkName) {
@@ -437,22 +514,10 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
     return new Point(p.x, p.y, p.z);
   }
 
-  private JMonkeyEngine findSimulator() {
-    for (org.myrobotlab.framework.interfaces.ServiceInterface si : Runtime.getServices()) {
-      if (si instanceof JMonkeyEngine) {
-        JMonkeyEngine jme = (JMonkeyEngine) si;
-        if (jme.isRunning()) {
-          return jme;
-        }
-      }
-    }
-    return null;
-  }
-
   /**
    * Fit a last-frame tool offset so the IK palm matches a world-frame wrist at
-   * the current pose. Requires {@link #calibrateToWorld} first. The offset
-   * rotates with the arm (unlike origin-fitting).
+   * the current pose. Requires a base transform first. The offset rotates with
+   * the arm (unlike origin-fitting).
    */
   public Point fitToolOffsetFromWorld(String name, Point endEffectorWorld) {
     DHRobotArm arm = arms.get(name);
@@ -460,8 +525,8 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       error("Cannot fit tool offset — arm or end effector missing");
       return null;
     }
-    Point targetIk = toIkFrame(endEffectorWorld);
-    Point offset = arm.fitToolOffset(targetIk);
+    Point offset = arm.fitToolOffset(endEffectorWorld);
+    persistToolOffset(arm);
     worldPosition = currentPositionWorld(name);
     log.info("Tool offset {} — IK world palm now {}", offset, worldPosition);
     return offset;
@@ -475,77 +540,50 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
     return fitToolOffsetFromWorld(name, endEffectorWorld);
   }
 
-  static double distMm(Point a, Point b) {
+  static double distM(Point a, Point b) {
     if (a == null || b == null) {
       return 0;
     }
-    return a.distanceTo(b) * IK_MM_PER_JME_METER;
-  }
-
-  static boolean setLinkLength(DHLink link, boolean isA, double mm, String label) {
-    if (link == null || Math.abs(mm) < MIN_DH_LINK_MM || Math.abs(mm) > MAX_DH_LINK_MM) {
-      if (link != null && Math.abs(mm) >= 1.0) {
-        log.warn("Ignoring DH {} {} mm (allowed {}–{})", label, mm, MIN_DH_LINK_MM, MAX_DH_LINK_MM);
-      }
-      return false;
-    }
-    if (isA) {
-      log.info("DH {} {} -> {}", label, link.getA(), mm);
-      link.setA(mm);
-    } else {
-      log.info("DH {} {} -> {}", label, link.getD(), mm);
-      link.setD(mm);
-    }
-    return true;
+    return a.distanceTo(b);
   }
 
   /**
-   * Map a simulator / world point into the DH / IK frame (same transform
-   * {@link #moveTo} applies before solving).
+   * Map a world point into the chain-local frame (inverse of the arm base
+   * transform).
    */
   public Point toIkFrame(Point world) {
-    Point p = world;
-    if (scale != null) {
-      p = new Point(scale.getX() * p.getX(), scale.getY() * p.getY(), scale.getZ() * p.getZ(), p.getRoll(), p.getPitch(), p.getYaw());
+    DHRobotArm arm = currentArmModel();
+    if (arm != null) {
+      return arm.toLocalFrame(world);
     }
-    if (inputMatrix != null) {
-      p = rotateAndTranslate(p);
-    }
-    return p;
+    return inputMatrix != null ? rotateAndTranslate(world) : world;
   }
 
   /**
-   * Map a DH / IK point into simulator / world coordinates (inverse of
-   * {@link #toIkFrame}).
+   * Map a chain-local point into world / JME coordinates.
    */
   public Point toWorldFrame(Point ik) {
-    Point p = ik;
-    if (inputMatrix != null) {
-      p = inverseRotateAndTranslate(p);
+    DHRobotArm arm = currentArmModel();
+    if (arm != null) {
+      return arm.toWorldFrame(ik);
     }
-    if (scale != null) {
-      double sx = scale.getX() != 0.0 ? scale.getX() : 1.0;
-      double sy = scale.getY() != 0.0 ? scale.getY() : 1.0;
-      double sz = scale.getZ() != 0.0 ? scale.getZ() : 1.0;
-      p = new Point(p.getX() / sx, p.getY() / sy, p.getZ() / sz, p.getRoll(), p.getPitch(), p.getYaw());
-    }
-    return p;
+    return inputMatrix != null ? inverseRotateAndTranslate(ik) : ik;
   }
 
   public Point currentPositionWorld(String name) {
-    return toWorldFrame(currentPosition(name));
+    return currentPosition(name);
   }
 
   public Point getWorldOrigin() {
+    DHRobotArm arm = currentArmModel();
+    if (arm != null) {
+      return arm.getBaseOrigin();
+    }
     return worldOrigin;
   }
 
-  public Point getScale() {
-    return scale;
-  }
-
   public boolean isWorldFrameEnabled() {
-    return config != null && config.worldFrame && (scale != null || inputMatrix != null);
+    return config == null || config.worldFrame;
   }
 
   public Point rotateAndTranslate(Point pIn) {
@@ -592,7 +630,9 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
   }
 
   public void centerAllJoints(String name) {
-    arms.get(name).centerAllJoints();
+    DHRobotArm arm = arms.get(name);
+    arm.centerAllJoints();
+    invoke("publishIkGoal", arm.getPalmPosition());
     publishTelemetry(name);
   }
 
@@ -629,60 +669,75 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
         continue;
       }
       double servoPos = ((ServoControl) si).getCurrentInputPos();
-      // publishTelemetry: servo = deg(theta) + offset  (then % 360)
-      double thetaDeg = servoPos - link.getOffset();
-      link.setTheta(MathUtils.degToRad(thetaDeg));
+      link.setFromServoDegrees(servoPos);
       found++;
-      log.info("DH {} from servo {}° → theta {}°", servoName, servoPos, thetaDeg);
+      log.info("{} from servo {}° → theta {}°", servoName, servoPos, link.getThetaDegrees());
     }
     if (found == 0) {
       error("No servos found for arm %s — cannot compute position", name);
       return null;
     }
-    JMonkeyEngine jme = findSimulator();
-    if (jme != null) {
-      calibrateFromSimulator(jme);
-    } else if (scale == null) {
-      // Overlay and HUD are meters; never publish raw DH millimeters as world.
-      calibrateToWorld(0.0, 0.0, 0.0);
-    }
     publishTelemetry(name);
     Point world = currentPositionWorld(name);
+    invoke("publishIkGoal", world);
     log.info("Forward kinematics from servos world {}", world);
     return world;
   }
 
   /**
-   * Compute the inverse kinematics to move the robot hand to the destination
-   * first scale the input point, then apply
-   * 
-   * @param name
-   *             n
-   * @param p
-   *             p
-   * 
+   * Solve IK so the palm reaches {@code p}. {@code p} is already in the palm /
+   * world frame ({@link DHRobotArm#getPalmPosition()}); the old
+   * {@link #createInputMatrix} scale/translate path is not applied here.
+   * <p>
+   * Publishes {@link #publishIkGoal} immediately (simulator green marker), then
+   * walks a straight Cartesian line in {@link #CARTESIAN_STEP_M} steps so the
+   * arm iterates toward the goal instead of jumping.
+   *
+   * @return reached world palm (same as {@link #worldPosition} after publish)
    */
-  public void moveTo(String name, Point p) {
+  public Point moveTo(String name, Point p) {
+    DHRobotArm arm = arms.get(name);
+    if (arm == null) {
+      error("No arm named %s", name);
+      return null;
+    }
+    Point current = arm.getPalmPosition();
+    Point origin = arm.getBaseOrigin();
+    double travel = current.distanceTo(p);
+    log.info("moveTo {} world goal {} current {} origin {} travel {} m", name, p, current, origin, travel);
+    if (travel > 0.80) {
+      warn("moveTo goal is {} m from the palm — likely a DH-local point sent as world, or an unreachable pose. Origin {}", String.format("%.3f", travel), origin);
+    }
+    invoke("publishIkGoal", p);
+    int steps = Math.max(1, Math.min(MAX_CARTESIAN_STEPS, (int) Math.ceil(travel / CARTESIAN_STEP_M)));
+    int missed = 0;
+    for (int i = 1; i <= steps; i++) {
+      Point waypoint = lerp(current, p, (double) i / steps);
+      if (!arm.moveToGoal(waypoint)) {
+        // keep walking rather than aborting - the solver leaves the arm at its
+        // closest reachable pose, and a later waypoint may be reachable again
+        missed++;
+        log.debug("missed waypoint {}/{} {} by {} m", i, steps, waypoint, arm.distanceToGoal(waypoint));
+      }
+      publishTelemetry(name);
+    }
+    Point reached = currentPositionWorld(name);
+    double err = reached.distanceTo(p);
+    if (missed > 0) {
+      warn("moveTo %s got within %.4f m of %s (%d of %d waypoints unreachable)", name, err, p, missed, steps);
+    } else {
+      log.info("moveTo {} reached {} goal {} err {} m", name, reached, p, err);
+    }
+    return reached;
+  }
 
-    log.info("Raw Input : {} - {}", name, p);
-    if (scale != null) {
-      // scale the x,y,z by the factors stored in the scale point. (really
-      // vector i guess?)
-      double x = scale.getX() * p.getX();
-      double y = scale.getY() * p.getY();
-      double z = scale.getZ() * p.getZ();
-      p = new Point(x, y, z, p.getRoll(), p.getPitch(), p.getYaw());
-      log.info("Scaled Input {}", p);
-    }
-    if (inputMatrix != null) {
-      p = rotateAndTranslate(p);
-      log.info("Rot/Translated input {}", p);
-    }
-    boolean success = arms.get(name).moveToGoal(p);
-    if (!success) {
-      log.warn("IK did not reach goal {} — publishing FK of last thetas (miss {} mm)", p, arms.get(name).getPalmPosition().distanceTo(p));
-    }
-    publishTelemetry(name);
+  static Point lerp(Point a, Point b, double t) {
+    return new Point(a.getX() + t * (b.getX() - a.getX()), a.getY() + t * (b.getY() - a.getY()), a.getZ() + t * (b.getZ() - a.getZ()));
+  }
+
+  public Point publishIkGoal(Point goal) {
+    ikGoal = goal;
+    return goal;
   }
 
   // public void publishTelemetry()
@@ -695,12 +750,11 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       if (jointName == null) {
         continue;
       }
-      double theta = l.getTheta();
-      // angles between 0 - 360 degrees.. not sure what people will really want?
-      // - 180 to + 180 ?
-      double angle = MathUtils.radToDeg(theta) + l.getOffset();
-      angleMap.put(jointName, angle % 360.0F);
-      log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
+      // servoSlope * thetaDeg + offset, clamped to the joint's servo range.
+      // No modulo-360 wrap: it is not invertible, so computePositionFromServos
+      // could not read back what was published, and it mangles negative slopes.
+      angleMap.put(jointName, l.toServoDegrees());
+      log.debug("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
     // Synchronous delivery so InMoov2/arm listeners move before the next IK step
     broadcast("publishJointAngles", angleMap);
@@ -714,15 +768,16 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
 
   public double[][] createJointPositionMap(String name) {
 
-    double[][] jointPositionMap = new double[arms.get(name).getNumLinks() + 1][3];
+    DHRobotArm arm = arms.get(name);
+    double[][] jointPositionMap = new double[arm.getNumLinks() + 1][3];
 
-    // first position is the origin... second is the end of the first link
-    jointPositionMap[0][0] = 0;
-    jointPositionMap[0][1] = 0;
-    jointPositionMap[0][2] = 0;
+    Point origin = arm.getBaseOrigin();
+    jointPositionMap[0][0] = origin.getX();
+    jointPositionMap[0][1] = origin.getY();
+    jointPositionMap[0][2] = origin.getZ();
 
-    for (int i = 1; i <= arms.get(name).getNumLinks(); i++) {
-      Point jp = arms.get(name).getJointPosition(i - 1);
+    for (int i = 1; i <= arm.getNumLinks(); i++) {
+      Point jp = arm.getJointPosition(i - 1);
       jointPositionMap[i][0] = jp.getX();
       jointPositionMap[i][1] = jp.getY();
       jointPositionMap[i][2] = jp.getZ();
@@ -750,22 +805,107 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
     arm.setIk3D(this);
     this.arms.put(name, arm);
     this.currentArm = name;
+    installCalibrationFromConfig();
     worldPosition = currentPositionWorld(name);
+  }
+
+  private DHRobotArm currentArmModel() {
+    if (currentArm != null && arms.containsKey(currentArm)) {
+      return arms.get(currentArm);
+    }
+    return null;
+  }
+
+  /**
+   * Rebuild the current arm from a saved calibration so a restart does not need
+   * the simulator running. Falls back to the arm's built-in default geometry when
+   * nothing was saved.
+   */
+  private void installCalibrationFromConfig() {
+    DHRobotArm arm = currentArmModel();
+    if (arm == null || config == null) {
+      return;
+    }
+    List<JointFrame> frames = config.toJointFrames();
+    if (frames.isEmpty()) {
+      return;
+    }
+    if (frames.size() != arm.getNumLinks()) {
+      warn("saved calibration has %d joints but the arm has %d — ignoring it", frames.size(), arm.getNumLinks());
+      return;
+    }
+    Point endEffector = config.endEffectorSet ? new Point(config.endEffectorX, config.endEffectorY, config.endEffectorZ) : null;
+    if (arm.applyJointFrames(frames, endEffector)) {
+      worldOrigin = arm.getBaseOrigin();
+      worldCalibrated = true;
+      log.info("restored measured calibration for {} — origin {} palm {}", currentArm, worldOrigin, arm.getPalmPosition());
+    }
+  }
+
+  /**
+   * Save the measured joints so {@link #installCalibrationFromConfig} can restore
+   * them, plus the resulting link lengths for human reference.
+   */
+  private void persistCalibration(DHRobotArm arm, List<JointFrame> frames, Point endEffectorWorld) {
+    if (config == null) {
+      return;
+    }
+    config.worldFrame = true;
+    config.fromJointFrames(frames);
+    if (endEffectorWorld != null) {
+      config.endEffectorSet = true;
+      config.endEffectorX = endEffectorWorld.getX();
+      config.endEffectorY = endEffectorWorld.getY();
+      config.endEffectorZ = endEffectorWorld.getZ();
+    } else {
+      config.endEffectorSet = false;
+    }
+    Point origin = arm.getBaseOrigin();
+    config.originX = origin.getX();
+    config.originY = origin.getY();
+    config.originZ = origin.getZ();
+    config.originRoll = 0;
+    config.originPitch = 0;
+    config.originYaw = 0;
+    persistToolOffset(arm);
+
+    List<Double> segments = measuredSegmentLengths(frames, endEffectorWorld);
+    if (segments.size() >= 4) {
+      config.omoplateA = segments.get(0);
+      config.shoulderD = segments.get(1);
+      config.rotateD = segments.get(2);
+      config.bicepA = segments.get(3);
+    }
+  }
+
+  private void persistToolOffset(DHRobotArm arm) {
+    if (config == null || arm == null) {
+      return;
+    }
+    Point t = arm.getToolOffset();
+    if (t == null) {
+      config.toolOffsetSet = false;
+      return;
+    }
+    config.toolOffsetSet = true;
+    config.toolOffsetX = t.getX();
+    config.toolOffsetY = t.getY();
+    config.toolOffsetZ = t.getZ();
   }
 
   @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof JMonkeyEngine) {
-      // Overlay only — JME.onJointAngles would move servos a second time.
       addListener("publishWorldPosition", attachable.getName(), "onWorldPosition");
-      JMonkeyEngine jme = (JMonkeyEngine) attachable;
-      if (jme.isRunning() && currentArm != null) {
-        calibrateFromSimulator(jme);
-      }
+      addListener("publishIkGoal", attachable.getName(), "onIkGoal");
+      subscribe(attachable.getName(), "publishSceneReady", getName(), "onSceneReady");
+      return;
+    }
+    if (attachable instanceof InMoov2Arm) {
+      warn("Do not attach IK joint angles to InMoov2Arm — its deprecated onJointAngles applies a second gain/phase map. Attach InMoov2 instead.");
       return;
     }
     if (attachable instanceof IKJointAngleListener) {
-      // Matches IKJointAnglePublisher / IKJointAngleListener (plural)
       addListener("publishJointAngles", attachable.getName(), "onJointAngles");
     }
   }
@@ -920,7 +1060,7 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       input.value = 0.0F;
     }
 
-    double totalGain = 100.0;
+    double totalGain = 0.1;
     double xGain = totalGain;
     // invert y control.
     double yGain = -1.0 * totalGain;

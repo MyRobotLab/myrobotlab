@@ -25,6 +25,7 @@ Use this map to pick the right package when fixing a bug. Categories come from `
 | Speech in | `speech recognition` | `WebkitSpeechRecognition`, `Sphinx`, `VoskSpeechRecognition` |
 | Chat / AI | `ai`, `chatbot` | `ProgramAB` (sibling repo resources), `DiscordBot`, `LLM`, `Gpt3`, `OpenAI` |
 | Servo / motor | `servo`, `motor`, `control` | `Servo`, `DiyServo`, `Adafruit16CServoDriver`, `Sabertooth`, `RoboClaw` |
+| Inverse kinematics | `robot`, `control` | `InverseKinematics3D` (Jacobian / DH), `Fabrik` (FABRIK) |
 | Microcontroller | `microcontroller`, `i2c` | `Arduino`, `VirtualArduino`, `RasPi`, `Esp8266`, `Mpu6050` |
 | Sensors | `sensors`, `encoder` | `Pir`, `Lidar`, `Gps`, `Ads1115`, `LeapMotion` |
 | Robot bodies | `robot` | `InMoov2*` (often sibling repo), `Arm`, `SpotMicro`, `Roomba` |

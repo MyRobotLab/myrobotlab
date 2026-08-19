@@ -64,10 +64,150 @@ public class Matrix implements Serializable {
   }
 
   /**
+   * Right-handed rotation about X. Prefer this over {@link #xRotation(double)},
+   * which uses the opposite sign convention.
+   *
+   * @param theta
+   *          an angle in radians
+   * @return the 4x4 rotation matrix
+   */
+  public static Matrix rotationX(double theta) {
+    Matrix R = identity(4);
+    double c = Math.cos(theta);
+    double s = Math.sin(theta);
+    R.elements[1][1] = c;
+    R.elements[1][2] = -s;
+    R.elements[2][1] = s;
+    R.elements[2][2] = c;
+    return R;
+  }
+
+  /**
+   * Right-handed rotation about Y. Prefer this over {@link #yRotation(double)}.
+   *
+   * @param theta
+   *          an angle in radians
+   * @return the 4x4 rotation matrix
+   */
+  public static Matrix rotationY(double theta) {
+    Matrix R = identity(4);
+    double c = Math.cos(theta);
+    double s = Math.sin(theta);
+    R.elements[0][0] = c;
+    R.elements[0][2] = s;
+    R.elements[2][0] = -s;
+    R.elements[2][2] = c;
+    return R;
+  }
+
+  /**
+   * Right-handed rotation about Z. Prefer this over {@link #zRotation(double)}.
+   * This is the convention the Denavit-Hartenberg link matrices use, so it is
+   * also the joint variable of a {@link DHLink}.
+   *
+   * @param theta
+   *          an angle in radians
+   * @return the 4x4 rotation matrix
+   */
+  public static Matrix rotationZ(double theta) {
+    Matrix R = identity(4);
+    double c = Math.cos(theta);
+    double s = Math.sin(theta);
+    R.elements[0][0] = c;
+    R.elements[0][1] = -s;
+    R.elements[1][0] = s;
+    R.elements[1][1] = c;
+    return R;
+  }
+
+  /**
+   * Right-handed rotation of {@code theta} radians about an arbitrary axis
+   * through the origin (Rodrigues). The axis is normalized; a degenerate axis
+   * yields identity.
+   */
+  public static Matrix rotationAboutAxis(double ax, double ay, double az, double theta) {
+    double len = Math.sqrt(ax * ax + ay * ay + az * az);
+    if (len < 1e-12) {
+      return identity(4);
+    }
+    double x = ax / len;
+    double y = ay / len;
+    double z = az / len;
+    double c = Math.cos(theta);
+    double s = Math.sin(theta);
+    double t = 1 - c;
+    Matrix R = identity(4);
+    R.elements[0][0] = t * x * x + c;
+    R.elements[0][1] = t * x * y - s * z;
+    R.elements[0][2] = t * x * z + s * y;
+    R.elements[1][0] = t * x * y + s * z;
+    R.elements[1][1] = t * y * y + c;
+    R.elements[1][2] = t * y * z - s * x;
+    R.elements[2][0] = t * x * z - s * y;
+    R.elements[2][1] = t * y * z + s * x;
+    R.elements[2][2] = t * z * z + c;
+    return R;
+  }
+
+  /**
+   * Rigid frame whose Z axis is {@code (zx,zy,zz)} and whose origin is
+   * {@code (ox,oy,oz)}. X and Y are an arbitrary but deterministic orthonormal
+   * completion.
+   *
+   * <p>
+   * Used to turn a measured joint (a point on the axis plus the axis direction)
+   * into a link frame. Because the completion only spins the frame about its own
+   * Z, and Z is the joint variable, the choice does not affect kinematics.
+   * </p>
+   */
+  public static Matrix frameFromZAxis(double zx, double zy, double zz, double ox, double oy, double oz) {
+    double len = Math.sqrt(zx * zx + zy * zy + zz * zz);
+    if (len < 1e-12) {
+      Matrix m = identity(4);
+      m.elements[0][3] = ox;
+      m.elements[1][3] = oy;
+      m.elements[2][3] = oz;
+      return m;
+    }
+    double[] z = { zx / len, zy / len, zz / len };
+    // pick the world axis least aligned with z so the cross product is stable
+    double[] helper = { 1, 0, 0 };
+    double ax = Math.abs(z[0]);
+    double ay = Math.abs(z[1]);
+    double az = Math.abs(z[2]);
+    if (ay <= ax && ay <= az) {
+      helper = new double[] { 0, 1, 0 };
+    } else if (az <= ax && az <= ay) {
+      helper = new double[] { 0, 0, 1 };
+    }
+    double[] x = cross(helper, z);
+    double xLen = Math.sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+    x = new double[] { x[0] / xLen, x[1] / xLen, x[2] / xLen };
+    double[] y = cross(z, x);
+
+    Matrix m = identity(4);
+    for (int r = 0; r < 3; r++) {
+      m.elements[r][0] = x[r];
+      m.elements[r][1] = y[r];
+      m.elements[r][2] = z[r];
+    }
+    m.elements[0][3] = ox;
+    m.elements[1][3] = oy;
+    m.elements[2][3] = oz;
+    return m;
+  }
+
+  private static double[] cross(double[] a, double[] b) {
+    return new double[] { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] };
+  }
+
+  /**
    * @param theta
    *          an angle in radians
    * @return the associated x-axis rotation transformation matrix
+   * @deprecated left-handed sign convention — use {@link #rotationX(double)}
    */
+  @Deprecated
   public static Matrix xRotation(double theta) {
     Matrix R = new Matrix();
     double c = Math.cos(theta);
@@ -85,7 +225,9 @@ public class Matrix implements Serializable {
    * @param theta
    *          an angle in radians
    * @return the associated y-axis rotation transformation matrix
+   * @deprecated left-handed sign convention — use {@link #rotationY(double)}
    */
+  @Deprecated
   public static Matrix yRotation(double theta) {
     Matrix R = new Matrix();
     double c = Math.cos(theta);
@@ -103,7 +245,9 @@ public class Matrix implements Serializable {
    * @param theta
    *          an angle in radians
    * @return the associated z-axis rotation transformation matrix
+   * @deprecated left-handed sign convention — use {@link #rotationZ(double)}
    */
+  @Deprecated
   public static Matrix zRotation(double theta) {
     Matrix R = new Matrix();
     double c = Math.cos(theta);
@@ -143,13 +287,127 @@ public class Matrix implements Serializable {
   /**
    * Copy constructor
    */
-  Matrix(Matrix m) {
+  public Matrix(Matrix m) {
     numRows = m.numRows;
     numCols = m.numCols;
     elements = new double[numRows][numCols];
     for (int r = 0; r < numRows; r++)
       for (int c = 0; c < numCols; c++)
         this.elements[r][c] = m.elements[r][c];
+  }
+
+  public static Matrix identity(int n) {
+    Matrix m = new Matrix(n, n);
+    for (int i = 0; i < n; i++) {
+      m.elements[i][i] = 1.0;
+    }
+    return m;
+  }
+
+  /**
+   * Rigid 4x4: {@code T(tx,ty,tz) * Rz(roll) * Ry(yaw) * Rx(pitch)} with
+   * right-handed rotations, angles in radians. Inverse of
+   * {@link #toRollPitchYaw()}.
+   */
+  public static Matrix rigid(double tx, double ty, double tz, double roll, double pitch, double yaw) {
+    Matrix tr = translation(tx, ty, tz);
+    Matrix rot = rotationZ(roll).multiply(rotationY(yaw).multiply(rotationX(pitch)));
+    return tr.multiply(rot);
+  }
+
+  /**
+   * Decompose the rotation of a rigid transform into the same
+   * {@code Rz(roll) Ry(yaw) Rx(pitch)} convention {@link #rigid} builds, in
+   * radians.
+   *
+   * @return {@code { roll, pitch, yaw }}
+   */
+  public double[] toRollPitchYaw() {
+    double sinYaw = -elements[2][0];
+    sinYaw = Math.max(-1.0, Math.min(1.0, sinYaw));
+    double yaw = Math.asin(sinYaw);
+    double roll;
+    double pitch;
+    if (Math.abs(Math.cos(yaw)) > 1e-6) {
+      roll = Math.atan2(elements[1][0], elements[0][0]);
+      pitch = Math.atan2(elements[2][1], elements[2][2]);
+    } else {
+      roll = 0;
+      pitch = Math.atan2(elements[0][1], elements[1][1]);
+    }
+    return new double[] { roll, pitch, yaw };
+  }
+
+  /**
+   * Affine 4x4 with optional axis scaling.
+   *
+   * @deprecated a negative scale is a reflection, which turns a kinematic chain
+   *             left-handed and silently mirrors every solved joint angle. Use
+   *             {@link #rigid} instead.
+   */
+  @Deprecated
+  public static Matrix affine(double tx, double ty, double tz, double roll, double pitch, double yaw, double sx, double sy, double sz) {
+    Matrix rigid = rigid(tx, ty, tz, roll, pitch, yaw);
+    if (sx == 1.0 && sy == 1.0 && sz == 1.0) {
+      return rigid;
+    }
+    return rigid.multiply(scaling(sx, sy, sz));
+  }
+
+  /**
+   * Transform a point by this 4x4 affine matrix (last row assumed {@code 0 0 0 1}).
+   */
+  public Point transformPoint(Point p) {
+    if (p == null) {
+      return null;
+    }
+    double x = elements[0][0] * p.getX() + elements[0][1] * p.getY() + elements[0][2] * p.getZ() + elements[0][3];
+    double y = elements[1][0] * p.getX() + elements[1][1] * p.getY() + elements[1][2] * p.getZ() + elements[1][3];
+    double z = elements[2][0] * p.getX() + elements[2][1] * p.getY() + elements[2][2] * p.getZ() + elements[2][3];
+    return new Point(x, y, z, p.getRoll(), p.getPitch(), p.getYaw());
+  }
+
+  /**
+   * Inverse of an affine 4x4 {@code [A t; 0 1]}. Returns null if A is singular.
+   */
+  public Matrix invertAffine() {
+    if (numRows != 4 || numCols != 4) {
+      return null;
+    }
+    double[][] a = new double[3][3];
+    for (int r = 0; r < 3; r++) {
+      for (int c = 0; c < 3; c++) {
+        a[r][c] = elements[r][c];
+      }
+    }
+    double det = a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+    if (Math.abs(det) < 1e-12) {
+      return null;
+    }
+    double invDet = 1.0 / det;
+    double[][] invA = new double[3][3];
+    invA[0][0] = (a[1][1] * a[2][2] - a[1][2] * a[2][1]) * invDet;
+    invA[0][1] = (a[0][2] * a[2][1] - a[0][1] * a[2][2]) * invDet;
+    invA[0][2] = (a[0][1] * a[1][2] - a[0][2] * a[1][1]) * invDet;
+    invA[1][0] = (a[1][2] * a[2][0] - a[1][0] * a[2][2]) * invDet;
+    invA[1][1] = (a[0][0] * a[2][2] - a[0][2] * a[2][0]) * invDet;
+    invA[1][2] = (a[0][2] * a[1][0] - a[0][0] * a[1][2]) * invDet;
+    invA[2][0] = (a[1][0] * a[2][1] - a[1][1] * a[2][0]) * invDet;
+    invA[2][1] = (a[0][1] * a[2][0] - a[0][0] * a[2][1]) * invDet;
+    invA[2][2] = (a[0][0] * a[1][1] - a[0][1] * a[1][0]) * invDet;
+    double tx = elements[0][3];
+    double ty = elements[1][3];
+    double tz = elements[2][3];
+    Matrix inv = identity(4);
+    for (int r = 0; r < 3; r++) {
+      for (int c = 0; c < 3; c++) {
+        inv.elements[r][c] = invA[r][c];
+      }
+    }
+    inv.elements[0][3] = -(invA[0][0] * tx + invA[0][1] * ty + invA[0][2] * tz);
+    inv.elements[1][3] = -(invA[1][0] * tx + invA[1][1] * ty + invA[1][2] * tz);
+    inv.elements[2][3] = -(invA[2][0] * tx + invA[2][1] * ty + invA[2][2] * tz);
+    return inv;
   }
 
   /**

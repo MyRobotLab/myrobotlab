@@ -13,28 +13,64 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         $scope.angles = '';
         $scope.tracking = '';
         $scope.worldPosition = $scope.service.worldPosition || null;
+        $scope.verifyResult = null;
+        $scope.originX = 0;
+        $scope.originY = 0;
+        $scope.originZ = 0;
+        var SLIDER_SPAN_M = 2;
+        var SLIDER_MIN_Y_M = 0;
+        var SLIDER_MAX_Y_M = 4;
+        // Same world-meter box as FabrikGui: X/Z ±2 m, Y 0–4 m
+        $scope.sliderMinX = -SLIDER_SPAN_M;
+        $scope.sliderMaxX = SLIDER_SPAN_M;
+        $scope.sliderMinY = SLIDER_MIN_Y_M;
+        $scope.sliderMaxY = SLIDER_MAX_Y_M;
+        $scope.sliderMinZ = -SLIDER_SPAN_M;
+        $scope.sliderMaxZ = SLIDER_SPAN_M;
         $scope.x = null;
         $scope.y = null;
         $scope.z = null;
-        seedMoveTo($scope.worldPosition);
+        applyWorldPosition($scope.worldPosition);
+        applyOrigin($scope.service);
         // GOOD TEMPLATE TO FOLLOW
         this.updateState = function (service) {
             $scope.service = service;
+            applyOrigin(service);
             if (service && service.worldPosition) {
                 $scope.worldPosition = service.worldPosition;
-                seedMoveTo(service.worldPosition);
+                applyWorldPosition(service.worldPosition);
             }
         };
 
-        function seedMoveTo(p) {
+        function applyOrigin(service) {
+            var cfg = service && service.config;
+            var ox = 0;
+            var oy = 0;
+            var oz = 0;
+            if (cfg) {
+                ox = cfg.originX || 0;
+                oy = cfg.originY || 0;
+                oz = cfg.originZ || 0;
+            }
+            $scope.originX = ox;
+            $scope.originY = oy;
+            $scope.originZ = oz;
+            $scope.sliderMinX = -SLIDER_SPAN_M;
+            $scope.sliderMaxX = SLIDER_SPAN_M;
+            $scope.sliderMinY = SLIDER_MIN_Y_M;
+            $scope.sliderMaxY = SLIDER_MAX_Y_M;
+            $scope.sliderMinZ = -SLIDER_SPAN_M;
+            $scope.sliderMaxZ = SLIDER_SPAN_M;
+        }
+
+        function applyWorldPosition(p) {
             if (!p) {
                 return;
             }
-            if ($scope.x === null || $scope.x === undefined || $scope.x === '') {
-                $scope.x = roundCoord(p.x);
-                $scope.y = roundCoord(p.y);
-                $scope.z = roundCoord(p.z);
-            }
+            $scope.worldPosition = p;
+            $scope.x = roundCoord(p.x);
+            $scope.y = roundCoord(p.y);
+            $scope.z = roundCoord(p.z);
         }
 
         function roundCoord(v) {
@@ -44,9 +80,12 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             return Math.round(v * 10000) / 10000;
         }
 
-        function toNumber(v) {
+        function parseCoord(v) {
+            if (v === null || v === undefined || v === '') {
+                return null;
+            }
             var n = parseFloat(v);
-            return isNaN(n) ? 0 : n;
+            return isNaN(n) ? null : n;
         }
 
         // Rendering area helper functions
@@ -86,13 +125,13 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 		var renderer = new THREE.WebGLRenderer();
 		renderer.setSize( 400, 400 );
 		// add the x,y,z axis lines to the scene.
-		var axis = buildAxes( 500 );
+		var axis = buildAxes( 1 );
 		//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-		var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
-		camera.position.x = 50;
-		camera.position.y = -200;
-		camera.position.z = 500;
-		camera.lookAt(new THREE.Vector3(0, 0, 0));
+		var camera = new THREE.PerspectiveCamera( 75, 1, 0.01, 50 );
+		camera.position.x = 1.5;
+		camera.position.y = 2.0;
+		camera.position.z = 3.0;
+		camera.lookAt(new THREE.Vector3(0.2, 1.5, 0));
 		bindCanvasOrbit(renderer, camera);
 
 		function bindCanvasOrbit(webglRenderer, cam) {
@@ -104,7 +143,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 			el.style.cursor = 'grab';
 			el.title = 'Left-drag to orbit, wheel to zoom';
 
-			var lookAt = new THREE.Vector3(0, 0, 0);
+			var lookAt = new THREE.Vector3(0.2, 1.5, 0);
 			var dragging = false;
 			var lastX = 0;
 			var lastY = 0;
@@ -114,7 +153,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
 
 			function applyOrbit() {
 				phi = Math.max(0.05, Math.min(Math.PI - 0.05, phi));
-				radius = Math.max(40, Math.min(2500, radius));
+				radius = Math.max(0.3, Math.min(12, radius));
 				cam.position.x = radius * Math.sin(phi) * Math.sin(theta);
 				cam.position.y = radius * Math.cos(phi);
 				cam.position.z = radius * Math.sin(phi) * Math.cos(theta);
@@ -164,16 +203,33 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
                     $scope.$apply();
                     break;
                 case 'onWorldPosition':
+                    // Live FK palm — do not overwrite the MoveTo boxes (those are the goal)
                     $scope.worldPosition = msg.data[0];
-                    seedMoveTo($scope.worldPosition);
                     $scope.$apply();
                     break;
-                case 'onComputePositionFromServos':
+                case 'onIkGoal':
                     if (msg.data && msg.data[0]) {
-                        $scope.worldPosition = msg.data[0];
                         $scope.x = roundCoord(msg.data[0].x);
                         $scope.y = roundCoord(msg.data[0].y);
                         $scope.z = roundCoord(msg.data[0].z);
+                    }
+                    $scope.$apply();
+                    break;
+                case 'onMoveTo':
+                case 'onComputePositionFromServos':
+                case 'onCalibrateFromSimulator':
+                    if (msg.data && msg.data[0]) {
+                        $scope.worldPosition = msg.data[0];
+                    }
+                    $scope.$apply();
+                    break;
+                case 'onVerifyAgainstSimulator':
+                    var worst = msg.data ? msg.data[0] : null;
+                    if (worst === null || worst === undefined || isNaN(worst)) {
+                        $scope.verifyResult = 'could not run - is the simulator started?';
+                    } else {
+                        $scope.verifyResult = 'worst disagreement ' + (Math.round(worst * 10000) / 10) + ' mm'
+                            + (worst > 0.005 ? ' - recalibrate, the model does not track the arm' : ' - model tracks the arm');
                     }
                     $scope.$apply();
                     break;
@@ -278,16 +334,33 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             msg.send('computePositionFromServos');
         };
 
+        $scope.calibrateFromSimulator = function() {
+            $scope.verifyResult = null;
+            msg.send('calibrateFromSimulator');
+        };
+
+        $scope.verifyAgainstSimulator = function() {
+            $scope.verifyResult = 'sweeping joints...';
+            msg.send('verifyAgainstSimulator');
+        };
+
         $scope.moveTo = function(x, y, z) {
-            var nx = roundCoord(toNumber(x));
-            var ny = roundCoord(toNumber(y));
-            var nz = roundCoord(toNumber(z));
-            $log.info('moveTo', nx, ny, nz);
+            var nx = parseCoord(x);
+            var ny = parseCoord(y);
+            var nz = parseCoord(z);
+            if (nx === null || ny === null || nz === null) {
+                $log.warn('moveTo needs all three world coordinates, got', x, y, z);
+                return;
+            }
+            nx = roundCoord(nx);
+            ny = roundCoord(ny);
+            nz = roundCoord(nz);
+            $log.info('moveTo world', nx, ny, nz);
             msg.send('moveTo', nx, ny, nz);
         };
 
         $scope.createInputMatrix = function(dx, dy, dz, roll, pitch, yaw) {
-            msg.send('createInputMatrix', toNumber(dx), toNumber(dy), toNumber(dz), toNumber(roll), toNumber(pitch), toNumber(yaw));
+            msg.send('createInputMatrix', parseCoord(dx) || 0, parseCoord(dy) || 0, parseCoord(dz) || 0, parseCoord(roll) || 0, parseCoord(pitch) || 0, parseCoord(yaw) || 0);
         };
         
         
@@ -296,11 +369,14 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         mrl.subscribe($scope.service.name, 'publishJointAngle');
         mrl.subscribe($scope.service.name, 'publishWorldPosition');
         mrl.subscribe($scope.service.name, 'publishTracking');
-//        $scope.panel.initDone();
         
         msg.subscribe('publishWorldPosition');
+        msg.subscribe('publishIkGoal');
         msg.subscribe('publishJointPositions');
         msg.subscribe('publishJointAngles');
+        msg.subscribe('moveTo');
         msg.subscribe('computePositionFromServos');
+        msg.subscribe('calibrateFromSimulator');
+        msg.subscribe('verifyAgainstSimulator');
         msg.subscribe(this);
     }]);

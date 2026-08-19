@@ -1,0 +1,70 @@
+<div>
+	<h3>FABRIK Inverse Kinematics</h3>
+	<p class="text-muted">Forward And Backward Reaching IK (Aristidou). Green marker is the Cartesian goal. Use after VirtualInMoovIkDemo so the chain is calibrated to VinMoov.</p>
+
+	<div class="well" style="margin-bottom: 12px;">
+		<h4 style="margin-top: 0;">World position</h4>
+		<div ng-if="worldPosition">
+			<table class="table table-condensed" style="margin-bottom: 4px; width: auto;">
+				<tr>
+					<th>X</th>
+					<th>Y</th>
+					<th>Z</th>
+				</tr>
+				<tr>
+					<td>{{worldPosition.x | number:4}}</td>
+					<td>{{worldPosition.y | number:4}}</td>
+					<td>{{worldPosition.z | number:4}}</td>
+				</tr>
+			</table>
+			<small class="text-muted">meters (JMonkeyEngine). Table = current palm. Boxes = goal. Origin {{originX | number:3}}, {{originY | number:3}}, {{originZ | number:3}}</small>
+		</div>
+		<div ng-if="!worldPosition" class="text-muted">No position yet — center joints, compute from servos, or calibrate</div>
+		<div ng-if="lastSolveError || lastSolveError === 0" class="text-muted" style="margin-top: 4px;">
+			<small>Last solve error {{lastSolveError * 1000 | number:1}} mm ({{lastSolveError | number:4}} m) in {{lastSolveIterations}} iterations</small>
+		</div>
+	</div>
+
+	<h4>Reset</h4>
+	<input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
+	<input type="submit" ng-click="computePositionFromServos()" value="Compute from servos" title="Forward kinematics from current servo positions" />
+	<input type="submit" ng-click="calibrateFromSimulator()" value="Calibrate from simulator" title="Measure each joint's rotation axis and origin off VinMoov and rebuild the chain" />
+	<br/>
+	<form novalidate class="search-form" ng-submit="moveTo(x,y,z)" style="margin-top: 12px;">
+		<div style="margin-bottom: 6px;">World X,Y,Z goal (m) — X/Z ±2 m, Y 0–4 m. Table above is current palm; these boxes stay on the goal you set.</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">X</label>
+			<input type="range" style="width: 280px;" min="-2" max="2" step="0.01" ng-model="x" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="-2" max="2" style="width: 7em;" ng-model="x" ng-change="moveTo(x,y,z)" />
+		</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">Y</label>
+			<input type="range" style="width: 280px;" min="0" max="4" step="0.01" ng-model="y" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="0" max="4" style="width: 7em;" ng-model="y" ng-change="moveTo(x,y,z)" />
+		</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">Z</label>
+			<input type="range" style="width: 280px;" min="-2" max="2" step="0.01" ng-model="z" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="-2" max="2" style="width: 7em;" ng-model="z" ng-change="moveTo(x,y,z)" />
+		</div>
+		<input type="submit" value="MoveTo" />
+	</form>
+	<small class="text-muted">Green marker is the goal. Arm walks there in 2 cm steps.</small>
+
+	<h3>Skeleton (world meters)</h3>
+	<table>
+		<tr ng-repeat="rowContent in positions track by $index">
+			<td>Point {{$index}}</td>
+			<td>x:{{rowContent[0] | number:4}}</td>
+			<td>y:{{rowContent[1] | number:4}}</td>
+			<td>z:{{rowContent[2] | number:4}}</td>
+		</tr>
+	</table>
+	<h3>Servo angles</h3>
+	<table>
+		<tr ng-repeat="(name,value) in angles">
+			<td>{{name}}</td>
+			<td>{{value | number:2}}</td>
+		</tr>
+	</table>
+</div>

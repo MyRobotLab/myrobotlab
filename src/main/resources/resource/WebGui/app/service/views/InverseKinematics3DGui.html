@@ -16,29 +16,46 @@
 					<td>{{worldPosition.z | number:4}}</td>
 				</tr>
 			</table>
-			<small class="text-muted" ng-if="service.config.worldFrame">meters (simulator / world frame)</small>
-			<small class="text-muted" ng-if="!service.config.worldFrame">DH millimeters (world calibration not applied)</small>
+			<small class="text-muted">meters (JMonkeyEngine). Table = current IK palm. Boxes = goal (green dot). DH origin {{originX | number:3}}, {{originY | number:3}}, {{originZ | number:3}}</small>
 		</div>
-		<div ng-if="!worldPosition" class="text-muted">No position yet — center joints or moveTo</div>
+		<div ng-if="!worldPosition" class="text-muted">No position yet — center joints, compute from servos, or calibrate</div>
 	</div>
 
 	<h4>Reset Configuration</h4>
 	<input type="submit" ng-click="centerAllJoints()" value="Center All Joints" />
 	<input type="submit" ng-click="computePositionFromServos()" value="Compute from servos" title="Forward kinematics from current servo positions" />
+	<input type="submit" ng-click="calibrateFromSimulator()" value="Calibrate from simulator" title="Measure each joint's rotation axis and origin off VinMoov and rebuild the chain" />
+	<input type="submit" ng-click="verifyAgainstSimulator()" value="Verify against simulator" title="Sweep every joint across its range and compare the model to the simulated hand - a rest-pose match alone does not prove the model is right" />
+	<div ng-if="verifyResult" class="text-muted" style="margin-top: 4px;">
+		<small>Verify: {{verifyResult}}</small>
+	</div>
 	<br/>
 	<div id='canvas'></div>
-	<small class="text-muted">Left-drag to orbit the view, mouse wheel to zoom</small>
+	<small class="text-muted">Left-drag to orbit the view, mouse wheel to zoom — skeleton is in world meters</small>
 	<br />
 	<form novalidate class="search-form" ng-submit="moveTo(x,y,z)">
-		World X,Y,Z:
-		<input type="number" step="0.01" ng-model="x" ng-change="moveTo(x,y,z)" />
-		<input type="number" step="0.01" ng-model="y" ng-change="moveTo(x,y,z)" />
-		<input type="number" step="0.01" ng-model="z" ng-change="moveTo(x,y,z)" />
+		<div style="margin-bottom: 6px;">World X,Y,Z goal (m) — X/Z ±2 m, Y 0–4 m. Each slider change sends moveTo</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">X</label>
+			<input type="range" style="width: 280px;" min="-2" max="2" step="0.01" ng-model="x" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="-2" max="2" style="width: 7em;" ng-model="x" ng-change="moveTo(x,y,z)" />
+		</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">Y</label>
+			<input type="range" style="width: 280px;" min="0" max="4" step="0.01" ng-model="y" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="0" max="4" style="width: 7em;" ng-model="y" ng-change="moveTo(x,y,z)" />
+		</div>
+		<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+			<label style="width: 1.2em;">Z</label>
+			<input type="range" style="width: 280px;" min="-2" max="2" step="0.01" ng-model="z" ng-change="moveTo(x,y,z)" />
+			<input type="number" step="0.01" min="-2" max="2" style="width: 7em;" ng-model="z" ng-change="moveTo(x,y,z)" />
+		</div>
 		<input type="submit" value="MoveTo" />
 	</form>
+	<small class="text-muted">Green marker is the goal. Arm walks there in 1 cm steps.</small>
 
 	<br />
-	<h3>Positions</h3>
+	<h3>Positions (world meters)</h3>
 	<table>
 		<tr ng-repeat="rowContent in positions track by $index">
 			<td>Link</td>
@@ -55,36 +72,6 @@
 		</tr>
 	</table>
 	<br />
-
-	<h4>Input Calibration (Translation/Rotation Matrix)</h4>
-	<form novalidate class="search-form">
-		<table>
-			<tr>
-				<td>dX</td>
-				<td>dY</td>
-				<td>dZ</td>
-			</tr>
-			<tr>
-				<td><input type="text" ng-model="dx" /></td>
-				<td><input type="text" ng-model="dy" /></td>
-				<td><input type="text" ng-model="dz" /></td>
-			</tr>
-			<tr>
-				<td>Roll</td>
-				<td>Pitch</td>
-				<td>Yaw</td>
-			</tr>
-			<tr>
-				<td><input type="text" ng-model="roll" /></td>
-				<td><input type="text" ng-model="pitch" /></td>
-				<td><input type="text" ng-model="yaw" /></td>
-			</tr>
-			<tr>
-				<td><input type="submit"
-					ng-click="createInputMatrix(dx,dy,dz,roll,pitch,yaw)" value="Calibrate!" /></td>
-			</tr>
-		</table>
-	</form>
 
 	<h4>TRACKING</h4>
 	{{tracking}}

@@ -12,16 +12,18 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
 /**
- * Boots a virtual InMoov (JMonkeyEngine simulator) with InverseKinematics3D,
- * calibrates the DH / IK millimeter frame onto the simulator's meter Y-up
- * frame, and checks that IK palm and simulated hand agree.
+ * Boots a virtual InMoov (JMonkeyEngine simulator) with InverseKinematics3D
+ * (Jacobian) and Fabrik (FABRIK), measures the arm's joint axes off VinMoov,
+ * verifies the Jacobian model tracks the rig across every joint range, then
+ * leaves WebGui ready for: Center All Joints → MoveTo world X ± a few cm. The
+ * Fabrik service panel can be used the same way to compare solvers.
  *
  * <pre>
  * Run: org.myrobotlab.service.VirtualInMoovIkDemo
  * </pre>
  *
- * Expects a single {@code VinMoov5.j3o} under
- * {@code resource/JMonkeyEngine/assets/Models/}.
+ * Green marker = IK Cartesian goal. Blue = simulated left hand. The solver
+ * walks a straight line in 1 cm steps toward the goal.
  *
  * Chain:
  * {@code ik3d.publishJointAngles → i01.onJointAngles → Servo.moveTo →
@@ -53,6 +55,11 @@ public class VirtualInMoovIkDemo {
       ik3d.setCurrentArm(ARM_KEY, InMoov2Arm.getDHRobotArm(ROBOT, ARM_KEY));
       log.info("ik3d running, DH palm at constructor pose {}", ik3d.currentPosition(ARM_KEY));
 
+      log.info("Starting fabrik...");
+      Fabrik fabrik = (Fabrik) Runtime.start("fabrik", "Fabrik");
+      fabrik.setCurrentArm(ARM_KEY, ROBOT, ARM_KEY);
+      log.info("fabrik running, palm at constructor pose {}", fabrik.currentPosition(ARM_KEY));
+
       InMoov2 i01 = (InMoov2) Runtime.create(ROBOT, "InMoov2");
       i01.getConfig().reportOnBoot = false;
       i01.getConfig().loadGestures = false;
@@ -82,34 +89,42 @@ public class VirtualInMoovIkDemo {
       attachArmServosToSimulator(simulator, leftArm);
 
       // Full servo names (i01.leftArm.*) → InMoov2 hub → Servo.moveTo
-      ik3d.attach(i01);
       ik3d.addListener("publishJointAngles", i01.getName(), "onJointAngles");
-      // Green IK overlay + HUD follow publishWorldPosition (Compute from servos)
+      fabrik.addListener("publishJointAngles", i01.getName(), "onJointAngles");
+      // Green marker = publishIkGoal; HUD current palm = publishWorldPosition
       ik3d.attach(simulator);
-      log.info("IK publishJointAngles → {}.onJointAngles; publishWorldPosition → {}.onWorldPosition", i01.getName(),
-          simulator.getName());
+      fabrik.attach(simulator);
+      log.info("IK/FABRIK publishJointAngles → {}.onJointAngles; publishIkGoal → {}.onIkGoal", i01.getName(), simulator.getName());
 
-      // Sanity: same path as WebGui servo UI (must move VinMoov if wiring OK)
-      log.info("Sanity sweep leftArm.bicep 0 → 45 → 0 (watch simulator)");
-      leftArm.getBicep().moveTo(0.0);
-      sleep(1000);
-      leftArm.getBicep().moveTo(45.0);
+      leftArm.rest();
       sleep(1500);
-      leftArm.getBicep().moveTo(0.0);
-      sleep(1500);
-      log.info("Sanity sweep done — bicep pos={}", leftArm.getBicep().getCurrentInputPos());
-
       ik3d.computePositionFromServos(ARM_KEY);
       if (!calibrateIkToSimulator(ik3d, simulator)) {
         log.error("Could not calibrate IK to simulator — check VinMoov node names");
         return;
       }
+      Point fabrikWorld = fabrik.calibrateFromSimulator(simulator);
+      if (fabrikWorld == null) {
+        log.error("Could not calibrate FABRIK to simulator — check VinMoov node names");
+        return;
+      }
+      log.info("Calibrated FABRIK world {}", fabrikWorld);
 
-      log.info("Rest-pose check (DH rest thetas vs simulator rest)");
+      log.info("Rest-pose check (measured chain vs simulator rest)");
       compareHands("rest", ik3d, simulator);
       logArmChain("rest", ik3d, simulator);
 
-      probeIsolatedServoMoves(ik3d, simulator, leftArm);
+      // A rest-pose match proves nothing on its own: a chain with the wrong joint
+      // axes or a mirrored direction also matches at rest. Sweep the workspace.
+      double worst = ik3d.verifyAgainstSimulator(simulator, 5);
+      if (Double.isNaN(worst) || worst > InverseKinematics3D.VERIFY_TOLERANCE_M) {
+        log.error("Model disagrees with the simulator by {} m across the joint ranges — IK will diverge as the arm moves", worst);
+      } else {
+        log.info("Model tracks the simulator within {} m across every joint range", worst);
+      }
+      leftArm.rest();
+      sleep(1500);
+      ik3d.computePositionFromServos(ARM_KEY);
 
       log.info("Centered joints — publishing angles to {}", i01.getName());
       ik3d.centerAllJoints(ARM_KEY);
@@ -120,78 +135,55 @@ public class VirtualInMoovIkDemo {
       Point centerWorld = ik3d.currentPositionWorld(ARM_KEY);
       log.info("Centered palm in world frame {}", centerWorld);
 
-      // Small reachable offsets in simulator meters from the centered pose
-      double[][] worldDeltas = { { 0.05, 0.0, 0.05 }, { -0.04, 0.04, 0.0 }, { 0.0, 0.05, 0.04 } };
-      for (double[] d : worldDeltas) {
-        double tx = centerWorld.getX() + d[0];
-        double ty = centerWorld.getY() + d[1];
-        double tz = centerWorld.getZ() + d[2];
-        log.info("IK moveTo world ({}, {}, {})", tx, ty, tz);
-        ik3d.moveTo(ARM_KEY, tx, ty, tz);
+      // Validate the WebGui use case: jog world X a few centimeters, stay on Y/Z
+      double[] xDeltas = { 0.03, -0.03, 0.05 };
+      for (double dx : xDeltas) {
+        ik3d.centerAllJoints(ARM_KEY);
+        sleep(500);
+        double tx = centerWorld.getX() + dx;
+        double ty = centerWorld.getY();
+        double tz = centerWorld.getZ();
+        log.info("IK straight-line world X {} → ({}, {}, {})", dx, tx, ty, tz);
+        Point reached = ik3d.moveTo(ARM_KEY, tx, ty, tz);
         logServoSnapshot(leftArm);
-        sleep(3000);
-        compareHands(String.format("moveTo(%.3f,%.3f,%.3f)", tx, ty, tz), ik3d, simulator);
+        sleep(1500);
+        compareHands(String.format("moveTo x%+.3f", dx), ik3d, simulator);
+        if (reached != null) {
+          log.info("X-line dx={} goal=({}, {}, {}) reached {} errX={} errY={} errZ={}", dx, tx, ty, tz, reached,
+              Math.abs(reached.getX() - tx), Math.abs(reached.getY() - ty), Math.abs(reached.getZ() - tz));
+        }
       }
 
-      log.info("Demo moves finished — Runtime/WebGui/simulator still running.");
+      ik3d.centerAllJoints(ARM_KEY);
+      sleep(1500);
+      fabrik.computePositionFromServos(ARM_KEY);
+      log.info("Demo ready for WebGui: use ik3d or fabrik — Center All Joints, then MoveTo world X ± a few cm. Green dot is the IK goal.");
     } catch (Exception e) {
       log.error("VirtualInMoovIkDemo failed", e);
     }
   }
 
   /**
-   * DH is mm at the omoplate, Y-up; JME is meters at the model root, Y-up.
-   * Measure VinMoov bone lengths, put the DH origin on the omoplate node, and
-   * fit a last-frame wrist offset so hanging Z lives in the chain.
+   * Measure every arm joint's rotation axis and origin off VinMoov and rebuild
+   * the solver's chain from them. Both frames are meters, Y-up.
    */
   private static boolean calibrateIkToSimulator(InverseKinematics3D ik3d, JMonkeyEngine simulator) {
-    Point omoplate = worldPoint(simulator, ROBOT + ".leftArm.omoplate", ROBOT + ".leftArm.shoulder", "leftArm.omoplate");
-    Point shoulder = worldPoint(simulator, ROBOT + ".leftArm.shoulder");
-    Point rotate = worldPoint(simulator, ROBOT + ".leftArm.rotate");
-    Point bicep = worldPoint(simulator, ROBOT + ".leftArm.bicep");
-    Point wrist = toPoint(simulator.getHandWorldTranslation(ROBOT, ARM_KEY));
-    if (wrist == null) {
-      wrist = worldPoint(simulator, ROBOT + ".leftHand.wrist", ROBOT + ".leftHand", "leftHand.wrist");
-    }
-    if (omoplate == null || wrist == null) {
-      log.error("Calibration samples missing omoplate={} wrist={}", omoplate, wrist);
-      return false;
-    }
-    logVinMoovDistances(omoplate, shoulder, rotate, bicep, wrist);
-    ik3d.fitVinMoovLinkLengths(ARM_KEY, omoplate, shoulder, rotate, bicep, wrist);
-    Point world = ik3d.calibrateFromWorldSamples(omoplate, wrist);
-    log.info("Calibrated IK world {} vs sim wrist {}", world, wrist);
+    Point world = ik3d.calibrateFromSimulator(simulator);
+    log.info("Calibrated IK world {}", world);
     return world != null;
-  }
-
-  private static void logVinMoovDistances(Point omoplate, Point shoulder, Point rotate, Point bicep, Point wrist) {
-    log.info("VinMoov omoplate-shoulder {} mm", fmtMm(omoplate, shoulder));
-    log.info("VinMoov shoulder-rotate {} mm", fmtMm(shoulder, rotate));
-    log.info("VinMoov rotate-bicep {} mm", fmtMm(rotate, bicep));
-    log.info("VinMoov bicep-wrist {} mm", fmtMm(bicep, wrist));
-  }
-
-  private static String fmtMm(Point a, Point b) {
-    if (a == null || b == null) {
-      return "n/a";
-    }
-    return String.format("%.1f", a.distanceTo(b) * InverseKinematics3D.IK_MM_PER_JME_METER);
   }
 
   private static void logArmChain(String label, InverseKinematics3D ik3d, JMonkeyEngine simulator) {
     Map<String, Point3df> chain = simulator.getArmChainWorldTranslations(ROBOT, ARM_KEY);
     log.info("[{}] VinMoov chain {}", label, chain);
-    DHRobotArm dh = ik3d.getCurrentArm(ARM_KEY);
-    if (dh == null) {
+    DHRobotArm arm = ik3d.getCurrentArm(ARM_KEY);
+    if (arm == null) {
       return;
     }
-    Point origin = ik3d.getWorldOrigin();
-    for (int i = 0; i < dh.getNumLinks(); i++) {
-      Point jp = dh.getJointPosition(i);
-      Point world = origin != null ? ik3d.toWorldFrame(jp) : jp;
-      log.info("[{}] DH joint {} {} world {}", label, i, dh.getLink(i).getName(), world);
+    for (int i = 0; i < arm.getNumLinks(); i++) {
+      log.info("[{}] joint {} {} world {} servo {}", label, i, arm.getLink(i).getName(), arm.getJointPosition(i), arm.getLink(i).toServoDegrees());
     }
-    log.info("[{}] DH palm world {}", label, ik3d.currentPositionWorld(ARM_KEY));
+    log.info("[{}] origin {} tool offset {} palm world {}", label, ik3d.getWorldOrigin(), arm.getToolOffset(), ik3d.currentPositionWorld(ARM_KEY));
   }
 
   private static void probeIsolatedServoMoves(InverseKinematics3D ik3d, JMonkeyEngine simulator, InMoov2Arm arm) {
@@ -239,18 +231,6 @@ public class VirtualInMoovIkDemo {
       log.warn("[{}] HAND MISMATCH err={}m (limit {}m)  IK {}  sim {}", label, String.format("%.3f", err), HAND_MATCH_M, ikWorld, simHand);
     }
     return match;
-  }
-
-  private static Point worldPoint(JMonkeyEngine simulator, String... names) {
-    for (String name : names) {
-      Point3df p = simulator.getWorldTranslation(name);
-      if (p != null) {
-        log.info("Resolved world node {} -> ({}, {}, {})", name, p.x, p.y, p.z);
-        return toPoint(p);
-      }
-      log.info("World node {} not found", name);
-    }
-    return null;
   }
 
   private static Point toPoint(Point3df p) {
