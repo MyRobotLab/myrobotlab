@@ -214,6 +214,14 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         msg.send('installOcrModel', filter.name, filter.detectionModel)
     }
 
+    $scope.installVisionModel = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        msg.send('installVisionModel', filter.name)
+    }
+
     $scope.isOcrModelInstalled = function(id) {
         let filter = $scope.getFilter()
         if (!filter || !id || id === 'none') {

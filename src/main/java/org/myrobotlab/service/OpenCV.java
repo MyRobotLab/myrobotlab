@@ -118,9 +118,12 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetectYN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterOcr;
+import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.opencv.OpenCVFilterYoloOnnx;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -335,11 +338,11 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
-      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
-      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay", "PyramidDown",
-      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
-      "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceDetectYN", "FaceRecognizer", "FaceTraining", "Fauvist",
+      "FindContours", "Flip", "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert",
+      "KinectDepth", "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay",
+      "PyramidDown", "PyramidUp", "QrCode", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF",
+      "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", "YoloOnnx" };
 
   static final long serialVersionUID = 1L;
 
@@ -1887,6 +1890,31 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
       ocr.detectionModel = modelId.trim();
     }
     String path = ocr.installSelectedModel();
+    broadcastState();
+    return path;
+  }
+
+  /**
+   * Download zoo ONNX weights for {@code FaceDetectYN}, {@code YoloOnnx}, or
+   * Nano/ViT {@code Tracker} filters.
+   */
+  public String installVisionModel(String filterName) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter == null) {
+      error("installVisionModel - could not find filter %s", filterName);
+      return null;
+    }
+    String path = null;
+    if (filter instanceof OpenCVFilterFaceDetectYN) {
+      path = ((OpenCVFilterFaceDetectYN) filter).installSelectedModel();
+    } else if (filter instanceof OpenCVFilterYoloOnnx) {
+      path = ((OpenCVFilterYoloOnnx) filter).installSelectedModel();
+    } else if (filter instanceof OpenCVFilterTracker) {
+      path = ((OpenCVFilterTracker) filter).installTrackerModels();
+    } else {
+      error("%s does not use OpenCV Zoo models", filterName);
+      return null;
+    }
     broadcastState();
     return path;
   }
