@@ -119,6 +119,7 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterOcr;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -336,7 +337,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
       "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
       "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
-      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
+      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay", "PyramidDown",
       "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
       "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
@@ -1853,6 +1854,41 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     // not thread safe
     // Service.copyShallowFrom(filter, otherFilter);
     newFilterStates.put(otherFilter.name, otherFilter);
+  }
+
+  /**
+   * Download and cache the OCR detector currently selected on an {@code Ocr}
+   * filter (EAST or DBNet). Works even when capture is not running.
+   *
+   * @param filterName
+   *          name of the {@link org.myrobotlab.opencv.OpenCVFilterOcr} filter
+   * @return absolute path of the cached model, or null for full-frame mode
+   */
+  public String installOcrModel(String filterName) {
+    return installOcrModel(filterName, null);
+  }
+
+  /**
+   * Select a catalog id ({@code east}, {@code db_ic15_r18}, …) then download
+   * and cache it.
+   */
+  public String installOcrModel(String filterName, String modelId) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter == null) {
+      error("installOcrModel - could not find filter %s", filterName);
+      return null;
+    }
+    if (!(filter instanceof OpenCVFilterOcr)) {
+      error("%s is not an Ocr filter", filterName);
+      return null;
+    }
+    OpenCVFilterOcr ocr = (OpenCVFilterOcr) filter;
+    if (modelId != null && !modelId.trim().isEmpty()) {
+      ocr.detectionModel = modelId.trim();
+    }
+    String path = ocr.installSelectedModel();
+    broadcastState();
+    return path;
   }
 
   public String setGrabberType(String grabberType) {

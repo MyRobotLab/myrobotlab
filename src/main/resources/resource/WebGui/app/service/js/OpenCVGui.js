@@ -181,6 +181,48 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         console.info(filter)
     }
 
+    $scope.ocrDetectionModels = [
+        { id: 'none', label: 'Full frame (Tesseract only)' },
+        { id: 'east', label: 'EAST scene-text detector' },
+        { id: 'db_ic15_r18', label: 'DBNet IC15 ResNet-18 (English, fast)' },
+        { id: 'db_ic15_r50', label: 'DBNet IC15 ResNet-50 (English)' },
+        { id: 'db_td500_r18', label: 'DBNet TD500 ResNet-18 (English + Chinese)' },
+        { id: 'db_td500_r50', label: 'DBNet TD500 ResNet-50 (English + Chinese)' }
+    ]
+
+    $scope.onOcrModelChange = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        let id = filter.detectionModel || 'east'
+        if (id === 'none') {
+            filter.detector = 'none'
+        } else if (id.indexOf('db') === 0) {
+            filter.detector = 'db'
+        } else {
+            filter.detector = 'east'
+        }
+        $scope.setFilterState()
+    }
+
+    $scope.installOcrModel = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        msg.send('installOcrModel', filter.name, filter.detectionModel)
+    }
+
+    $scope.isOcrModelInstalled = function(id) {
+        let filter = $scope.getFilter()
+        if (!filter || !id || id === 'none') {
+            return true
+        }
+        let installed = filter.installedDetectionModels
+        return installed && installed.indexOf(id) >= 0
+    }
+
     $scope.getFilterType = function(typeName) {
         if (!typeName) {
             typeName = $scope.service.displayFilter
