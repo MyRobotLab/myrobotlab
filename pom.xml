@@ -2171,6 +2171,7 @@
                 <include>**/org/myrobotlab/framework/AttachTest.java</include>
                 <include>**/org/myrobotlab/framework/repo/ServiceDataTest.java</include>
                 <include>**/org/myrobotlab/codec/CodecUtilsTest.java</include>
+                <include>**/org/myrobotlab/math/geometry/DepthToPointCloudTest.java</include>
               </includes>
               <excludes>
                 <exclude>**/integration/*</exclude>

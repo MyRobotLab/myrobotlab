@@ -158,8 +158,43 @@ public class VirtualInMoovIkDemo {
       sleep(1500);
       fabrik.computePositionFromServos(ARM_KEY);
       log.info("Demo ready for WebGui: use ik3d or fabrik — Center All Joints, then MoveTo world X ± a few cm. Green dot is the IK goal.");
+
+      startChestDepthOverlay(i01, simulator);
     } catch (Exception e) {
       log.error("VirtualInMoovIkDemo failed", e);
+    }
+  }
+
+  /**
+   * Live OAK-D stereo depth in the VinMoov chest, with a 3D cloud + HUD
+   * colormap. Falls back to synthetic depth if no device is present.
+   * <p>
+   * {@code -Dmrl.oakd.synthetic=true} forces the synthetic publisher (no USB /
+   * Python). First start pip-installs depthai into the Py4j venv
+   * ({@code OakDConfig.py4jInstall}).
+   */
+  private static void startChestDepthOverlay(InMoov2 i01, JMonkeyEngine simulator) {
+    try {
+      log.info("Starting chest depth overlay on {} / {}", i01.getName(), simulator.getName());
+      boolean forceSynthetic = Boolean.parseBoolean(System.getProperty("mrl.oakd.synthetic", "false"));
+      OakD oakd = (OakD) Runtime.create("oakd", "OakD");
+      oakd.getConfig().forceSynthetic = forceSynthetic;
+      oakd.getConfig().syntheticFallback = true;
+      oakd.getConfig().fps = 12;
+      oakd.getConfig().cloudStride = 4;
+      oakd.startService();
+      simulator.ensureChestDepthCamera();
+      simulator.attach(oakd);
+      boolean started = oakd.startDepth();
+      if (started && oakd.usingSynthetic) {
+        log.info("Chest depth overlay using synthetic wall+box (no OAK-D). Live device: install depthai in the Py4j venv, unplug is OK — fallback is automatic.");
+      } else if (started) {
+        log.info("Chest depth overlay started — OAK-D pipeline requested. Watch the cyan chest frustum and lower-left HUD.");
+      } else {
+        log.warn("Could not start OakD depth overlay");
+      }
+    } catch (Exception e) {
+      log.error("Chest depth overlay failed", e);
     }
   }
 

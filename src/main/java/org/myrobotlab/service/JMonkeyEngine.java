@@ -6,6 +6,7 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,9 @@ import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.geometry.DepthCloudJme;
+import org.myrobotlab.math.geometry.DepthColorMap;
+import org.myrobotlab.math.geometry.DepthToRgbMesh;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.interfaces.Mapper;
@@ -58,8 +62,16 @@ import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.DepthFrame;
+import org.myrobotlab.service.data.DepthHud;
+import org.myrobotlab.service.interfaces.DepthFrameListener;
+import org.myrobotlab.service.interfaces.DepthFramePublisher;
+import org.myrobotlab.service.interfaces.DepthHudListener;
+import org.myrobotlab.service.interfaces.DepthHudPublisher;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.PointCloudListener;
+import org.myrobotlab.service.interfaces.PointCloudPublisher;
 import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
@@ -71,6 +83,8 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
 // import com.jme3.bullet.animation.DynamicAnimControl;
 import com.jme3.collision.CollisionResults;
@@ -106,6 +120,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -121,6 +136,10 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Image;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.image.ColorSpace;
 import com.jme3.util.BufferUtils;
 
 /**
@@ -135,7 +154,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
+public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener, PointCloudListener, DepthHudListener, DepthFrameListener {
 
   final static String CAMERA = "camera";
 
@@ -249,9 +268,55 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   protected transient FloatBuffer pointCloudBuffer = null;
 
+  protected transient FloatBuffer pointCloudColorBuffer = null;
+
   protected transient Material pointCloudMat = null;
 
   protected transient Mesh pointCloudMesh = new Mesh();
+
+  protected transient Geometry pointCloudGeometry = null;
+
+  protected transient Geometry depthMeshGeometry = null;
+
+  protected transient Mesh depthSurfaceMesh = null;
+
+  protected transient Material depthMeshMat = null;
+
+  protected transient Texture2D depthMeshTexture = null;
+
+  protected transient FloatBuffer depthMeshPosBuffer = null;
+
+  protected transient FloatBuffer depthMeshUvBuffer = null;
+
+  protected int depthMeshVertexCount = 0;
+
+  protected int depthMeshTexW = 0;
+
+  protected int depthMeshTexH = 0;
+
+  protected transient Node chestDepthCameraNode = null;
+
+  /**
+   * Depth voxels + frustum live here (child of {@link #rootNode}), not under
+   * VinMoov. Parenting the cloud to {@code topStom} exploded that node's
+   * bounds, z-fought with the chest/arms, and left Unshaded vertex-color state
+   * on the following Lighting/PBR draws (black textures).
+   */
+  protected transient Node depthOverlayNode = null;
+
+  protected transient Vector3f cachedTorsoCenterLocal = null;
+
+  protected transient String cachedTorsoCenterParent = null;
+
+  protected transient Geometry depthHudGeometry = null;
+
+  protected transient Texture2D depthHudTexture = null;
+
+  protected transient Material depthHudMat = null;
+
+  protected int pointCloudVertexCount = 0;
+
+  protected transient String lastChestParentName;
 
   protected transient Node rootNode;
 
@@ -475,6 +540,17 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       subscribe(service.getName(), "publishCvData");
     }</pre>
      */
+
+    if (service instanceof PointCloudPublisher) {
+      subscribe(service.getName(), "publishPointCloud", getName(), "onPointCloud");
+    }
+    if (service instanceof DepthHudPublisher) {
+      subscribe(service.getName(), "publishDepthHud", getName(), "onDepthHud");
+    }
+    if (service instanceof DepthFramePublisher) {
+      subscribe(service.getName(), "publishDepthFrame", getName(), "onDepthFrame");
+      subscribe(service.getName(), "publishRgbMesh", getName(), "onRgbMesh");
+    }
 
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
       // Instantaneous angle stream (TimeEncoder) and direct move commands
@@ -1182,43 +1258,270 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   public void initPointCloud(PointCloud pc) {
-
     Point3df[] points = pc.getData();
-    Vector3f[] lineVerticies = new Vector3f[points.length];
+    int n = points == null ? 0 : points.length;
+    pointCloudVertexCount = n;
+    int verts = Math.max(1, n) * 8;
+    pointCloudBuffer = BufferUtils.createFloatBuffer(verts * 3);
+    pointCloudColorBuffer = BufferUtils.createFloatBuffer(verts * 4);
+    writePointCloudBuffers(pc);
 
-    for (int i = 0; i < points.length; ++i) {
-      Point3df p = points[i];
-      lineVerticies[i] = new Vector3f(p.x, p.y, p.z);
-    }
-
-    pointCloudBuffer = BufferUtils.createFloatBuffer(lineVerticies);
-
-    // pointCloudMesh.setMode(Mesh.Mode.TriangleFan);
-    pointCloudMesh.setMode(Mesh.Mode.Points);
-    // pointCloudMesh.setMode(Mesh.Mode.Lines);
-    // pointCloudMesh.setMode(Mesh.Mode.Triangles);
-
-    // https://hub.jmonkeyengine.org/t/how-to-render-a-3d-point-cloud/27341/11
+    pointCloudMesh = new Mesh();
+    pointCloudMesh.setMode(Mesh.Mode.Triangles);
     pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pc.getColors());
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pointCloudColorBuffer);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(DepthCloudJme.cubeIndices(Math.max(1, n))));
     pointCloudMesh.updateBound();
     pointCloudMesh.updateCounts();
-    // pointCloudMesh.setPointSize(0.0003);
 
-    Geometry geo = new Geometry("line", pointCloudMesh);
+    if (pointCloudGeometry != null) {
+      pointCloudGeometry.removeFromParent();
+    }
+    pointCloudGeometry = new Geometry("chest.depthCloud", pointCloudMesh);
     pointCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    // pointCloudMat = new Material(assetManager,
-    // "Common/MatDefs/Misc/Particle.j3md");
+    pointCloudMat.setBoolean("VertexColor", true);
+    pointCloudMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
+    pointCloudMat.getAdditionalRenderState().setPolyOffset(1f, 1f);
+    pointCloudGeometry.setMaterial(pointCloudMat);
+    pointCloudGeometry.setShadowMode(ShadowMode.Off);
+    pointCloudGeometry.setQueueBucket(Bucket.Opaque);
 
-    pointCloudMat.setColor("Color", ColorRGBA.Green);
-    pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-    // pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Front);
-    pointCloudMat.setBoolean("VertexColor", false); // important for points !!
-    // pointCloudMat.setBoolean("VertexColor", false); // important for points
-    // !!
-    geo.setMaterial(pointCloudMat);
+    ensureDepthOverlayNode();
+    depthOverlayNode.attachChild(pointCloudGeometry);
+    syncDepthOverlayPose();
+    applyDepthDisplayMode();
+  }
 
-    rootNode.attachChild(geo);
+  /**
+   * Camera frame (X right, Y down, Z forward) → JME local (X right, Y up, Z
+   * forward). Each sample is a cube on {@link #depthOverlayNode} (not under
+   * VinMoov) so torso motion is copied via {@link #syncDepthOverlayPose()}.
+   */
+  private void writePointCloudBuffers(PointCloud pc) {
+    Point3df[] points = pc.getData();
+    float[] colors = pc.getColors();
+    int n = points == null ? 0 : points.length;
+    JMonkeyEngineConfig cfg = (JMonkeyEngineConfig) config;
+    float parentScale = 1f;
+    if (cfg != null && cfg.depthCloudMatchWorldMeters && depthOverlayNode != null) {
+      Vector3f ws = depthOverlayNode.getWorldScale();
+      parentScale = (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
+    }
+    float scale = DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+    float voxel = cfg != null ? cfg.depthCloudVoxelM : 0.03f;
+    float half = Math.max(0.004f, voxel * 0.5f);
+    if (cfg != null && cfg.depthCloudMatchWorldMeters && parentScale > 1e-6f) {
+      half = half / parentScale;
+    }
+
+    pointCloudBuffer.clear();
+    pointCloudColorBuffer.clear();
+    float[] corners = new float[24];
+    for (int i = 0; i < n; i++) {
+      Point3df p = points[i];
+      DepthCloudJme.voxelCorners(p.x, p.y, p.z, scale, half, corners);
+      for (int c = 0; c < 24; c++) {
+        pointCloudBuffer.put(corners[c]);
+      }
+      float r = 0.2f;
+      float g = 0.9f;
+      float b = 0.3f;
+      float a = 1f;
+      if (colors != null && colors.length >= (i + 1) * 4) {
+        r = colors[i * 4];
+        g = colors[i * 4 + 1];
+        b = colors[i * 4 + 2];
+        a = colors[i * 4 + 3];
+      }
+      for (int c = 0; c < 8; c++) {
+        pointCloudColorBuffer.put(r).put(g).put(b).put(a);
+      }
+    }
+    if (n == 0) {
+      for (int i = 0; i < 24; i++) {
+        pointCloudBuffer.put(0f);
+      }
+      for (int i = 0; i < 8; i++) {
+        pointCloudColorBuffer.put(0f).put(0f).put(0f).put(0f);
+      }
+    }
+    pointCloudBuffer.flip();
+    pointCloudColorBuffer.flip();
+  }
+
+  /**
+   * Organized depth grid → RGB-textured triangles on {@link #depthOverlayNode}.
+   * Camera Y is flipped to JME Y-up, same as voxels.
+   */
+  protected void initDepthRgbMesh(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
+    int n = Math.max(1, mesh.vertexCount);
+    depthMeshVertexCount = mesh.vertexCount;
+    depthMeshPosBuffer = BufferUtils.createFloatBuffer(n * 3);
+    depthMeshUvBuffer = BufferUtils.createFloatBuffer(n * 2);
+    writeDepthMeshBuffers(mesh, rgb, texW, texH);
+
+    depthSurfaceMesh = new Mesh();
+    depthSurfaceMesh.setMode(Mesh.Mode.Triangles);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Position, 3, depthMeshPosBuffer);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.TexCoord, 2, depthMeshUvBuffer);
+    int[] idx = mesh.indices != null && mesh.indices.length > 0 ? mesh.indices : new int[] { 0, 0, 0 };
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(idx));
+    depthSurfaceMesh.updateBound();
+    depthSurfaceMesh.updateCounts();
+
+    if (depthMeshGeometry != null) {
+      depthMeshGeometry.removeFromParent();
+    }
+    depthMeshGeometry = new Geometry("chest.depthRgbMesh", depthSurfaceMesh);
+    depthMeshMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    depthMeshMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
+    depthMeshMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+    depthMeshMat.getAdditionalRenderState().setPolyOffset(1f, 1f);
+    uploadDepthMeshTexture(rgb, texW, texH);
+    depthMeshMat.setTexture("ColorMap", depthMeshTexture);
+    depthMeshGeometry.setMaterial(depthMeshMat);
+    depthMeshGeometry.setShadowMode(ShadowMode.Off);
+    depthMeshGeometry.setQueueBucket(Bucket.Opaque);
+
+    ensureDepthOverlayNode();
+    depthOverlayNode.attachChild(depthMeshGeometry);
+    syncDepthOverlayPose();
+    applyDepthDisplayMode();
+  }
+
+  private void writeDepthMeshBuffers(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
+    JMonkeyEngineConfig cfg = config;
+    float parentScale = 1f;
+    if (cfg != null && cfg.depthCloudMatchWorldMeters && depthOverlayNode != null) {
+      Vector3f ws = depthOverlayNode.getWorldScale();
+      parentScale = (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
+    }
+    float scale = DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+
+    depthMeshPosBuffer.clear();
+    int n = mesh.vertexCount;
+    float[] p = mesh.positions;
+    for (int i = 0; i < n; i++) {
+      int o = i * 3;
+      depthMeshPosBuffer.put(p[o] * scale);
+      depthMeshPosBuffer.put(-p[o + 1] * scale);
+      depthMeshPosBuffer.put(p[o + 2] * scale);
+    }
+    if (n == 0) {
+      depthMeshPosBuffer.put(0f).put(0f).put(0f);
+    }
+    depthMeshPosBuffer.flip();
+
+    depthMeshUvBuffer.clear();
+    if (mesh.uvs != null && mesh.uvs.length >= n * 2) {
+      depthMeshUvBuffer.put(mesh.uvs, 0, n * 2);
+    }
+    if (n == 0) {
+      depthMeshUvBuffer.put(0f).put(0f);
+    }
+    depthMeshUvBuffer.flip();
+
+    if (depthSurfaceMesh != null) {
+      int[] idx = mesh.indices != null && mesh.indices.length > 0 ? mesh.indices : new int[] { 0, 0, 0 };
+      depthSurfaceMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(idx));
+    }
+    uploadDepthMeshTexture(rgb, texW, texH);
+  }
+
+  private void uploadDepthMeshTexture(byte[] rgb, int w, int h) {
+    if (rgb == null || w <= 0 || h <= 0 || rgb.length < w * h * 3) {
+      return;
+    }
+    ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 3);
+    for (int y = 0; y < h; y++) {
+      int src = (h - 1 - y) * w * 3;
+      buf.put(rgb, src, w * 3);
+    }
+    buf.flip();
+    Image image = new Image(Image.Format.RGB8, w, h, buf, ColorSpace.sRGB);
+    if (depthMeshTexture == null || depthMeshTexW != w || depthMeshTexH != h) {
+      depthMeshTexture = new Texture2D(image);
+      depthMeshTexture.setMagFilter(Texture.MagFilter.Bilinear);
+      depthMeshTexture.setMinFilter(Texture.MinFilter.BilinearNoMipMaps);
+      depthMeshTexture.setWrap(Texture.WrapMode.EdgeClamp);
+      depthMeshTexW = w;
+      depthMeshTexH = h;
+      if (depthMeshMat != null) {
+        depthMeshMat.setTexture("ColorMap", depthMeshTexture);
+      }
+    } else {
+      depthMeshTexture.setImage(image);
+    }
+  }
+
+  private static byte[] meshTextureRgb(DepthFrame frame, int[] wh) {
+    if (frame.rgb != null && frame.rgbWidth > 0 && frame.rgbHeight > 0
+        && frame.rgb.length >= frame.rgbWidth * frame.rgbHeight * 3) {
+      wh[0] = frame.rgbWidth;
+      wh[1] = frame.rgbHeight;
+      return frame.rgb;
+    }
+    DepthHud hud = DepthColorMap.toHud(frame);
+    if (hud == null || hud.rgb == null) {
+      return null;
+    }
+    wh[0] = hud.width;
+    wh[1] = hud.height;
+    return hud.rgb;
+  }
+
+  protected void updateRgbMeshOnRenderThread(DepthFrame frame) {
+    ensureChestDepthCameraOnRenderThread(config);
+    syncDepthOverlayPose();
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthCloud) {
+      applyDepthDisplayMode();
+      return;
+    }
+    float maxEdge = cfg != null ? cfg.depthMeshMaxEdgeM : DepthToRgbMesh.DEFAULT_MAX_EDGE_M;
+    DepthToRgbMesh.Result mesh = DepthToRgbMesh.convert(frame, maxEdge);
+    int[] wh = new int[2];
+    byte[] rgb = meshTextureRgb(frame, wh);
+    if (rgb == null || mesh.vertexCount <= 0) {
+      applyDepthDisplayMode();
+      return;
+    }
+    if (depthMeshGeometry == null || depthMeshPosBuffer == null || mesh.vertexCount != depthMeshVertexCount) {
+      initDepthRgbMesh(mesh, rgb, wh[0], wh[1]);
+      return;
+    }
+    writeDepthMeshBuffers(mesh, rgb, wh[0], wh[1]);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Position, 3, depthMeshPosBuffer);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.TexCoord, 2, depthMeshUvBuffer);
+    depthSurfaceMesh.updateBound();
+    depthSurfaceMesh.updateCounts();
+    applyDepthDisplayMode();
+  }
+
+  public void setDepthRgbMesh(boolean enabled) {
+    config.depthRgbMesh = enabled;
+    if (app != null) {
+      app.enqueue(() -> {
+        applyDepthDisplayMode();
+        return null;
+      });
+    }
+  }
+
+  public void onRgbMesh(Boolean enabled) {
+    setDepthRgbMesh(Boolean.TRUE.equals(enabled));
+  }
+
+  private void applyDepthDisplayMode() {
+    JMonkeyEngineConfig cfg = config;
+    boolean show3d = cfg == null || cfg.depthCloud;
+    boolean mesh = cfg != null && cfg.depthRgbMesh;
+    if (pointCloudGeometry != null) {
+      pointCloudGeometry.setCullHint((show3d && !mesh) ? CullHint.Inherit : CullHint.Always);
+    }
+    if (depthMeshGeometry != null) {
+      depthMeshGeometry.setCullHint((show3d && mesh) ? CullHint.Inherit : CullHint.Always);
+    }
   }
 
   @Override
@@ -1777,8 +2080,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    *          cv data
    */
   public void onCvData(CVData data) {
-    // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
-    // FIXME - do something interesting ... :)
+    if (data == null) {
+      return;
+    }
+    PointCloud pc = data.getPointCloud();
+    if (pc != null) {
+      onPointCloud(pc);
+    }
   }
 
   @Override
@@ -1791,40 +2099,360 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
   }
 
+  @Override
   public void onPointCloud(PointCloud pc) {
-
-    if (pc == null) {
+    if (pc == null || app == null || assetManager == null) {
       return;
     }
-    // pointCloudMat.setBoolean("VertexColor", false);
-    // pointCloudMesh.setPointSize(0.01f);
-
-    if (pointCloudBuffer == null) {
-      initPointCloud(pc);
-      // addBox("box-1");
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthCloud) {
+      return;
     }
-
-    pointCloudBuffer.rewind();
-    Point3df[] points = pc.getData();
-
-    for (Point3df p : points) {
-      // log.info("p {}", p);
-      // pointCloudBuffer.put(480 - p.y);
-      // pointCloudBuffer.put(640 - p.x);
-      pointCloudBuffer.put(p.x);
-      pointCloudBuffer.put(p.y);
-      pointCloudBuffer.put(p.z);
-      // lineVerticies[index] = new Vector3f(480 - p.y, 640 - p.x, p.z);
+    if (cfg != null && cfg.depthRgbMesh) {
+      return;
     }
-
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pc.getColors());
+    app.enqueue(() -> {
+      updatePointCloudOnRenderThread(pc);
+      return null;
+    });
   }
 
-  // auto Register
+  @Override
+  public void onDepthFrame(DepthFrame frame) {
+    if (frame == null || app == null || assetManager == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg == null || !cfg.depthRgbMesh) {
+      return;
+    }
+    if (!cfg.depthCloud) {
+      return;
+    }
+    frame.decodeRgb();
+    app.enqueue(() -> {
+      updateRgbMeshOnRenderThread(frame);
+      return null;
+    });
+  }
+
+  @Override
+  public void onDepthHud(DepthHud hud) {
+    if (hud == null || hud.rgb == null || app == null || guiNode == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthHud) {
+      return;
+    }
+    app.enqueue(() -> {
+      updateDepthHudOnRenderThread(hud);
+      return null;
+    });
+  }
+
+  /**
+   * Create or move the dummy chest depth camera on the VinMoov torso. Safe from
+   * any thread (enqueued to JME).
+   */
+  public void ensureChestDepthCamera() {
+    if (app == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = (JMonkeyEngineConfig) config;
+    app.enqueue(() -> {
+      ensureChestDepthCameraOnRenderThread(cfg);
+      return null;
+    });
+  }
+
+  protected void updatePointCloudOnRenderThread(PointCloud pc) {
+    ensureChestDepthCameraOnRenderThread((JMonkeyEngineConfig) config);
+    syncDepthOverlayPose();
+    Point3df[] points = pc.getData();
+    int n = points == null ? 0 : points.length;
+    if (pointCloudGeometry == null || pointCloudBuffer == null || n != pointCloudVertexCount) {
+      initPointCloud(pc);
+      return;
+    }
+    writePointCloudBuffers(pc);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pointCloudColorBuffer);
+    pointCloudMesh.updateBound();
+    pointCloudMesh.updateCounts();
+  }
+
+  protected void ensureChestDepthCameraOnRenderThread(JMonkeyEngineConfig cfg) {
+    if (cfg == null || rootNode == null || assetManager == null) {
+      return;
+    }
+    ensureDepthOverlayNode();
+    String nodeName = cfg.chestCameraNode;
+    if (nodeName == null || nodeName.isEmpty()) {
+      nodeName = "i01.chest.depthCamera";
+    }
+    Node parent = resolveChestCameraParent(cfg);
+    Spatial existing = find(nodeName);
+    Node camNode;
+    if (existing instanceof Node) {
+      camNode = (Node) existing;
+      if (camNode.getParent() != parent) {
+        parent.attachChild(camNode);
+      }
+      detachOverlayGeometryFromCharacter(camNode);
+    } else {
+      camNode = new Node(nodeName);
+      camNode.setShadowMode(ShadowMode.Off);
+      parent.attachChild(camNode);
+      Box body = new Box(0.022f, 0.012f, 0.008f);
+      Geometry geo = new Geometry(nodeName + ".body", body);
+      Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      mat.setColor("Color", ColorRGBA.Cyan);
+      geo.setMaterial(mat);
+      geo.setShadowMode(ShadowMode.Off);
+      camNode.attachChild(geo);
+    }
+    Vector3f local = new Vector3f(cfg.chestCameraX, cfg.chestCameraY, cfg.chestCameraZ);
+    if (cfg.chestCameraCenterOnTorso) {
+      Node boundSrc = parent != rootNode ? parent : findRobotRoot(cfg);
+      if (boundSrc != null) {
+        Vector3f center = cachedTorsoCenter(boundSrc);
+        if (boundSrc == parent) {
+          local.addLocal(center);
+        } else {
+          local = boundSrc.localToWorld(center, null).addLocal(local);
+        }
+      }
+    }
+    camNode.setLocalTranslation(local);
+    camNode.setLocalRotation(new Quaternion().fromAngles(cfg.chestCameraPitchDeg * FastMath.DEG_TO_RAD,
+        cfg.chestCameraYawDeg * FastMath.DEG_TO_RAD, cfg.chestCameraRollDeg * FastMath.DEG_TO_RAD));
+    chestDepthCameraNode = camNode;
+    syncDepthOverlayPose();
+    String parentName = parent.getName();
+    if (parentName != null && !parentName.equals(lastChestParentName)) {
+      lastChestParentName = parentName;
+      Vector3f world = camNode.getWorldTranslation();
+      log.info("Chest depth camera '{}' parented to {} at local {} world {}", nodeName, parentName, local, world);
+    }
+  }
+
+  private void ensureDepthOverlayNode() {
+    if (rootNode == null) {
+      return;
+    }
+    if (depthOverlayNode == null) {
+      Spatial existing = find("_mrl.depthOverlay");
+      if (existing instanceof Node) {
+        depthOverlayNode = (Node) existing;
+      } else {
+        depthOverlayNode = new Node("_mrl.depthOverlay");
+        rootNode.attachChild(depthOverlayNode);
+      }
+      depthOverlayNode.setShadowMode(ShadowMode.Off);
+    }
+    boolean hasFrustum = false;
+    for (Spatial child : depthOverlayNode.getChildren()) {
+      if (child.getName() != null && child.getName().endsWith(".frustum")) {
+        hasFrustum = true;
+        break;
+      }
+    }
+    if (!hasFrustum) {
+      attachDepthFrustum(depthOverlayNode);
+    }
+    if (pointCloudGeometry != null && pointCloudGeometry.getParent() != depthOverlayNode) {
+      depthOverlayNode.attachChild(pointCloudGeometry);
+    }
+    if (depthMeshGeometry != null && depthMeshGeometry.getParent() != depthOverlayNode) {
+      depthOverlayNode.attachChild(depthMeshGeometry);
+    }
+  }
+
+  private void syncDepthOverlayPose() {
+    if (depthOverlayNode == null || chestDepthCameraNode == null) {
+      return;
+    }
+    depthOverlayNode.setLocalTranslation(chestDepthCameraNode.getWorldTranslation());
+    depthOverlayNode.setLocalRotation(chestDepthCameraNode.getWorldRotation());
+    depthOverlayNode.setLocalScale(1f);
+  }
+
+  /**
+   * Old sessions parented the voxel mesh and frustum under VinMoov — pull them
+   * off so Lighting/PBR on the character is not batched with this overlay.
+   */
+  private void detachOverlayGeometryFromCharacter(Node camNode) {
+    if (camNode == null) {
+      return;
+    }
+    List<Spatial> move = new ArrayList<>();
+    for (Spatial child : camNode.getChildren()) {
+      String n = child.getName() == null ? "" : child.getName();
+      if (n.contains("depthCloud") || n.contains("depthRgbMesh") || n.endsWith(".frustum")) {
+        move.add(child);
+      }
+    }
+    for (Spatial child : move) {
+      child.removeFromParent();
+      if (depthOverlayNode != null) {
+        depthOverlayNode.attachChild(child);
+      }
+    }
+  }
+
+  private Vector3f cachedTorsoCenter(Node boundSrc) {
+    String key = boundSrc.getName();
+    if (cachedTorsoCenterLocal != null && key != null && key.equals(cachedTorsoCenterParent)) {
+      return cachedTorsoCenterLocal;
+    }
+    cachedTorsoCenterLocal = torsoCenterInParent(boundSrc);
+    cachedTorsoCenterParent = key;
+    return cachedTorsoCenterLocal;
+  }
+
+  private Node resolveChestCameraParent(JMonkeyEngineConfig cfg) {
+    String robot = inferRobotNameFromNodeConfig(cfg);
+    if (robot == null || robot.isEmpty()) {
+      robot = "i01";
+    }
+    LinkedHashSet<String> names = new LinkedHashSet<>();
+    if (cfg.chestCameraParent != null && !cfg.chestCameraParent.isEmpty()) {
+      names.add(cfg.chestCameraParent);
+    }
+    names.add(robot + ".torso.topStom");
+    names.add(robot + ".torso.midStom");
+    names.add(robot + ".torso.lowStom");
+    names.add(robot);
+    for (String name : names) {
+      Spatial found = find(name);
+      if (found instanceof Node) {
+        return (Node) found;
+      }
+      if (found != null && found.getParent() != null) {
+        return found.getParent();
+      }
+    }
+    log.warn("Chest depth camera parent not found (tried {}) — attaching to root", names);
+    return rootNode;
+  }
+
+  private Node findRobotRoot(JMonkeyEngineConfig cfg) {
+    String robot = inferRobotNameFromNodeConfig(cfg);
+    if (robot == null || robot.isEmpty()) {
+      robot = "i01";
+    }
+    Spatial s = find(robot);
+    return s instanceof Node ? (Node) s : null;
+  }
+
+  /**
+   * Visual center of the torso mesh in {@code parent}'s local frame. Skips
+   * head/arm/hand subtrees so a topStom node that also owns the limbs does not
+   * pull the camera up into the neck.
+   */
+  private Vector3f torsoCenterInParent(Node parent) {
+    BoundingBox acc = null;
+    ArrayList<Geometry> meshes = new ArrayList<>();
+    collectTorsoGeometries(parent, meshes, true);
+    for (Geometry g : meshes) {
+      BoundingVolume bv = g.getWorldBound();
+      if (bv instanceof BoundingBox) {
+        if (acc == null) {
+          acc = new BoundingBox((BoundingBox) bv);
+        } else {
+          acc.mergeLocal(bv);
+        }
+      }
+    }
+    if (acc == null && parent.getWorldBound() instanceof BoundingBox) {
+      acc = new BoundingBox((BoundingBox) parent.getWorldBound());
+    }
+    if (acc == null) {
+      return Vector3f.ZERO.clone();
+    }
+    return parent.worldToLocal(acc.getCenter(), null);
+  }
+
+  private void collectTorsoGeometries(Spatial spatial, List<Geometry> out, boolean root) {
+    if (spatial == null) {
+      return;
+    }
+    String name = spatial.getName() == null ? "" : spatial.getName().toLowerCase();
+    if (!root && (name.contains("head") || name.contains("arm") || name.contains("hand") || name.contains("eye")
+        || name.contains("depthcamera") || name.contains("depthcloud") || name.contains("depthrgb"))) {
+      return;
+    }
+    if (spatial instanceof Geometry) {
+      out.add((Geometry) spatial);
+      return;
+    }
+    if (spatial instanceof Node) {
+      for (Spatial child : ((Node) spatial).getChildren()) {
+        collectTorsoGeometries(child, out, false);
+      }
+    }
+  }
+
+  private void attachDepthFrustum(Node camNode) {
+    float z = 0.55f;
+    float hw = 0.28f;
+    float hh = 0.21f;
+    Vector3f o = Vector3f.ZERO;
+    Vector3f[] c = { new Vector3f(-hw, -hh, z), new Vector3f(hw, -hh, z), new Vector3f(hw, hh, z),
+        new Vector3f(-hw, hh, z) };
+    Vector3f[] verts = new Vector3f[16];
+    int i = 0;
+    for (int k = 0; k < 4; k++) {
+      verts[i++] = o;
+      verts[i++] = c[k];
+    }
+    for (int k = 0; k < 4; k++) {
+      verts[i++] = c[k];
+      verts[i++] = c[(k + 1) % 4];
+    }
+    Mesh mesh = new Mesh();
+    mesh.setMode(Mesh.Mode.Lines);
+    mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(verts));
+    mesh.updateBound();
+    Geometry g = new Geometry(camNode.getName() + ".frustum", mesh);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", new ColorRGBA(0.2f, 0.9f, 1f, 1f));
+    g.setMaterial(mat);
+    camNode.attachChild(g);
+  }
+
+  protected void updateDepthHudOnRenderThread(DepthHud hud) {
+    int w = hud.width;
+    int h = hud.height;
+    if (w <= 0 || h <= 0 || hud.rgb == null || hud.rgb.length < w * h * 3) {
+      return;
+    }
+    ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 3);
+    for (int y = 0; y < h; y++) {
+      int src = (h - 1 - y) * w * 3;
+      buf.put(hud.rgb, src, w * 3);
+    }
+    buf.flip();
+    Image image = new Image(Image.Format.RGB8, w, h, buf, ColorSpace.sRGB);
+    if (depthHudTexture == null || depthHudGeometry == null) {
+      depthHudTexture = new Texture2D(image);
+      depthHudTexture.setMagFilter(Texture.MagFilter.Nearest);
+      depthHudTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+      depthHudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      depthHudMat.setTexture("ColorMap", depthHudTexture);
+      Quad q = new Quad(320, 240);
+      depthHudGeometry = new Geometry("depthHud", q);
+      depthHudGeometry.setMaterial(depthHudMat);
+      depthHudGeometry.setLocalTranslation(16, 16, 0);
+      guiNode.attachChild(depthHudGeometry);
+    } else {
+      depthHudTexture.setImage(image);
+    }
+  }
+
   public void onRegistered(Registration registration) {
     try {
-      // new service - see if we can virtualize it
       log.info("{}.onRegistered({})", getName(), registration);
       if (registration.getName().contentEquals("i01.head.jaw")) {
         log.info("here");
@@ -3585,6 +4213,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       if (lookAt != null) {
         cameraLookAt(lookAt);
       }
+      ensureChestDepthCameraOnRenderThread(config);
     };
 
     if (app != null) {

@@ -37,6 +37,7 @@ import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -2282,6 +2283,34 @@ public class InMoov2 extends Service<InMoov2Config>
     return jme;
   }
 
+  /**
+   * Start the OAK-D chest depth peer, attach it to the simulator overlay, and
+   * begin publishing (live device or synthetic fallback).
+   */
+  public OakD startChestCamera() {
+    OakD oakd = (OakD) startPeer("oakd");
+    ServiceInterface sim = getPeer("simulator");
+    if (sim instanceof JMonkeyEngine && oakd != null) {
+      try {
+        ((JMonkeyEngine) sim).attach(oakd);
+        ((JMonkeyEngine) sim).ensureChestDepthCamera();
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    if (oakd != null) {
+      oakd.startDepth();
+    }
+    return oakd;
+  }
+
+  public void stopChestCamera() {
+    OakD oakd = (OakD) getPeer("oakd");
+    if (oakd != null) {
+      oakd.stopDepth();
+    }
+  }
+
   public void stop() {
     sendToPeer("head", "stop");
     sendToPeer("rightHand", "stop");
@@ -2356,6 +2385,10 @@ public class InMoov2 extends Service<InMoov2Config>
       warn("No ultrasonicLeft attached");
       return 0.0;
     }
+  }
+
+  public Classification onClassification(Classification c) {
+    return c;
   }
 
   public Map publishClassification(Map<String, Object> c) {

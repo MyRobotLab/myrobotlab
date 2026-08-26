@@ -3,7 +3,6 @@ angular.module('mrlapp.service.OakDGui', []).controller('OakDGuiCtrl', ['$scope'
     var _self = this
     var msg = this.msg
 
-    // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
     }
@@ -24,14 +23,32 @@ angular.module('mrlapp.service.OakDGui', []).controller('OakDGuiCtrl', ['$scope'
               $scope.image = data
               $scope.$apply()
             break
+        case 'onDepthHud':
+              $scope.depthHud = data
+              $scope.$apply()
+            break
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
 
+    $scope.startDepth = function() {
+        msg.send('startDepth')
+    }
+    $scope.stopDepth = function() {
+        msg.send('stopDepth')
+    }
+    $scope.startSynthetic = function() {
+        msg.send('startSyntheticDepth')
+    }
+    $scope.setRgbMesh = function() {
+        msg.send('setRgbMesh', $scope.service.config.rgbMesh)
+    }
+
     msg.subscribe('publishClassification')
-    msg.subscribe('imageToWeb')    
+    msg.subscribe('imageToWeb')
+    msg.subscribe('publishDepthHud')
     msg.subscribe(this)
 }
 ])

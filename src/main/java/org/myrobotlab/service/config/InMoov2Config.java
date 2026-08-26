@@ -377,6 +377,15 @@ public class InMoov2Config extends ServiceConfig {
     simulator.nodes.put(name + ".rightHand.pinky2", new UserDataConfig(new MapperLinear(0.0, 180.0, 70.0, -10.0, true, false), "x"));
     simulator.nodes.put(name + ".rightHand.pinky3", new UserDataConfig(new MapperLinear(0.0, 180.0, 60.0, -10.0, true, false), "x"));
     simulator.cameraLookAt = name + ".torso.lowStom";
+    simulator.chestCameraParent = name + ".torso.topStom";
+    simulator.chestCameraNode = name + ".chest.depthCamera";
+    simulator.chestCameraCenterOnTorso = true;
+    simulator.chestCameraX = 0f;
+    simulator.chestCameraY = 0f;
+    simulator.chestCameraZ = 0.06f;
+    simulator.depthCloudScale = 1f;
+    simulator.depthCloudMatchWorldMeters = true;
+    simulator.depthCloudVoxelM = 0.03f;
 
     FiniteStateMachineConfig fsm = (FiniteStateMachineConfig) plan.get(getPeerName("fsm"));
     // TODO - events easily gotten from InMoov data ?? auto callbacks in python

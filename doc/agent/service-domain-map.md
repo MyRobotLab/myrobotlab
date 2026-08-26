@@ -20,7 +20,7 @@ Use this map to pick the right package when fixing a bug. Categories come from `
 |--------|-------------------|---------------------|
 | Web UI / display | `display` | `WebGui`, `resource/WebGui/` |
 | Scripting | `programming` | `Python`, `Py4j`, `JavaScript`, `Blocks` |
-| Vision | `vision`, `video` | `OpenCV`, `opencv/*`, `Webcam`, `BoofCV`, `TesseractOcr` (OCR; OpenCV filter `Ocr`) |
+| Vision | `vision`, `video` | `OpenCV`, `opencv/*`, `Webcam`, `BoofCV`, `OakD` (Luxonis DepthAI via Py4j; Python wheels in `data/Py4j/venv`; voxel cloud or RGB-textured mesh overlay in JME, see `resource/OakD/README.md`), `TesseractOcr` (OCR; OpenCV filter `Ocr`) |
 | Speech out | `speech`, `sound` | `MarySpeech`, `Polly`, `WebkitSpeechSynthesis`, abstracts in `meta/abstracts` |
 | Speech in | `speech recognition` | `WebkitSpeechRecognition`, `Sphinx`, `VoskSpeechRecognition` |
 | Chat / AI | `ai`, `chatbot` | `ProgramAB` (sibling repo resources), `DiscordBot`, `LLM`, `Gpt3`, `OpenAI` |

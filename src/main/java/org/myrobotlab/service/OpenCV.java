@@ -132,6 +132,7 @@ import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
+import org.myrobotlab.service.interfaces.PointCloudPublisher;
 // import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
@@ -147,7 +148,7 @@ import org.slf4j.Logger;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher {
+public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher, PointCloudPublisher {
 
   int vpId = 0;
 
@@ -340,9 +341,10 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
       "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceDetectYN", "FaceRecognizer", "FaceTraining", "Fauvist",
       "FindContours", "Flip", "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert",
-      "KinectDepth", "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay",
+      "KinectDepth", "KinectDepthMask", "KinectNavigate", "KinectPointCloud", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay",
       "PyramidDown", "PyramidUp", "QrCode", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF",
-      "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", "YoloOnnx" };
+      "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", "YoloOnnx",
+      "DepthToPointCloud" };
 
   static final long serialVersionUID = 1L;
 
@@ -2061,6 +2063,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return putCacheFile(url, data);
   }
 
+  @Override
   public PointCloud publishPointCloud(PointCloud pointCloud) {
     lastPointCloud = pointCloud;
     return pointCloud;
