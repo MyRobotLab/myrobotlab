@@ -1,0 +1,15 @@
+!!org.myrobotlab.service.config.VoskSpeechRecognitionConfig
+afterSpeakingPauseMs: 500
+autoDownloadModel: true
+listeners: null
+listening: false
+model: vosk-model-small-en-us-0.15
+modelBaseUrl: https://alphacephei.com/vosk/models
+modelPath: null
+peers: null
+publishPartial: false
+recording: false
+sampleRate: 16000.0
+type: VoskSpeechRecognition
+wakeWord: null
+wakeWordIdleTimeoutSeconds: 10

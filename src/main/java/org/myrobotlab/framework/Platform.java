@@ -200,15 +200,13 @@ public class Platform implements Serializable {
       // git properties - local build has precedence
       Properties gitProps = gitProperties();
       if (gitProps != null) {
-        String gitProp = gitProps.getProperty("git.branch");
+        String gitProp = normalize(gitProps.getProperty("git.branch"));
         platform.branch = (gitProp != null) ? gitProp : platform.branch;
 
-        gitProp = gitProps.getProperty("git.commit.id");
+        gitProp = normalize(gitProps.getProperty("git.commit.id"));
         platform.commit = (gitProp != null) ? gitProp : platform.commit;
-        if (platform.commit != null) {
-          platform.shortCommit = platform.commit.substring(0, 7);
-        }
       }
+      platform.shortCommit = toShortCommit(platform.commit);
 
       // motd
       platform.motd = "resistance is futile, we have cookies and robots ...";
@@ -250,11 +248,39 @@ public class Platform implements Serializable {
     return localInstance;
   }
 
+  /**
+   * Read a manifest value, treating missing / blank / literal "null" as absent
+   * (Docker builds that skip git-commit-id write "null" into the manifest).
+   */
   static public String get(Map<String, String> manifest, String key, String def) {
-    if (manifest != null & manifest.containsKey(key)) {
-      return manifest.get(key);
+    if (manifest != null && manifest.containsKey(key)) {
+      String value = normalize(manifest.get(key));
+      if (value != null) {
+        return value;
+      }
     }
     return def;
+  }
+
+  /** Null-out blank and the literal string "null" from plugins/manifests. */
+  static String normalize(String value) {
+    if (value == null) {
+      return null;
+    }
+    String trimmed = value.trim();
+    if (trimmed.isEmpty() || "null".equalsIgnoreCase(trimmed)) {
+      return null;
+    }
+    return trimmed;
+  }
+
+  /** Abbreviate a commit id; safe when shorter than 7 chars (or null). */
+  static String toShortCommit(String commit) {
+    String normalized = normalize(commit);
+    if (normalized == null) {
+      return null;
+    }
+    return normalized.length() <= 7 ? normalized : normalized.substring(0, 7);
   }
 
   static public Properties gitProperties() {
@@ -262,9 +288,19 @@ public class Platform implements Serializable {
       Properties properties = new Properties();
       String rootOfClass = FileIO.getRoot();
       if (FileIO.isJar()) {
-        // extract from jar
+        // Load only from the MyRobotLab jar — ClassLoader.getResource can pick up
+        // a dependency's git.properties once libraries/jar/* is on the classpath.
         log.info("git loading properties from jar {}", rootOfClass);
-        properties.load(Platform.class.getResourceAsStream("/git.properties"));
+        try (ZipFile zip = new ZipFile(rootOfClass)) {
+          java.util.zip.ZipEntry entry = zip.getEntry("git.properties");
+          if (entry == null) {
+            log.info("git.properties does not exist in jar");
+            return null;
+          }
+          try (InputStream in = zip.getInputStream(entry)) {
+            properties.load(in);
+          }
+        }
       } else {
 
         // get from file system

@@ -5,8 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -122,61 +121,36 @@ public class MavenWrapper extends Repo implements Serializable {
 
   public void createPom(String location, String[] serviceTypes) throws IOException {
 
-    Map<String, String> snr = new HashMap<>();
+    Map<String, String> snr = new LinkedHashMap<>();
 
     StringBuilder deps = new StringBuilder();
 
-    ServiceData sd = ServiceData.getLocalInstance();
+    // Preserve caller service order and use LinkedHashMap so duplicate
+    // ownership is deterministic (HashMap.values() iteration was not).
+    Map<String, List<ServiceDependency>> allDependencies = new LinkedHashMap<>();
+    Map<String, MetaData> serviceMetaData = new LinkedHashMap<>();
 
-    // A map from dependency keys to lists of all dependencies matching
-    // those keys. Used to store all duplicate dependencies and check for
-    // which ones should be given priority
-    Map<String, List<ServiceDependency>> allDependencies = new HashMap<>();
- 
-    // A map from service type names to their metadata
-    Map<String, MetaData> serviceMetaData = new HashMap<>();
+    for (String service : serviceTypes) {
+      serviceMetaData.put(service, ServiceData.getMetaData(service));
+    }
 
-    // Fills serviceMetaData
-    Arrays.stream(serviceTypes).forEach(service -> serviceMetaData.put(service, ServiceData.getMetaData(service)));
-
-    // A big long stream, hang on
-    serviceMetaData.values().stream()
-
-        // First, we convert all the metadata into lists of dependencies
-        .map(MetaData::getDependencies)
-
-        // We flatten the list, so now we have a single stream of all
-        // dependencies, including duplicates
-        .flatMap(List::stream)
-
-        // Now we loop over each dependency in the stream,
-        // aka all dependencies of all services including duplicates
-        .forEach(serviceDependency -> {
-
-          // If we haven't seen this dependency before, add it to our known
-          // dependencies
-          if (!allDependencies.containsKey(serviceDependency.getProjectCoordinates()))
-            allDependencies.put(serviceDependency.getProjectCoordinates(), new ArrayList<>(List.of(serviceDependency)));
-          else {
-            // We have seen it, so loop over all dependencies with matching keys
-            allDependencies.get(serviceDependency.getProjectCoordinates()).forEach(existingDependency -> {
-
-              // Check priority, if this dependency is higher priority than
-              // existing,
-              // skip existing. Otherwise, skip this one. This is the meat
-              // of the stream, we're modifying the dependencies held in
-              // serviceMetaData
-              // so the write phase accesses the modified data
-              if (serviceDependency.getIncludeInOneJar() && !existingDependency.getIncludeInOneJar())
-                existingDependency.setSkipped(true);
-              else
-                serviceDependency.setSkipped(true);
-            });
-            // Add the dependency to the known dependencies
-            allDependencies.get(serviceDependency.getProjectCoordinates()).add(serviceDependency);
-
+    for (MetaData meta : serviceMetaData.values()) {
+      for (ServiceDependency serviceDependency : meta.getDependencies()) {
+        String key = serviceDependency.getProjectCoordinates();
+        if (!allDependencies.containsKey(key)) {
+          allDependencies.put(key, new ArrayList<>(List.of(serviceDependency)));
+        } else {
+          for (ServiceDependency existingDependency : allDependencies.get(key)) {
+            if (preferDependency(serviceDependency, existingDependency)) {
+              existingDependency.setSkipped(true);
+            } else {
+              serviceDependency.setSkipped(true);
+            }
           }
-        });
+          allDependencies.get(key).add(serviceDependency);
+        }
+      }
+    }
 
     snr.put("{{repositories}}", getRepositories());
 
@@ -256,6 +230,23 @@ public class MavenWrapper extends Repo implements Serializable {
     snr.put("{{dependencies}}", deps.toString());
 
     createFilteredFile(snr, location, "pom", "xml");
+  }
+
+  /**
+   * Choose which duplicate dependency definition should be emitted in the pom.
+   * Prefer include-in-one-jar, then richer exclusion sets, else keep existing
+   * (first-seen) so regeneration stays deterministic.
+   */
+  static boolean preferDependency(ServiceDependency candidate, ServiceDependency existing) {
+    if (candidate.getIncludeInOneJar() && !existing.getIncludeInOneJar()) {
+      return true;
+    }
+    if (!candidate.getIncludeInOneJar() && existing.getIncludeInOneJar()) {
+      return false;
+    }
+    int candidateExcludes = candidate.getExcludes() == null ? 0 : candidate.getExcludes().size();
+    int existingExcludes = existing.getExcludes() == null ? 0 : existing.getExcludes().size();
+    return candidateExcludes > existingExcludes;
   }
 
   /**

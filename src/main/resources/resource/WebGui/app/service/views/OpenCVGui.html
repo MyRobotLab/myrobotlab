@@ -258,6 +258,201 @@
             <button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear
                 Point</button>
         </div>
+        <div ng-show="isFilterType('Ocr')" class="col-md-12">
+            Detects text regions then recognizes them with a TesseractOcr service.
+            EAST is installed with OpenCV. DBNet ONNX files are downloaded on demand into
+            <code>data/OpenCV/ocr_models/</code>. Recognition language is set on the TesseractOcr service.
+            <hr>
+            <div class="form-group">
+                <label>OCR service</label>
+                <input type="text" class="form-control" ng-model="getFilter().ocrService"
+                    ng-change="setFilterState()" placeholder="tesseract" />
+            </div>
+            <div class="form-group">
+                <label>Detection model</label>
+                <select class="form-control" ng-model="getFilter().detectionModel"
+                    ng-options="m.id as m.label for m in ocrDetectionModels"
+                    ng-change="onOcrModelChange()">
+                </select>
+            </div>
+            <div>
+                <span ng-show="getFilter().detectionModel !== 'none' && isOcrModelInstalled(getFilter().detectionModel)" class="text-success">cached</span>
+                <span ng-show="getFilter().detectionModel !== 'none' && !isOcrModelInstalled(getFilter().detectionModel)" class="text-warning">not cached — download on first frame or click below</span>
+            </div>
+            Interval {{getFilter().minIntervalMs}} ms
+            <input type="range" ng-model="getFilter().minIntervalMs" min="0" max="3000" step="50"
+                ng-change="setFilterState()" />
+            <br />
+            Confidence {{getFilter().confThreshold}}
+            <input type="range" ng-model="getFilter().confThreshold" min="0.1" max="0.95" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            NMS {{getFilter().nmsThreshold}}
+            <input type="range" ng-model="getFilter().nmsThreshold" min="0.1" max="0.9" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            Blur skip threshold {{getFilter().blurrinessThreshold}}
+            <input type="range" ng-model="getFilter().blurrinessThreshold" min="0" max="400" step="5"
+                ng-change="setFilterState()" />
+            <br />
+            Font {{getFilter().fontSize}}
+            <input type="range" ng-model="getFilter().fontSize" min="8" max="48" step="1"
+                ng-change="setFilterState()" />
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().skipBlurry" ng-change="setFilterState()" />
+                Skip blurry frames
+            </label>
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().thresholdEnabled" ng-change="setFilterState()" />
+                Adaptive threshold crops
+            </label>
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().autoStartOcr" ng-change="setFilterState()" />
+                Auto-start OCR service
+            </label>
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().autoDownloadModel" ng-change="setFilterState()" />
+                Auto-download missing detector model
+            </label>
+            <br />
+            <button class="btn btn-default" ng-click="installOcrModel()">Download / cache model</button>
+            <hr>
+            <div ng-show="getFilter().detectionModel === 'east'">
+                EAST override path
+                <input type="text" class="form-control" ng-model="getFilter().eastModelFile"
+                    ng-change="setFilterState()" />
+            </div>
+            <div ng-show="getFilter().detectionModel && getFilter().detectionModel.indexOf('db') === 0">
+                DBNet override path (optional)
+                <input type="text" class="form-control" ng-model="getFilter().dbModelFile"
+                    ng-change="setFilterState()" placeholder="(auto cache)" />
+            </div>
+            <hr>
+            <strong>Model:</strong> {{getFilter().modelStatus}}
+            <div ng-show="getFilter().loadedModelPath"><small>{{getFilter().loadedModelPath}}</small></div>
+            <strong>Last text:</strong> {{getFilter().lastText}}
+        </div>
+        <div ng-show="isFilterType('FaceDetectYN')" class="col-md-12">
+            YuNet face detector (OpenCV 4.x FaceDetectorYN). ONNX weights (~233 KB) download into
+            <code>data/OpenCV/zoo_models/</code>.
+            <hr>
+            Score {{getFilter().scoreThreshold}}
+            <input type="range" ng-model="getFilter().scoreThreshold" min="0.1" max="0.95" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            NMS {{getFilter().nmsThreshold}}
+            <input type="range" ng-model="getFilter().nmsThreshold" min="0.1" max="0.9" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().autoDownloadModel" ng-change="setFilterState()" />
+                Auto-download missing model
+            </label>
+            <br />
+            <button class="btn btn-default" ng-click="installVisionModel()">Download / cache YuNet</button>
+            <hr>
+            <strong>Model:</strong> {{getFilter().modelStatus}}
+            <div ng-show="getFilter().loadedModelPath"><small>{{getFilter().loadedModelPath}}</small></div>
+        </div>
+        <div ng-show="isFilterType('YoloOnnx')" class="col-md-12">
+            YOLO ONNX object detector. Default is OpenCV Zoo YOLOX-s (COCO). Weights download into
+            <code>data/OpenCV/zoo_models/</code>.
+            <hr>
+            <div class="form-group">
+                <label>Decoder</label>
+                <select class="form-control" ng-model="getFilter().decoder" ng-change="setFilterState()">
+                    <option value="yolox">YOLOX (OpenCV Zoo)</option>
+                    <option value="detection_model">DetectionModel (SSD / Darknet-style ONNX)</option>
+                </select>
+            </div>
+            Confidence {{getFilter().confThreshold}}
+            <input type="range" ng-model="getFilter().confThreshold" min="0.1" max="0.95" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            NMS {{getFilter().nmsThreshold}}
+            <input type="range" ng-model="getFilter().nmsThreshold" min="0.1" max="0.9" step="0.05"
+                ng-change="setFilterState()" />
+            <br />
+            Interval {{getFilter().minIntervalMs}} ms
+            <input type="range" ng-model="getFilter().minIntervalMs" min="0" max="2000" step="50"
+                ng-change="setFilterState()" />
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().autoDownloadModel" ng-change="setFilterState()" />
+                Auto-download missing model
+            </label>
+            <br />
+            Optional override path
+            <input type="text" class="form-control" ng-model="getFilter().modelFile"
+                ng-change="setFilterState()" placeholder="(auto cache)" />
+            <br />
+            <button class="btn btn-default" ng-click="installVisionModel()">Download / cache YOLOX</button>
+            <hr>
+            <strong>Model:</strong> {{getFilter().modelStatus}}
+            <div ng-show="getFilter().loadedModelPath"><small>{{getFilter().loadedModelPath}}</small></div>
+        </div>
+        <div ng-show="isFilterType('QrCode')" class="col-md-12">
+            QR codes use OpenCV's ArUco-based QRCodeDetectorAruco. Optionally detect ArUco fiducial markers
+            from a predefined dictionary.
+            <hr>
+            <div class="form-group">
+                <label>Mode</label>
+                <select class="form-control" ng-model="getFilter().mode" ng-change="setFilterState()">
+                    <option value="qr">QR codes</option>
+                    <option value="aruco">ArUco markers</option>
+                    <option value="both">QR + ArUco</option>
+                </select>
+            </div>
+            <div class="form-group" ng-show="getFilter().mode === 'aruco' || getFilter().mode === 'both'">
+                <label>ArUco dictionary</label>
+                <select class="form-control" ng-model="getFilter().dictionary" ng-change="setFilterState()">
+                    <option>DICT_4X4_50</option>
+                    <option>DICT_4X4_100</option>
+                    <option>DICT_5X5_50</option>
+                    <option>DICT_6X6_250</option>
+                    <option>DICT_7X7_250</option>
+                    <option>DICT_ARUCO_ORIGINAL</option>
+                </select>
+            </div>
+            <strong>Last:</strong> {{getFilter().lastText}}
+        </div>
+        <div ng-show="isFilterType('Tracker')" class="col-md-12">
+            Click the video to set a tracking box. CSRT/KCF/MIL/GOTURN are built in.
+            Nano and ViT download ONNX weights into <code>data/OpenCV/zoo_models/</code>.
+            <hr>
+            <div class="form-group">
+                <label>Tracker</label>
+                <select class="form-control" ng-model="getFilter().trackerType" ng-change="setFilterState()">
+                    <option>CSRT</option>
+                    <option>KCF</option>
+                    <option>MIL</option>
+                    <option>GOTURN</option>
+                    <option>Nano</option>
+                    <option>Vit</option>
+                </select>
+            </div>
+            Box width {{getFilter().boxWidth}}
+            <input type="range" ng-model="getFilter().boxWidth" min="10" max="200" step="1"
+                ng-change="setFilterState()" />
+            <br />
+            Box height {{getFilter().boxHeight}}
+            <input type="range" ng-model="getFilter().boxHeight" min="10" max="200" step="1"
+                ng-change="setFilterState()" />
+            <br />
+            <label>
+                <input type="checkbox" ng-model="getFilter().autoDownloadModel" ng-change="setFilterState()" />
+                Auto-download Nano / ViT models
+            </label>
+            <br />
+            <button class="btn btn-default" ng-click="installVisionModel()">Download / cache tracker models</button>
+            <hr>
+            <strong>Model:</strong> {{getFilter().modelStatus}}
+            <div ng-show="getFilter().loadedModelPath"><small>{{getFilter().loadedModelPath}}</small></div>
+        </div>
         <!-- =================================== FILTER DIALOGS STOP =================================== -->
     </div>
 </div>

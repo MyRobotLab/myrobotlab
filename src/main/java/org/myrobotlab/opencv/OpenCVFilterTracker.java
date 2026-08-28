@@ -37,6 +37,9 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.global.opencv_video;
 import org.bytedeco.opencv.opencv_core.AbstractCvScalar;
 import org.bytedeco.opencv.opencv_core.AbstractIplImage;
 import org.bytedeco.opencv.opencv_core.CvScalar;
@@ -48,22 +51,16 @@ import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
 import org.bytedeco.opencv.opencv_video.Tracker;
 import org.bytedeco.opencv.opencv_video.TrackerGOTURN;
 import org.bytedeco.opencv.opencv_video.TrackerMIL;
-/*
-import org.bytedeco.opencv.opencv_tracking.Tracker;
-import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
-import org.bytedeco.opencv.opencv_tracking.TrackerGOTURN;
-import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
-import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
-import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
-import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
-*/
+import org.bytedeco.opencv.opencv_video.TrackerNano;
+import org.bytedeco.opencv.opencv_video.TrackerVit;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 /**
- * This implements the TLD tracking code from opencv_tracking.
- * 
+ * Bounding-box object tracker. CSRT/KCF/MIL/GOTURN plus OpenCV 4.x DNN
+ * trackers Nano and ViT (ONNX from the zoo, downloaded on demand).
+ *
  * @author kwatters
  *
  */
@@ -71,6 +68,12 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
   private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTracker.class);
+
+  static {
+    Loader.load(opencv_video.class);
+  }
+
+  public static final String[] TRACKER_TYPES = { "CSRT", "KCF", "MIL", "GOTURN", "Nano", "Vit" };
 
   // The current tracker and it's associated boundingBox
   private Tracker tracker;
@@ -88,8 +91,14 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // TODO: i'm not sure there is really a performance difference here..
   public boolean blackAndWhite = false;
-  // CSRT,GOTURN,KCF,MIL
+  // CSRT, KCF, MIL, GOTURN, Nano, Vit
   public String trackerType = "CSRT";
+
+  public boolean autoDownloadModel = true;
+
+  public String modelStatus = "";
+
+  public String loadedModelPath = "";
 
   // The current mat that is being processed.
   private Mat mat = null;
@@ -161,39 +170,108 @@ public class OpenCVFilterTracker extends OpenCVFilter {
   }
 
   private Tracker createTracker(String trackerType) {
-    // TODO: add a switch for all the other types of trackers!
-    // if (trackerType.equalsIgnoreCase("Boosting")) {
-    // return TrackerBoosting.create();
-    // } else
-    if (trackerType.equalsIgnoreCase("CSRT")) {
-      TrackerCSRT tracker = TrackerCSRT.create();
-      return tracker;
-    } else if (trackerType.equalsIgnoreCase("GOTURN")) {
-      return TrackerGOTURN.create();
-    } else if (trackerType.equalsIgnoreCase("KCF")) {
-      return TrackerKCF.create();
-    } else
-
-    // if (trackerType.equalsIgnoreCase("MedianFlow")) {
-    // return TrackerMedianFlow.create();
-    // } else
-    if (trackerType.equalsIgnoreCase("MIL")) {
-      return TrackerMIL.create();
-    } else
-    // if (trackerType.equalsIgnoreCase("MOSSE")) {
-    // return TrackerMOSSE.create();
-    // } else
-    // if (trackerType.equalsIgnoreCase("TLD")) {
-    // return TrackerTLD.create();
-    // } else
-    {
-      // TODO: why?
-      log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
-      // default to TLD..
-      TrackerCSRT tracker = TrackerCSRT.create();
-      return tracker;
+    String type = trackerType == null ? "CSRT" : trackerType.trim();
+    try {
+      if (type.equalsIgnoreCase("CSRT")) {
+        return TrackerCSRT.create();
+      } else if (type.equalsIgnoreCase("GOTURN")) {
+        return TrackerGOTURN.create();
+      } else if (type.equalsIgnoreCase("KCF")) {
+        return TrackerKCF.create();
+      } else if (type.equalsIgnoreCase("MIL")) {
+        return TrackerMIL.create();
+      } else if (type.equalsIgnoreCase("Nano") || type.equalsIgnoreCase("TrackerNano")) {
+        Tracker nano = createNanoTracker();
+        if (nano != null) {
+          return nano;
+        }
+        log.warn("Nano tracker models unavailable, falling back to CSRT");
+        modelStatus = "Nano models missing, using CSRT";
+        return TrackerCSRT.create();
+      } else if (type.equalsIgnoreCase("Vit") || type.equalsIgnoreCase("ViT") || type.equalsIgnoreCase("TrackerVit")) {
+        Tracker vit = createVitTracker();
+        if (vit != null) {
+          return vit;
+        }
+        log.warn("ViT tracker model unavailable, falling back to CSRT");
+        modelStatus = "ViT model missing, using CSRT";
+        return TrackerCSRT.create();
+      }
+    } catch (Exception e) {
+      log.warn("createTracker {} failed, using CSRT", type, e);
+      modelStatus = type + " failed: " + e.getMessage();
     }
+    log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
+    return TrackerCSRT.create();
+  }
 
+  private Tracker createNanoTracker() throws Exception {
+    java.io.File backbone = OpenCvZooModels.resolve(OpenCvZooModels.NANOTRACK_BACKBONE, null, autoDownloadModel);
+    java.io.File head = OpenCvZooModels.resolve(OpenCvZooModels.NANOTRACK_HEAD, null, autoDownloadModel);
+    if (backbone == null || head == null) {
+      return null;
+    }
+    TrackerNano.Params params = new TrackerNano.Params();
+    BytePointer bb = new BytePointer(backbone.getAbsolutePath());
+    BytePointer hh = new BytePointer(head.getAbsolutePath());
+    params.backbone(bb);
+    params.neckhead(hh);
+    TrackerNano nano = TrackerNano.create(params);
+    loadedModelPath = backbone.getAbsolutePath();
+    modelStatus = "Nano loaded";
+    log.info("TrackerNano loaded backbone={} head={}", backbone, head);
+    return nano;
+  }
+
+  private Tracker createVitTracker() throws Exception {
+    java.io.File netFile = OpenCvZooModels.resolve(OpenCvZooModels.VITTRACK, null, autoDownloadModel);
+    if (netFile == null) {
+      return null;
+    }
+    TrackerVit.Params params = new TrackerVit.Params();
+    BytePointer netPath = new BytePointer(netFile.getAbsolutePath());
+    params.net(netPath);
+    TrackerVit vit = TrackerVit.create(params);
+    loadedModelPath = netFile.getAbsolutePath();
+    modelStatus = "ViT loaded";
+    log.info("TrackerVit loaded {}", netFile);
+    return vit;
+  }
+
+  public String installTrackerModels() {
+    try {
+      String type = trackerType == null ? "" : trackerType.trim();
+      if (type.equalsIgnoreCase("Nano") || type.equalsIgnoreCase("TrackerNano")) {
+        java.io.File backbone = OpenCvZooModels.resolve(OpenCvZooModels.NANOTRACK_BACKBONE, null, true);
+        java.io.File head = OpenCvZooModels.resolve(OpenCvZooModels.NANOTRACK_HEAD, null, true);
+        if (backbone == null || head == null) {
+          modelStatus = "Nano download failed";
+          return null;
+        }
+        loadedModelPath = backbone.getAbsolutePath();
+        modelStatus = "Nano cached";
+        broadcastFilterState();
+        return loadedModelPath;
+      }
+      if (type.equalsIgnoreCase("Vit") || type.equalsIgnoreCase("ViT") || type.equalsIgnoreCase("TrackerVit")) {
+        java.io.File netFile = OpenCvZooModels.resolve(OpenCvZooModels.VITTRACK, null, true);
+        if (netFile == null) {
+          modelStatus = "ViT download failed";
+          return null;
+        }
+        loadedModelPath = netFile.getAbsolutePath();
+        modelStatus = "ViT cached";
+        broadcastFilterState();
+        return loadedModelPath;
+      }
+      modelStatus = type + " has no ONNX weights";
+      broadcastFilterState();
+      return null;
+    } catch (Exception e) {
+      modelStatus = "download failed: " + e.getMessage();
+      log.warn("tracker model install failed", e);
+      return null;
+    }
   }
 
   public void samplePoint(Float x, Float y) {
@@ -211,10 +289,12 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // the tracker will initialize on the next frame.. (I know , I know. it'd be
     // better to have the current frame and do the
     // initialization here.)
-    if (tracker == null) {
-      tracker = createTracker(trackerType);
+    if (tracker != null) {
+      tracker.close();
+      tracker = null;
     }
-    log.info("Created tracker");
+    tracker = createTracker(trackerType);
+    log.info("Created tracker {}", trackerType);
     // TODO: I'm worried about thread safety with the "mat" object.
     if (mat != null) {
       // TODO: what happens if we're already initalized?

@@ -25,4 +25,92 @@ public class JMonkeyEngineConfig extends ServiceConfig {
    */
   public String cameraLookAt;
 
+  /**
+   * VinMoov node to parent the chest depth camera (e.g. {@code i01.torso.topStom}).
+   */
+  public String chestCameraParent;
+
+  /** Scene-graph name of the dummy chest depth camera. */
+  public String chestCameraNode = "i01.chest.depthCamera";
+
+  /**
+   * Place the dummy camera at the visual center of the torso mesh (excluding
+   * head/arms), then apply {@link #chestCameraX}/{@link #chestCameraY}/
+   * {@link #chestCameraZ} as a local offset. Without this the camera often
+   * lands at the world origin (on the floor) when the joint pivot is not the
+   * chest center.
+   */
+  public boolean chestCameraCenterOnTorso = true;
+
+  /**
+   * Local translation offset in meters (JME Y-up), added after torso centering.
+   * Default is a few centimeters forward of the chest plate.
+   */
+  public float chestCameraX = 0f;
+  public float chestCameraY = 0f;
+  public float chestCameraZ = 0.06f;
+
+  /** Local rotation of the chest camera, degrees (pitch, yaw, roll). */
+  public float chestCameraPitchDeg = -8f;
+  public float chestCameraYawDeg = 0f;
+  public float chestCameraRollDeg = 0f;
+
+  /** Draw the colorized depth map on the HUD. */
+  public boolean depthHud = true;
+
+  /** Draw the 3D depth point cloud parented to the chest camera. */
+  public boolean depthCloud = true;
+
+  /**
+   * Calibration multiplier on camera-frame meters. {@code 1} is real-world
+   * (same units as IK / VinMoov). Use {@code setDepthCloudScale} or
+   * {@code calibrateDepthScale} after a mesh click if a tape measure disagrees.
+   */
+  public float depthCloudScale = 1f;
+
+  /** Yellow 1 m stick along the chest camera +Z (forward) for scale checks. */
+  public boolean depthMeterStick = true;
+
+  /**
+   * Divide out the chest node's world scale so 1 m of depth stays 1 m even
+   * when the rig is imported with a non-unit scale.
+   */
+  public boolean depthCloudMatchWorldMeters = true;
+
+  /**
+   * Edge length of each depth voxel in meters (before scale). ~3 cm fills a
+   * stride-8 OAK-D cloud at 1–2 m so it reads as a surface, not dust.
+   */
+  public float depthCloudVoxelM = 0.03f;
+
+  /**
+   * Draw an organized RGB-textured mesh instead of voxel cubes. OakD's
+   * {@code rgbMesh} checkbox publishes this to the simulator.
+   */
+  public boolean depthRgbMesh = false;
+
+  /**
+   * Drop a mesh quad when any edge's Z jump exceeds this (meters). Stops
+   * rubber-sheet triangles across object silhouettes.
+   */
+  public float depthMeshMaxEdgeM = 0.12f;
+
+  /**
+   * Left-click on the visible OAK-D voxel cloud or RGB mesh publishes that
+   * world point ({@code publishClickPoint}) so Fabrik can {@code moveTo} it.
+   */
+  public boolean depthClickToIk = true;
+
+  /**
+   * Cyan voxel cloud of palm positions the InMoov left arm can reach. Off until
+   * the JMonkeyEngine or Fabrik panel turns it on.
+   */
+  public boolean reachCloud = false;
+
+  /** Servo samples per left-arm joint when the simulator builds the cloud. */
+  public int reachCloudSteps = 8;
+
+  /** Merge nearby palm samples into this cell size (meters). */
+  public float reachCloudVoxelM = 0.025f;
+
 }

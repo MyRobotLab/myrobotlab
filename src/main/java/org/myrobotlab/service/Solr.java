@@ -1127,9 +1127,15 @@ public class Solr extends Service<SolrConfig> implements DocumentListener, TextL
     //
     if (embeddedSolrServer != null) {
       try {
+        CoreContainer cores = embeddedSolrServer.getCoreContainer();
         embeddedSolrServer.close();
-      } catch (IOException e) {
+        if (cores != null && !cores.isShutDown()) {
+          cores.shutdown();
+        }
+      } catch (Exception e) {
         log.warn("Exception shutting down the embedded solr server.", e);
+      } finally {
+        embeddedSolrServer = null;
       }
     }
     if (solrServer != null) {
@@ -1137,6 +1143,8 @@ public class Solr extends Service<SolrConfig> implements DocumentListener, TextL
         solrServer.close();
       } catch (IOException e) {
         log.warn("Exception disconnecting from remote Solr server.", e);
+      } finally {
+        solrServer = null;
       }
     }
 

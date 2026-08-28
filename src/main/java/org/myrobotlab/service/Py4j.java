@@ -270,7 +270,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    */
   public List<String> getScriptList() throws IOException {
     List<String> sorted = new ArrayList<>();
-    System.out.println(CodecUtils.toJson(config));
+    log.debug("Py4j script list for {}", CodecUtils.toJson(config));
     Py4jConfig c = (Py4jConfig) config;
     List<File> files = FileIO.getFileList(c.scriptRootDir, true);
     for (File file : files) {
@@ -487,6 +487,8 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
               ? venv + fs + "Scripts" + fs + "python.exe" 
               : venv + fs + "bin" + fs + "python";
 
+          info("Py4j using system Python '%s' for venv at %s", pythonCommand, venv);
+
           if (!venvDir.exists()) {
               ProcessBuilder venvProcess = new ProcessBuilder(pythonCommand, "-m", "venv", venv);
               int ret = venvProcess.inheritIO().start().waitFor();
@@ -576,31 +578,79 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    *                     If an I/O error occurs running Pip.
    */
   public void installPipPackages(List<String> packages) throws IOException {
-    List<String> commandArgs = new ArrayList<>(List.of("-m", "pip", "install"));
+    installPipPackages(packages, Collections.emptyList());
+  }
+
+  /**
+   * Install packages with extra pip flags (inserted after {@code pip install}).
+   * Example: {@code --only-binary=depthai} to refuse source builds that fail on
+   * newer CPython.
+   *
+   * @param packages
+   *          requirement specifiers
+   * @param pipOptions
+   *          extra pip arguments, or empty
+   */
+  public void installPipPackages(List<String> packages, List<String> pipOptions) throws IOException {
+    String python = findVenvPythonExecutable();
+    if (python == null) {
+      throw new IOException("Py4j venv Python was not found under " + getDataDir() + fs + "venv");
+    }
+    List<String> commandArgs = new ArrayList<>();
+    commandArgs.add(python);
+    commandArgs.add("-m");
+    commandArgs.add("pip");
+    commandArgs.add("install");
+    if (pipOptions != null) {
+      commandArgs.addAll(pipOptions);
+    }
     commandArgs.addAll(packages);
-    ProcessBuilder pipProcess = new ProcessBuilder(findVenvPythonExecutable());
-    pipProcess.command().addAll(commandArgs);
+    info("pip: %s", String.join(" ", commandArgs));
+    ProcessBuilder pipProcess = new ProcessBuilder(commandArgs);
     Process proc = pipProcess.redirectErrorStream(true).start();
-    new Thread(() -> {
-      BufferedReader stdOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-      String s;
-      try {
+    StringBuilder pipOut = new StringBuilder();
+    Thread reader = new Thread(() -> {
+      try (BufferedReader stdOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+        String s;
         while ((s = stdOutput.readLine()) != null) {
+          pipOut.append(s).append('\n');
           handleStdOut(s);
         }
       } catch (IOException e) {
         error(e);
       }
-    }).start();
-    int ret = 0;
+    }, getName() + "-pip-stdout");
+    reader.start();
+    int ret;
     try {
       ret = proc.waitFor();
+      reader.join(8000);
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      Thread.currentThread().interrupt();
+      throw new IOException("pip install interrupted", e);
     }
     if (ret != 0) {
-      error("Could not install packages, subprocess returned " + ret);
+      String tail = tailLines(pipOut.toString(), 40);
+      String msg = "Could not install packages (pip exit " + ret + "). " + tail;
+      error(msg);
+      throw new IOException(msg);
     }
+  }
+
+  static String tailLines(String text, int maxLines) {
+    if (text == null || text.isEmpty()) {
+      return "(no pip output captured)";
+    }
+    String[] lines = text.split("\\R");
+    int from = Math.max(0, lines.length - Math.max(1, maxLines));
+    StringBuilder sb = new StringBuilder();
+    for (int i = from; i < lines.length; i++) {
+      if (sb.length() > 0) {
+        sb.append('\n');
+      }
+      sb.append(lines[i]);
+    }
+    return sb.toString();
   }
 
   @Override

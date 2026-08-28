@@ -6,11 +6,13 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -20,6 +22,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CVData;
@@ -32,6 +35,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
+import org.myrobotlab.jme3.DepthPick;
 import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
@@ -41,9 +45,16 @@ import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.jme3.UserDataConfig;
+import org.myrobotlab.kinematics.JointFrame;
+import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.kinematics.ReachCloud;
+import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.geometry.DepthCloudJme;
+import org.myrobotlab.math.geometry.DepthColorMap;
+import org.myrobotlab.math.geometry.DepthToRgbMesh;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.interfaces.Mapper;
@@ -52,8 +63,18 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.DepthFrame;
+import org.myrobotlab.service.data.DepthHud;
+import org.myrobotlab.service.interfaces.DepthFrameListener;
+import org.myrobotlab.service.interfaces.DepthFramePublisher;
+import org.myrobotlab.service.interfaces.DepthHudListener;
+import org.myrobotlab.service.interfaces.DepthHudPublisher;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
+import org.myrobotlab.service.interfaces.PointCloudListener;
+import org.myrobotlab.service.interfaces.PointCloudPublisher;
+import org.myrobotlab.service.interfaces.PointListener;
 import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
@@ -65,6 +86,8 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
 // import com.jme3.bullet.animation.DynamicAnimControl;
 import com.jme3.collision.CollisionResults;
@@ -75,11 +98,18 @@ import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
+import com.jme3.input.RawInputListener;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.event.JoyAxisEvent;
+import com.jme3.input.event.JoyButtonEvent;
+import com.jme3.input.event.KeyInputEvent;
+import com.jme3.input.event.MouseButtonEvent;
+import com.jme3.input.event.MouseMotionEvent;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.FaceCullMode;
@@ -93,6 +123,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -106,7 +137,12 @@ import com.jme3.scene.debug.Grid;
 import com.jme3.scene.plugins.blender.BlenderLoader;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Image;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.image.ColorSpace;
 import com.jme3.util.BufferUtils;
 
 /**
@@ -121,7 +157,7 @@ import com.jme3.util.BufferUtils;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
+public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener, PointCloudListener, DepthHudListener, DepthFrameListener {
 
   final static String CAMERA = "camera";
 
@@ -163,9 +199,75 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   
   protected ChaseCamera chaseCamera;
 
-  protected String fontColor = "#66ff66"; // green
+  protected String fontColor = "#000000"; // black
 
-  protected int fontSize = 14;
+  protected int fontSize = 20;
+
+  /**
+   * When true, show left/right InMoov hand world positions in the upper-left HUD.
+   */
+  protected boolean showHandPositions = true;
+
+  /**
+   * Robot name prefix for hand nodes (e.g. {@code i01} → {@code i01.leftHand.wrist}).
+   */
+  protected String handPositionRobot = "i01";
+
+  protected static final String HAND_POSITION_HUD_KEY = "hand-positions";
+
+  /** Live IK / hand readout on the GUI viewport (upper-left). */
+  protected transient BitmapText handPositionHudText;
+
+  protected static final String LEFT_HAND_MARKER = "_marker.leftHand";
+
+  protected static final String RIGHT_HAND_MARKER = "_marker.rightHand";
+
+  protected static final String IK_LEFT_HAND_MARKER = "_marker.ikLeftHand";
+
+  /** World-space radius of the left/right hand position dots. */
+  protected float handMarkerRadius = 0.05f;
+
+  protected transient Geometry leftHandMarker;
+
+  protected transient Geometry rightHandMarker;
+
+  protected transient Geometry ikLeftHandMarker;
+
+  /** IK Cartesian goal in world coordinates (green marker). */
+  protected Vector3f ikLeftHandGoal;
+
+  /** Latest IK forward-kinematics palm (HUD). */
+  protected Vector3f ikLeftHandCurrent;
+
+  /** Displayed green marker: goal if set, otherwise current FK. */
+  protected Vector3f ikLeftHandWorld;
+
+  /** Last OAK-D overlay click in world meters (Y-up), or null. */
+  public Point lastClickPoint;
+
+  /** Distance from the chest camera to {@link #lastClickPoint}, meters. */
+  public float lastClickDistanceM;
+
+  /** Last left-hand reach cloud shown in the simulator (world meters). */
+  public PointCloud lastReachCloud;
+
+  /** Voxel count of {@link #lastReachCloud}, for the WebGui. */
+  public int reachCloudPointCount = 0;
+
+  protected transient FloatBuffer reachCloudBuffer = null;
+
+  protected transient FloatBuffer reachCloudColorBuffer = null;
+
+  protected transient Material reachCloudMat = null;
+
+  protected transient Mesh reachCloudMesh = null;
+
+  protected transient Geometry reachCloudGeometry = null;
+
+  protected int reachCloudVertexCount = 0;
+
+  /** Chest camera world translation (copied on the render thread). */
+  protected final Vector3f lastChestCameraWorld = new Vector3f();
 
   protected boolean fullscreen = false;
 
@@ -199,9 +301,55 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   protected transient FloatBuffer pointCloudBuffer = null;
 
+  protected transient FloatBuffer pointCloudColorBuffer = null;
+
   protected transient Material pointCloudMat = null;
 
   protected transient Mesh pointCloudMesh = new Mesh();
+
+  protected transient Geometry pointCloudGeometry = null;
+
+  protected transient Geometry depthMeshGeometry = null;
+
+  protected transient Mesh depthSurfaceMesh = null;
+
+  protected transient Material depthMeshMat = null;
+
+  protected transient Texture2D depthMeshTexture = null;
+
+  protected transient FloatBuffer depthMeshPosBuffer = null;
+
+  protected transient FloatBuffer depthMeshUvBuffer = null;
+
+  protected int depthMeshVertexCount = 0;
+
+  protected int depthMeshTexW = 0;
+
+  protected int depthMeshTexH = 0;
+
+  protected transient Node chestDepthCameraNode = null;
+
+  /**
+   * Depth voxels + frustum live here (child of {@link #rootNode}), not under
+   * VinMoov. Parenting the cloud to {@code topStom} exploded that node's
+   * bounds, z-fought with the chest/arms, and left Unshaded vertex-color state
+   * on the following Lighting/PBR draws (black textures).
+   */
+  protected transient Node depthOverlayNode = null;
+
+  protected transient Vector3f cachedTorsoCenterLocal = null;
+
+  protected transient String cachedTorsoCenterParent = null;
+
+  protected transient Geometry depthHudGeometry = null;
+
+  protected transient Texture2D depthHudTexture = null;
+
+  protected transient Material depthHudMat = null;
+
+  protected int pointCloudVertexCount = 0;
+
+  protected transient String lastChestParentName;
 
   protected transient Node rootNode;
 
@@ -231,11 +379,28 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   
   protected float orbitRadius = 10f;
   
-  protected float orbitSpeed = 0.5f;
+  protected float orbitSpeed = 1.0f;
+
+  protected float orbitMinDistance = 0.3f;
+
+  protected float orbitMaxDistance = 80f;
+
+  protected float panSpeed = 1.0f;
+
+  /** Extra translation applied to the orbit look-at point after panning. */
+  protected final Vector3f orbitPanOffset = new Vector3f();
+
+  /** True after the mouse has moved while a button is held (orbit/pan vs click-select). */
+  protected boolean viewDragging = false;
+
+  protected float viewDragAccum = 0f;
   
   protected float mouseX = 0f;
   
   protected float mouseY = 0f;
+
+  /** Radians of orbit per pixel dragged. */
+  protected float orbitRadiansPerPixel = 0.008f;
 
   // protected Set<String> modelPaths = new LinkedHashSet<>();
 
@@ -409,9 +574,38 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }</pre>
      */
 
+    if (service instanceof PointCloudPublisher) {
+      subscribe(service.getName(), "publishPointCloud", getName(), "onPointCloud");
+      wireDepthClickToIk();
+    }
+    if (service instanceof DepthHudPublisher) {
+      subscribe(service.getName(), "publishDepthHud", getName(), "onDepthHud");
+    }
+    if (service instanceof DepthFramePublisher) {
+      subscribe(service.getName(), "publishDepthFrame", getName(), "onDepthFrame");
+      subscribe(service.getName(), "publishRgbMesh", getName(), "onRgbMesh");
+    }
+    if (service instanceof OakD) {
+      addListener("publishClickPoint", service.getName(), "onSimulatorClick");
+    }
+    if (service instanceof PointListener) {
+      addListener("publishClickPoint", service.getName(), "onPoint");
+    }
+
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
-      // non-batched - "instantaneous" move data subscription
+      // Instantaneous angle stream (TimeEncoder) and direct move commands
       subscribe(service.getName(), "publishEncoderData", getName(), "onEncoderData");
+      // Servo.processMove publishes ServoMove (not ServoControl) — handle both
+      subscribe(service.getName(), "publishServoMoveTo", getName(), "onServoMove");
+      subscribe(service.getName(), "publishMoveTo", getName(), "onServoMoveTo");
+    }
+
+    if (service instanceof InverseKinematics3D || service instanceof Fabrik) {
+      subscribe(service.getName(), "publishWorldPosition", getName(), "onWorldPosition");
+      subscribe(service.getName(), "publishIkGoal", getName(), "onIkGoal");
+    }
+    if (service instanceof Fabrik) {
+      subscribe(service.getName(), "publishReachCloud", getName(), "onReachCloud");
     }
 
     // backward attach ?
@@ -490,10 +684,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
   
   public void resetView() {
-    // cam.setLocation(new Vector3f(0, 1, 2));
+    orbitPanOffset.set(0, 0, 0);
     camera.setLocalTransform(new Transform(new Vector3f(0, 3, 5)));
-//    camera.setLocalTransform(null);
-//    camera.move(0, 1, 2);;
     cameraLookAt("root");
   }
 
@@ -507,6 +699,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // thread processing
     // all the other moves & rotations !
     // camera.lookAt(spatial.getWorldTranslation(), Vector3f.UNIT_Y);
+    orbitPanOffset.set(0, 0, 0);
     addMsg("lookAt", CAMERA, spatial.getName());
   }
 
@@ -525,36 +718,158 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     cameraLookAt(rootNode);
   }
 
-  // FIXME make a more general Collision check..
+  /**
+   * Ray-pick from the cursor. A click on the visible OAK-D voxel cloud or RGB
+   * mesh publishes {@link #publishClickPoint} (world meters, Y-up) for Fabrik
+   * and does not steal the orbit selection.
+   */
   public Geometry checkCollision() {
-
-    // Reset results list.
+    if (cam == null || inputManager == null || rootNode == null) {
+      return null;
+    }
+    refreshDepthCollisionData();
     CollisionResults results = new CollisionResults();
-    // Convert screen click to 3d position
     Vector2f click2d = inputManager.getCursorPosition();
     Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
     Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-    // Aim the ray from the clicked spot forwards.
     Ray ray = new Ray(click3d, dir);
-    // Collect intersections between ray and all nodes in results list.
     rootNode.collideWith(ray, results);
-    // (Print the results so we see what is going on:)
-    for (int i = 0; i < results.size(); i++) {
-      // (For each “hit”, we know distance, impact point, geometry.)
-      float dist = results.getCollision(i).getDistance();
-      Vector3f pt = results.getCollision(i).getContactPoint();
-      String target = results.getCollision(i).getGeometry().getName();
-      System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+    DepthPick.Hit hit = DepthPick.firstPick(results);
+    if (hit == null) {
+      return null;
     }
-    // Use the results -- we rotate the selected geometry.
-    if (results.size() > 0) {
-      // The closest result is the target that the player picked:
-      Geometry target = results.getClosestCollision().getGeometry();
-      // Here comes the action:
-      log.info("you clicked " + target.getName());
-      return target;
+    log.info("you clicked {} at {}", hit.geometry.getName(), hit.world);
+    JMonkeyEngineConfig cfg = config;
+    if (hit.depthOverlay && (cfg == null || cfg.depthClickToIk)) {
+      Point p = new Point(hit.world.x, hit.world.y, hit.world.z);
+      onIkGoal(p);
+      invoke("publishClickPoint", p);
     }
-    return null;
+    return hit.geometry;
+  }
+
+  /**
+   * Rebuild triangle collision trees for the visible OAK-D overlay. Vertex
+   * buffers change every frame; stale BIH data would pick the wrong point.
+   */
+  private void refreshDepthCollisionData() {
+    refreshMeshCollision(pointCloudGeometry, pointCloudMesh);
+    refreshMeshCollision(depthMeshGeometry, depthSurfaceMesh);
+  }
+
+  private void refreshMeshCollision(Geometry geometry, Mesh mesh) {
+    if (geometry == null || mesh == null || DepthPick.isCulled(geometry)) {
+      return;
+    }
+    mesh.updateBound();
+    mesh.updateCounts();
+    try {
+      mesh.createCollisionData();
+      geometry.updateModelBound();
+    } catch (Exception e) {
+      log.warn("Could not rebuild OAK-D overlay collision data for {}", geometry.getName(), e);
+    }
+  }
+
+  /**
+   * World-meter point on the OAK-D overlay (same frame as Fabrik / IK).
+   */
+  public Point publishClickPoint(Point point) {
+    lastClickPoint = point;
+    lastClickDistanceM = distanceToChestCamera(point);
+    log.info("OAK-D click {}  {} m from camera  depthScale {}", point, lastClickDistanceM, config.depthCloudScale);
+    invoke("publishClickDistance", lastClickDistanceM);
+    return point;
+  }
+
+  /** Meters from the chest camera to the last overlay click. */
+  public float publishClickDistance(float meters) {
+    return meters;
+  }
+
+  /**
+   * Camera-frame meters → overlay local meters. Default 1 is real-world
+   * (JME / IK meters). {@link JMonkeyEngineConfig#depthCloudScale} is a
+   * calibration multiplier.
+   */
+  public float depthVertexScale() {
+    JMonkeyEngineConfig cfg = config;
+    float parentScale = 1f;
+    if (cfg != null && cfg.depthCloudMatchWorldMeters) {
+      parentScale = overlayWorldScale();
+    }
+    return DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+  }
+
+  private float overlayWorldScale() {
+    if (depthOverlayNode == null) {
+      return 1f;
+    }
+    Vector3f ws = depthOverlayNode.getWorldScale();
+    return (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
+  }
+
+  public float getDepthCloudScale() {
+    return config != null && config.depthCloudScale > 0f ? config.depthCloudScale : 1f;
+  }
+
+  /**
+   * Calibration multiplier on camera-frame meters. {@code 1} is real-world.
+   */
+  public float setDepthCloudScale(float scale) {
+    if (config == null) {
+      return Float.NaN;
+    }
+    float s = scale;
+    if (s < 0.05f) {
+      s = 0.05f;
+    }
+    if (s > 20f) {
+      s = 20f;
+    }
+    config.depthCloudScale = s;
+    log.info("depth overlay scale {}", s);
+    broadcastState();
+    return s;
+  }
+
+  /**
+   * Set {@link JMonkeyEngineConfig#depthCloudScale} so the last mesh click
+   * lands at {@code knownDistanceM} from the chest camera (tape measure).
+   */
+  public float calibrateDepthScale(double knownDistanceM) {
+    if (lastClickPoint == null || lastClickDistanceM < 1e-4f) {
+      error("Click the OAK-D mesh first, then calibrate with a measured distance");
+      return getDepthCloudScale();
+    }
+    float next = DepthCloudJme.nextScale(getDepthCloudScale(), lastClickDistanceM, knownDistanceM);
+    info("Depth scale %.3f → %.3f (click was %.3f m, measured %.3f m)", getDepthCloudScale(), next, lastClickDistanceM,
+        knownDistanceM);
+    float applied = setDepthCloudScale(next);
+    lastClickDistanceM = (float) knownDistanceM;
+    return applied;
+  }
+
+  private float distanceToChestCamera(Point point) {
+    if (point == null) {
+      return 0f;
+    }
+    float dx = (float) point.getX() - lastChestCameraWorld.x;
+    float dy = (float) point.getY() - lastChestCameraWorld.y;
+    float dz = (float) point.getZ() - lastChestCameraWorld.z;
+    return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+
+  /**
+   * Subscribe running Fabrik services to mesh clicks (idempotent). Called when
+   * an OAK-D (or other point-cloud publisher) is attached.
+   */
+  protected void wireDepthClickToIk() {
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof PointListener) {
+        addListener("publishClickPoint", si.getName(), "onPoint");
+      }
+    }
   }
 
   public void clone(String name, String newName) {
@@ -835,38 +1150,25 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     return getAngle(name, null);
   }
 
+  /**
+   * The joint's input (servo) angle. Read from the angle last applied by
+   * {@link Jme3Util#rotateTo}, which is exact — recovering it from the node's
+   * quaternion via Euler angles is lossy and clamps the Z axis to ±90°.
+   */
   public Float getAngle(String name, String axis) {
     Spatial s = get(name);
     if (s == null) {
       return null;
     }
-    Quaternion q = s.getLocalRotation();
-    float[] angles = new float[3];
-    q.toAngles(angles);
     UserData data = getUserData(name);
-    // default rotation is around Y axis unless specified
-    Vector3f rotMask = null;
-
-    if (axis != null) {
-      rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
-    } else {
-      rotMask = util.getUnitVector(data.rotationMask);
-    }
-
-    // Unit vectors just have a length of 1 and can be along multiple axes,
-    // for which getIndexFromUnitVector does not work.
-    Integer axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
-    if (axisIndex == null) {
-      error("rotMask is not a unit vector along a single axis.");
+    if (data == null) {
       return null;
     }
-    float rawAngle = angles[axisIndex] * 180 / FastMath.PI;
-
-    float result = rawAngle;
+    double meshAngle = data.getCurrentAngleDeg();
     if (data.mapper != null) {
-      result = Double.valueOf(data.mapper.calcInput(rawAngle)).floatValue();
+      return Double.valueOf(data.mapper.calcInput(meshAngle)).floatValue();
     }
-    return result;
+    return (float) meshAngle;
   }
 
   public Jme3App getApp() {
@@ -1121,43 +1423,262 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   public void initPointCloud(PointCloud pc) {
-
     Point3df[] points = pc.getData();
-    Vector3f[] lineVerticies = new Vector3f[points.length];
+    int n = points == null ? 0 : points.length;
+    pointCloudVertexCount = n;
+    int verts = Math.max(1, n) * 8;
+    pointCloudBuffer = BufferUtils.createFloatBuffer(verts * 3);
+    pointCloudColorBuffer = BufferUtils.createFloatBuffer(verts * 4);
+    writePointCloudBuffers(pc);
 
-    for (int i = 0; i < points.length; ++i) {
-      Point3df p = points[i];
-      lineVerticies[i] = new Vector3f(p.x, p.y, p.z);
-    }
-
-    pointCloudBuffer = BufferUtils.createFloatBuffer(lineVerticies);
-
-    // pointCloudMesh.setMode(Mesh.Mode.TriangleFan);
-    pointCloudMesh.setMode(Mesh.Mode.Points);
-    // pointCloudMesh.setMode(Mesh.Mode.Lines);
-    // pointCloudMesh.setMode(Mesh.Mode.Triangles);
-
-    // https://hub.jmonkeyengine.org/t/how-to-render-a-3d-point-cloud/27341/11
+    pointCloudMesh = new Mesh();
+    pointCloudMesh.setMode(Mesh.Mode.Triangles);
     pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pc.getColors());
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pointCloudColorBuffer);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(DepthCloudJme.cubeIndices(Math.max(1, n))));
     pointCloudMesh.updateBound();
     pointCloudMesh.updateCounts();
-    // pointCloudMesh.setPointSize(0.0003);
 
-    Geometry geo = new Geometry("line", pointCloudMesh);
+    if (pointCloudGeometry != null) {
+      pointCloudGeometry.removeFromParent();
+    }
+    pointCloudGeometry = new Geometry(DepthPick.DEPTH_CLOUD, pointCloudMesh);
+    DepthPick.mark(pointCloudGeometry);
     pointCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    // pointCloudMat = new Material(assetManager,
-    // "Common/MatDefs/Misc/Particle.j3md");
+    pointCloudMat.setBoolean("VertexColor", true);
+    pointCloudMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
+    pointCloudMat.getAdditionalRenderState().setPolyOffset(1f, 1f);
+    pointCloudGeometry.setMaterial(pointCloudMat);
+    pointCloudGeometry.setShadowMode(ShadowMode.Off);
+    pointCloudGeometry.setQueueBucket(Bucket.Opaque);
 
-    pointCloudMat.setColor("Color", ColorRGBA.Green);
-    pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
-    // pointCloudMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Front);
-    pointCloudMat.setBoolean("VertexColor", false); // important for points !!
-    // pointCloudMat.setBoolean("VertexColor", false); // important for points
-    // !!
-    geo.setMaterial(pointCloudMat);
+    ensureDepthOverlayNode();
+    depthOverlayNode.attachChild(pointCloudGeometry);
+    syncDepthOverlayPose();
+    applyDepthDisplayMode();
+  }
 
-    rootNode.attachChild(geo);
+  /**
+   * Camera frame (X right, Y down, Z forward) → JME local (X right, Y up, Z
+   * forward). Each sample is a cube on {@link #depthOverlayNode} (not under
+   * VinMoov) so torso motion is copied via {@link #syncDepthOverlayPose()}.
+   */
+  private void writePointCloudBuffers(PointCloud pc) {
+    Point3df[] points = pc.getData();
+    float[] colors = pc.getColors();
+    int n = points == null ? 0 : points.length;
+    JMonkeyEngineConfig cfg = config;
+    float scale = depthVertexScale();
+    float voxel = cfg != null ? cfg.depthCloudVoxelM : 0.03f;
+    float half = Math.max(0.004f, voxel * 0.5f);
+    float parentScale = overlayWorldScale();
+    if (cfg != null && cfg.depthCloudMatchWorldMeters && parentScale > 1e-6f) {
+      half = half / parentScale;
+    }
+
+    pointCloudBuffer.clear();
+    pointCloudColorBuffer.clear();
+    float[] corners = new float[24];
+    for (int i = 0; i < n; i++) {
+      Point3df p = points[i];
+      DepthCloudJme.voxelCorners(p.x, p.y, p.z, scale, half, corners);
+      for (int c = 0; c < 24; c++) {
+        pointCloudBuffer.put(corners[c]);
+      }
+      float r = 0.2f;
+      float g = 0.9f;
+      float b = 0.3f;
+      float a = 1f;
+      if (colors != null && colors.length >= (i + 1) * 4) {
+        r = colors[i * 4];
+        g = colors[i * 4 + 1];
+        b = colors[i * 4 + 2];
+        a = colors[i * 4 + 3];
+      }
+      for (int c = 0; c < 8; c++) {
+        pointCloudColorBuffer.put(r).put(g).put(b).put(a);
+      }
+    }
+    if (n == 0) {
+      for (int i = 0; i < 24; i++) {
+        pointCloudBuffer.put(0f);
+      }
+      for (int i = 0; i < 8; i++) {
+        pointCloudColorBuffer.put(0f).put(0f).put(0f).put(0f);
+      }
+    }
+    pointCloudBuffer.flip();
+    pointCloudColorBuffer.flip();
+  }
+
+  /**
+   * Organized depth grid → RGB-textured triangles on {@link #depthOverlayNode}.
+   * Camera Y is flipped to JME Y-up, same as voxels.
+   */
+  protected void initDepthRgbMesh(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
+    int n = Math.max(1, mesh.vertexCount);
+    depthMeshVertexCount = mesh.vertexCount;
+    depthMeshPosBuffer = BufferUtils.createFloatBuffer(n * 3);
+    depthMeshUvBuffer = BufferUtils.createFloatBuffer(n * 2);
+    writeDepthMeshBuffers(mesh, rgb, texW, texH);
+
+    depthSurfaceMesh = new Mesh();
+    depthSurfaceMesh.setMode(Mesh.Mode.Triangles);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Position, 3, depthMeshPosBuffer);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.TexCoord, 2, depthMeshUvBuffer);
+    int[] idx = mesh.indices != null && mesh.indices.length > 0 ? mesh.indices : new int[] { 0, 0, 0 };
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(idx));
+    depthSurfaceMesh.updateBound();
+    depthSurfaceMesh.updateCounts();
+
+    if (depthMeshGeometry != null) {
+      depthMeshGeometry.removeFromParent();
+    }
+    depthMeshGeometry = new Geometry(DepthPick.DEPTH_RGB_MESH, depthSurfaceMesh);
+    DepthPick.mark(depthMeshGeometry);
+    depthMeshMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    depthMeshMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
+    depthMeshMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
+    depthMeshMat.getAdditionalRenderState().setPolyOffset(1f, 1f);
+    uploadDepthMeshTexture(rgb, texW, texH);
+    depthMeshMat.setTexture("ColorMap", depthMeshTexture);
+    depthMeshGeometry.setMaterial(depthMeshMat);
+    depthMeshGeometry.setShadowMode(ShadowMode.Off);
+    depthMeshGeometry.setQueueBucket(Bucket.Opaque);
+
+    ensureDepthOverlayNode();
+    depthOverlayNode.attachChild(depthMeshGeometry);
+    syncDepthOverlayPose();
+    applyDepthDisplayMode();
+  }
+
+  private void writeDepthMeshBuffers(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
+    float scale = depthVertexScale();
+
+    depthMeshPosBuffer.clear();
+    int n = mesh.vertexCount;
+    float[] p = mesh.positions;
+    for (int i = 0; i < n; i++) {
+      int o = i * 3;
+      depthMeshPosBuffer.put(p[o] * scale);
+      depthMeshPosBuffer.put(-p[o + 1] * scale);
+      depthMeshPosBuffer.put(p[o + 2] * scale);
+    }
+    if (n == 0) {
+      depthMeshPosBuffer.put(0f).put(0f).put(0f);
+    }
+    depthMeshPosBuffer.flip();
+
+    depthMeshUvBuffer.clear();
+    if (mesh.uvs != null && mesh.uvs.length >= n * 2) {
+      depthMeshUvBuffer.put(mesh.uvs, 0, n * 2);
+    }
+    if (n == 0) {
+      depthMeshUvBuffer.put(0f).put(0f);
+    }
+    depthMeshUvBuffer.flip();
+
+    if (depthSurfaceMesh != null) {
+      int[] idx = mesh.indices != null && mesh.indices.length > 0 ? mesh.indices : new int[] { 0, 0, 0 };
+      depthSurfaceMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(idx));
+    }
+    uploadDepthMeshTexture(rgb, texW, texH);
+  }
+
+  private void uploadDepthMeshTexture(byte[] rgb, int w, int h) {
+    if (rgb == null || w <= 0 || h <= 0 || rgb.length < w * h * 3) {
+      return;
+    }
+    ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 3);
+    for (int y = 0; y < h; y++) {
+      int src = (h - 1 - y) * w * 3;
+      buf.put(rgb, src, w * 3);
+    }
+    buf.flip();
+    Image image = new Image(Image.Format.RGB8, w, h, buf, ColorSpace.sRGB);
+    if (depthMeshTexture == null || depthMeshTexW != w || depthMeshTexH != h) {
+      depthMeshTexture = new Texture2D(image);
+      depthMeshTexture.setMagFilter(Texture.MagFilter.Bilinear);
+      depthMeshTexture.setMinFilter(Texture.MinFilter.BilinearNoMipMaps);
+      depthMeshTexture.setWrap(Texture.WrapMode.EdgeClamp);
+      depthMeshTexW = w;
+      depthMeshTexH = h;
+      if (depthMeshMat != null) {
+        depthMeshMat.setTexture("ColorMap", depthMeshTexture);
+      }
+    } else {
+      depthMeshTexture.setImage(image);
+    }
+  }
+
+  private static byte[] meshTextureRgb(DepthFrame frame, int[] wh) {
+    if (frame.rgb != null && frame.rgbWidth > 0 && frame.rgbHeight > 0
+        && frame.rgb.length >= frame.rgbWidth * frame.rgbHeight * 3) {
+      wh[0] = frame.rgbWidth;
+      wh[1] = frame.rgbHeight;
+      return frame.rgb;
+    }
+    DepthHud hud = DepthColorMap.toHud(frame);
+    if (hud == null || hud.rgb == null) {
+      return null;
+    }
+    wh[0] = hud.width;
+    wh[1] = hud.height;
+    return hud.rgb;
+  }
+
+  protected void updateRgbMeshOnRenderThread(DepthFrame frame) {
+    ensureChestDepthCameraOnRenderThread(config);
+    syncDepthOverlayPose();
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthCloud) {
+      applyDepthDisplayMode();
+      return;
+    }
+    float maxEdge = cfg != null ? cfg.depthMeshMaxEdgeM : DepthToRgbMesh.DEFAULT_MAX_EDGE_M;
+    DepthToRgbMesh.Result mesh = DepthToRgbMesh.convert(frame, maxEdge);
+    int[] wh = new int[2];
+    byte[] rgb = meshTextureRgb(frame, wh);
+    if (rgb == null || mesh.vertexCount <= 0) {
+      applyDepthDisplayMode();
+      return;
+    }
+    if (depthMeshGeometry == null || depthMeshPosBuffer == null || mesh.vertexCount != depthMeshVertexCount) {
+      initDepthRgbMesh(mesh, rgb, wh[0], wh[1]);
+      return;
+    }
+    writeDepthMeshBuffers(mesh, rgb, wh[0], wh[1]);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.Position, 3, depthMeshPosBuffer);
+    depthSurfaceMesh.setBuffer(VertexBuffer.Type.TexCoord, 2, depthMeshUvBuffer);
+    depthSurfaceMesh.updateBound();
+    depthSurfaceMesh.updateCounts();
+    applyDepthDisplayMode();
+  }
+
+  public void setDepthRgbMesh(boolean enabled) {
+    config.depthRgbMesh = enabled;
+    if (app != null) {
+      app.enqueue(() -> {
+        applyDepthDisplayMode();
+        return null;
+      });
+    }
+  }
+
+  public void onRgbMesh(Boolean enabled) {
+    setDepthRgbMesh(Boolean.TRUE.equals(enabled));
+  }
+
+  private void applyDepthDisplayMode() {
+    JMonkeyEngineConfig cfg = config;
+    boolean show3d = cfg == null || cfg.depthCloud;
+    boolean mesh = cfg != null && cfg.depthRgbMesh;
+    if (pointCloudGeometry != null) {
+      pointCloudGeometry.setCullHint((show3d && !mesh) ? CullHint.Inherit : CullHint.Always);
+    }
+    if (depthMeshGeometry != null) {
+      depthMeshGeometry.setCullHint((show3d && mesh) ? CullHint.Inherit : CullHint.Always);
+    }
   }
 
   @Override
@@ -1243,39 +1764,140 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     JMonkeyEngineConfig c = (JMonkeyEngineConfig) config;
     Spatial model = null;
     try {
-      if (loadedModels.contains(assetPath)) {
-        log.info("model {} already loaded");
+      String basename = modelBasename(assetPath);
+      if (loadedModels.contains(assetPath) || loadedModels.contains(basename)
+          || isModelBasenameLoaded(basename)) {
+        log.info("model {} already loaded (skipping duplicate)", assetPath);
+        return null;
+      }
+
+      // Already have a VinMoov / robot root in the scene — do not attach another body
+      if (isVinMoovAsset(basename) && hasVinMoovOrRobotRoot()) {
+        log.info("VinMoov/robot root already in scene — skipping {}", assetPath);
+        loadedModels.add(basename);
+        loadedModels.add(assetPath);
         return null;
       }
       
       if (FileIO.checkDir(modelsDir + fs + assetPath)) {
-        log.info("skipping directory {}");
+        log.info("skipping directory {}", assetPath);
         return null;        
       }
       
       if (assetPath.toLowerCase().endsWith(".md") || assetPath.toLowerCase().endsWith(".txt") || assetPath.toLowerCase().endsWith(".bin")) {
-        log.info("skipping {} not and valid model type");
+        log.info("skipping {} not a valid model type", assetPath);
         return null;
       }
       
       log.info("loading {}", assetPath);
       model = assetManager.loadModel(assetPath);
-      log.info("loaded {}", assetPath);
+      log.info("loaded {} name={}", assetPath, model != null ? model.getName() : null);
       if (model != null) {
+        if (model.getName() == null || model.getName().isEmpty() || model.getName().equals(assetPath)) {
+          model.setName(basename);
+        }
         getRootNode().attachChild(model);
+        loadedModels.add(assetPath);
+        loadedModels.add(basename);
       } else {
-        error("%s model null");
+        error("%s model null", assetPath);
       }
       
       if (c.models == null) {
         c.models = new ArrayList<>();
       }
       
-      c.models.add(assetPath);
+      if (!c.models.contains(assetPath) && !c.models.contains(basename)) {
+        c.models.add(basename.endsWith(".j3o") || basename.contains(".") ? assetPath : basename + ".j3o");
+      }
     } catch(Exception e) {
       error(e);
     }
     return model;
+  }
+
+  private static String modelBasename(String assetPath) {
+    String simple = assetPath.replace('\\', '/');
+    int slash = simple.lastIndexOf('/');
+    if (slash >= 0) {
+      simple = simple.substring(slash + 1);
+    }
+    return simple;
+  }
+
+  private static String modelNameNoExt(String assetPath) {
+    String simple = modelBasename(assetPath);
+    int dot = simple.lastIndexOf('.');
+    if (dot > 0) {
+      return simple.substring(0, dot);
+    }
+    return simple;
+  }
+
+  private static boolean isVinMoovAsset(String basename) {
+    String n = modelNameNoExt(basename).toLowerCase();
+    return n.startsWith("vinmoov");
+  }
+
+  private boolean isModelBasenameLoaded(String basename) {
+    String noExt = modelNameNoExt(basename);
+    for (String loaded : loadedModels) {
+      if (modelBasename(loaded).equalsIgnoreCase(basename) || modelNameNoExt(loaded).equalsIgnoreCase(noExt)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean hasVinMoovOrRobotRoot() {
+    if (rootNode == null) {
+      return false;
+    }
+    for (Spatial child : rootNode.getChildren()) {
+      String n = child.getName();
+      if (n == null) {
+        continue;
+      }
+      if (n.equals("i01") || n.toLowerCase().startsWith("vinmoov")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Remove extra VinMoov clones so only one body remains (named robotName when possible).
+   */
+  public void removeDuplicateVinMoovRoots(String robotName) {
+    if (rootNode == null) {
+      return;
+    }
+    List<Spatial> bodies = new ArrayList<>();
+    for (Spatial child : new ArrayList<>(rootNode.getChildren())) {
+      String n = child.getName();
+      if (n == null) {
+        continue;
+      }
+      if (n.equals(robotName) || n.toLowerCase().startsWith("vinmoov")) {
+        bodies.add(child);
+      }
+    }
+    if (bodies.size() <= 1) {
+      if (bodies.size() == 1 && robotName != null && !robotName.equals(bodies.get(0).getName())) {
+        String old = bodies.get(0).getName();
+        bodies.get(0).setName(robotName);
+        log.info("Renamed sole body {} -> {}", old, robotName);
+      }
+      return;
+    }
+    // Keep the first; detach the rest
+    Spatial keep = bodies.get(0);
+    keep.setName(robotName != null ? robotName : keep.getName());
+    for (int i = 1; i < bodies.size(); i++) {
+      Spatial dup = bodies.get(i);
+      log.warn("Removing duplicate VinMoov body {}", dup.getName());
+      dup.removeFromParent();
+    }
   }
 
 
@@ -1373,10 +1995,6 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public void onAction(String name, boolean keyPressed, float tpf) {
     log.debug("onAction {} {} {}", name, keyPressed, tpf);
 
-    if (name.equals("mouse-click-right")) {
-      mouseRightPressed = keyPressed;
-    }
-
     if ("full-screen".equals(name)) {
       enableFullScreen(true);
     } else if ("select-root".equals(name)) {
@@ -1397,22 +2015,38 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       saveSpatial(selectedForView.getName());
     } else if ("mouse-click-left".equals(name)) {
       mouseLeft = keyPressed;
+      // Click (no drag) selects; drag orbits the view. Selecting on press would
+      // jump the orbit target mid-gesture.
       if (mouseLeft) {
-        Geometry target = checkCollision();
-        setSelected(target);
+        viewDragging = false;
+        viewDragAccum = 0f;
+        captureCursor();
+      } else {
+        if (!viewDragging) {
+          Geometry target = checkCollision();
+          // Mesh clicks publish an IK goal — keep the current orbit target.
+          if (target == null || !DepthPick.isDepthOverlay(target)) {
+            setSelected(target);
+          }
+        }
+        viewDragging = false;
+        viewDragAccum = 0f;
       }
-    } 
-
-    else if ("mouse-click-middle".equals(name)) {
+    } else if ("mouse-click-middle".equals(name)) {
       mouseMiddle = keyPressed;
-      // USEFUL - but need a different key combo
-//      if (mouseMiddle && selectedForView != null) {
-//        cameraLookAt(selectedForView.getName());
-//      }
-    } 
-    
-    
-    else {
+      if (mouseMiddle) {
+        captureCursor();
+      } else {
+        viewDragging = false;
+      }
+    } else if ("mouse-click-right".equals(name)) {
+      mouseRightPressed = keyPressed;
+      if (mouseRightPressed) {
+        captureCursor();
+      } else {
+        viewDragging = false;
+      }
+    } else {
       warn("%s - key %b %f not found", name, keyPressed, tpf);
     }
   }
@@ -1431,87 +2065,171 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public void onAnalog(String name, float keyPressed, float tpf) {
     log.debug("onAnalog [{} {} {}]", name, keyPressed, tpf);
 
-    // selectedForMovement invariably is the camera
-    if (selectedForMovement == null) {
-      selectedForMovement = camera;// FIXME "new" selectedMove vs selected
-    }
-
-    // ROTATE ORBIT (should be middle button / mouse wheel button)
-    // currently wrong :P its rotating in place - you want to orbit on a selection at 10 pts out
-    if (mouseMiddle && !shiftLeft) {
-      
-      switch (name) {
-        case "mouse-axis-x":
-          selectedForMovement.rotate(0, -keyPressed, 0);
-          break;
-        case "mouse-axis-x-negative":
-          selectedForMovement.rotate(0, keyPressed, 0);
-          break;
-        case "mouse-axis-y":
-          selectedForMovement.rotate(-keyPressed, 0, 0);
-          break;
-        case "mouse-axis-y-negative":
-          selectedForMovement.rotate(keyPressed, 0, 0);
-          break;
-      }
-      
-      
-      if (name.equals("mouse-axis-x")) {
-        mouseX = inputManager.getCursorPosition().x;
-    } else if (name.equals("mouse-axis-y")) {
-        mouseY = inputManager.getCursorPosition().y;
-    }
- 
-      
-      
-    }
-
-    // PAN -- works(ish)
-    if (mouseMiddle && shiftLeft) {
-      log.debug("panning");
-      switch (name) {
-        case "mouse-axis-x":
-        case "mouse-axis-x-negative":
-          
-       // Get the local rotation of the camera
-          Quaternion rotation = selectedForMovement.getLocalRotation();
-
-          // Extract the X-axis rotation column from the quaternion
-          Vector3f rotationAxis = rotation.getRotationColumn(0);
-
-          // Define the direction and distance to pan
-          float direction = name.equals("mouse-axis-x") ? -0.13f : 0.13f;
-          float distance = 0.3f;
-
-          // Calculate the translation vector by multiplying the rotation axis with the direction and distance
-          Vector3f translation = rotationAxis.mult(direction).mult(distance);
-
-          // Move the camera by the translation vector
-          // camera.setLocation(camera.getLocation().add(translation));
-          // selectedForMovement.move(translation);
-          
-          // needs to be on the normal
-          // selectedForMovement.move(direction, 0, direction);
-          selectedForMovement.move(translation);
-          break;
-        case "mouse-axis-y":
-          selectedForMovement.move(0, keyPressed * 3, 0);
-          break;
-        case "mouse-axis-y-negative":
-          selectedForMovement.move(0, -keyPressed * 3, 0);
-          break;
-      }
-    }
-
-    // ZOOM
+    // Mouse X/Y analog does not fire with a visible cursor under LWJGL3.
+    // Orbit/pan is applied from cursor deltas in simpleUpdate instead.
     if (name.equals("mouse-wheel-up") || name.equals("mouse-wheel-down")) {
-
-      Quaternion normal = camera.getLocalRotation();
-      Vector3f rotationAxis = normal.getRotationColumn(2);
-      float direction = name.equals("mouse-wheel-up")?0.3f:-0.3f;
-      Vector3f translation = rotationAxis.mult(direction);
-      camera.move(translation);
+      zoomCamera(name.equals("mouse-wheel-up") ? -1f : 1f);
     }
+  }
+
+  private void captureCursor() {
+    if (inputManager == null) {
+      return;
+    }
+    Vector2f cursor = inputManager.getCursorPosition();
+    mouseX = cursor.x;
+    mouseY = cursor.y;
+  }
+
+  /**
+   * Orbit / pan from absolute cursor movement. Required because
+   * {@link MouseAxisTrigger} X/Y values are not delivered when the cursor is
+   * visible (LWJGL3 ungrabbed mouse). Wheel analog still works.
+   */
+  protected void updateViewDrag() {
+    if (inputManager == null || camera == null) {
+      return;
+    }
+    Vector2f cursor = inputManager.getCursorPosition();
+    boolean buttonDown = mouseLeft || mouseMiddle || mouseRightPressed;
+    if (!buttonDown) {
+      mouseX = cursor.x;
+      mouseY = cursor.y;
+      return;
+    }
+    float dx = cursor.x - mouseX;
+    float dy = cursor.y - mouseY;
+    mouseX = cursor.x;
+    mouseY = cursor.y;
+    if (dx == 0f && dy == 0f) {
+      return;
+    }
+    applyViewDrag(dx, dy);
+  }
+
+  /**
+   * Apply a pixel mouse delta: left/middle drag orbits, right or shift-drag pans.
+   */
+  protected void applyViewDrag(float dxPixels, float dyPixels) {
+    viewDragAccum += FastMath.abs(dxPixels) + FastMath.abs(dyPixels);
+    if (viewDragAccum > 3f) {
+      viewDragging = true;
+    }
+    boolean pan = mouseRightPressed || ((mouseLeft || mouseMiddle) && shiftLeft);
+    if (pan) {
+      panCameraPixels(dxPixels, dyPixels);
+    } else if (mouseLeft || mouseMiddle) {
+      float sens = orbitRadiansPerPixel * orbitSpeed;
+      orbitCamera(-dxPixels * sens, dyPixels * sens);
+    }
+  }
+
+  /**
+   * World-space point the camera orbits around: the configured look-at node, or
+   * the scene origin, plus any pan offset.
+   */
+  protected Vector3f getOrbitTarget() {
+    Spatial target = null;
+    if (config instanceof JMonkeyEngineConfig) {
+      String lookAt = ((JMonkeyEngineConfig) config).cameraLookAt;
+      if (lookAt != null) {
+        target = get(lookAt);
+      }
+    }
+    if (target == null) {
+      target = rootNode;
+    }
+    Vector3f base = target != null ? target.getWorldTranslation() : Vector3f.ZERO;
+    return base.add(orbitPanOffset);
+  }
+
+  /**
+   * Orbit the camera around {@link #getOrbitTarget()} by yaw (world Y) and pitch
+   * (camera right). Keeps looking at the target.
+   */
+  protected void orbitCamera(float yaw, float pitch) {
+    if (camera == null || (yaw == 0f && pitch == 0f)) {
+      return;
+    }
+    Vector3f target = getOrbitTarget();
+    Vector3f offset = camera.getWorldTranslation().subtract(target);
+    if (offset.lengthSquared() < 1e-8f) {
+      offset = new Vector3f(0f, 0f, orbitRadius);
+    }
+
+    Quaternion yawQ = new Quaternion();
+    yawQ.fromAngleAxis(-yaw, Vector3f.UNIT_Y);
+    offset = yawQ.mult(offset);
+
+    if (pitch != 0f) {
+      Vector3f right = Vector3f.UNIT_Y.cross(offset);
+      if (right.lengthSquared() < 1e-8f) {
+        right = Vector3f.UNIT_X.clone();
+      } else {
+        right.normalizeLocal();
+      }
+      Quaternion pitchQ = new Quaternion();
+      pitchQ.fromAngleAxis(-pitch, right);
+      Vector3f pitched = pitchQ.mult(offset);
+      Vector3f dir = pitched.normalize();
+      if (FastMath.abs(dir.y) < 0.98f) {
+        offset = pitched;
+      }
+    }
+
+    orbitRadius = offset.length();
+    camera.setLocalTranslation(target.add(offset));
+    camera.lookAt(target, Vector3f.UNIT_Y);
+  }
+
+  /**
+   * Pan the camera in its local X/Y plane using pixel mouse deltas, and keep
+   * the orbit target in sync so subsequent orbits stay around the new view
+   * center.
+   */
+  protected void panCameraPixels(float dxPixels, float dyPixels) {
+    if (camera == null || (dxPixels == 0f && dyPixels == 0f)) {
+      return;
+    }
+    Quaternion rotation = camera.getLocalRotation();
+    Vector3f right = rotation.getRotationColumn(0);
+    Vector3f up = rotation.getRotationColumn(1);
+    float dist = Math.max(camera.getWorldTranslation().subtract(getOrbitTarget()).length(), 1f);
+    float scale = dist / 600f;
+    Vector3f delta = right.mult(-dxPixels * scale).add(up.mult(dyPixels * scale));
+    orbitPanOffset.addLocal(delta);
+    camera.setLocalTranslation(camera.getLocalTranslation().add(delta));
+  }
+
+  /**
+   * Pan the camera in its local X/Y plane and keep the orbit target in sync so
+   * subsequent orbits stay around the new view center.
+   */
+  protected void panCamera(float x, float y) {
+    panCameraPixels(x, y);
+  }
+
+  /**
+   * Zoom toward or away from the orbit target. Positive {@code direction} zooms
+   * out.
+   */
+  protected void zoomCamera(float direction) {
+    if (camera == null) {
+      return;
+    }
+    Vector3f target = getOrbitTarget();
+    Vector3f offset = camera.getWorldTranslation().subtract(target);
+    float dist = offset.length();
+    if (dist < 1e-4f) {
+      offset = camera.getLocalRotation().mult(Vector3f.UNIT_Z).mult(orbitRadius);
+      dist = offset.length();
+    }
+    float factor = direction < 0f ? 0.92f : 1.08f;
+    float newDist = FastMath.clamp(dist * factor, orbitMinDistance, orbitMaxDistance);
+    offset.normalizeLocal().multLocal(newDist);
+    orbitRadius = newDist;
+    camera.setLocalTranslation(target.add(offset));
+    camera.lookAt(target, Vector3f.UNIT_Y);
   }
 
   /**
@@ -1522,8 +2240,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    *          cv data
    */
   public void onCvData(CVData data) {
-    // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
-    // FIXME - do something interesting ... :)
+    if (data == null) {
+      return;
+    }
+    PointCloud pc = data.getPointCloud();
+    if (pc != null) {
+      onPointCloud(pc);
+    }
   }
 
   @Override
@@ -1536,40 +2259,402 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
   }
 
+  @Override
   public void onPointCloud(PointCloud pc) {
-
-    if (pc == null) {
+    if (pc == null || app == null || assetManager == null) {
       return;
     }
-    // pointCloudMat.setBoolean("VertexColor", false);
-    // pointCloudMesh.setPointSize(0.01f);
-
-    if (pointCloudBuffer == null) {
-      initPointCloud(pc);
-      // addBox("box-1");
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthCloud) {
+      return;
     }
-
-    pointCloudBuffer.rewind();
-    Point3df[] points = pc.getData();
-
-    for (Point3df p : points) {
-      // log.info("p {}", p);
-      // pointCloudBuffer.put(480 - p.y);
-      // pointCloudBuffer.put(640 - p.x);
-      pointCloudBuffer.put(p.x);
-      pointCloudBuffer.put(p.y);
-      pointCloudBuffer.put(p.z);
-      // lineVerticies[index] = new Vector3f(480 - p.y, 640 - p.x, p.z);
+    if (cfg != null && cfg.depthRgbMesh) {
+      return;
     }
-
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
-    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pc.getColors());
+    app.enqueue(() -> {
+      updatePointCloudOnRenderThread(pc);
+      return null;
+    });
   }
 
-  // auto Register
+  @Override
+  public void onDepthFrame(DepthFrame frame) {
+    if (frame == null || app == null || assetManager == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg == null || !cfg.depthRgbMesh) {
+      return;
+    }
+    if (!cfg.depthCloud) {
+      return;
+    }
+    frame.decodeRgb();
+    app.enqueue(() -> {
+      updateRgbMeshOnRenderThread(frame);
+      return null;
+    });
+  }
+
+  @Override
+  public void onDepthHud(DepthHud hud) {
+    if (hud == null || hud.rgb == null || app == null || guiNode == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg != null && !cfg.depthHud) {
+      return;
+    }
+    app.enqueue(() -> {
+      updateDepthHudOnRenderThread(hud);
+      return null;
+    });
+  }
+
+  /**
+   * Create or move the dummy chest depth camera on the VinMoov torso. Safe from
+   * any thread (enqueued to JME).
+   */
+  public void ensureChestDepthCamera() {
+    if (app == null) {
+      return;
+    }
+    JMonkeyEngineConfig cfg = (JMonkeyEngineConfig) config;
+    app.enqueue(() -> {
+      ensureChestDepthCameraOnRenderThread(cfg);
+      return null;
+    });
+  }
+
+  protected void updatePointCloudOnRenderThread(PointCloud pc) {
+    ensureChestDepthCameraOnRenderThread((JMonkeyEngineConfig) config);
+    syncDepthOverlayPose();
+    Point3df[] points = pc.getData();
+    int n = points == null ? 0 : points.length;
+    if (pointCloudGeometry == null || pointCloudBuffer == null || n != pointCloudVertexCount) {
+      initPointCloud(pc);
+      return;
+    }
+    writePointCloudBuffers(pc);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, pointCloudBuffer);
+    pointCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, pointCloudColorBuffer);
+    pointCloudMesh.updateBound();
+    pointCloudMesh.updateCounts();
+  }
+
+  protected void ensureChestDepthCameraOnRenderThread(JMonkeyEngineConfig cfg) {
+    if (cfg == null || rootNode == null || assetManager == null) {
+      return;
+    }
+    ensureDepthOverlayNode();
+    String nodeName = cfg.chestCameraNode;
+    if (nodeName == null || nodeName.isEmpty()) {
+      nodeName = "i01.chest.depthCamera";
+    }
+    Node parent = resolveChestCameraParent(cfg);
+    Spatial existing = find(nodeName);
+    Node camNode;
+    if (existing instanceof Node) {
+      camNode = (Node) existing;
+      if (camNode.getParent() != parent) {
+        parent.attachChild(camNode);
+      }
+      detachOverlayGeometryFromCharacter(camNode);
+    } else {
+      camNode = new Node(nodeName);
+      camNode.setShadowMode(ShadowMode.Off);
+      parent.attachChild(camNode);
+      Box body = new Box(0.022f, 0.012f, 0.008f);
+      Geometry geo = new Geometry(nodeName + ".body", body);
+      Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      mat.setColor("Color", ColorRGBA.Cyan);
+      geo.setMaterial(mat);
+      geo.setShadowMode(ShadowMode.Off);
+      camNode.attachChild(geo);
+    }
+    Vector3f local = new Vector3f(cfg.chestCameraX, cfg.chestCameraY, cfg.chestCameraZ);
+    if (cfg.chestCameraCenterOnTorso) {
+      Node boundSrc = parent != rootNode ? parent : findRobotRoot(cfg);
+      if (boundSrc != null) {
+        Vector3f center = cachedTorsoCenter(boundSrc);
+        if (boundSrc == parent) {
+          local.addLocal(center);
+        } else {
+          local = boundSrc.localToWorld(center, null).addLocal(local);
+        }
+      }
+    }
+    camNode.setLocalTranslation(local);
+    camNode.setLocalRotation(new Quaternion().fromAngles(cfg.chestCameraPitchDeg * FastMath.DEG_TO_RAD,
+        cfg.chestCameraYawDeg * FastMath.DEG_TO_RAD, cfg.chestCameraRollDeg * FastMath.DEG_TO_RAD));
+    chestDepthCameraNode = camNode;
+    syncDepthOverlayPose();
+    String parentName = parent.getName();
+    if (parentName != null && !parentName.equals(lastChestParentName)) {
+      lastChestParentName = parentName;
+      Vector3f world = camNode.getWorldTranslation();
+      log.info("Chest depth camera '{}' parented to {} at local {} world {}", nodeName, parentName, local, world);
+    }
+  }
+
+  private void ensureDepthOverlayNode() {
+    if (rootNode == null) {
+      return;
+    }
+    if (depthOverlayNode == null) {
+      Spatial existing = find("_mrl.depthOverlay");
+      if (existing instanceof Node) {
+        depthOverlayNode = (Node) existing;
+      } else {
+        depthOverlayNode = new Node("_mrl.depthOverlay");
+        rootNode.attachChild(depthOverlayNode);
+      }
+      depthOverlayNode.setShadowMode(ShadowMode.Off);
+    }
+    boolean hasFrustum = false;
+    boolean hasMeter = false;
+    for (Spatial child : depthOverlayNode.getChildren()) {
+      String n = child.getName();
+      if (n != null && n.endsWith(".frustum")) {
+        hasFrustum = true;
+      }
+      if ("_mrl.depthMeter".equals(n)) {
+        hasMeter = true;
+      }
+    }
+    if (!hasFrustum) {
+      attachDepthFrustum(depthOverlayNode);
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg == null || cfg.depthMeterStick) {
+      if (!hasMeter) {
+        attachDepthMeterStick(depthOverlayNode);
+      }
+    } else if (hasMeter) {
+      Spatial meter = depthOverlayNode.getChild("_mrl.depthMeter");
+      if (meter != null) {
+        meter.removeFromParent();
+      }
+    }
+    if (pointCloudGeometry != null && pointCloudGeometry.getParent() != depthOverlayNode) {
+      depthOverlayNode.attachChild(pointCloudGeometry);
+    }
+    if (depthMeshGeometry != null && depthMeshGeometry.getParent() != depthOverlayNode) {
+      depthOverlayNode.attachChild(depthMeshGeometry);
+    }
+  }
+
+  private void syncDepthOverlayPose() {
+    if (depthOverlayNode == null || chestDepthCameraNode == null) {
+      return;
+    }
+    depthOverlayNode.setLocalTranslation(chestDepthCameraNode.getWorldTranslation());
+    depthOverlayNode.setLocalRotation(chestDepthCameraNode.getWorldRotation());
+    depthOverlayNode.setLocalScale(1f);
+    lastChestCameraWorld.set(chestDepthCameraNode.getWorldTranslation());
+  }
+
+  /**
+   * Old sessions parented the voxel mesh and frustum under VinMoov — pull them
+   * off so Lighting/PBR on the character is not batched with this overlay.
+   */
+  private void detachOverlayGeometryFromCharacter(Node camNode) {
+    if (camNode == null) {
+      return;
+    }
+    List<Spatial> move = new ArrayList<>();
+    for (Spatial child : camNode.getChildren()) {
+      String n = child.getName() == null ? "" : child.getName();
+      if (n.contains("depthCloud") || n.contains("depthRgbMesh") || n.endsWith(".frustum") || n.contains("depthMeter")) {
+        move.add(child);
+      }
+    }
+    for (Spatial child : move) {
+      child.removeFromParent();
+      if (depthOverlayNode != null) {
+        depthOverlayNode.attachChild(child);
+      }
+    }
+  }
+
+  private Vector3f cachedTorsoCenter(Node boundSrc) {
+    String key = boundSrc.getName();
+    if (cachedTorsoCenterLocal != null && key != null && key.equals(cachedTorsoCenterParent)) {
+      return cachedTorsoCenterLocal;
+    }
+    cachedTorsoCenterLocal = torsoCenterInParent(boundSrc);
+    cachedTorsoCenterParent = key;
+    return cachedTorsoCenterLocal;
+  }
+
+  private Node resolveChestCameraParent(JMonkeyEngineConfig cfg) {
+    String robot = inferRobotNameFromNodeConfig(cfg);
+    if (robot == null || robot.isEmpty()) {
+      robot = "i01";
+    }
+    LinkedHashSet<String> names = new LinkedHashSet<>();
+    if (cfg.chestCameraParent != null && !cfg.chestCameraParent.isEmpty()) {
+      names.add(cfg.chestCameraParent);
+    }
+    names.add(robot + ".torso.topStom");
+    names.add(robot + ".torso.midStom");
+    names.add(robot + ".torso.lowStom");
+    names.add(robot);
+    for (String name : names) {
+      Spatial found = find(name);
+      if (found instanceof Node) {
+        return (Node) found;
+      }
+      if (found != null && found.getParent() != null) {
+        return found.getParent();
+      }
+    }
+    log.warn("Chest depth camera parent not found (tried {}) — attaching to root", names);
+    return rootNode;
+  }
+
+  private Node findRobotRoot(JMonkeyEngineConfig cfg) {
+    String robot = inferRobotNameFromNodeConfig(cfg);
+    if (robot == null || robot.isEmpty()) {
+      robot = "i01";
+    }
+    Spatial s = find(robot);
+    return s instanceof Node ? (Node) s : null;
+  }
+
+  /**
+   * Visual center of the torso mesh in {@code parent}'s local frame. Skips
+   * head/arm/hand subtrees so a topStom node that also owns the limbs does not
+   * pull the camera up into the neck.
+   */
+  private Vector3f torsoCenterInParent(Node parent) {
+    BoundingBox acc = null;
+    ArrayList<Geometry> meshes = new ArrayList<>();
+    collectTorsoGeometries(parent, meshes, true);
+    for (Geometry g : meshes) {
+      BoundingVolume bv = g.getWorldBound();
+      if (bv instanceof BoundingBox) {
+        if (acc == null) {
+          acc = new BoundingBox((BoundingBox) bv);
+        } else {
+          acc.mergeLocal(bv);
+        }
+      }
+    }
+    if (acc == null && parent.getWorldBound() instanceof BoundingBox) {
+      acc = new BoundingBox((BoundingBox) parent.getWorldBound());
+    }
+    if (acc == null) {
+      return Vector3f.ZERO.clone();
+    }
+    return parent.worldToLocal(acc.getCenter(), null);
+  }
+
+  private void collectTorsoGeometries(Spatial spatial, List<Geometry> out, boolean root) {
+    if (spatial == null) {
+      return;
+    }
+    String name = spatial.getName() == null ? "" : spatial.getName().toLowerCase();
+    if (!root && (name.contains("head") || name.contains("arm") || name.contains("hand") || name.contains("eye")
+        || name.contains("depthcamera") || name.contains("depthcloud") || name.contains("depthrgb"))) {
+      return;
+    }
+    if (spatial instanceof Geometry) {
+      out.add((Geometry) spatial);
+      return;
+    }
+    if (spatial instanceof Node) {
+      for (Spatial child : ((Node) spatial).getChildren()) {
+        collectTorsoGeometries(child, out, false);
+      }
+    }
+  }
+
+  private void attachDepthFrustum(Node camNode) {
+    float z = 0.55f;
+    float hw = 0.28f;
+    float hh = 0.21f;
+    Vector3f o = Vector3f.ZERO;
+    Vector3f[] c = { new Vector3f(-hw, -hh, z), new Vector3f(hw, -hh, z), new Vector3f(hw, hh, z),
+        new Vector3f(-hw, hh, z) };
+    Vector3f[] verts = new Vector3f[16];
+    int i = 0;
+    for (int k = 0; k < 4; k++) {
+      verts[i++] = o;
+      verts[i++] = c[k];
+    }
+    for (int k = 0; k < 4; k++) {
+      verts[i++] = c[k];
+      verts[i++] = c[(k + 1) % 4];
+    }
+    Mesh mesh = new Mesh();
+    mesh.setMode(Mesh.Mode.Lines);
+    mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(verts));
+    mesh.updateBound();
+    Geometry g = new Geometry(camNode.getName() + ".frustum", mesh);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", new ColorRGBA(0.2f, 0.9f, 1f, 1f));
+    g.setMaterial(mat);
+    camNode.attachChild(g);
+  }
+
+  /**
+   * 1 m along camera +Z with 10 cm ticks. Same world meters as IK — if a
+   * known object disagrees with this stick, use {@link #calibrateDepthScale}.
+   */
+  private void attachDepthMeterStick(Node overlay) {
+    Vector3f[] verts = new Vector3f[22];
+    int i = 0;
+    verts[i++] = Vector3f.ZERO;
+    verts[i++] = new Vector3f(0f, 0f, 1f);
+    for (int t = 1; t <= 10; t++) {
+      float z = t * 0.1f;
+      float tick = t == 10 ? 0.04f : 0.02f;
+      verts[i++] = new Vector3f(-tick, 0f, z);
+      verts[i++] = new Vector3f(tick, 0f, z);
+    }
+    Mesh mesh = new Mesh();
+    mesh.setMode(Mesh.Mode.Lines);
+    mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(verts));
+    mesh.updateBound();
+    Geometry g = new Geometry("_mrl.depthMeter", mesh);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", new ColorRGBA(1f, 0.85f, 0.15f, 1f));
+    g.setMaterial(mat);
+    overlay.attachChild(g);
+  }
+
+  protected void updateDepthHudOnRenderThread(DepthHud hud) {
+    int w = hud.width;
+    int h = hud.height;
+    if (w <= 0 || h <= 0 || hud.rgb == null || hud.rgb.length < w * h * 3) {
+      return;
+    }
+    ByteBuffer buf = BufferUtils.createByteBuffer(w * h * 3);
+    for (int y = 0; y < h; y++) {
+      int src = (h - 1 - y) * w * 3;
+      buf.put(hud.rgb, src, w * 3);
+    }
+    buf.flip();
+    Image image = new Image(Image.Format.RGB8, w, h, buf, ColorSpace.sRGB);
+    if (depthHudTexture == null || depthHudGeometry == null) {
+      depthHudTexture = new Texture2D(image);
+      depthHudTexture.setMagFilter(Texture.MagFilter.Nearest);
+      depthHudTexture.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+      depthHudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      depthHudMat.setTexture("ColorMap", depthHudTexture);
+      Quad q = new Quad(320, 240);
+      depthHudGeometry = new Geometry("depthHud", q);
+      depthHudGeometry.setMaterial(depthHudMat);
+      depthHudGeometry.setLocalTranslation(16, 16, 0);
+      guiNode.attachChild(depthHudGeometry);
+    } else {
+      depthHudTexture.setImage(image);
+    }
+  }
+
   public void onRegistered(Registration registration) {
     try {
-      // new service - see if we can virtualize it
       log.info("{}.onRegistered({})", getName(), registration);
       if (registration.getName().contentEquals("i01.head.jaw")) {
         log.info("here");
@@ -1716,6 +2801,669 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       guiText.put(key, hud);
       app.getGuiNode().attachChild(hud.getNode());
     }
+  }
+
+  public void setShowHandPositions(boolean show) {
+    this.showHandPositions = show;
+    if (!show) {
+      removeHandPositionOverlays();
+    }
+  }
+
+  public boolean getShowHandPositions() {
+    return showHandPositions;
+  }
+
+  public void setHandPositionRobot(String robotName) {
+    this.handPositionRobot = robotName;
+  }
+
+  public String getHandPositionRobot() {
+    return handPositionRobot;
+  }
+
+  public void setHandMarkerRadius(float radius) {
+    this.handMarkerRadius = radius;
+    // recreate markers next frame with new size
+    detachHandMarker(leftHandMarker);
+    detachHandMarker(rightHandMarker);
+    leftHandMarker = null;
+    rightHandMarker = null;
+  }
+
+  /**
+   * Upper-left HUD + colored dots at InMoov left/right hand world positions.
+   * Blue = left, red = right. Called each frame from {@link #simpleUpdate(float)}.
+   * Positioned from the GUI camera so a resize or DPI scale cannot drop it
+   * onto the OAK-D heatmap in the lower-left.
+   */
+  protected void updateHandPositionHud() {
+    if (!showHandPositions || app == null || rootNode == null) {
+      return;
+    }
+
+    String robot = handPositionRobot;
+    if (robot == null || robot.isEmpty()) {
+      robot = inferRobotNameFromNodeConfig((JMonkeyEngineConfig) config);
+      if (robot == null) {
+        robot = "i01";
+      }
+    }
+
+    Spatial leftHand = findHandSpatial(robot, "left");
+    Spatial rightHand = findHandSpatial(robot, "right");
+    Vector3f left = leftHand != null ? leftHand.getWorldTranslation() : null;
+    Vector3f right = rightHand != null ? rightHand.getWorldTranslation() : null;
+    Vector3f ikLeft = ikLeftHandWorld;
+
+    if (guiNode != null) {
+      String err = formatHudError(left, ikLeft);
+      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s\nL goal: %s%s%s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeftHandCurrent),
+          formatHudVec(ikLeftHandGoal), err != null ? "\nL err:  " + err : "", depthHudLine(), reachHudLine());
+      ensureHandPositionHudText();
+      if (handPositionHudText != null) {
+        handPositionHudText.setText(text);
+        float guiH = guiHudHeight();
+        // BitmapText origin is the top-left of the block; GUI Y=0 is the bottom.
+        handPositionHudText.setLocalTranslation(16f, guiH - 12f, 1f);
+      }
+    }
+
+    leftHandMarker = ensureHandMarker(leftHandMarker, LEFT_HAND_MARKER, ColorRGBA.Blue);
+    rightHandMarker = ensureHandMarker(rightHandMarker, RIGHT_HAND_MARKER, ColorRGBA.Red);
+    ikLeftHandMarker = ensureHandMarker(ikLeftHandMarker, IK_LEFT_HAND_MARKER, ColorRGBA.Green);
+    syncHandMarker(leftHandMarker, left);
+    syncHandMarker(rightHandMarker, right);
+    syncHandMarker(ikLeftHandMarker, ikLeft);
+  }
+
+  private void ensureHandPositionHudText() {
+    // Drop the old HudText path (it was anchored from the bottom / AppSettings
+    // height and sat under the depth heatmap).
+    HudText legacy = guiText.remove(HAND_POSITION_HUD_KEY);
+    if (legacy != null && legacy.getNode() != null && legacy.getNode().getParent() != null) {
+      legacy.getNode().removeFromParent();
+    }
+    if (handPositionHudText != null && handPositionHudText.getParent() != null) {
+      return;
+    }
+    if (app == null || guiNode == null) {
+      return;
+    }
+    BitmapFont font = app.loadGuiFont();
+    handPositionHudText = new BitmapText(font, false);
+    float size = fontSize > 0 ? fontSize : font.getCharSet().getRenderedSize();
+    handPositionHudText.setSize(size);
+    handPositionHudText.setColor(ColorRGBA.Yellow);
+    handPositionHudText.setQueueBucket(Bucket.Gui);
+    handPositionHudText.setCullHint(CullHint.Never);
+    guiNode.attachChild(handPositionHudText);
+    log.info("IK HUD attached at upper-left of GUI viewport ({} px tall)", guiHudHeight());
+  }
+
+  /**
+   * Live GUI framebuffer height. {@link AppSettings#getHeight()} stays at the
+   * launch resolution when the window is resized.
+   */
+  private float guiHudHeight() {
+    if (app != null && app.getGuiViewPort() != null && app.getGuiViewPort().getCamera() != null) {
+      return app.getGuiViewPort().getCamera().getHeight();
+    }
+    if (cam != null) {
+      return cam.getHeight();
+    }
+    return settings != null ? settings.getHeight() : height;
+  }
+
+  private void removeHandPositionOverlays() {
+    HudText hud = guiText.remove(HAND_POSITION_HUD_KEY);
+    if (hud != null && hud.getNode() != null && hud.getNode().getParent() != null) {
+      hud.getNode().removeFromParent();
+    }
+    if (handPositionHudText != null && handPositionHudText.getParent() != null) {
+      handPositionHudText.removeFromParent();
+    }
+    handPositionHudText = null;
+    detachHandMarker(leftHandMarker);
+    detachHandMarker(rightHandMarker);
+    detachHandMarker(ikLeftHandMarker);
+    leftHandMarker = null;
+    rightHandMarker = null;
+    ikLeftHandMarker = null;
+  }
+
+  private Geometry ensureHandMarker(Geometry existing, String name, ColorRGBA color) {
+    if (existing != null && existing.getParent() != null) {
+      return existing;
+    }
+    if (assetManager == null || rootNode == null) {
+      return existing;
+    }
+    Sphere sphere = new Sphere(12, 12, handMarkerRadius);
+    Geometry marker = new Geometry(name, sphere);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", color);
+    // Keep dots readable when briefly occluded by fingers/geometry
+    mat.getAdditionalRenderState().setDepthTest(true);
+    mat.getAdditionalRenderState().setDepthWrite(true);
+    marker.setMaterial(mat);
+    marker.setCullHint(CullHint.Never);
+    rootNode.attachChild(marker);
+    return marker;
+  }
+
+  private void syncHandMarker(Geometry marker, Vector3f worldPos) {
+    if (marker == null) {
+      return;
+    }
+    if (worldPos == null) {
+      marker.setCullHint(CullHint.Always);
+      return;
+    }
+    marker.setCullHint(CullHint.Never);
+    marker.setLocalTranslation(worldPos);
+  }
+
+  private void detachHandMarker(Geometry marker) {
+    if (marker != null && marker.getParent() != null) {
+      marker.removeFromParent();
+    }
+  }
+
+  private Spatial findHandSpatial(String robot, String side) {
+    // Prefer wrist (configured InMoov hand root); fall back to common aliases
+    String[] candidates = new String[] {
+        robot + "." + side + "Hand.wrist",
+        robot + "." + side + "Hand",
+        robot + "." + side + "Arm.hand",
+        side + "Hand.wrist",
+        side + "Hand"
+    };
+    for (String name : candidates) {
+      Spatial spatial = find(name);
+      if (spatial != null) {
+        return spatial;
+      }
+    }
+    return null;
+  }
+
+  private static String formatHudVec(Vector3f v) {
+    if (v == null) {
+      return "n/a";
+    }
+    return String.format("%.3f, %.3f, %.3f", v.x, v.y, v.z);
+  }
+
+  private String depthHudLine() {
+    float s = getDepthCloudScale();
+    if (lastClickDistanceM > 1e-4f) {
+      return String.format("\ndepth ×%.3f  click %.3f m", s, lastClickDistanceM);
+    }
+    return String.format("\ndepth ×%.3f  click —", s);
+  }
+
+  private String reachHudLine() {
+    if (config == null || !config.reachCloud || lastReachCloud == null || lastReachCloud.size() == 0) {
+      return "";
+    }
+    return String.format("\nL reach: %d pts", lastReachCloud.size());
+  }
+
+  private static String formatHudError(Vector3f sim, Vector3f ik) {
+    if (sim == null || ik == null) {
+      return null;
+    }
+    return String.format("%.3f m", sim.distance(ik));
+  }
+
+  /**
+   * Thread-safe world translation of a named spatial (meters, JME Y-up).
+   *
+   * @param name
+   *          node name, e.g. {@code i01.leftArm.omoplate}
+   * @return world position, or null if missing / JME not started
+   */
+  public Point3df getWorldTranslation(String name) {
+    if (app == null) {
+      log.warn("getWorldTranslation({}) — JME app not started", name);
+      return null;
+    }
+    try {
+      Future<Point3df> future = app.enqueue(() -> {
+        Spatial spatial = find(name);
+        if (spatial == null) {
+          return null;
+        }
+        Vector3f v = spatial.getWorldTranslation();
+        return new Point3df(v.x, v.y, v.z);
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldTranslation({}) failed", name, e);
+      return null;
+    }
+  }
+
+  /**
+   * Thread-safe 4x4 world transform of a named spatial (meters, JME Y-up). Used
+   * as the InverseKinematics3D DH base so the arm chain shares the JME root
+   * origin.
+   */
+  public Matrix getWorldMatrix(String name) {
+    if (app == null) {
+      log.warn("getWorldMatrix({}) — JME app not started", name);
+      return null;
+    }
+    try {
+      Future<Matrix> future = app.enqueue(() -> {
+        Spatial spatial = find(name);
+        if (spatial == null) {
+          return null;
+        }
+        com.jme3.math.Vector3f t = spatial.getWorldTranslation();
+        com.jme3.math.Matrix3f r = spatial.getWorldRotation().toRotationMatrix();
+        Matrix m = Matrix.identity(4);
+        for (int row = 0; row < 3; row++) {
+          for (int col = 0; col < 3; col++) {
+            m.elements[row][col] = r.get(row, col);
+          }
+        }
+        m.elements[0][3] = t.x;
+        m.elements[1][3] = t.y;
+        m.elements[2][3] = t.z;
+        return m;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldMatrix({}) failed", name, e);
+      return null;
+    }
+  }
+
+  /**
+   * Fired after VinMoov is bound and node mappers are applied so InverseKinematics3D
+   * can sample the omoplate world pose.
+   */
+  public String publishSceneReady(String name) {
+    return name;
+  }
+
+  /**
+   * Thread-safe snapshot of several spatial world translations (meters, JME
+   * Y-up). Missing names are omitted from the result.
+   */
+  public Map<String, Point3df> getWorldTranslations(String... names) {
+    Map<String, Point3df> empty = new LinkedHashMap<>();
+    if (app == null || names == null) {
+      log.warn("getWorldTranslations — JME app not started or no names");
+      return empty;
+    }
+    try {
+      Future<Map<String, Point3df>> future = app.enqueue(() -> {
+        Map<String, Point3df> out = new LinkedHashMap<>();
+        for (String name : names) {
+          if (name == null) {
+            continue;
+          }
+          Spatial spatial = find(name);
+          if (spatial == null) {
+            continue;
+          }
+          Vector3f v = spatial.getWorldTranslation();
+          out.put(name, new Point3df(v.x, v.y, v.z));
+        }
+        return out;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getWorldTranslations failed", e);
+      return empty;
+    }
+  }
+
+  /**
+   * The named nodes' rotation axes, axis origins, current joint angles and
+   * servo&rarr;mesh maps, sampled together on the render thread.
+   *
+   * <p>
+   * This is the measurement a kinematic solver needs: it fully describes each
+   * revolute joint of the rig, so a chain built from it reproduces the simulated
+   * arm for <em>any</em> joint angles. Missing nodes are skipped, so check the
+   * size of the result.
+   * </p>
+   *
+   * @param names
+   *          node names ordered parent to child, e.g.
+   *          {@code i01.leftArm.omoplate ... i01.leftArm.bicep}
+   */
+  public List<JointFrame> getJointFrames(String... names) {
+    List<JointFrame> frames = new ArrayList<>();
+    if (app == null || names == null) {
+      log.warn("getJointFrames — JME app not started or no names");
+      return frames;
+    }
+    try {
+      Future<List<JointFrame>> future = app.enqueue(() -> {
+        List<JointFrame> out = new ArrayList<>();
+        for (String name : names) {
+          if (name == null) {
+            continue;
+          }
+          UserData data = getUserData(name);
+          double[] axis = util.getWorldJointAxis(name);
+          if (data == null || axis == null) {
+            log.warn("getJointFrames - no node / rotation axis for {}", name);
+            continue;
+          }
+          JointFrame frame = new JointFrame(name, new Point(axis[0], axis[1], axis[2]), new Point(axis[3], axis[4], axis[5]));
+          frame.rotationMask = data.rotationMask;
+          frame.angleDeg = data.getCurrentAngleDeg();
+          if (data.mapper != null) {
+            frame.withServoMap(data.mapper.getMinX(), data.mapper.getMaxX(), data.mapper.getMinY(), data.mapper.getMaxY());
+          }
+          out.add(frame);
+        }
+        return out;
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getJointFrames failed", e);
+      return frames;
+    }
+  }
+
+  /**
+   * {@link #getJointFrames(String...)} for one InMoov arm, in chain order.
+   */
+  public List<JointFrame> getArmJointFrames(String robot, String side) {
+    String prefix = robot + "." + side + "Arm.";
+    return getJointFrames(prefix + "omoplate", prefix + "shoulder", prefix + "rotate", prefix + "bicep");
+  }
+
+  /**
+   * Omoplate, shoulder, rotate, bicep, and wrist world translations for one
+   * InMoov arm (meters).
+   */
+  public Map<String, Point3df> getArmChainWorldTranslations(String robot, String side) {
+    Map<String, Point3df> chain = getWorldTranslations(robot + "." + side + "Arm.omoplate", robot + "." + side + "Arm.shoulder", robot + "." + side + "Arm.rotate",
+        robot + "." + side + "Arm.bicep", robot + "." + side + "Hand.wrist");
+    if (!chain.containsKey(robot + "." + side + "Hand.wrist")) {
+      Point3df hand = getHandWorldTranslation(robot, side);
+      if (hand != null) {
+        chain.put(robot + "." + side + "Hand.wrist", hand);
+      }
+    }
+    return chain;
+  }
+
+  /**
+   * Thread-safe world translation of an InMoov hand / wrist node.
+   */
+  public Point3df getHandWorldTranslation(String robot, String side) {
+    if (app == null) {
+      log.warn("getHandWorldTranslation({}, {}) — JME app not started", robot, side);
+      return null;
+    }
+    try {
+      Future<Point3df> future = app.enqueue(() -> {
+        Spatial spatial = findHandSpatial(robot, side);
+        if (spatial == null) {
+          return null;
+        }
+        Vector3f v = spatial.getWorldTranslation();
+        return new Point3df(v.x, v.y, v.z);
+      });
+      return future.get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getHandWorldTranslation({}, {}) failed", robot, side, e);
+      return null;
+    }
+  }
+
+  /**
+   * InverseKinematics3D / Fabrik {@code publishIkGoal} callback. Green marker is
+   * the Cartesian goal the solver is walking toward.
+   */
+  public void onIkGoal(Point position) {
+    if (position == null) {
+      ikLeftHandGoal = null;
+    } else {
+      ikLeftHandGoal = new Vector3f((float) position.getX(), (float) position.getY(), (float) position.getZ());
+    }
+    refreshIkMarker();
+  }
+
+  /**
+   * InverseKinematics3D {@code publishWorldPosition} callback. Updates the IK
+   * palm HUD; green stays on the goal when one is active.
+   */
+  public void onWorldPosition(Point position) {
+    if (position == null) {
+      ikLeftHandCurrent = null;
+    } else {
+      ikLeftHandCurrent = new Vector3f((float) position.getX(), (float) position.getY(), (float) position.getZ());
+    }
+    refreshIkMarker();
+  }
+
+  /**
+   * Show a green marker + HUD line at the IK goal (or current palm if no goal).
+   * Pass nulls to hide.
+   */
+  public void setIkHandWorldPosition(Double x, Double y, Double z) {
+    if (x == null || y == null || z == null) {
+      ikLeftHandCurrent = null;
+      ikLeftHandGoal = null;
+      refreshIkMarker();
+      return;
+    }
+    ikLeftHandCurrent = new Vector3f(x.floatValue(), y.floatValue(), z.floatValue());
+    refreshIkMarker();
+  }
+
+  private void refreshIkMarker() {
+    ikLeftHandWorld = ikLeftHandGoal != null ? ikLeftHandGoal : ikLeftHandCurrent;
+  }
+
+  /**
+   * Show or hide the cyan left-hand reach cloud. When turning on with no cloud
+   * yet, sample VinMoov's left arm (omoplate → wrist) via forward kinematics.
+   */
+  public boolean setReachCloud(boolean show) {
+    if (config == null) {
+      return false;
+    }
+    if (!show) {
+      config.reachCloud = false;
+      setReachCloudVisible(false);
+      broadcastState();
+      return false;
+    }
+    PointCloud sampled = sampleLeftHandReachFromVinMoov();
+    if (sampled != null && sampled.size() > 0) {
+      lastReachCloud = sampled;
+    }
+    if (lastReachCloud == null || lastReachCloud.size() == 0) {
+      error("Left-hand reach cloud needs VinMoov loaded (or a FABRIK chain)");
+      config.reachCloud = false;
+      broadcastState();
+      return false;
+    }
+    config.reachCloud = true;
+    onReachCloud(lastReachCloud);
+    broadcastState();
+    return true;
+  }
+
+  public boolean getReachCloud() {
+    return config != null && config.reachCloud;
+  }
+
+  /**
+   * FABRIK {@code publishReachCloud} — world-meter palm samples, Y-up.
+   */
+  public void onReachCloud(PointCloud pc) {
+    lastReachCloud = pc;
+    reachCloudPointCount = pc == null ? 0 : pc.size();
+    if (pc == null || pc.size() == 0) {
+      if (config != null) {
+        config.reachCloud = false;
+      }
+      setReachCloudVisible(false);
+      return;
+    }
+    if (config != null) {
+      config.reachCloud = true;
+    }
+    if (app == null || assetManager == null) {
+      return;
+    }
+    app.enqueue(() -> {
+      updateReachCloudOnRenderThread(pc);
+      return null;
+    });
+    broadcastState();
+  }
+
+  public void setReachCloudVisible(boolean show) {
+    if (config != null) {
+      config.reachCloud = show;
+    }
+    if (app == null) {
+      return;
+    }
+    app.enqueue(() -> {
+      if (reachCloudGeometry != null) {
+        reachCloudGeometry.setCullHint(show ? CullHint.Never : CullHint.Always);
+      }
+      return null;
+    });
+  }
+
+  /**
+   * Measure the live VinMoov left arm and sample its palm workspace. Safe from
+   * the service thread (joint frames are copied off the render thread).
+   */
+  public PointCloud sampleLeftHandReachFromVinMoov() {
+    String robot = handPositionRobot;
+    if (robot == null || robot.isEmpty()) {
+      robot = inferRobotNameFromNodeConfig(config);
+      if (robot == null) {
+        robot = "i01";
+      }
+    }
+    JMonkeyEngineConfig cfg = config;
+    int steps = cfg != null && cfg.reachCloudSteps > 1 ? cfg.reachCloudSteps : ReachCloud.DEFAULT_STEPS;
+    float voxel = cfg != null && cfg.reachCloudVoxelM > 0f ? cfg.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
+    List<JointFrame> frames = getArmJointFrames(robot, "left");
+    if (frames.size() < 4) {
+      log.warn("sampleLeftHandReachFromVinMoov — measured {} of 4 left-arm joints", frames.size());
+      return null;
+    }
+    Point3df wrist = getHandWorldTranslation(robot, "left");
+    if (wrist == null) {
+      log.warn("sampleLeftHandReachFromVinMoov — no left wrist node");
+      return null;
+    }
+    PointCloud cloud = ReachCloud.sample(frames, new Point(wrist.x, wrist.y, wrist.z), steps, voxel);
+    reachCloudPointCount = cloud.size();
+    log.info("Left-hand reach cloud {} voxels from VinMoov {} ({} joint steps, {} m cells)", cloud.size(), robot, steps, voxel);
+    return cloud;
+  }
+
+  protected void updateReachCloudOnRenderThread(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    int n = points == null ? 0 : points.length;
+    if (reachCloudGeometry == null || reachCloudBuffer == null || n != reachCloudVertexCount) {
+      initReachCloud(pc);
+      return;
+    }
+    writeReachCloudBuffers(pc);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, reachCloudBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, reachCloudColorBuffer);
+    reachCloudMesh.updateBound();
+    reachCloudMesh.updateCounts();
+    reachCloudGeometry.setCullHint(CullHint.Never);
+  }
+
+  private void initReachCloud(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    int n = points == null ? 0 : points.length;
+    reachCloudVertexCount = n;
+    int verts = Math.max(1, n) * 8;
+    reachCloudBuffer = BufferUtils.createFloatBuffer(verts * 3);
+    reachCloudColorBuffer = BufferUtils.createFloatBuffer(verts * 4);
+    writeReachCloudBuffers(pc);
+
+    reachCloudMesh = new Mesh();
+    reachCloudMesh.setMode(Mesh.Mode.Triangles);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, reachCloudBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, reachCloudColorBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(DepthCloudJme.cubeIndices(Math.max(1, n))));
+    reachCloudMesh.updateBound();
+    reachCloudMesh.updateCounts();
+
+    if (reachCloudGeometry != null) {
+      reachCloudGeometry.removeFromParent();
+    }
+    reachCloudGeometry = new Geometry(DepthPick.LEFT_HAND_REACH, reachCloudMesh);
+    reachCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    reachCloudMat.setBoolean("VertexColor", true);
+    reachCloudMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Alpha);
+    reachCloudMat.getAdditionalRenderState().setDepthWrite(false);
+    reachCloudMat.getAdditionalRenderState().setDepthTest(true);
+    reachCloudGeometry.setMaterial(reachCloudMat);
+    reachCloudGeometry.setShadowMode(ShadowMode.Off);
+    reachCloudGeometry.setQueueBucket(Bucket.Transparent);
+    reachCloudGeometry.setCullHint(CullHint.Never);
+    if (rootNode != null) {
+      rootNode.attachChild(reachCloudGeometry);
+    }
+  }
+
+  private void writeReachCloudBuffers(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    float[] colors = pc == null ? null : pc.getColors();
+    int n = points == null ? 0 : points.length;
+    JMonkeyEngineConfig cfg = config;
+    float voxel = cfg != null ? cfg.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
+    float half = Math.max(0.006f, voxel * 0.45f);
+
+    reachCloudBuffer.clear();
+    reachCloudColorBuffer.clear();
+    float[] corners = new float[24];
+    for (int i = 0; i < n; i++) {
+      Point3df p = points[i];
+      DepthCloudJme.worldVoxelCorners(p.x, p.y, p.z, half, corners);
+      for (int c = 0; c < 24; c++) {
+        reachCloudBuffer.put(corners[c]);
+      }
+      float r = ReachCloud.COLOR[0];
+      float g = ReachCloud.COLOR[1];
+      float b = ReachCloud.COLOR[2];
+      float a = ReachCloud.COLOR[3];
+      if (colors != null && colors.length >= (i + 1) * 4) {
+        r = colors[i * 4];
+        g = colors[i * 4 + 1];
+        b = colors[i * 4 + 2];
+        a = colors[i * 4 + 3];
+      }
+      for (int c = 0; c < 8; c++) {
+        reachCloudColorBuffer.put(r).put(g).put(b).put(a);
+      }
+    }
+    int pad = Math.max(1, n);
+    for (int i = n; i < pad; i++) {
+      for (int c = 0; c < 24; c++) {
+        reachCloudBuffer.put(0f);
+      }
+      for (int c = 0; c < 8; c++) {
+        reachCloudColorBuffer.put(0f).put(0f).put(0f).put(0f);
+      }
+    }
+    reachCloudBuffer.flip();
+    reachCloudColorBuffer.flip();
   }
 
   public void rename(String name, String newName) {
@@ -2156,11 +3904,24 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     new File(getDataDir()).mkdirs();
     new File(getResourceDir()).mkdirs();
 
+    // Refresh paths at app init — field initializers may have run before Runtime
+    // config was applied (Eclipse often uses src/main/resources/resource).
+    refreshAssetPaths();
+
     assetManager.registerLocator("./", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(modelsDir, FileLocator.class);
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
+    // Also register fallback model dirs (extracted /resource with VinMoov5.j3o)
+    for (String modelPath : getModelsSearchPaths()) {
+      assetManager.registerLocator(modelPath, FileLocator.class);
+      File parentAssets = new File(modelPath).getParentFile();
+      if (parentAssets != null) {
+        assetManager.registerLocator(parentAssets.getPath(), FileLocator.class);
+      }
+      log.info("Registered JME model locator {}", modelPath);
+    }
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
     /**
@@ -2184,11 +3945,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
      * </pre>
      */
 
-    // wheelmouse zoom (check)
-    // alt+ctrl+lmb - zoom <br>
-    // alt+lmb - rotate<br>
-    // alt+shft+lmb - pan
-    // rotate around selection -
+    // Left drag     orbit around selection / look-at
+    // Right drag    pan
+    // Shift+drag    pan
+    // Wheel         zoom toward look-at
+    // Left click    select (if the pointer did not drag); OAK-D mesh → FABRIK
     // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
     // wrap text of breadcrumbs
     // draggable - resize for menu - what you set is how it stays
@@ -2247,6 +4008,62 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     inputManager.addMapping("export", new KeyTrigger(KeyInput.KEY_E));
     inputManager.addListener(this, "export");
 
+    // Absolute cursor motion — MouseAxisTrigger X/Y is silent with a visible cursor.
+    inputManager.addRawInputListener(new RawInputListener() {
+      @Override
+      public void beginInput() {
+      }
+
+      @Override
+      public void endInput() {
+      }
+
+      @Override
+      public void onJoyAxisEvent(JoyAxisEvent evt) {
+      }
+
+      @Override
+      public void onJoyButtonEvent(JoyButtonEvent evt) {
+      }
+
+      @Override
+      public void onKeyEvent(KeyInputEvent evt) {
+      }
+
+      @Override
+      public void onMouseButtonEvent(MouseButtonEvent evt) {
+        boolean pressed = evt.isPressed();
+        int button = evt.getButtonIndex();
+        if (button == MouseInput.BUTTON_LEFT) {
+          mouseLeft = pressed;
+          if (pressed) {
+            viewDragging = false;
+            viewDragAccum = 0f;
+            captureCursor();
+          }
+        } else if (button == MouseInput.BUTTON_MIDDLE) {
+          mouseMiddle = pressed;
+          if (pressed) {
+            captureCursor();
+          }
+        } else if (button == MouseInput.BUTTON_RIGHT) {
+          mouseRightPressed = pressed;
+          if (pressed) {
+            captureCursor();
+          }
+        }
+      }
+
+      @Override
+      public void onMouseMotionEvent(MouseMotionEvent evt) {
+        updateViewDrag();
+      }
+
+      @Override
+      public void onTouchEvent(TouchEvent evt) {
+      }
+    });
+
     viewPort.setBackgroundColor(ColorRGBA.Gray);
 
     DirectionalLight sun = new DirectionalLight();
@@ -2273,6 +4090,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // start the clock on how much time we will take
     startUpdateTs = System.currentTimeMillis();
 
+    updateHandPositionHud();
+
     for (HudText hudTxt : guiText.values()) {
       hudTxt.update();
     }
@@ -2294,13 +4113,19 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
 
+    // After queued lookAt/move so the user's drag wins this frame.
+    updateViewDrag();
+
     deltaMs = System.currentTimeMillis() - startUpdateTs;
     sleepMs = 33 - deltaMs;
 
     if (sleepMs < 0) {
       sleepMs = 0;
     }
-    sleep(sleepMs);
+    // Don't cap the frame rate while dragging — cursor sampling needs to keep up.
+    if (!(mouseLeft || mouseMiddle || mouseRightPressed)) {
+      sleep(sleepMs);
+    }
   }
 
   public SimpleApplication start() {
@@ -2348,22 +4173,28 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       mainThread = new Thread() {
         @Override
         public void run() {
-          app.start();
+          try {
+            app.start();
+          } catch (Throwable t) {
+            log.error("JMonkeyEngine app.start() failed", t);
+          }
         }
       };
-
+      mainThread.setName(String.format("%s-jme", getName()));
+      mainThread.setDaemon(false);
       mainThread.start();
 
       Callable<String> callable = new Callable<String>() {
         @Override
         public String call() throws Exception {
-          System.out.println("Asynchronous Callable");
+          log.info("JMonkeyEngine app initialized");
           return "Callable Result";
         }
       };
       Future<String> future = app.enqueue(callable);
       try {
-        future.get();
+        // Timeout so a failed LWJGL/native init cannot hang Runtime forever
+        future.get(60, java.util.concurrent.TimeUnit.SECONDS);
 
         // default positioning
         moveTo(CAMERA, 0, 3, 6);
@@ -2371,6 +4202,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         rotateOnAxis(CAMERA, "x", -20);
         setFloorGrid(true);
 
+      } catch (java.util.concurrent.TimeoutException e) {
+        error("JMonkeyEngine failed to initialize within 60s — check LWJGL natives / display");
+        log.error("JMonkeyEngine init timeout", e);
       } catch (Exception e) {
         log.warn("future threw", e);
       }
@@ -2642,26 +4476,42 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   @Override
   public void onServoMoveTo(ServoControl servo) {
-    String name = servo.getName();
-    /*
-     * if (!servos.containsKey(name)) { log.error("servoMoveTo({})", servo);
-     * return; }
-     */
+    if (servo == null) {
+      return;
+    }
     Double velocity = servo.getSpeed();
     if (velocity == null || velocity == -1) {
       velocity = defaultServoSpeed;
     }
+    rotateNamedNode(servo.getName(), servo.getTargetPos(), velocity);
+  }
 
-    // String axis = rotationMap.get(name);
+  /**
+   * Callback for {@code Servo.publishServoMoveTo(ServoMove)} — the path used by
+   * {@link Servo#processMove}. Applies target input angle immediately so the
+   * simulator moves even if TimeEncoder is delayed/disabled.
+   */
+  public void onServoMove(ServoMove move) {
+    if (move == null || move.name == null || move.inputPos == null) {
+      return;
+    }
+    rotateNamedNode(move.name, move.inputPos, defaultServoSpeed);
+  }
 
+  private void rotateNamedNode(String name, double degrees, Double velocity) {
     String[] multi = multiMapped.get(name);
     if (multi != null) {
       for (String nodeName : multi) {
-        rotateOnAxis(nodeName, null, servo.getTargetPos(), velocity); // was
-                                                                      // getPos()
+        if (velocity != null) {
+          rotateOnAxis(nodeName, null, degrees, velocity);
+        } else {
+          addMsg("rotateTo", nodeName, null, degrees);
+        }
       }
+    } else if (velocity != null) {
+      rotateOnAxis(name, null, degrees, velocity);
     } else {
-      rotateOnAxis(name, null, servo.getTargetPos(), velocity);
+      addMsg("rotateTo", name, null, degrees);
     }
   }
 
@@ -2700,7 +4550,88 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * Scans and loads the default resource location and loads any models not already loaded
    */
   public void loadDefaultModels() {
-    loadModels(modelsDir);
+    refreshAssetPaths();
+    // Load each model basename at most once across all search directories
+    LinkedHashSet<String> pendingBasenames = new LinkedHashSet<>();
+    for (String dir : getModelsSearchPaths()) {
+      log.info("Scanning for JME models in {}", dir);
+      for (String name : scanForModels(dir)) {
+        String base = modelBasename(name);
+        if (!pendingBasenames.add(base)) {
+          log.info("Skipping duplicate model file {} also found in {}", base, dir);
+        }
+      }
+    }
+
+    int loaded = 0;
+    for (String base : pendingBasenames) {
+      Spatial spatial = loadModel(base);
+      if (spatial != null) {
+        loaded++;
+      }
+    }
+    removeDuplicateVinMoovRoots("i01");
+    if (loaded == 0 && !hasVinMoovOrRobotRoot()) {
+      error("No JME models loaded — place VinMoov5.j3o under resource/JMonkeyEngine/assets/Models/");
+    } else {
+      bindVinMoovRoot("i01");
+      removeDuplicateVinMoovRoots("i01");
+    }
+  }
+
+  /**
+   * Recompute assets/models dirs from the current resource root.
+   */
+  public void refreshAssetPaths() {
+    assetsDir = getResourceDir() + File.separator + "assets";
+    modelsDir = assetsDir + File.separator + "Models";
+  }
+
+  /**
+   * Candidate directories that may contain VinMoov / other models. Dev Eclipse
+   * configs often point resource at {@code src/main/resources/resource} (no large
+   * j3o), while the extracted model lives under {@code resource/...}.
+   */
+  public List<String> getModelsSearchPaths() {
+    List<String> paths = new ArrayList<>();
+    LinkedHashSet<String> unique = new LinkedHashSet<>();
+
+    refreshAssetPaths();
+    unique.add(modelsDir);
+    unique.add(FileIO.gluePaths("resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "JMonkeyEngine/assets/Models"));
+
+    for (String p : unique) {
+      File dir = new File(p);
+      if (dir.isDirectory()) {
+        paths.add(dir.getPath());
+      }
+    }
+    return paths;
+  }
+
+  /**
+   * Rename VinMoov* root spatial to the InMoov service name so peer node keys
+   * like {@code i01.leftArm.bicep} resolve.
+   */
+  public void bindVinMoovRoot(String robotName) {
+    if (robotName == null) {
+      return;
+    }
+    removeDuplicateVinMoovRoots(robotName);
+    if (get(robotName) != null) {
+      log.info("Scene already has root node {}", robotName);
+      return;
+    }
+    for (String candidate : new String[] { "VinMoov5", "VinMoov4", "VinMoov", "VinMoov5.j3o" }) {
+      Spatial spatial = get(candidate);
+      if (spatial != null) {
+        spatial.setName(robotName);
+        log.info("Bound model root {} -> {}", candidate, robotName);
+        return;
+      }
+    }
+    log.warn("Could not find VinMoov root to rename to {} — check loaded model node names", robotName);
   }
   
   /**
@@ -2727,20 +4658,61 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       loadDefaultModels();
     }
 
+    // Bind + mappers must run on the JME render thread. Doing this from the
+    // service/main thread after app.start() can deadlock and hang startService
+    // (demo never reaches ik3d / motion loops).
+    final String robotName = inferRobotNameFromNodeConfig(config);
+    final String lookAt = config.cameraLookAt;
+    Runnable sceneSetup = () -> {
+      if (robotName != null) {
+        bindVinMoovRoot(robotName);
+      }
+      applyNodeMappings(config);
+      if (lookAt != null) {
+        cameraLookAt(lookAt);
+      }
+      ensureChestDepthCameraOnRenderThread(config);
+    };
+
+    if (app != null) {
+      try {
+        app.enqueue(() -> {
+          sceneSetup.run();
+          return null;
+        }).get(30, java.util.concurrent.TimeUnit.SECONDS);
+      } catch (Exception e) {
+        log.error("loadDelayed scene setup failed or timed out — continuing without full node mappers", e);
+      }
+    } else {
+      sceneSetup.run();
+    }
+
+    invoke("publishSceneReady", getName());
+    return c;
+  }
+
+  /**
+   * Re-apply rotation axes / mappers from config after the model root is bound.
+   * Safe to call multiple times (e.g. after {@link #bindVinMoovRoot(String)}).
+   */
+  public void applyNodeMappings() {
+    applyNodeMappings((JMonkeyEngineConfig) config);
+  }
+
+  public void applyNodeMappings(JMonkeyEngineConfig config) {
+    if (config == null) {
+      return;
+    }
+    int applied = 0;
+    int missing = 0;
     if (config.nodes != null) {
-      // nodes.putAll(config.nodes);
       for (String path : config.nodes.keySet()) {
-        // getUserData(path)
         UserData ud = getUserData(path);
         UserDataConfig udc = config.nodes.get(path);
-        // UserData ud = new UserData(config.nodes.get(path));
-        // if (ud == null) {
-        // addNode(path);
-        // ud = nodes.get(path); // new UserData(config.nodes.get(path));
-        // }
 
         if (ud == null) {
-          log.error("could not find node for {}", path);
+          log.debug("could not find node for {}", path);
+          missing++;
           continue;
         }
 
@@ -2751,6 +4723,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         if (udc.rotationMask != null) {
           setRotation(path, udc.rotationMask);
         }
+        // remember the authored pose now, before anything drives the joint, so
+        // joint angles are always measured from bind
+        ud.captureBindRotation();
+        applied++;
       }
     }
 
@@ -2759,12 +4735,51 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         multiMap(name, config.multiMapped.get(name));
       }
     }
+    log.info("Applied {} node mappings ({} missing)", applied, missing);
+  }
 
-    if (config.cameraLookAt != null) {
-      cameraLookAt(config.cameraLookAt);
+  private static String inferRobotNameFromNodeConfig(JMonkeyEngineConfig config) {
+    if (config == null || config.nodes == null || config.nodes.isEmpty()) {
+      return null;
     }
+    for (String path : config.nodes.keySet()) {
+      if (path == null) {
+        continue;
+      }
+      int dot = path.indexOf('.');
+      if (dot > 0) {
+        return path.substring(0, dot);
+      }
+    }
+    return null;
+  }
 
-    return c;
+  /**
+   * Returns spatial names in the scene that contain the given substring (for
+   * diagnostics when servo↔node wiring fails).
+   */
+  public List<String> findSpatialNamesContaining(String fragment) {
+    List<String> matches = new ArrayList<>();
+    if (rootNode == null || fragment == null) {
+      return matches;
+    }
+    collectSpatialNamesContaining(rootNode, fragment, matches);
+    return matches;
+  }
+
+  private void collectSpatialNamesContaining(Spatial spatial, String fragment, List<String> matches) {
+    if (spatial == null) {
+      return;
+    }
+    String n = spatial.getName();
+    if (n != null && n.contains(fragment)) {
+      matches.add(n);
+    }
+    if (spatial instanceof Node) {
+      for (Spatial child : ((Node) spatial).getChildren()) {
+        collectSpatialNamesContaining(child, fragment, matches);
+      }
+    }
   }
 
   /**
