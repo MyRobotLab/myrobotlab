@@ -248,6 +248,46 @@ public class FabrikArm implements Serializable {
   }
 
   /**
+   * Palm positions on a uniform grid in servo space. Restores the current pose
+   * when finished so sampling cannot disturb an in-progress solve.
+   */
+  public List<Point> samplePalmWorkspace(int stepsPerJoint) {
+    List<Point> out = new ArrayList<>();
+    int n = frames.size();
+    if (n == 0) {
+      return out;
+    }
+    int steps = Math.max(2, stepsPerJoint);
+    double[] saved = snapshotThetas();
+    int[] idx = new int[n];
+    while (true) {
+      for (int i = 0; i < n; i++) {
+        JointFrame frame = frames.get(i);
+        double lo = Math.min(frame.servoMin, frame.servoMax);
+        double hi = Math.max(frame.servoMin, frame.servoMax);
+        double t = (double) idx[i] / (steps - 1);
+        thetaDeg[i] = meshFromServo(i, lo + t * (hi - lo));
+      }
+      rebuild();
+      out.add(new Point(getPalmPosition()));
+      int k = 0;
+      while (k < n) {
+        idx[k]++;
+        if (idx[k] < steps) {
+          break;
+        }
+        idx[k] = 0;
+        k++;
+      }
+      if (k == n) {
+        break;
+      }
+    }
+    restoreThetas(saved);
+    return out;
+  }
+
+  /**
    * Drive the palm to {@code goal}: FABRIK hint, hinge projection, line-search
    * CCD, then damped least squares until the residual is inside
    * {@link #errorThreshold} (2 mm by default).

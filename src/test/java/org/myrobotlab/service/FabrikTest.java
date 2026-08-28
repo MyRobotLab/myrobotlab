@@ -50,4 +50,35 @@ public class FabrikTest extends AbstractTest {
     Assert.assertTrue(servos.containsKey("i01.leftArm.bicep"));
     Runtime.release("fabrik-map");
   }
+
+  @Test
+  public void testReachCloudContainsRestPalm() {
+    Fabrik fabrik = (Fabrik) Runtime.start("fabrik-reach", "Fabrik");
+    fabrik.setCurrentArm("left", "i01", "left");
+    fabrik.centerAllJoints("left");
+    org.myrobotlab.math.geometry.PointCloud cloud = fabrik.sampleReachCloud();
+    Assert.assertNotNull(cloud);
+    Assert.assertTrue("reach cloud should have many voxels, got " + cloud.size(), cloud.size() > 50);
+    Assert.assertTrue(fabrik.setReachCloud(true));
+    Assert.assertTrue(fabrik.getReachCloud());
+    Assert.assertTrue(fabrik.reachCloudPointCount > 50);
+    Assert.assertFalse(fabrik.setReachCloud(false));
+    Assert.assertFalse(fabrik.getReachCloud());
+    Runtime.release("fabrik-reach");
+  }
+
+  @Test
+  public void testOnPointMovesToClickedGoal() {
+    Fabrik fabrik = (Fabrik) Runtime.start("fabrik-click", "Fabrik");
+    fabrik.setCurrentArm("left", "i01", "left");
+    fabrik.centerAllJoints("left");
+    Point start = fabrik.currentPosition("left");
+    Assert.assertNotNull(start);
+    Point goal = new Point(start.getX() + 0.02, start.getY(), start.getZ());
+    fabrik.onPoint(goal);
+    Point reached = fabrik.currentPosition("left");
+    Assert.assertNotNull(reached);
+    Assert.assertTrue("FABRIK onPoint error " + reached.distanceTo(goal), reached.distanceTo(goal) < 0.003);
+    Runtime.release("fabrik-click");
+  }
 }

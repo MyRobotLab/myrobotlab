@@ -44,6 +44,17 @@ public class FabrikConfig extends ServiceConfig {
 
   public boolean worldFrame = true;
 
+  /**
+   * Publish / show the left-hand reach cloud in the simulator. Off by default.
+   */
+  public boolean reachCloud = false;
+
+  /** Servo samples per joint when building {@link #reachCloud}. */
+  public int reachCloudSteps = 8;
+
+  /** Voxel size in meters for the published reach cloud. */
+  public float reachCloudVoxelM = 0.025f;
+
   public List<JointCalibration> joints = new ArrayList<>();
 
   public double endEffectorX = 0.0;

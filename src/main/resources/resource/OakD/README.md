@@ -65,6 +65,41 @@ crashes the device (`X_LINK_ERROR` / access violation).
 Spatial YOLO (`enableSpatialDetections`) is still the DepthAI 2.x path; on 3.x
 the pipeline logs that spatial is not wired and continues depth-only.
 
+## Click a point for FABRIK
+
+Left-click the visible overlay in JMonkeyEngine (RGB mesh or voxel cloud). The
+simulator publishes that world-meter point (`publishClickPoint`). A running
+**Fabrik** service receives `onPoint` and `moveTo`s the current arm there. The
+green marker is the goal. Clicks on the robot still select; the floor grid,
+frustum, and hand markers are ignored. Drag to orbit as usual.
+
+Requires Fabrik attached to the simulator (VirtualInMoovIkDemo does this) or
+Fabrik started while JME is already running.
+
+## World scale (meters)
+
+Depth is unprojected with the **RGB (CAM_A)** camera matrix into meters
+(`Z = mm / 1000`). JMonkeyEngine uses the same meters as IK / VinMoov (X right,
+Y up, Z forward). Overlay vertices are **not** parented under the character
+mesh; the overlay node sits at the chest camera with local scale `1`.
+
+If DepthAI returns a full-sensor `K` (principal point outside the 640×400
+image), Java `DepthFrame.normalizeIntrinsics()` rescales it so XY extent is not
+doll-sized at a correct Z.
+
+Default overlay multiplier `depthCloudScale` is **1** (real-world). A yellow
+**1 m stick** along the camera +Z is a visual check against InMoov.
+
+If a known object still disagrees:
+
+1. Click that object on the overlay.
+2. Enter the tape-measured distance from the camera (meters).
+3. **Calibrate** on the OakD or JMonkeyEngine WebGui (or
+   `oakd.calibrateDepthScale(1.2)` / `jme.calibrateDepthScale(1.2)`).
+
+That sets `simulator.depthCloudScale` so the click lands at the measured range.
+Reset to `1.0` to return to the metric default.
+
 ## Manual install
 
 ```text

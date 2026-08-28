@@ -8,6 +8,15 @@ import org.junit.Test;
 public class DepthCloudJmeTest {
 
   @Test
+  public void worldVoxelsKeepYUp() {
+    float[] corners = new float[24];
+    DepthCloudJme.worldVoxelCorners(0.1f, 0.2f, 1.5f, 0f, corners);
+    assertEquals(0.1f, corners[0], 1e-5f);
+    assertEquals(0.2f, corners[1], 1e-5f);
+    assertEquals(1.5f, corners[2], 1e-5f);
+  }
+
+  @Test
   public void cameraYFlipsToJmeUp() {
     float[] corners = new float[24];
     DepthCloudJme.voxelCorners(0.1f, 0.2f, 1.5f, 1f, 0f, corners);
@@ -43,5 +52,13 @@ public class DepthCloudJmeTest {
     assertEquals(72, idx.length);
     assertEquals(8, idx[36]);
     assertTrue(idx[71] >= 8);
+  }
+
+  @Test
+  public void nextScaleStretchesWhenClickWasTooClose() {
+    assertEquals(2f, DepthCloudJme.nextScale(1f, 0.5, 1.0), 1e-4f);
+    assertEquals(0.5f, DepthCloudJme.nextScale(1f, 2.0, 1.0), 1e-4f);
+    assertEquals(1f, DepthCloudJme.nextScale(1f, 0, 1.0), 1e-4f);
+    assertEquals(1f, DepthCloudJme.nextScale(0f, 1.0, 1.0), 1e-4f);
   }
 }

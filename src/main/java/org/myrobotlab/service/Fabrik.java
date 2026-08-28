@@ -6,15 +6,20 @@ import java.util.TreeMap;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.kinematics.FabrikArm;
 import org.myrobotlab.kinematics.JointFrame;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.kinematics.ReachCloud;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point3df;
+import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.config.FabrikConfig;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
+import org.myrobotlab.service.interfaces.PointListener;
+import org.myrobotlab.service.interfaces.PointsListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -34,12 +39,13 @@ import org.slf4j.Logger;
  *
  * <p>
  * Chain:
+ * {@code jme.publishClickPoint → fabrik.onPoint → moveTo};
  * {@code fabrik.publishJointAngles → i01.onJointAngles → Servo.moveTo →
  * JMonkeyEngine.rotateTo}. The green simulator marker tracks
  * {@link #publishIkGoal}.
  * </p>
  */
-public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublisher {
+public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublisher, PointListener, PointsListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(Fabrik.class);
@@ -60,10 +66,47 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
 
   public int lastSolveIterations = 0;
 
+  public int reachCloudPointCount = 0;
+
   private boolean worldCalibrated = false;
 
   public Fabrik(String n, String id) {
     super(n, id);
+  }
+
+  @Override
+  public void startService() {
+    super.startService();
+    subscribeToSimulatorClicks();
+  }
+
+  /**
+   * Simulator OAK-D mesh click (world meters, Y-up). Same path as the WebGui
+   * MoveTo boxes.
+   */
+  @Override
+  public void onPoint(Point point) {
+    if (point == null) {
+      return;
+    }
+    log.info("FABRIK onPoint {}", point);
+    invoke("publishPickedPoint", point);
+    moveTo(point.getX(), point.getY(), point.getZ());
+  }
+
+  /**
+   * World point picked on the OAK-D overlay (before {@link #moveTo}).
+   */
+  public Point publishPickedPoint(Point point) {
+    return point;
+  }
+
+  @Override
+  public void onPoints(List<Point> points) {
+    if (points == null || points.isEmpty()) {
+      return;
+    }
+    onPoint(points.get(0));
   }
 
   @Override
@@ -158,13 +201,12 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
   }
 
   public Point calibrateFromSimulator() {
-    for (org.myrobotlab.framework.interfaces.ServiceInterface si : Runtime.getServices()) {
-      if (si instanceof JMonkeyEngine) {
-        return calibrateFromSimulator((JMonkeyEngine) si);
-      }
+    JMonkeyEngine jme = findSimulator();
+    if (jme == null) {
+      error("No JMonkeyEngine running — start the simulator first");
+      return null;
     }
-    error("No JMonkeyEngine running — start the simulator first");
-    return null;
+    return calibrateFromSimulator(jme);
   }
 
   public Point calibrateFromSimulator(JMonkeyEngine jme) {
@@ -219,6 +261,9 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
     invoke("publishIkGoal", world);
     double residual = endEffectorWorld == null ? 0 : world.distanceTo(endEffectorWorld);
     log.info("FABRIK calibrated {} from {} joints: origin {} palm {} residual {} m", name, frames.size(), arm.getBaseOrigin(), world, residual);
+    if (config != null && config.reachCloud) {
+      setReachCloud(true);
+    }
     return world;
   }
 
@@ -302,6 +347,67 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
   public Point publishWorldPosition(Point position) {
     worldPosition = position;
     return position;
+  }
+
+  /**
+   * Cyan voxel cloud of palm positions this arm can reach. Shown in the
+   * simulator when attached to JMonkeyEngine.
+   */
+  public PointCloud publishReachCloud(PointCloud cloud) {
+    reachCloudPointCount = cloud == null ? 0 : cloud.size();
+    return cloud;
+  }
+
+  public boolean getReachCloud() {
+    return config != null && config.reachCloud;
+  }
+
+  /**
+   * Sample the current arm's joint ranges and show (or hide) the reach cloud
+   * in the simulator.
+   */
+  public boolean setReachCloud(boolean show) {
+    if (config == null) {
+      return false;
+    }
+    if (!show) {
+      config.reachCloud = false;
+      reachCloudPointCount = 0;
+      JMonkeyEngine jme = findSimulator();
+      if (jme != null) {
+        jme.setReachCloud(false);
+      }
+      broadcastState();
+      return false;
+    }
+    PointCloud cloud = sampleReachCloud();
+    if (cloud == null || cloud.size() == 0) {
+      error("No left-arm chain to sample — setCurrentArm or calibrate from the simulator first");
+      config.reachCloud = false;
+      broadcastState();
+      return false;
+    }
+    config.reachCloud = true;
+    invoke("publishReachCloud", cloud);
+    JMonkeyEngine jme = findSimulator();
+    if (jme != null) {
+      jme.onReachCloud(cloud);
+    }
+    log.info("FABRIK reach cloud {} voxels", cloud.size());
+    broadcastState();
+    return true;
+  }
+
+  public PointCloud sampleReachCloud() {
+    FabrikArm arm = currentArmModel();
+    if (arm == null || arm.getNumJoints() == 0) {
+      return null;
+    }
+    int steps = config != null && config.reachCloudSteps > 1 ? config.reachCloudSteps : ReachCloud.DEFAULT_STEPS;
+    float voxel = config != null && config.reachCloudVoxelM > 0f ? config.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
+    PointCloud cloud = ReachCloud.sample(arm, steps, voxel);
+    reachCloudPointCount = cloud.size();
+    return cloud;
   }
 
   @Override
@@ -402,12 +508,22 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
     config.originZ = origin.getZ();
   }
 
+  private void subscribeToSimulatorClicks() {
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof JMonkeyEngine) {
+        subscribe(si.getName(), "publishClickPoint", getName(), "onPoint");
+      }
+    }
+  }
+
   @Override
   public void attach(Attachable attachable) {
     if (attachable instanceof JMonkeyEngine) {
       addListener("publishWorldPosition", attachable.getName(), "onWorldPosition");
       addListener("publishIkGoal", attachable.getName(), "onIkGoal");
+      addListener("publishReachCloud", attachable.getName(), "onReachCloud");
       subscribe(attachable.getName(), "publishSceneReady", getName(), "onSceneReady");
+      subscribe(attachable.getName(), "publishClickPoint", getName(), "onPoint");
       return;
     }
     if (attachable instanceof InMoov2Arm) {
@@ -417,6 +533,15 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
     if (attachable instanceof IKJointAngleListener) {
       addListener("publishJointAngles", attachable.getName(), "onJointAngles");
     }
+  }
+
+  private JMonkeyEngine findSimulator() {
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof JMonkeyEngine) {
+        return (JMonkeyEngine) si;
+      }
+    }
+    return null;
   }
 
   static Point lerp(Point a, Point b, double t) {

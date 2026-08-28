@@ -157,7 +157,7 @@ public class VirtualInMoovIkDemo {
       ik3d.centerAllJoints(ARM_KEY);
       sleep(1500);
       fabrik.computePositionFromServos(ARM_KEY);
-      log.info("Demo ready for WebGui: use ik3d or fabrik — Center All Joints, then MoveTo world X ± a few cm. Green dot is the IK goal.");
+      log.info("Demo ready for WebGui: use ik3d or fabrik — Center All Joints, then MoveTo world X ± a few cm. Green dot is the IK goal. Check Show left-hand reach cloud to see the reachable volume. Click the OAK-D mesh in the simulator to send a FABRIK goal.");
 
       startChestDepthOverlay(i01, simulator);
     } catch (Exception e) {
@@ -182,6 +182,7 @@ public class VirtualInMoovIkDemo {
       oakd.getConfig().syntheticFallback = true;
       oakd.getConfig().fps = 12;
       oakd.getConfig().cloudStride = 4;
+      oakd.getConfig().rgbMesh = true;
       oakd.startService();
       simulator.ensureChestDepthCamera();
       simulator.attach(oakd);
@@ -193,6 +194,7 @@ public class VirtualInMoovIkDemo {
       } else {
         log.warn("Could not start OakD depth overlay");
       }
+      log.info("Click the OAK-D RGB mesh in the simulator to send that world point to FABRIK (green marker).");
     } catch (Exception e) {
       log.error("Chest depth overlay failed", e);
     }

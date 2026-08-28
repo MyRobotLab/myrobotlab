@@ -258,7 +258,9 @@ public class InverseKinematics3DTest extends AbstractTest {
     double[] servoPos = new double[] { InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.SHOULDER_SERVO_REST, InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.BICEP_SERVO_REST };
     for (int i = 0; i < names.length; i++) {
       Servo servo = (Servo) Runtime.start(names[i], "Servo");
-      servo.moveTo(servoPos[i]);
+      // Snap immediately. moveTo() only sets targetPos; currentInputPos stays
+      // at the default rest (90) until TimeEncoder ticks, so FK would read 80°.
+      servo.setPosition(servoPos[i]);
     }
     Point world = ik3d.computePositionFromServos();
     Assert.assertNotNull(world);
@@ -302,7 +304,7 @@ public class InverseKinematics3DTest extends AbstractTest {
     Point origin = ik3d.getWorldOrigin();
     Runtime.setAllVirtual(true);
     Servo omo = (Servo) Runtime.start("i01.leftArm.omoplate", "Servo");
-    omo.moveTo(InMoov2Arm.OMOPLATE_SERVO_REST);
+    omo.setPosition(InMoov2Arm.OMOPLATE_SERVO_REST);
     ik3d.computePositionFromServos();
     Assert.assertEquals("origin X unchanged", origin.getX(), ik3d.getWorldOrigin().getX(), 1e-9);
     Assert.assertEquals("origin Y unchanged", origin.getY(), ik3d.getWorldOrigin().getY(), 1e-9);

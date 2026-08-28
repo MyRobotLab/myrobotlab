@@ -9,7 +9,7 @@ public class FabrikMeta extends MetaData {
   public final static Logger log = LoggerFactory.getLogger(FabrikMeta.class);
 
   public FabrikMeta() {
-    addDescription("FABRIK inverse kinematics (Aristidou) for simulated or physical arms");
+    addDescription("FABRIK inverse kinematics (Aristidou). Click the OAK-D mesh in the simulator to move the palm there. Toggle the left-hand reach cloud to see where the arm can go.");
     addCategory("robot", "control");
     setAvailable(true);
     addLicense("mit");

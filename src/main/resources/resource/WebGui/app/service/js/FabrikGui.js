@@ -106,6 +106,13 @@ angular.module('mrlapp.service.FabrikGui', [])
                     $scope.worldPosition = inMsg.data[0];
                     $scope.$apply();
                     break;
+                case 'onPickedPoint':
+                    // Simulator OAK-D mesh click — show that world point in the boxes
+                    if (inMsg.data && inMsg.data[0]) {
+                        applyGoal(inMsg.data[0]);
+                    }
+                    $scope.$apply();
+                    break;
                 case 'onIkGoal':
                     // Green-marker goal. Do not copy into the MoveTo boxes —
                     // moveTo publishes this and would snap the controls back.
@@ -145,6 +152,10 @@ angular.module('mrlapp.service.FabrikGui', [])
             msg.send('centerAllJoints');
         };
 
+        $scope.setReachCloud = function() {
+            msg.send('setReachCloud', !!$scope.service.config.reachCloud);
+        };
+
         $scope.computePositionFromServos = function() {
             msg.send('computePositionFromServos');
         };
@@ -175,6 +186,7 @@ angular.module('mrlapp.service.FabrikGui', [])
 
         msg.subscribe('publishWorldPosition');
         msg.subscribe('publishIkGoal');
+        msg.subscribe('publishPickedPoint');
         msg.subscribe('publishJointPositions');
         msg.subscribe('publishJointAngles');
         msg.subscribe('moveTo');

@@ -15,7 +15,27 @@
                 <input type="checkbox" ng-model="service.config.rgbMesh" ng-change="setRgbMesh()"/>
                 RGB mesh
             </label>
-            <span class="text-muted">unchecked = voxel cloud</span>
+            <span class="text-muted">unchecked = voxel cloud. Click the overlay in the simulator to send that point to FABRIK.</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>World scale</label>
+            <div class="text-muted">1.0 is real-world meters (same as IK). Yellow stick in the simulator is 1 m.
+            Click the mesh, type a tape-measured distance, then Calibrate if objects look too small.</div>
+            scale {{service.depthCloudScale | number:3}}
+            <input type="range" min="0.2" max="5" step="0.01" style="width: 16em; display: inline-block; vertical-align: middle;"
+                ng-model="service.depthCloudScale" ng-change="setDepthCloudScale()"/>
+            <button class="btn btn-default btn-sm" ng-click="resetDepthCloudScale()">Reset 1.0</button>
+            <div>
+                last click
+                <span ng-show="service.lastClickDistanceM">{{service.lastClickDistanceM | number:3}} m from camera</span>
+                <span ng-hide="service.lastClickDistanceM" class="text-muted">—</span>
+                &nbsp; measured
+                <input type="number" ng-model="knownDistanceM" min="0.05" max="10" step="0.01" style="width: 5em;"/>
+                m
+                <button class="btn btn-primary btn-sm" ng-click="calibrateDepthScale()">Calibrate</button>
+            </div>
         </td>
     </tr>
     <tr ng-show="classification">

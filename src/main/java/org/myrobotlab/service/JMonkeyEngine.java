@@ -35,6 +35,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
+import org.myrobotlab.jme3.DepthPick;
 import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
@@ -46,6 +47,7 @@ import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.jme3.UserDataConfig;
 import org.myrobotlab.kinematics.JointFrame;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.kinematics.ReachCloud;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -72,6 +74,7 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.PointCloudListener;
 import org.myrobotlab.service.interfaces.PointCloudPublisher;
+import org.myrobotlab.service.interfaces.PointListener;
 import org.myrobotlab.service.interfaces.SelectListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
@@ -201,7 +204,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   protected int fontSize = 20;
 
   /**
-   * When true, show left/right InMoov hand world positions in the lower-left HUD.
+   * When true, show left/right InMoov hand world positions in the upper-left HUD.
    */
   protected boolean showHandPositions = true;
 
@@ -211,6 +214,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   protected String handPositionRobot = "i01";
 
   protected static final String HAND_POSITION_HUD_KEY = "hand-positions";
+
+  /** Live IK / hand readout on the GUI viewport (upper-left). */
+  protected transient BitmapText handPositionHudText;
 
   protected static final String LEFT_HAND_MARKER = "_marker.leftHand";
 
@@ -235,6 +241,33 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   /** Displayed green marker: goal if set, otherwise current FK. */
   protected Vector3f ikLeftHandWorld;
+
+  /** Last OAK-D overlay click in world meters (Y-up), or null. */
+  public Point lastClickPoint;
+
+  /** Distance from the chest camera to {@link #lastClickPoint}, meters. */
+  public float lastClickDistanceM;
+
+  /** Last left-hand reach cloud shown in the simulator (world meters). */
+  public PointCloud lastReachCloud;
+
+  /** Voxel count of {@link #lastReachCloud}, for the WebGui. */
+  public int reachCloudPointCount = 0;
+
+  protected transient FloatBuffer reachCloudBuffer = null;
+
+  protected transient FloatBuffer reachCloudColorBuffer = null;
+
+  protected transient Material reachCloudMat = null;
+
+  protected transient Mesh reachCloudMesh = null;
+
+  protected transient Geometry reachCloudGeometry = null;
+
+  protected int reachCloudVertexCount = 0;
+
+  /** Chest camera world translation (copied on the render thread). */
+  protected final Vector3f lastChestCameraWorld = new Vector3f();
 
   protected boolean fullscreen = false;
 
@@ -543,6 +576,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     if (service instanceof PointCloudPublisher) {
       subscribe(service.getName(), "publishPointCloud", getName(), "onPointCloud");
+      wireDepthClickToIk();
     }
     if (service instanceof DepthHudPublisher) {
       subscribe(service.getName(), "publishDepthHud", getName(), "onDepthHud");
@@ -550,6 +584,12 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (service instanceof DepthFramePublisher) {
       subscribe(service.getName(), "publishDepthFrame", getName(), "onDepthFrame");
       subscribe(service.getName(), "publishRgbMesh", getName(), "onRgbMesh");
+    }
+    if (service instanceof OakD) {
+      addListener("publishClickPoint", service.getName(), "onSimulatorClick");
+    }
+    if (service instanceof PointListener) {
+      addListener("publishClickPoint", service.getName(), "onPoint");
     }
 
     if (service.getTypeKey().equals("org.myrobotlab.service.Servo")) {
@@ -563,6 +603,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (service instanceof InverseKinematics3D || service instanceof Fabrik) {
       subscribe(service.getName(), "publishWorldPosition", getName(), "onWorldPosition");
       subscribe(service.getName(), "publishIkGoal", getName(), "onIkGoal");
+    }
+    if (service instanceof Fabrik) {
+      subscribe(service.getName(), "publishReachCloud", getName(), "onReachCloud");
     }
 
     // backward attach ?
@@ -675,36 +718,158 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     cameraLookAt(rootNode);
   }
 
-  // FIXME make a more general Collision check..
+  /**
+   * Ray-pick from the cursor. A click on the visible OAK-D voxel cloud or RGB
+   * mesh publishes {@link #publishClickPoint} (world meters, Y-up) for Fabrik
+   * and does not steal the orbit selection.
+   */
   public Geometry checkCollision() {
-
-    // Reset results list.
+    if (cam == null || inputManager == null || rootNode == null) {
+      return null;
+    }
+    refreshDepthCollisionData();
     CollisionResults results = new CollisionResults();
-    // Convert screen click to 3d position
     Vector2f click2d = inputManager.getCursorPosition();
     Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
     Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
-    // Aim the ray from the clicked spot forwards.
     Ray ray = new Ray(click3d, dir);
-    // Collect intersections between ray and all nodes in results list.
     rootNode.collideWith(ray, results);
-    // (Print the results so we see what is going on:)
-    for (int i = 0; i < results.size(); i++) {
-      // (For each “hit”, we know distance, impact point, geometry.)
-      float dist = results.getCollision(i).getDistance();
-      Vector3f pt = results.getCollision(i).getContactPoint();
-      String target = results.getCollision(i).getGeometry().getName();
-      System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+    DepthPick.Hit hit = DepthPick.firstPick(results);
+    if (hit == null) {
+      return null;
     }
-    // Use the results -- we rotate the selected geometry.
-    if (results.size() > 0) {
-      // The closest result is the target that the player picked:
-      Geometry target = results.getClosestCollision().getGeometry();
-      // Here comes the action:
-      log.info("you clicked " + target.getName());
-      return target;
+    log.info("you clicked {} at {}", hit.geometry.getName(), hit.world);
+    JMonkeyEngineConfig cfg = config;
+    if (hit.depthOverlay && (cfg == null || cfg.depthClickToIk)) {
+      Point p = new Point(hit.world.x, hit.world.y, hit.world.z);
+      onIkGoal(p);
+      invoke("publishClickPoint", p);
     }
-    return null;
+    return hit.geometry;
+  }
+
+  /**
+   * Rebuild triangle collision trees for the visible OAK-D overlay. Vertex
+   * buffers change every frame; stale BIH data would pick the wrong point.
+   */
+  private void refreshDepthCollisionData() {
+    refreshMeshCollision(pointCloudGeometry, pointCloudMesh);
+    refreshMeshCollision(depthMeshGeometry, depthSurfaceMesh);
+  }
+
+  private void refreshMeshCollision(Geometry geometry, Mesh mesh) {
+    if (geometry == null || mesh == null || DepthPick.isCulled(geometry)) {
+      return;
+    }
+    mesh.updateBound();
+    mesh.updateCounts();
+    try {
+      mesh.createCollisionData();
+      geometry.updateModelBound();
+    } catch (Exception e) {
+      log.warn("Could not rebuild OAK-D overlay collision data for {}", geometry.getName(), e);
+    }
+  }
+
+  /**
+   * World-meter point on the OAK-D overlay (same frame as Fabrik / IK).
+   */
+  public Point publishClickPoint(Point point) {
+    lastClickPoint = point;
+    lastClickDistanceM = distanceToChestCamera(point);
+    log.info("OAK-D click {}  {} m from camera  depthScale {}", point, lastClickDistanceM, config.depthCloudScale);
+    invoke("publishClickDistance", lastClickDistanceM);
+    return point;
+  }
+
+  /** Meters from the chest camera to the last overlay click. */
+  public float publishClickDistance(float meters) {
+    return meters;
+  }
+
+  /**
+   * Camera-frame meters → overlay local meters. Default 1 is real-world
+   * (JME / IK meters). {@link JMonkeyEngineConfig#depthCloudScale} is a
+   * calibration multiplier.
+   */
+  public float depthVertexScale() {
+    JMonkeyEngineConfig cfg = config;
+    float parentScale = 1f;
+    if (cfg != null && cfg.depthCloudMatchWorldMeters) {
+      parentScale = overlayWorldScale();
+    }
+    return DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+  }
+
+  private float overlayWorldScale() {
+    if (depthOverlayNode == null) {
+      return 1f;
+    }
+    Vector3f ws = depthOverlayNode.getWorldScale();
+    return (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
+  }
+
+  public float getDepthCloudScale() {
+    return config != null && config.depthCloudScale > 0f ? config.depthCloudScale : 1f;
+  }
+
+  /**
+   * Calibration multiplier on camera-frame meters. {@code 1} is real-world.
+   */
+  public float setDepthCloudScale(float scale) {
+    if (config == null) {
+      return Float.NaN;
+    }
+    float s = scale;
+    if (s < 0.05f) {
+      s = 0.05f;
+    }
+    if (s > 20f) {
+      s = 20f;
+    }
+    config.depthCloudScale = s;
+    log.info("depth overlay scale {}", s);
+    broadcastState();
+    return s;
+  }
+
+  /**
+   * Set {@link JMonkeyEngineConfig#depthCloudScale} so the last mesh click
+   * lands at {@code knownDistanceM} from the chest camera (tape measure).
+   */
+  public float calibrateDepthScale(double knownDistanceM) {
+    if (lastClickPoint == null || lastClickDistanceM < 1e-4f) {
+      error("Click the OAK-D mesh first, then calibrate with a measured distance");
+      return getDepthCloudScale();
+    }
+    float next = DepthCloudJme.nextScale(getDepthCloudScale(), lastClickDistanceM, knownDistanceM);
+    info("Depth scale %.3f → %.3f (click was %.3f m, measured %.3f m)", getDepthCloudScale(), next, lastClickDistanceM,
+        knownDistanceM);
+    float applied = setDepthCloudScale(next);
+    lastClickDistanceM = (float) knownDistanceM;
+    return applied;
+  }
+
+  private float distanceToChestCamera(Point point) {
+    if (point == null) {
+      return 0f;
+    }
+    float dx = (float) point.getX() - lastChestCameraWorld.x;
+    float dy = (float) point.getY() - lastChestCameraWorld.y;
+    float dz = (float) point.getZ() - lastChestCameraWorld.z;
+    return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+
+  /**
+   * Subscribe running Fabrik services to mesh clicks (idempotent). Called when
+   * an OAK-D (or other point-cloud publisher) is attached.
+   */
+  protected void wireDepthClickToIk() {
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof PointListener) {
+        addListener("publishClickPoint", si.getName(), "onPoint");
+      }
+    }
   }
 
   public void clone(String name, String newName) {
@@ -1277,7 +1442,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (pointCloudGeometry != null) {
       pointCloudGeometry.removeFromParent();
     }
-    pointCloudGeometry = new Geometry("chest.depthCloud", pointCloudMesh);
+    pointCloudGeometry = new Geometry(DepthPick.DEPTH_CLOUD, pointCloudMesh);
+    DepthPick.mark(pointCloudGeometry);
     pointCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     pointCloudMat.setBoolean("VertexColor", true);
     pointCloudMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
@@ -1301,15 +1467,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     Point3df[] points = pc.getData();
     float[] colors = pc.getColors();
     int n = points == null ? 0 : points.length;
-    JMonkeyEngineConfig cfg = (JMonkeyEngineConfig) config;
-    float parentScale = 1f;
-    if (cfg != null && cfg.depthCloudMatchWorldMeters && depthOverlayNode != null) {
-      Vector3f ws = depthOverlayNode.getWorldScale();
-      parentScale = (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
-    }
-    float scale = DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+    JMonkeyEngineConfig cfg = config;
+    float scale = depthVertexScale();
     float voxel = cfg != null ? cfg.depthCloudVoxelM : 0.03f;
     float half = Math.max(0.004f, voxel * 0.5f);
+    float parentScale = overlayWorldScale();
     if (cfg != null && cfg.depthCloudMatchWorldMeters && parentScale > 1e-6f) {
       half = half / parentScale;
     }
@@ -1372,7 +1534,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (depthMeshGeometry != null) {
       depthMeshGeometry.removeFromParent();
     }
-    depthMeshGeometry = new Geometry("chest.depthRgbMesh", depthSurfaceMesh);
+    depthMeshGeometry = new Geometry(DepthPick.DEPTH_RGB_MESH, depthSurfaceMesh);
+    DepthPick.mark(depthMeshGeometry);
     depthMeshMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     depthMeshMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Off);
     depthMeshMat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
@@ -1390,13 +1553,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   private void writeDepthMeshBuffers(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
-    JMonkeyEngineConfig cfg = config;
-    float parentScale = 1f;
-    if (cfg != null && cfg.depthCloudMatchWorldMeters && depthOverlayNode != null) {
-      Vector3f ws = depthOverlayNode.getWorldScale();
-      parentScale = (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3f;
-    }
-    float scale = DepthCloudJme.effectiveScale(cfg != null ? cfg.depthCloudScale : 1f, parentScale);
+    float scale = depthVertexScale();
 
     depthMeshPosBuffer.clear();
     int n = mesh.vertexCount;
@@ -1867,7 +2024,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       } else {
         if (!viewDragging) {
           Geometry target = checkCollision();
-          setSelected(target);
+          // Mesh clicks publish an IK goal — keep the current orbit target.
+          if (target == null || !DepthPick.isDepthOverlay(target)) {
+            setSelected(target);
+          }
         }
         viewDragging = false;
         viewDragAccum = 0f;
@@ -2252,14 +2412,29 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       depthOverlayNode.setShadowMode(ShadowMode.Off);
     }
     boolean hasFrustum = false;
+    boolean hasMeter = false;
     for (Spatial child : depthOverlayNode.getChildren()) {
-      if (child.getName() != null && child.getName().endsWith(".frustum")) {
+      String n = child.getName();
+      if (n != null && n.endsWith(".frustum")) {
         hasFrustum = true;
-        break;
+      }
+      if ("_mrl.depthMeter".equals(n)) {
+        hasMeter = true;
       }
     }
     if (!hasFrustum) {
       attachDepthFrustum(depthOverlayNode);
+    }
+    JMonkeyEngineConfig cfg = config;
+    if (cfg == null || cfg.depthMeterStick) {
+      if (!hasMeter) {
+        attachDepthMeterStick(depthOverlayNode);
+      }
+    } else if (hasMeter) {
+      Spatial meter = depthOverlayNode.getChild("_mrl.depthMeter");
+      if (meter != null) {
+        meter.removeFromParent();
+      }
     }
     if (pointCloudGeometry != null && pointCloudGeometry.getParent() != depthOverlayNode) {
       depthOverlayNode.attachChild(pointCloudGeometry);
@@ -2276,6 +2451,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     depthOverlayNode.setLocalTranslation(chestDepthCameraNode.getWorldTranslation());
     depthOverlayNode.setLocalRotation(chestDepthCameraNode.getWorldRotation());
     depthOverlayNode.setLocalScale(1f);
+    lastChestCameraWorld.set(chestDepthCameraNode.getWorldTranslation());
   }
 
   /**
@@ -2289,7 +2465,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     List<Spatial> move = new ArrayList<>();
     for (Spatial child : camNode.getChildren()) {
       String n = child.getName() == null ? "" : child.getName();
-      if (n.contains("depthCloud") || n.contains("depthRgbMesh") || n.endsWith(".frustum")) {
+      if (n.contains("depthCloud") || n.contains("depthRgbMesh") || n.endsWith(".frustum") || n.contains("depthMeter")) {
         move.add(child);
       }
     }
@@ -2420,6 +2596,32 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     mat.setColor("Color", new ColorRGBA(0.2f, 0.9f, 1f, 1f));
     g.setMaterial(mat);
     camNode.attachChild(g);
+  }
+
+  /**
+   * 1 m along camera +Z with 10 cm ticks. Same world meters as IK — if a
+   * known object disagrees with this stick, use {@link #calibrateDepthScale}.
+   */
+  private void attachDepthMeterStick(Node overlay) {
+    Vector3f[] verts = new Vector3f[22];
+    int i = 0;
+    verts[i++] = Vector3f.ZERO;
+    verts[i++] = new Vector3f(0f, 0f, 1f);
+    for (int t = 1; t <= 10; t++) {
+      float z = t * 0.1f;
+      float tick = t == 10 ? 0.04f : 0.02f;
+      verts[i++] = new Vector3f(-tick, 0f, z);
+      verts[i++] = new Vector3f(tick, 0f, z);
+    }
+    Mesh mesh = new Mesh();
+    mesh.setMode(Mesh.Mode.Lines);
+    mesh.setBuffer(VertexBuffer.Type.Position, 3, BufferUtils.createFloatBuffer(verts));
+    mesh.updateBound();
+    Geometry g = new Geometry("_mrl.depthMeter", mesh);
+    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat.setColor("Color", new ColorRGBA(1f, 0.85f, 0.15f, 1f));
+    g.setMaterial(mat);
+    overlay.attachChild(g);
   }
 
   protected void updateDepthHudOnRenderThread(DepthHud hud) {
@@ -2630,8 +2832,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * Lower-left HUD + colored dots at InMoov left/right hand world positions.
+   * Upper-left HUD + colored dots at InMoov left/right hand world positions.
    * Blue = left, red = right. Called each frame from {@link #simpleUpdate(float)}.
+   * Positioned from the GUI camera so a resize or DPI scale cannot drop it
+   * onto the OAK-D heatmap in the lower-left.
    */
   protected void updateHandPositionHud() {
     if (!showHandPositions || app == null || rootNode == null) {
@@ -2654,17 +2858,14 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     if (guiNode != null) {
       String err = formatHudError(left, ikLeft);
-      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s\nL goal: %s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeftHandCurrent),
-          formatHudVec(ikLeftHandGoal), err != null ? "\nL err:  " + err : "");
-      HudText hud = guiText.get(HAND_POSITION_HUD_KEY);
-      if (hud == null) {
-        hud = new HudText(this, text, 12, 0);
-        hud.setFromBottom(18);
-        hud.setText(text, fontColor, fontSize);
-        guiText.put(HAND_POSITION_HUD_KEY, hud);
-        app.getGuiNode().attachChild(hud.getNode());
-      } else {
-        hud.setText(text, fontColor, fontSize);
+      String text = String.format("L hand: %s\nR hand: %s\nL IK:   %s\nL goal: %s%s%s%s", formatHudVec(left), formatHudVec(right), formatHudVec(ikLeftHandCurrent),
+          formatHudVec(ikLeftHandGoal), err != null ? "\nL err:  " + err : "", depthHudLine(), reachHudLine());
+      ensureHandPositionHudText();
+      if (handPositionHudText != null) {
+        handPositionHudText.setText(text);
+        float guiH = guiHudHeight();
+        // BitmapText origin is the top-left of the block; GUI Y=0 is the bottom.
+        handPositionHudText.setLocalTranslation(16f, guiH - 12f, 1f);
       }
     }
 
@@ -2676,11 +2877,53 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     syncHandMarker(ikLeftHandMarker, ikLeft);
   }
 
+  private void ensureHandPositionHudText() {
+    // Drop the old HudText path (it was anchored from the bottom / AppSettings
+    // height and sat under the depth heatmap).
+    HudText legacy = guiText.remove(HAND_POSITION_HUD_KEY);
+    if (legacy != null && legacy.getNode() != null && legacy.getNode().getParent() != null) {
+      legacy.getNode().removeFromParent();
+    }
+    if (handPositionHudText != null && handPositionHudText.getParent() != null) {
+      return;
+    }
+    if (app == null || guiNode == null) {
+      return;
+    }
+    BitmapFont font = app.loadGuiFont();
+    handPositionHudText = new BitmapText(font, false);
+    float size = fontSize > 0 ? fontSize : font.getCharSet().getRenderedSize();
+    handPositionHudText.setSize(size);
+    handPositionHudText.setColor(ColorRGBA.Yellow);
+    handPositionHudText.setQueueBucket(Bucket.Gui);
+    handPositionHudText.setCullHint(CullHint.Never);
+    guiNode.attachChild(handPositionHudText);
+    log.info("IK HUD attached at upper-left of GUI viewport ({} px tall)", guiHudHeight());
+  }
+
+  /**
+   * Live GUI framebuffer height. {@link AppSettings#getHeight()} stays at the
+   * launch resolution when the window is resized.
+   */
+  private float guiHudHeight() {
+    if (app != null && app.getGuiViewPort() != null && app.getGuiViewPort().getCamera() != null) {
+      return app.getGuiViewPort().getCamera().getHeight();
+    }
+    if (cam != null) {
+      return cam.getHeight();
+    }
+    return settings != null ? settings.getHeight() : height;
+  }
+
   private void removeHandPositionOverlays() {
     HudText hud = guiText.remove(HAND_POSITION_HUD_KEY);
     if (hud != null && hud.getNode() != null && hud.getNode().getParent() != null) {
       hud.getNode().removeFromParent();
     }
+    if (handPositionHudText != null && handPositionHudText.getParent() != null) {
+      handPositionHudText.removeFromParent();
+    }
+    handPositionHudText = null;
     detachHandMarker(leftHandMarker);
     detachHandMarker(rightHandMarker);
     detachHandMarker(ikLeftHandMarker);
@@ -2750,6 +2993,21 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return "n/a";
     }
     return String.format("%.3f, %.3f, %.3f", v.x, v.y, v.z);
+  }
+
+  private String depthHudLine() {
+    float s = getDepthCloudScale();
+    if (lastClickDistanceM > 1e-4f) {
+      return String.format("\ndepth ×%.3f  click %.3f m", s, lastClickDistanceM);
+    }
+    return String.format("\ndepth ×%.3f  click —", s);
+  }
+
+  private String reachHudLine() {
+    if (config == null || !config.reachCloud || lastReachCloud == null || lastReachCloud.size() == 0) {
+      return "";
+    }
+    return String.format("\nL reach: %d pts", lastReachCloud.size());
   }
 
   private static String formatHudError(Vector3f sim, Vector3f ik) {
@@ -3006,6 +3264,206 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   private void refreshIkMarker() {
     ikLeftHandWorld = ikLeftHandGoal != null ? ikLeftHandGoal : ikLeftHandCurrent;
+  }
+
+  /**
+   * Show or hide the cyan left-hand reach cloud. When turning on with no cloud
+   * yet, sample VinMoov's left arm (omoplate → wrist) via forward kinematics.
+   */
+  public boolean setReachCloud(boolean show) {
+    if (config == null) {
+      return false;
+    }
+    if (!show) {
+      config.reachCloud = false;
+      setReachCloudVisible(false);
+      broadcastState();
+      return false;
+    }
+    PointCloud sampled = sampleLeftHandReachFromVinMoov();
+    if (sampled != null && sampled.size() > 0) {
+      lastReachCloud = sampled;
+    }
+    if (lastReachCloud == null || lastReachCloud.size() == 0) {
+      error("Left-hand reach cloud needs VinMoov loaded (or a FABRIK chain)");
+      config.reachCloud = false;
+      broadcastState();
+      return false;
+    }
+    config.reachCloud = true;
+    onReachCloud(lastReachCloud);
+    broadcastState();
+    return true;
+  }
+
+  public boolean getReachCloud() {
+    return config != null && config.reachCloud;
+  }
+
+  /**
+   * FABRIK {@code publishReachCloud} — world-meter palm samples, Y-up.
+   */
+  public void onReachCloud(PointCloud pc) {
+    lastReachCloud = pc;
+    reachCloudPointCount = pc == null ? 0 : pc.size();
+    if (pc == null || pc.size() == 0) {
+      if (config != null) {
+        config.reachCloud = false;
+      }
+      setReachCloudVisible(false);
+      return;
+    }
+    if (config != null) {
+      config.reachCloud = true;
+    }
+    if (app == null || assetManager == null) {
+      return;
+    }
+    app.enqueue(() -> {
+      updateReachCloudOnRenderThread(pc);
+      return null;
+    });
+    broadcastState();
+  }
+
+  public void setReachCloudVisible(boolean show) {
+    if (config != null) {
+      config.reachCloud = show;
+    }
+    if (app == null) {
+      return;
+    }
+    app.enqueue(() -> {
+      if (reachCloudGeometry != null) {
+        reachCloudGeometry.setCullHint(show ? CullHint.Never : CullHint.Always);
+      }
+      return null;
+    });
+  }
+
+  /**
+   * Measure the live VinMoov left arm and sample its palm workspace. Safe from
+   * the service thread (joint frames are copied off the render thread).
+   */
+  public PointCloud sampleLeftHandReachFromVinMoov() {
+    String robot = handPositionRobot;
+    if (robot == null || robot.isEmpty()) {
+      robot = inferRobotNameFromNodeConfig(config);
+      if (robot == null) {
+        robot = "i01";
+      }
+    }
+    JMonkeyEngineConfig cfg = config;
+    int steps = cfg != null && cfg.reachCloudSteps > 1 ? cfg.reachCloudSteps : ReachCloud.DEFAULT_STEPS;
+    float voxel = cfg != null && cfg.reachCloudVoxelM > 0f ? cfg.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
+    List<JointFrame> frames = getArmJointFrames(robot, "left");
+    if (frames.size() < 4) {
+      log.warn("sampleLeftHandReachFromVinMoov — measured {} of 4 left-arm joints", frames.size());
+      return null;
+    }
+    Point3df wrist = getHandWorldTranslation(robot, "left");
+    if (wrist == null) {
+      log.warn("sampleLeftHandReachFromVinMoov — no left wrist node");
+      return null;
+    }
+    PointCloud cloud = ReachCloud.sample(frames, new Point(wrist.x, wrist.y, wrist.z), steps, voxel);
+    reachCloudPointCount = cloud.size();
+    log.info("Left-hand reach cloud {} voxels from VinMoov {} ({} joint steps, {} m cells)", cloud.size(), robot, steps, voxel);
+    return cloud;
+  }
+
+  protected void updateReachCloudOnRenderThread(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    int n = points == null ? 0 : points.length;
+    if (reachCloudGeometry == null || reachCloudBuffer == null || n != reachCloudVertexCount) {
+      initReachCloud(pc);
+      return;
+    }
+    writeReachCloudBuffers(pc);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, reachCloudBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, reachCloudColorBuffer);
+    reachCloudMesh.updateBound();
+    reachCloudMesh.updateCounts();
+    reachCloudGeometry.setCullHint(CullHint.Never);
+  }
+
+  private void initReachCloud(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    int n = points == null ? 0 : points.length;
+    reachCloudVertexCount = n;
+    int verts = Math.max(1, n) * 8;
+    reachCloudBuffer = BufferUtils.createFloatBuffer(verts * 3);
+    reachCloudColorBuffer = BufferUtils.createFloatBuffer(verts * 4);
+    writeReachCloudBuffers(pc);
+
+    reachCloudMesh = new Mesh();
+    reachCloudMesh.setMode(Mesh.Mode.Triangles);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Position, 3, reachCloudBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Color, 4, reachCloudColorBuffer);
+    reachCloudMesh.setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createIntBuffer(DepthCloudJme.cubeIndices(Math.max(1, n))));
+    reachCloudMesh.updateBound();
+    reachCloudMesh.updateCounts();
+
+    if (reachCloudGeometry != null) {
+      reachCloudGeometry.removeFromParent();
+    }
+    reachCloudGeometry = new Geometry(DepthPick.LEFT_HAND_REACH, reachCloudMesh);
+    reachCloudMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    reachCloudMat.setBoolean("VertexColor", true);
+    reachCloudMat.getAdditionalRenderState().setBlendMode(com.jme3.material.RenderState.BlendMode.Alpha);
+    reachCloudMat.getAdditionalRenderState().setDepthWrite(false);
+    reachCloudMat.getAdditionalRenderState().setDepthTest(true);
+    reachCloudGeometry.setMaterial(reachCloudMat);
+    reachCloudGeometry.setShadowMode(ShadowMode.Off);
+    reachCloudGeometry.setQueueBucket(Bucket.Transparent);
+    reachCloudGeometry.setCullHint(CullHint.Never);
+    if (rootNode != null) {
+      rootNode.attachChild(reachCloudGeometry);
+    }
+  }
+
+  private void writeReachCloudBuffers(PointCloud pc) {
+    Point3df[] points = pc == null ? null : pc.getData();
+    float[] colors = pc == null ? null : pc.getColors();
+    int n = points == null ? 0 : points.length;
+    JMonkeyEngineConfig cfg = config;
+    float voxel = cfg != null ? cfg.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
+    float half = Math.max(0.006f, voxel * 0.45f);
+
+    reachCloudBuffer.clear();
+    reachCloudColorBuffer.clear();
+    float[] corners = new float[24];
+    for (int i = 0; i < n; i++) {
+      Point3df p = points[i];
+      DepthCloudJme.worldVoxelCorners(p.x, p.y, p.z, half, corners);
+      for (int c = 0; c < 24; c++) {
+        reachCloudBuffer.put(corners[c]);
+      }
+      float r = ReachCloud.COLOR[0];
+      float g = ReachCloud.COLOR[1];
+      float b = ReachCloud.COLOR[2];
+      float a = ReachCloud.COLOR[3];
+      if (colors != null && colors.length >= (i + 1) * 4) {
+        r = colors[i * 4];
+        g = colors[i * 4 + 1];
+        b = colors[i * 4 + 2];
+        a = colors[i * 4 + 3];
+      }
+      for (int c = 0; c < 8; c++) {
+        reachCloudColorBuffer.put(r).put(g).put(b).put(a);
+      }
+    }
+    int pad = Math.max(1, n);
+    for (int i = n; i < pad; i++) {
+      for (int c = 0; c < 24; c++) {
+        reachCloudBuffer.put(0f);
+      }
+      for (int c = 0; c < 8; c++) {
+        reachCloudColorBuffer.put(0f).put(0f).put(0f).put(0f);
+      }
+    }
+    reachCloudBuffer.flip();
+    reachCloudColorBuffer.flip();
   }
 
   public void rename(String name, String newName) {
@@ -3491,7 +3949,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // Right drag    pan
     // Shift+drag    pan
     // Wheel         zoom toward look-at
-    // Left click    select (if the pointer did not drag)
+    // Left click    select (if the pointer did not drag); OAK-D mesh → FABRIK
     // https://www.youtube.com/watch?v=IVZPm9HAMD4&feature=youtu.be
     // wrap text of breadcrumbs
     // draggable - resize for menu - what you set is how it stays

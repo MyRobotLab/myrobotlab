@@ -62,11 +62,14 @@ public class JMonkeyEngineConfig extends ServiceConfig {
   public boolean depthCloud = true;
 
   /**
-   * Extra multiplier on camera-frame meters. {@code 1} matches IK / VinMoov
-   * meters. Increase if the cloud still looks tiny after parent-scale
-   * compensation.
+   * Calibration multiplier on camera-frame meters. {@code 1} is real-world
+   * (same units as IK / VinMoov). Use {@code setDepthCloudScale} or
+   * {@code calibrateDepthScale} after a mesh click if a tape measure disagrees.
    */
   public float depthCloudScale = 1f;
+
+  /** Yellow 1 m stick along the chest camera +Z (forward) for scale checks. */
+  public boolean depthMeterStick = true;
 
   /**
    * Divide out the chest node's world scale so 1 m of depth stays 1 m even
@@ -91,5 +94,23 @@ public class JMonkeyEngineConfig extends ServiceConfig {
    * rubber-sheet triangles across object silhouettes.
    */
   public float depthMeshMaxEdgeM = 0.12f;
+
+  /**
+   * Left-click on the visible OAK-D voxel cloud or RGB mesh publishes that
+   * world point ({@code publishClickPoint}) so Fabrik can {@code moveTo} it.
+   */
+  public boolean depthClickToIk = true;
+
+  /**
+   * Cyan voxel cloud of palm positions the InMoov left arm can reach. Off until
+   * the JMonkeyEngine or Fabrik panel turns it on.
+   */
+  public boolean reachCloud = false;
+
+  /** Servo samples per left-arm joint when the simulator builds the cloud. */
+  public int reachCloudSteps = 8;
+
+  /** Merge nearby palm samples into this cell size (meters). */
+  public float reachCloudVoxelM = 0.025f;
 
 }

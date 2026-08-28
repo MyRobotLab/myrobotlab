@@ -42,8 +42,23 @@ angular.module('mrlapp.service.OakDGui', []).controller('OakDGuiCtrl', ['$scope'
     $scope.startSynthetic = function() {
         msg.send('startSyntheticDepth')
     }
+    $scope.knownDistanceM = 1
+
     $scope.setRgbMesh = function() {
         msg.send('setRgbMesh', $scope.service.config.rgbMesh)
+    }
+
+    $scope.setDepthCloudScale = function() {
+        msg.send('setDepthCloudScale', parseFloat($scope.service.depthCloudScale))
+    }
+
+    $scope.resetDepthCloudScale = function() {
+        $scope.service.depthCloudScale = 1
+        msg.send('setDepthCloudScale', 1)
+    }
+
+    $scope.calibrateDepthScale = function() {
+        msg.send('calibrateDepthScale', parseFloat($scope.knownDistanceM))
     }
 
     msg.subscribe('publishClassification')

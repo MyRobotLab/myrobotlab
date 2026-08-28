@@ -11,7 +11,9 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -37,7 +39,12 @@ import org.slf4j.Logger;
  * JPEG). Simulator overlay: attach a {@link JMonkeyEngine} and subscribe it to
  * {@link #publishPointCloud}, {@link #publishDepthHud}, and
  * {@link #publishDepthFrame}. {@link OakDConfig#rgbMesh} switches voxels vs an
- * RGB-textured mesh.
+ * RGB-textured mesh. Left-clicking that overlay in JMonkeyEngine publishes
+ * {@code publishClickPoint} to {@link Fabrik#onPoint}. Overlay vertices are
+ * camera-frame meters (Z from depth mm/1000) in JME world meters; scale
+ * {@code 1} is real-world. {@link #calibrateDepthScale(double)} adjusts
+ * {@link org.myrobotlab.service.config.JMonkeyEngineConfig#depthCloudScale}
+ * from a tape-measured click.
  * <p>
  * Python deps are installed into the shared Py4j venv ({@code data/Py4j/venv}).
  * DepthAI <strong>2.29.0 has no wheels for CPython 3.13/3.14</strong>; pip then
@@ -73,6 +80,12 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
 
   public String lastError;
 
+  /** Mirror of the simulator overlay scale (1 = real-world meters). */
+  public float depthCloudScale = 1f;
+
+  /** Meters from the chest camera to the last overlay click. */
+  public float lastClickDistanceM;
+
   private long syntheticFrameId = 0;
 
   public OakD(String n, String id) {
@@ -86,6 +99,7 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
       py4j = (Py4j) startPeer("py4j");
       installDepthAi();
     }
+    wireSimulatorCalibration();
   }
 
   @Override
@@ -104,6 +118,84 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
     addListener("publishDepthFrame", attachable.getName(), "onDepthFrame");
     addListener("publishRgbMesh", attachable.getName(), "onRgbMesh");
     addListener("publishClassification", attachable.getName(), "onClassification");
+    if (attachable instanceof JMonkeyEngine) {
+      subscribe(attachable.getName(), "publishClickPoint", getName(), "onSimulatorClick");
+      depthCloudScale = ((JMonkeyEngine) attachable).getDepthCloudScale();
+    }
+  }
+
+  /**
+   * Last mesh click in the simulator — copies range/scale for the OakD GUI.
+   */
+  public Point onSimulatorClick(Point point) {
+    JMonkeyEngine jme = findSimulator();
+    if (jme != null) {
+      lastClickDistanceM = jme.lastClickDistanceM;
+      depthCloudScale = jme.getDepthCloudScale();
+    }
+    broadcastState();
+    return point;
+  }
+
+  public float getDepthCloudScale() {
+    JMonkeyEngine jme = findSimulator();
+    if (jme != null) {
+      depthCloudScale = jme.getDepthCloudScale();
+      lastClickDistanceM = jme.lastClickDistanceM;
+    }
+    return depthCloudScale;
+  }
+
+  /**
+   * Calibration multiplier on the simulator overlay. {@code 1} is real-world
+   * meters (same as IK).
+   */
+  public float setDepthCloudScale(float scale) {
+    JMonkeyEngine jme = findSimulator();
+    if (jme == null) {
+      error("No JMonkeyEngine running — start the simulator first");
+      return depthCloudScale;
+    }
+    depthCloudScale = jme.setDepthCloudScale(scale);
+    lastClickDistanceM = jme.lastClickDistanceM;
+    broadcastState();
+    return depthCloudScale;
+  }
+
+  /**
+   * Set overlay scale so the last mesh click is {@code knownDistanceM} from
+   * the chest camera (tape measure). Click the overlay first.
+   */
+  public float calibrateDepthScale(double knownDistanceM) {
+    JMonkeyEngine jme = findSimulator();
+    if (jme == null) {
+      error("No JMonkeyEngine running — start the simulator first");
+      return depthCloudScale;
+    }
+    float applied = jme.calibrateDepthScale(knownDistanceM);
+    depthCloudScale = jme.getDepthCloudScale();
+    lastClickDistanceM = jme.lastClickDistanceM;
+    broadcastState();
+    return applied;
+  }
+
+  private void wireSimulatorCalibration() {
+    JMonkeyEngine jme = findSimulator();
+    if (jme == null) {
+      return;
+    }
+    subscribe(jme.getName(), "publishClickPoint", getName(), "onSimulatorClick");
+    depthCloudScale = jme.getDepthCloudScale();
+    lastClickDistanceM = jme.lastClickDistanceM;
+  }
+
+  private JMonkeyEngine findSimulator() {
+    for (ServiceInterface si : Runtime.getServices()) {
+      if (si instanceof JMonkeyEngine) {
+        return (JMonkeyEngine) si;
+      }
+    }
+    return null;
   }
 
   /**
@@ -292,6 +384,10 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
 
   private DepthFrame publishConverted(DepthFrame frame) {
     if (frame != null) {
+      if (frame.normalizeIntrinsics()) {
+        log.info("OAK-D intrinsics rescaled to {}x{}: fx={} fy={} cx={} cy={}", frame.width, frame.height, frame.fx,
+            frame.fy, frame.cx, frame.cy);
+      }
       frame.decodeRgb();
     }
     invoke("publishDepthFrame", frame);

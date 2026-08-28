@@ -54,6 +54,16 @@ public class HudText {
     this.marginBottom = marginBottom;
   }
 
+  /**
+   * Anchor this HUD text to the upper-left. {@code marginTop} is pixels from
+   * the top of the window to the top of the text block.
+   */
+  public void setFromTop(int marginLeft, int marginTop) {
+    this.fromBottom = false;
+    this.x = marginLeft;
+    this.y = marginTop;
+  }
+
   public void setText(String text, String color, int size) {
     this.color = color;
     this.size = size;

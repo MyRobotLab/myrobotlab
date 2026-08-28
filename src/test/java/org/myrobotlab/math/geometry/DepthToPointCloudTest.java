@@ -1,6 +1,7 @@
 package org.myrobotlab.math.geometry;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -93,5 +94,53 @@ public class DepthToPointCloudTest {
     assertEquals(frame.gridWidth(), hud.width);
     assertEquals(frame.gridHeight(), hud.height);
     assertEquals(hud.width * hud.height * 3, hud.rgb.length);
+  }
+
+  @Test
+  public void normalizeIntrinsicsLeavesFittedKAlone() {
+    DepthFrame frame = new DepthFrame();
+    frame.width = 640;
+    frame.height = 400;
+    frame.fx = 450f;
+    frame.fy = 450f;
+    frame.cx = 320f;
+    frame.cy = 200f;
+    assertFalse(frame.normalizeIntrinsics());
+    assertEquals(450f, frame.fx, 1e-3f);
+    assertEquals(320f, frame.cx, 1e-3f);
+  }
+
+  @Test
+  public void fullSensorKMakesXyTooSmallUntilNormalized() {
+    DepthFrame raw = rightEdgePixel(640, 400, 1400f, 1052f, 776f, 1000);
+    PointCloud before = DepthToPointCloud.convert(raw);
+    assertEquals(1, before.size());
+    float xBefore = before.getData()[0].x;
+
+    DepthFrame scaled = rightEdgePixel(640, 400, 1400f, 1052f, 776f, 1000);
+    assertTrue(scaled.normalizeIntrinsics());
+    PointCloud after = DepthToPointCloud.convert(scaled);
+    assertEquals(1, after.size());
+    float xAfter = after.getData()[0].x;
+    assertEquals(1f, after.getData()[0].z, 1e-4f);
+    assertTrue("normalized K must widen XY at the image edge", Math.abs(xAfter) > Math.abs(xBefore) * 1.5f);
+    assertEquals(320f, scaled.cx, 1f);
+    assertEquals(200f, scaled.cy, 1f);
+  }
+
+  private static DepthFrame rightEdgePixel(int w, int h, float fx, float cx, float cy, int mm) {
+    DepthFrame frame = new DepthFrame();
+    frame.width = w;
+    frame.height = h;
+    frame.stride = 1;
+    frame.fx = fx;
+    frame.fy = fx;
+    frame.cx = cx;
+    frame.cy = cy;
+    frame.minDepthMm = 1;
+    frame.maxDepthMm = 10000;
+    frame.depthMm = new int[w * h];
+    frame.depthMm[h / 2 * w + (w - 1)] = mm;
+    return frame;
   }
 }

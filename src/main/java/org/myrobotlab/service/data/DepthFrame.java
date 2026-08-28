@@ -15,8 +15,8 @@ import javax.imageio.ImageIO;
  * meters after converting mm.
  * <p>
  * <b>JMonkeyEngine:</b> X right, Y up, Z forward, meters. Convert camera
- * points with {@code (x, y, z)_jme = (x, -y, z)_cam} then parent the cloud to
- * the chest camera node so torso motion is applied by the scene graph.
+ * points with {@code (x, y, z)_jme = (x, -y, z)_cam}. The overlay node copies
+ * the chest camera world pose at scale 1 so 1 m of depth is 1 m for IK.
  */
 public class DepthFrame implements Serializable {
 
@@ -77,6 +77,35 @@ public class DepthFrame implements Serializable {
 
   public int index(int col, int row) {
     return row * gridWidth() + col;
+  }
+
+  /**
+   * Scale {@link #fx}/{@link #fy}/{@link #cx}/{@link #cy} into this frame's
+   * pixel size. DepthAI {@code getCameraIntrinsics(socket, w, h)} usually does
+   * this; if it returns a full-sensor matrix (principal point outside the
+   * image) XY unprojection is too small — objects look doll-sized at the
+   * correct Z. Assumes a roughly centered principal point on the native sensor.
+   *
+   * @return true if the matrix was rescaled
+   */
+  public boolean normalizeIntrinsics() {
+    if (width <= 0 || height <= 0) {
+      return false;
+    }
+    boolean changed = false;
+    if (cx > width * 1.05f && cx > 1f) {
+      float s = width / (2f * cx);
+      fx *= s;
+      cx *= s;
+      changed = true;
+    }
+    if (cy > height * 1.05f && cy > 1f) {
+      float s = height / (2f * cy);
+      fy *= s;
+      cy *= s;
+      changed = true;
+    }
+    return changed;
   }
 
   /**

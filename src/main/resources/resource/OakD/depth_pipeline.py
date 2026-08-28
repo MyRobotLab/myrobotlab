@@ -30,19 +30,38 @@ def _try_get(q):
         return None
 
 
+def _scale_k(fx, fy, cx, cy, w, h):
+    """If K is still in full-sensor pixels, unprojection XY is too small."""
+    if cx > w * 1.05 and cx > 1:
+        s = w / (2.0 * cx)
+        fx, cx = fx * s, cx * s
+    if cy > h * 1.05 and cy > 1:
+        s = h / (2.0 * cy)
+        fy, cy = fy * s, cy * s
+    return fx, fy, cx, cy
+
+
 def _intrinsics(dai, calib, w, h):
+    # Depth is aligned to RGB (CAM_A). Using the left mono (CAM_B) K first
+    # shrinks XY when the RGB FOV is wider.
     fx = fy = float(w) * 0.9
     cx = w / 2.0
     cy = h / 2.0
     if calib is None:
         return fx, fy, cx, cy
-    for name in ("CAM_B", "CAM_A", "LEFT", "RGB"):
+    for name in ("CAM_A", "RGB", "CAM_B", "LEFT"):
         try:
             socket = getattr(dai.CameraBoardSocket, name)
             mat = calib.getCameraIntrinsics(socket, w, h)
-            return float(mat[0][0]), float(mat[1][1]), float(mat[0][2]), float(mat[1][2])
+            fx = float(mat[0][0])
+            fy = float(mat[1][1])
+            cx = float(mat[0][2])
+            cy = float(mat[1][2])
+            break
         except Exception:
             continue
+    fx, fy, cx, cy = _scale_k(fx, fy, cx, cy, w, h)
+    print("oakd intrinsics fx,fy,cx,cy", fx, fy, cx, cy, "size", w, h)
     return fx, fy, cx, cy
 
 
@@ -117,9 +136,10 @@ def _jpeg_b64(pkt, cache):
 def _publish_depth(oakd, dai, np, pkt, stride, calib, cache, rgb_pkt=None):
     depth = pkt.getFrame()
     h, w = int(depth.shape[0]), int(depth.shape[1])
-    if cache.get("fx") is None:
+    if cache.get("fx") is None or cache.get("iw") != w or cache.get("ih") != h:
         fx, fy, cx, cy = _intrinsics(dai, calib, w, h)
         cache["fx"], cache["fy"], cache["cx"], cache["cy"] = fx, fy, cx, cy
+        cache["iw"], cache["ih"] = w, h
     sampled = depth[::stride, ::stride]
     jpeg = _jpeg_b64(rgb_pkt, cache)
     oakd.onStridedDepth(

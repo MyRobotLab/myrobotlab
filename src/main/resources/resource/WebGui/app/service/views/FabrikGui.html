@@ -1,6 +1,18 @@
 <div>
 	<h3>FABRIK Inverse Kinematics</h3>
-	<p class="text-muted">Forward And Backward Reaching IK (Aristidou). Green marker is the Cartesian goal. Use after VirtualInMoovIkDemo so the chain is calibrated to VinMoov.</p>
+	<p class="text-muted">Forward And Backward Reaching IK (Aristidou). Green marker is the Cartesian goal. Use after VirtualInMoovIkDemo so the chain is calibrated to VinMoov. Click the OAK-D 3D overlay in the simulator to move the palm there.</p>
+
+	<div class="well" style="margin-bottom: 12px;">
+		<label style="margin-bottom: 0;">
+			<input type="checkbox" ng-model="service.config.reachCloud" ng-change="setReachCloud()"/>
+			Show left-hand reach cloud
+		</label>
+		<div class="text-muted" style="margin-top: 4px;">
+			<small>Cyan voxels in the simulator are palm positions the InMoov left arm can actually reach.
+			<span ng-show="service.reachCloudPointCount">{{service.reachCloudPointCount}} voxels.</span>
+			Turn off to hide.</small>
+		</div>
+	</div>
 
 	<div class="well" style="margin-bottom: 12px;">
 		<h4 style="margin-top: 0;">World position</h4>
@@ -49,7 +61,7 @@
 		</div>
 		<input type="submit" value="MoveTo" />
 	</form>
-	<small class="text-muted">Green marker is the goal. Arm walks there in 2 cm steps.</small>
+	<small class="text-muted">Green marker is the goal. Arm walks there in 2 cm steps. Click the OAK-D mesh in the simulator to set this goal.</small>
 
 	<h3>Skeleton (world meters)</h3>
 	<table>

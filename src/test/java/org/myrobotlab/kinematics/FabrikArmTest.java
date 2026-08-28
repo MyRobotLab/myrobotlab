@@ -91,6 +91,16 @@ public class FabrikArmTest extends AbstractTest {
   }
 
   @Test
+  public void testSamplingDoesNotMoveArm() {
+    FabrikArm arm = leftArm();
+    arm.centerAllJoints();
+    Point before = arm.getPalmPosition();
+    java.util.List<Point> palms = arm.samplePalmWorkspace(2);
+    Assert.assertEquals(16, palms.size());
+    Assert.assertEquals(0.0, before.distanceTo(arm.getPalmPosition()), 1e-9);
+  }
+
+  @Test
   public void testCalibrateResidualIsZero() {
     FabrikArm arm = new FabrikArm("shifted");
     java.util.List<JointFrame> frames = InMoov2Arm.getDefaultJointFrames("i01", "left");
