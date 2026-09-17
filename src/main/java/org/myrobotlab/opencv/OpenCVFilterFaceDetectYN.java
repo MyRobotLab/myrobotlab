@@ -53,7 +53,7 @@ public class OpenCVFilterFaceDetectYN extends OpenCVFilter {
 
   private static final String FACE_LABEL = "face";
 
-  static {
+  private static void loadNatives() {
     Loader.load(opencv_objdetect.class);
   }
 
@@ -93,14 +93,17 @@ public class OpenCVFilterFaceDetectYN extends OpenCVFilter {
 
   public OpenCVFilterFaceDetectYN() {
     super();
+    loadNatives();
   }
 
   public OpenCVFilterFaceDetectYN(String name) {
     super(name);
+    loadNatives();
   }
 
   public OpenCVFilterFaceDetectYN(String filterName, String sourceKey) {
     super(filterName, sourceKey);
+    loadNatives();
   }
 
   public String installSelectedModel() {
@@ -134,6 +137,7 @@ public class OpenCVFilterFaceDetectYN extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
+    loadNatives();
     bb.clear();
     classifications.clear();
     landmarks.clear();

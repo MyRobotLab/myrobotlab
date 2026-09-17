@@ -48,7 +48,7 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
   public static OpenCVFilterInfo catalogInfo() {
     return new OpenCVFilterInfo("QrCode",
         "Detects QR codes with OpenCV's ArUco-based QR detector, and optionally ArUco fiducial markers from a predefined dictionary.",
-        "Point the camera at a sharp, well-lit code. Choose mode qr, aruco, or both. Pick the ArUco dictionary to match your printed markers. Last payload is shown in the WebGui.",
+        "Point the camera at a sharp, well-lit code. Choose mode qr, aruco, or both. Detected payloads appear in the WebGui with a scan history.",
         OpenCVFilterInfo.DEP_CORE);
   }
 
@@ -65,7 +65,7 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
   public static final String MODE_ARUCO = "aruco";
   public static final String MODE_BOTH = "both";
 
-  static {
+  private static void loadNatives() {
     Loader.load(opencv_objdetect.class);
   }
 
@@ -81,7 +81,15 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
 
   public String lastText = "";
 
-  public ArrayList<Classification> lastResult = new ArrayList<>();
+  /**
+   * Newest-first scan history for the WebGui. A new entry is added when the
+   * decoded payload changes, not on every frame the same code is visible.
+   */
+  public ArrayList<Detection> history = new ArrayList<>();
+
+  public int maxHistory = 50;
+
+  transient public ArrayList<Classification> lastResult = new ArrayList<>();
 
   transient private QRCodeDetectorAruco qrDetector;
 
@@ -93,14 +101,17 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
 
   public OpenCVFilterQrCode() {
     super();
+    loadNatives();
   }
 
   public OpenCVFilterQrCode(String name) {
     super(name);
+    loadNatives();
   }
 
   public OpenCVFilterQrCode(String filterName, String sourceKey) {
     super(filterName, sourceKey);
+    loadNatives();
   }
 
   @Override
@@ -109,6 +120,7 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
+    loadNatives();
     lastResult = new ArrayList<>();
     StringBuilder texts = new StringBuilder();
     Mat frame = converter.toMat(image);
@@ -122,7 +134,6 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
     if (MODE_ARUCO.equals(m) || MODE_BOTH.equals(m)) {
       detectAruco(frame, texts);
     }
-    lastText = texts.toString().trim();
     if (!lastResult.isEmpty()) {
       Map<String, List<Classification>> ret = new TreeMap<>();
       for (Classification c : lastResult) {
@@ -137,7 +148,54 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
       }
       data.putBoundingBoxArray(boxes);
     }
+    String frameText = texts.toString().trim();
+    if (!frameText.isEmpty() && !frameText.equals(lastText)) {
+      lastText = frameText;
+      String kind = MODE_ARUCO.equals(m) ? "aruco"
+          : (frameText.contains("aruco-") && MODE_BOTH.equals(m) ? "mixed" : "qr");
+      remember(frameText, kind);
+      broadcastFilterState();
+    }
     return image;
+  }
+
+  /**
+   * Scan record shown in the WebGui history list.
+   */
+  public static class Detection implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
+    public long ts;
+    public String text;
+    public String kind;
+
+    public Detection() {
+    }
+
+    public Detection(String text, String kind) {
+      this.ts = System.currentTimeMillis();
+      this.text = text;
+      this.kind = kind == null ? "qr" : kind;
+    }
+  }
+
+  void remember(String text, String kind) {
+    Detection hit = new Detection(text, kind);
+    if (history == null) {
+      history = new ArrayList<>();
+    }
+    history.add(0, hit);
+    int max = maxHistory < 1 ? 50 : maxHistory;
+    while (history.size() > max) {
+      history.remove(history.size() - 1);
+    }
+  }
+
+  public void clearHistory() {
+    if (history != null) {
+      history.clear();
+    }
+    lastText = "";
+    broadcastFilterState();
   }
 
   private void detectQr(Mat frame, StringBuilder texts) {

@@ -264,7 +264,7 @@ public abstract class OpenCVFilter implements Serializable, CVFilter {
         }
       } catch (NoSuchMethodException ignored) {
         // try superclass
-      } catch (Exception e) {
+      } catch (Throwable e) {
         log.warn("catalogInfo() failed for {}", cursor.getName(), e);
         break;
       }

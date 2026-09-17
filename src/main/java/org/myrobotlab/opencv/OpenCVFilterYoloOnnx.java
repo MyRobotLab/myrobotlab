@@ -70,7 +70,7 @@ public class OpenCVFilterYoloOnnx extends OpenCVFilter {
   public static final String DECODER_YOLOX = "yolox";
   public static final String DECODER_DETECTION_MODEL = "detection_model";
 
-  static {
+  private static void loadNatives() {
     Loader.load(opencv_dnn.class);
   }
 
@@ -134,14 +134,17 @@ public class OpenCVFilterYoloOnnx extends OpenCVFilter {
 
   public OpenCVFilterYoloOnnx() {
     super();
+    loadNatives();
   }
 
   public OpenCVFilterYoloOnnx(String name) {
     super(name);
+    loadNatives();
   }
 
   public OpenCVFilterYoloOnnx(String filterName, String sourceKey) {
     super(filterName, sourceKey);
+    loadNatives();
   }
 
   public String installSelectedModel() {
@@ -170,6 +173,7 @@ public class OpenCVFilterYoloOnnx extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
+    loadNatives();
     long now = System.currentTimeMillis();
     if (lastInferTs != 0 && now - lastInferTs < Math.max(0, minIntervalMs)) {
       return image;

@@ -123,6 +123,7 @@ import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectYN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterOcr;
+import org.myrobotlab.opencv.OpenCVFilterQrCode;
 import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.OpenCVFilterYoloOnnx;
@@ -340,13 +341,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   transient final static public String PART = "part";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
-      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceDetectYN", "FaceRecognizer", "FaceTraining", "Fauvist",
-      "FindContours", "Flip", "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert",
-      "KinectDepth", "KinectDepthMask", "KinectNavigate", "KinectPointCloud", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Ocr", "Output", "Overlay",
-      "PyramidDown", "PyramidUp", "QrCode", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF",
-      "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", "YoloOnnx",
-      "DepthToPointCloud" };
+  public final static String POSSIBLE_FILTERS[] = OpenCVFilterCatalog.POSSIBLE_FILTERS;
 
   static final long serialVersionUID = 1L;
 
@@ -1933,6 +1928,22 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return path;
   }
 
+  /**
+   * Clear the QR / ArUco scan history on a {@link OpenCVFilterQrCode} filter.
+   */
+  public void clearQrHistory(String filterName) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter instanceof OpenCVFilterQrCode) {
+      ((OpenCVFilterQrCode) filter).clearHistory();
+      return;
+    }
+    if (filter == null) {
+      error("clearQrHistory - could not find filter %s", filterName);
+      return;
+    }
+    error("clearQrHistory - %s is not a QrCode filter", filterName);
+  }
+
   public String setGrabberType(String grabberType) {
     this.grabberType = grabberType;
     return grabberType;
@@ -2230,14 +2241,15 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
       cv.capture();
 
-      cv.addFilter(new OpenCVFilterYolo("yolo"));
-      sleep(1000);
-      cv.removeFilters();
+      //cv.addFilter(new OpenCVFilterYolo("yolo"));
+      //sleep(1000);
+      //cv.removeFilters();
 
-      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
-      cv.addFilter(fr);
-      // OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
-      // cv.addFilter(tracker);
+      //OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
+      //cv.addFilter(fr);
+      OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
+      cv.addFilter(tracker);
+      
       // OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
       // cv.addFilter(lk);
       // OpenCVFilterFaceDetectDNN faceDnn = new

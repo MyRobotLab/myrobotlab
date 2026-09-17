@@ -436,7 +436,33 @@
                     <option>DICT_ARUCO_ORIGINAL</option>
                 </select>
             </div>
-            <strong>Last:</strong> {{getFilter().lastText}}
+            <strong>Last detected:</strong>
+            <div class="well well-sm" style="margin-top:6px;margin-bottom:8px;word-break:break-all">
+                {{getFilter().lastText || '(none yet)'}}
+            </div>
+            <div ng-show="getFilter().history && getFilter().history.length">
+                <strong>History</strong>
+                <button class="btn btn-default btn-xs pull-right" ng-click="clearQrHistory()">Clear</button>
+                <table class="table table-condensed" style="margin-top:8px">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="hit in getFilter().history">
+                            <td>{{formatQrTime(hit.ts)}}</td>
+                            <td>{{hit.kind || 'qr'}}</td>
+                            <td style="word-break:break-all">{{hit.text}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div ng-hide="getFilter().history && getFilter().history.length" class="text-muted">
+                No scan history yet.
+            </div>
         </div>
         <div ng-show="isFilterType('Tracker')" class="col-md-12">
             Click the video to set a tracking box. CSRT/KCF/MIL/GOTURN are built in.

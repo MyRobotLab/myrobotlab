@@ -187,6 +187,15 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
             $scope.mergeFilterCatalog(data)
             $scope.$apply()
             break
+        case 'onFilterState':
+            if (data && data.name && data.filter) {
+                if (!$scope.service.filters) {
+                    $scope.service.filters = {}
+                }
+                $scope.service.filters[data.name] = data.filter
+            }
+            $scope.$apply()
+            break
         case 'onWebDisplay':
             // $scope.diplayImage = 'data:image/jpeg;base64,' + data
             $scope.diplayImage = data.data
@@ -286,6 +295,27 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         return installed && installed.indexOf(id) >= 0
     }
 
+    $scope.clearQrHistory = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        filter.history = []
+        filter.lastText = ''
+        msg.send('clearQrHistory', filter.name)
+    }
+
+    $scope.formatQrTime = function(ts) {
+        if (!ts) {
+            return ''
+        }
+        let d = new Date(ts)
+        if (isNaN(d.getTime())) {
+            return ''
+        }
+        return d.toLocaleTimeString()
+    }
+
     $scope.getFilterType = function(typeName) {
         if (!typeName) {
             typeName = $scope.service.displayFilter
@@ -327,6 +357,7 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     msg.subscribe('getPossibleFilters')
     msg.subscribe('publishWebDisplay')
     msg.subscribe('publishState')
+    msg.subscribe('publishFilterState')
     msg.send('getPossibleFilters')
     msg.subscribe(this)
 
