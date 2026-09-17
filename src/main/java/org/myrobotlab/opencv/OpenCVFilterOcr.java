@@ -60,6 +60,22 @@ import org.slf4j.Logger;
  * be skipped when a {@link OpenCVFilterBlurDetector} has already run.
  */
 public class OpenCVFilterOcr extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Ocr",
+        "Scene-text pipeline: detect regions with EAST or DBNet (or OCR the full frame), then recognize with a TesseractOcr service. Throttled and can skip blurry frames.",
+        "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur. Set language on TesseractOcr.",
+        "TesseractOcr service (tessdata). EAST from opencv_east_text_detection zip, or DBNet ONNX downloaded on demand.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterOcr.class);

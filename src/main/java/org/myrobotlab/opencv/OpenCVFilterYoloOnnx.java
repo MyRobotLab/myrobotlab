@@ -47,6 +47,22 @@ import org.slf4j.Logger;
  * {@link DetectionModel} instead (SSD / Darknet-style YOLO ONNX).
  */
 public class OpenCVFilterYoloOnnx extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("YoloOnnx",
+        "ONNX YOLO detector. Default is OpenCV Zoo YOLOX-s (COCO). Can also run generic SSD/Darknet-style ONNX via DetectionModel.",
+        "Add the filter and optionally Download / cache YOLOX. Tune confidence, NMS, and min interval. Set decoder to detection_model for non-YOLOX ONNX. Weights cache in data/OpenCV/zoo_models/.",
+        "YOLOX-s ONNX from OpenCV Zoo (downloaded on demand), or your own ONNX path.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYoloOnnx.class);

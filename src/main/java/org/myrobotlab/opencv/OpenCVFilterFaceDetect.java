@@ -51,6 +51,22 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FaceDetect",
+        "Classic Haar-cascade frontal-face detector. Draws boxes around faces and publishes bounding boxes. Fast on CPU but sensitive to pose, scale, and lighting.",
+        "Add the filter and start capture. Default cascade is haarcascade_frontalface_alt2.xml. Prefer FaceDetectYN on OpenCV 4.x for better accuracy.",
+        OpenCVFilterInfo.DEP_HAAR);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

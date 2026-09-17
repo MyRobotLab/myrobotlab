@@ -116,7 +116,9 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterCatalog;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
+import org.myrobotlab.opencv.OpenCVFilterInfo;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectYN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
@@ -461,6 +463,16 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
    */
   static public String[] getPossibleFilters() {
     return POSSIBLE_FILTERS;
+  }
+
+  /**
+   * Descriptions for every filter in {@link #POSSIBLE_FILTERS}: what it does,
+   * how to use it, and extra dependencies. Used by the WebGui filter guide.
+   *
+   * @return unmodifiable map keyed by filter type name
+   */
+  static public Map<String, OpenCVFilterInfo> getPossibleFilterInfo() {
+    return OpenCVFilterCatalog.getAll();
   }
 
   public void stopStreamer() {

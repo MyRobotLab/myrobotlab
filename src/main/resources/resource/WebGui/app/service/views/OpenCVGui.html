@@ -166,7 +166,8 @@
                 <td>
                     <select class="custom-select col-md-12" size="7" ng-model="service.displayFilter"
                         ng-change="setDisplayFilter(service.displayFilter)">
-                        <option ng-repeat="(key, value) in service.filters">{{ key }}</option>
+                        <option ng-repeat="(key, value) in service.filters"
+                            title="{{(getFilterInfo(value.type) || {}).description}}">{{ key }}</option>
                     </select>
                 </td>
                 <td class="text-center align-middle cellPadding">
@@ -180,9 +181,26 @@
                     </button>
                 </td>
                 <td>
-                    <select class="custom-select col-md-12" ng-model="selectedFilterType" size="7">
-                        <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
+                    <select class="custom-select col-md-12" ng-model="selectedFilterType" size="7"
+                        ng-change="onAvailableFilterSelect()">
+                        <option ng-repeat="filter in possibleFilters"
+                            title="{{(getFilterInfo(filter) || {}).description}}">{{ filter }}</option>
                     </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="padding-top:8px">
+                    <div class="well well-sm" ng-show="getFilterInfo()">
+                        <strong>{{getFilterInfo().type}}</strong>
+                        <div style="margin-top:8px">
+                            <label>What it does</label>
+                            <p>{{getFilterInfo().description}}</p>
+                            <label>How to use</label>
+                            <p>{{getFilterInfo().usage}}</p>
+                            <label>Dependencies</label>
+                            <p>{{getFilterInfo().dependencies}}</p>
+                        </div>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -467,6 +485,12 @@
             name <input  ng-enter="addNamedFilter(newUserName)" class="form-control" type="text" ng-model="newUserName" autofocus /><br>           
         </div>
         </form>
+        <div ng-show="getFilterInfo(selectedFilterType)" style="margin-top:12px">
+            <strong>{{selectedFilterType}}</strong>
+            <p>{{getFilterInfo(selectedFilterType).description}}</p>
+            <p><em>How to use:</em> {{getFilterInfo(selectedFilterType).usage}}</p>
+            <p><em>Dependencies:</em> {{getFilterInfo(selectedFilterType).dependencies}}</p>
+        </div>
         </div>
         <div class="modal-footer">            
             <span class="input-group-btn"><button class="btn btn-default" ng-click="addNamedFilter(newUserName)">add</button></span>        

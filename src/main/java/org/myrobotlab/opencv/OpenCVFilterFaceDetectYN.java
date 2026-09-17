@@ -31,6 +31,22 @@ import org.slf4j.Logger;
  * {@code data/OpenCV/zoo_models/}.
  */
 public class OpenCVFilterFaceDetectYN extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FaceDetectYN",
+        "YuNet (OpenCV FaceDetectorYN) — the current OpenCV 4.x face detector. Publishes boxes and 5 face landmarks. ONNX weights are about 233 KB.",
+        "Add the filter, start capture, and optionally click Download / cache YuNet. Tune score and NMS thresholds. Auto-download stores files in data/OpenCV/zoo_models/.",
+        "YuNet ONNX from OpenCV Zoo (downloaded on demand into data/OpenCV/zoo_models/).");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectYN.class);

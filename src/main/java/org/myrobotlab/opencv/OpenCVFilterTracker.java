@@ -65,6 +65,22 @@ import org.slf4j.Logger;
  *
  */
 public class OpenCVFilterTracker extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Tracker",
+        "Bounding-box object tracker. CSRT/KCF/MIL/GOTURN are built in; Nano and ViT download ONNX weights. Click the video to set the box.",
+        "Start capture, add the filter, click the target. Choose tracker type in the WebGui. Enable auto-download for Nano/ViT. Re-click if tracking is lost.",
+        "CSRT/KCF/MIL/GOTURN: none extra. Nano/ViT: ONNX files in data/OpenCV/zoo_models/.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTracker.class);

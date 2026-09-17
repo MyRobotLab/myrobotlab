@@ -22,6 +22,22 @@ import org.bytedeco.opencv.opencv_ximgproc.SelectiveSearchSegmentation;
  *
  */
 public class OpenCVFilterImageSegmenter extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("ImageSegmenter",
+        "OpenCV selective search: proposes interesting regions that could contain objects (fast or quality mode).",
+        "Add to preview region proposals. Slow on large frames; the display only draws the first N boxes. Requires OpenCV ximgproc (bundled with JavaCV).",
+        "OpenCV ximgproc (JavaCV loads opencv_video first as a workaround).");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

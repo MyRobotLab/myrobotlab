@@ -2384,6 +2384,7 @@
                 <include>**/org/myrobotlab/math/geometry/DepthToPointCloudTest.java</include>
                 <include>**/org/myrobotlab/math/geometry/DepthCloudJmeTest.java</include>
                 <include>**/org/myrobotlab/jme3/DepthPickTest.java</include>
+                <include>**/org/myrobotlab/opencv/OpenCVFilterCatalogTest.java</include>
               </includes>
               <excludes>
                 <exclude>**/integration/*</exclude>

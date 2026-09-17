@@ -41,6 +41,22 @@ import org.slf4j.Logger;
  * {@link #mode}: {@code qr} (default), {@code aruco}, or {@code both}.
  */
 public class OpenCVFilterQrCode extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("QrCode",
+        "Detects QR codes with OpenCV's ArUco-based QR detector, and optionally ArUco fiducial markers from a predefined dictionary.",
+        "Point the camera at a sharp, well-lit code. Choose mode qr, aruco, or both. Pick the ArUco dictionary to match your printed markers. Last payload is shown in the WebGui.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterQrCode.class);

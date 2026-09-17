@@ -41,6 +41,22 @@ import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 public class OpenCVFilterAnd extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("And",
+        "Bitwise AND of the current frame with a loaded mask image. Pixels that are zero in the mask are cleared in the output.",
+        "Load a grayscale or binary mask (same size as the camera image) via loadMask, then add the filter to the pipeline. Pair with InRange or Threshold to build the mask.",
+        "A mask image loaded with loadMask(filename).");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

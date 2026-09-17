@@ -16,6 +16,22 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVFilterBlurDetector extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("BlurDetector",
+        "Estimates how sharp the whole frame is by computing the variance of the Laplacian. Lower scores mean a blurrier image (typically < 100 is quite blurry).",
+        "Add it early in a pipeline (for example before Ocr). It publishes blurriness on the OpenCV data so later filters can skip unusable frames. The on-screen label uses a display threshold of 100.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

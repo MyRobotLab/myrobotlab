@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', 'mrl', '$uibModal', function($scope, mrl, $uibModal) {
+angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', 'mrl', '$http', '$uibModal', function($scope, mrl, $http, $uibModal) {
     console.info('OpenCVGuiCtrl')
     // grab a reference
     var _self = this
@@ -65,6 +65,35 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
 
     $scope.possibleFilters = null
 
+    $scope.filterCatalog = {}
+
+    $scope.filterInfoType = $scope.selectedFilterType
+
+    $scope.mergeFilterCatalog = function(data) {
+        if (!data) {
+            return
+        }
+        if (Array.isArray(data)) {
+            data.forEach(function(info) {
+                if (info && info.type) {
+                    $scope.filterCatalog[info.type] = info
+                }
+            })
+        } else {
+            Object.keys(data).forEach(function(key) {
+                $scope.filterCatalog[key] = data[key]
+            })
+        }
+    }
+
+    $http.get('OpenCV/filter-catalog.json').then(function(resp) {
+        $scope.mergeFilterCatalog(resp.data)
+    }, function() {
+        $http.get('resource/OpenCV/filter-catalog.json').then(function(resp) {
+            $scope.mergeFilterCatalog(resp.data)
+        })
+    })
+
     // initial state of service.
 
     if ($scope.service.capturing) {
@@ -119,6 +148,28 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     $scope.setDisplayFilter = function(name) {
         console.info('setDisplayFilter', name)
         msg.send('setDisplayFilter', name)
+        $scope.onCurrentFilterSelect()
+    }
+
+    $scope.onAvailableFilterSelect = function() {
+        $scope.filterInfoType = $scope.selectedFilterType
+    }
+
+    $scope.onCurrentFilterSelect = function() {
+        let filter = $scope.getFilter()
+        if (filter && filter.type) {
+            $scope.filterInfoType = filter.type
+        }
+    }
+
+    $scope.getFilterInfo = function(type) {
+        if (!type) {
+            type = $scope.filterInfoType
+        }
+        if (type && $scope.filterCatalog[type]) {
+            return $scope.filterCatalog[type]
+        }
+        return null
     }
 
     this.onMsg = function(inMsg) {
@@ -130,6 +181,10 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
             break
         case 'onPossibleFilters':
             $scope.possibleFilters = data
+            $scope.$apply()
+            break
+        case 'onPossibleFilterInfo':
+            $scope.mergeFilterCatalog(data)
             $scope.$apply()
             break
         case 'onWebDisplay':

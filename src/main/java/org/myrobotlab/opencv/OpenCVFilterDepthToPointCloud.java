@@ -23,6 +23,22 @@ import org.slf4j.Logger;
  * {@link OpenCVFilterKinectPointCloud}.
  */
 public class OpenCVFilterDepthToPointCloud extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("DepthToPointCloud",
+        "Converts a 16-bit 1-channel depth image (millimeters) to a camera-frame point cloud and a colorized depth preview. Same engine as KinectPointCloud.",
+        "Use a depth grabber or depth image files. Adjust intrinsics (fx, fy, cx, cy), stride, and depth range. Subscribe to PointCloud publications for 3D views (JMonkeyEngine, etc.).",
+        OpenCVFilterInfo.DEP_KINECT);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

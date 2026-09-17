@@ -11,6 +11,22 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVFilterUndistort extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Undistort",
+        "Applies OpenCV undistort with a hard-coded 640×480 fisheye camera matrix and distortion coefficients to straighten a fisheye frame.",
+        "Works best on 640×480 fisheye captures matching that calibration. For another lens you must change the matrix in code — the WebGui does not yet expose calibration.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   /**
    * an undistortion filter that can add/remove a fisheye distortion to the
