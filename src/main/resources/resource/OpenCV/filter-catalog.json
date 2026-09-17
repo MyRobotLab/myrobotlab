@@ -1,0 +1,422 @@
+{
+  "AdaptiveThreshold": {
+    "type": "AdaptiveThreshold",
+    "description": "Converts the frame to grayscale and applies an adaptive binary threshold. Each pixel is compared to the mean or Gaussian average of a local neighborhood, which handles uneven lighting better than a single global threshold.",
+    "usage": "Add the filter and start capture. Adjust block size (odd number), the subtracted constant, and mean vs Gaussian. Use it before contour, blob, or OCR stages when illumination varies across the frame.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "AddMask": {
+    "type": "AddMask",
+    "description": "Composites a PNG that has an alpha channel over the live frame so you can hide or emphasize regions (for example, cutting a face out of a busy background for training).",
+    "usage": "Add the filter, then load a same-size PNG with transparency. The overlay is blended each frame. Useful as a preprocessing step before FaceRecognizer or training filters.",
+    "dependencies": "A PNG with an alpha channel; path is configured on the filter."
+  },
+  "Affine": {
+    "type": "Affine",
+    "description": "Applies a 2D affine transform (rotation plus optional translation) that keeps lines and parallelism. Typical use is rotating a camera image so the world is upright.",
+    "usage": "Add the filter and start capture. Drag the angle slider in the WebGui, or set angle/dx/dy from Python. Clicking the video records a point the filter can use as a rotation reference.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "And": {
+    "type": "And",
+    "description": "Bitwise AND of the current frame with a loaded mask image. Pixels that are zero in the mask are cleared in the output.",
+    "usage": "Load a grayscale or binary mask (same size as the camera image) via loadMask, then add the filter to the pipeline. Pair with InRange or Threshold to build the mask.",
+    "dependencies": "A mask image loaded with loadMask(filename)."
+  },
+  "BlurDetector": {
+    "type": "BlurDetector",
+    "description": "Estimates how sharp the whole frame is by computing the variance of the Laplacian. Lower scores mean a blurrier image (typically < 100 is quite blurry).",
+    "usage": "Add it early in a pipeline (for example before Ocr). It publishes blurriness on the OpenCV data so later filters can skip unusable frames. The on-screen label uses a display threshold of 100.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "BoundingBoxToFile": {
+    "type": "BoundingBoxToFile",
+    "description": "Crops every published bounding box from the current frame and writes those image patches to disk. Intended for collecting training samples from detectors that already emit boxes.",
+    "usage": "Put this after a detector (FaceDetect, Yolo, YoloOnnx, QrCode, FindContours, ...). Crops are written under <opencvName>.<filterName>/ as frames arrive.",
+    "dependencies": "Requires an upstream filter that publishes Rectangle bounding boxes on the OpenCV data."
+  },
+  "Canny": {
+    "type": "Canny",
+    "description": "Canny edge detector: finds intensity gradients and thins them into a binary edge map. Widely used as a first step for contours, lines, and shape analysis.",
+    "usage": "Add the filter and tune aperture size plus low/high hysteresis thresholds. Feed the output into FindContours, HoughLines2, or Mouse. Color input is converted to gray first.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "ColorTrack": {
+    "type": "ColorTrack",
+    "description": "Converts BGR to HSV and keeps pixels whose hue/saturation/value fall in a configured range — a classic color blob tracker.",
+    "usage": "Start capture, add the filter, then sample a color by clicking the video (samplePoint) or set HSV min/max in code. Follow with FindContours or SimpleBlobDetector to get a centroid.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Copy": {
+    "type": "Copy",
+    "description": "Makes an independent copy of the current image and stores it on the OpenCV data under the key \"copy\" without otherwise changing the pipeline image.",
+    "usage": "Insert where you need a snapshot of an intermediate stage for another filter's sourceKey, overlay, or debugging.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "CreateHistogram": {
+    "type": "CreateHistogram",
+    "description": "Splits the image into HSV planes and computes a hue histogram. Useful for checking lighting and color distribution.",
+    "usage": "Add the filter while capturing. Histogram data is calculated each frame; use it to choose InRange / ColorTrack bounds.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Detector": {
+    "type": "Detector",
+    "description": "Background subtractor (MOG2). Learns a model of the static scene and outputs a foreground mask of things that moved.",
+    "usage": "Point a fixed camera at a scene, add the filter, and let it learn (learningRate -1). Call learn() to resume adapting or set learningRate to 0 to freeze the model. Follow with FindContours to box movers.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Dilate": {
+    "type": "Dilate",
+    "description": "Morphological dilation: expands bright regions. Thickens edges, fills small holes, and grows blobs in a binary image.",
+    "usage": "Typically used after Threshold, Canny, or Erode. Add it when blobs or text strokes are too thin to detect reliably.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "DL4J": {
+    "type": "DL4J",
+    "description": "Legacy Deeplearning4j image-classification filter. The OpenCVFilterDL4J class is not currently in this tree, so adding it will fail until the filter is restored.",
+    "usage": "Prefer YoloOnnx or FaceDetectYN for current DNN vision. If you have an old DL4J pipeline, keep the matching Deeplearning4j service and model files.",
+    "dependencies": "Not implemented in this build. Historically required the Deeplearning4j service and a trained model."
+  },
+  "DL4JTransfer": {
+    "type": "DL4JTransfer",
+    "description": "Legacy Deeplearning4j transfer-learning filter. The implementation is not currently in this tree.",
+    "usage": "Use FaceRecognizer / FaceTraining or an external trainer instead. Adding this type will fail until the class is restored.",
+    "dependencies": "Not implemented in this build."
+  },
+  "Erode": {
+    "type": "Erode",
+    "description": "Morphological erosion: shrinks bright regions. Removes speckle noise and separates touching blobs in a binary image.",
+    "usage": "Use after Threshold or Canny when noise specks remain. Often paired with Dilate (open/close operations).",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "FaceDetect": {
+    "type": "FaceDetect",
+    "description": "Classic Haar-cascade frontal-face detector. Draws boxes around faces and publishes bounding boxes. Fast on CPU but sensitive to pose, scale, and lighting.",
+    "usage": "Add the filter and start capture. Default cascade is haarcascade_frontalface_alt2.xml. Prefer FaceDetectYN on OpenCV 4.x for better accuracy.",
+    "dependencies": "Haar cascade XML from the opencv_classifiers Ivy zip under resource/OpenCV/haarcascades/."
+  },
+  "FaceDetectDNN": {
+    "type": "FaceDetectDNN",
+    "description": "2016-era Caffe SSD face detector (res10_300x300). More robust than Haar, slower than YuNet.",
+    "usage": "Add the filter; it loads deploy.prototxt and the caffemodel from resource/OpenCV/models/facedetectdnn/. Prefer FaceDetectYN for new projects.",
+    "dependencies": "Caffe prototxt + caffemodel from the opencv_facedetectdnn Ivy zip."
+  },
+  "FaceDetectYN": {
+    "type": "FaceDetectYN",
+    "description": "YuNet (OpenCV FaceDetectorYN) — the current OpenCV 4.x face detector. Publishes boxes and 5 face landmarks. ONNX weights are about 233 KB.",
+    "usage": "Add the filter, start capture, and optionally click Download / cache YuNet. Tune score and NMS thresholds. Auto-download stores files in data/OpenCV/zoo_models/.",
+    "dependencies": "YuNet ONNX from OpenCV Zoo (downloaded on demand into data/OpenCV/zoo_models/)."
+  },
+  "FaceRecognizer": {
+    "type": "FaceRecognizer",
+    "description": "Identifies who a face belongs to after training (Eigen, Fisher, or LBPH). Detects a face, aligns it, and predicts a label.",
+    "usage": "Collect labeled face crops, set mode to TRAIN with trainName, then switch to RECOGNIZE. Training images live under the training/ directory. Needs commons-lang3 (already an OpenCV Meta dependency).",
+    "dependencies": "Haar cascades for face/eyes plus a trained model. Apache Commons Lang 3."
+  },
+  "FaceTraining": {
+    "type": "FaceTraining",
+    "description": "Helper that captures Haar-detected face crops and trains an EigenFace recognizer, switching between training and predicting modes.",
+    "usage": "Point the camera at a person, add the filter, and let it gather samples into its training folder, then switch to predicting. FaceRecognizer is the more complete API for production use.",
+    "dependencies": "Haar cascade XML from the opencv_classifiers Ivy zip under resource/OpenCV/haarcascades/."
+  },
+  "Fauvist": {
+    "type": "Fauvist",
+    "description": "Stylized edge-only look: converts to gray and runs Canny with fixed thresholds, returning a high-contrast line drawing.",
+    "usage": "Add for an artistic preview or as a cheap edge map. For tunable edges use Canny instead.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "FindContours": {
+    "type": "FindContours",
+    "description": "Finds external contours in a (usually binary) image, approximates polygons, and can publish bounding boxes.",
+    "usage": "Put after Threshold, Canny, ColorTrack, or Detector. Set min/max area to ignore noise. Boxes can feed BoundingBoxToFile or Tracker.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Flip": {
+    "type": "Flip",
+    "description": "Mirrors the image. flipCode 0 is upside-down, 1 is left-right, -1 is both — useful when a camera is mounted inverted.",
+    "usage": "Add near the start of the pipeline so later filters see a correctly oriented image. Change flipCode from Python if the default is wrong.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "FloodFill": {
+    "type": "FloodFill",
+    "description": "Flood-fills a connected region from a seed point, replacing similar colors. Used to paint a surface (for example floor) a uniform color.",
+    "usage": "Click the video to set a seed, or set the seed in code. Related to FloorFinder, which flood-fills from a default interior point.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "FloorFinder": {
+    "type": "FloorFinder",
+    "description": "Flood-fills from a point near the bottom-center of the frame so a homogeneous floor becomes a solid mask for navigation experiments.",
+    "usage": "Use a camera aimed at the floor with fairly uniform color. Tune lo/up color difference if the fill leaks into walls or stops too soon.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "FloorFinder2": {
+    "type": "FloorFinder2",
+    "description": "Floor segmentation that flood-fills, then finds contours and publishes polygons/boxes for the floor region.",
+    "usage": "Same setup as FloorFinder. Enable publishBoundingBox / publishPolygon depending on whether you want boxes or polygon points for motion planning.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "GoodFeaturesToTrack": {
+    "type": "GoodFeaturesToTrack",
+    "description": "Shi-Tomasi corner detector. Finds strong, trackable points (the same features LK optical flow uses).",
+    "usage": "Add to inspect corners, or use LKOpticalTrack which calls this internally when you click Get Features. Works best on textured scenes.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Gray": {
+    "type": "Gray",
+    "description": "Converts a color BGR frame to single-channel grayscale. Many classic filters expect gray input; others convert internally.",
+    "usage": "Place early when the rest of the pipeline is grayscale-only, or to reduce bandwidth before a heavy filter.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "HoughLines2": {
+    "type": "HoughLines2",
+    "description": "Probabilistic Hough line detector. Runs Canny then finds line segments — good for walls, horizons, and calibration targets.",
+    "usage": "Add after a reasonably sharp image. Adjust Canny thresholds if you get too many or too few lines. Output is drawn on the display.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Hsv": {
+    "type": "Hsv",
+    "description": "Converts the frame from BGR to HSV color space so hue-based filters and debugging are easier.",
+    "usage": "Add before InRange or ColorTrack when you want to inspect HSV, or as a standalone view. Click the video to sample a pixel.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "ImageSegmenter": {
+    "type": "ImageSegmenter",
+    "description": "OpenCV selective search: proposes interesting regions that could contain objects (fast or quality mode).",
+    "usage": "Add to preview region proposals. Slow on large frames; the display only draws the first N boxes. Requires OpenCV ximgproc (bundled with JavaCV).",
+    "dependencies": "OpenCV ximgproc (JavaCV loads opencv_video first as a workaround)."
+  },
+  "Input": {
+    "type": "Input",
+    "description": "Pass-through of the grabber image. Use it as a named tap so later filters can select this stage as their sourceKey, or to pin the WebGui viewer on the raw frame.",
+    "usage": "Add at the start of a pipeline when you want a stable \"input\" display name. It does not modify pixels.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "InRange": {
+    "type": "InRange",
+    "description": "Keeps pixels whose HSV (or channel) values lie between min and max scalars — a multi-channel color gate.",
+    "usage": "Convert to HSV first (this filter can convert), click the video to sample, then tighten min/max. Combine with FindContours for a colored-object tracker.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Invert": {
+    "type": "Invert",
+    "description": "Inverts every pixel (photographic negative). Turns dark-on-light text into light-on-dark and vice versa.",
+    "usage": "Add before OCR or thresholding when the subject is the opposite polarity of what the next stage expects.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "KinectDepth": {
+    "type": "KinectDepth",
+    "description": "Interprets a 16-bit Kinect-style depth frame and can colorize it or return raw depth. Click the image to sample depth at a point.",
+    "usage": "Set the grabber to a depth device (or depth file). Click the video to add sample points. Toggle color vs gray depth visualization.",
+    "dependencies": "A depth camera (Kinect or similar) producing a 16-bit 1-channel depth image. RGB-only webcams will not work."
+  },
+  "KinectDepthMask": {
+    "type": "KinectDepthMask",
+    "description": "Builds a mask from Kinect depth so far/near pixels can be ignored. Useful to isolate a person or table from the background.",
+    "usage": "Requires a depth stream. Tune the depth band so the subject stays in-range; use the mask with And or as a later sourceKey.",
+    "dependencies": "A depth camera (Kinect or similar) producing a 16-bit 1-channel depth image. RGB-only webcams will not work."
+  },
+  "KinectNavigate": {
+    "type": "KinectNavigate",
+    "description": "Turns Kinect depth into a simple occupancy / navigable view (near vs far) for robot obstacle experiments.",
+    "usage": "Use a forward-facing depth camera. Click to sample. displayCamera can overlay the RGB view when both streams exist.",
+    "dependencies": "A depth camera (Kinect or similar) producing a 16-bit 1-channel depth image. RGB-only webcams will not work."
+  },
+  "KinectPointCloud": {
+    "type": "KinectPointCloud",
+    "description": "Alias of DepthToPointCloud: converts 16-bit depth (mm) into a 3D point cloud using Kinect-like intrinsics, plus a colorized depth preview.",
+    "usage": "Use a depth grabber. Tune fx/fy/cx/cy, stride, and min/max depth. Subscribe to published PointCloud from the OpenCV service.",
+    "dependencies": "A depth camera (Kinect or similar) producing a 16-bit 1-channel depth image. RGB-only webcams will not work."
+  },
+  "LKOpticalTrack": {
+    "type": "LKOpticalTrack",
+    "description": "Lucas–Kanade pyramidal optical flow. Tracks sparse corners from frame to frame as a 2D motion field.",
+    "usage": "Start capture, add the filter, click Get Features (or click the video to add points). Tune max points, quality, min distance, and block size. Clear Points to reset.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Lloyd": {
+    "type": "Lloyd",
+    "description": "Placeholder name from an older Lloyd robot vision pipeline. There is no OpenCVFilterLloyd class in this build.",
+    "usage": "Do not add this type — addFilter will fail. Use YoloOnnx, FaceDetectYN, Tracker, or a custom pipeline instead.",
+    "dependencies": "Not implemented in this build."
+  },
+  "Mask": {
+    "type": "Mask",
+    "description": "Copies the current image through a named mask stored on the OpenCV data (another filter's output).",
+    "usage": "Set maskName to the data key of a binary/gray mask produced earlier (for example a depth mask). The masked copy is the output.",
+    "dependencies": "An upstream filter that puts a mask IplImage on OpenCV data under maskName."
+  },
+  "MatchTemplate": {
+    "type": "MatchTemplate",
+    "description": "Template matching (squared difference). Finds the best location of a small template image inside the current frame.",
+    "usage": "Load a template (crop of the object) then add the filter. A rectangle is drawn at the best match. Template must be smaller than the frame.",
+    "dependencies": "A template IplImage assigned to the filter."
+  },
+  "MiniXception": {
+    "type": "MiniXception",
+    "description": "Legacy Mini-Xception facial-emotion network. The OpenCVFilterMiniXception class is not in this tree (the old main() still mentions it).",
+    "usage": "Adding this type will fail until the filter is restored. Use FaceDetectYN plus an external classifier if you need emotion labels.",
+    "dependencies": "Not implemented in this build. Historically needed Mini-Xception weights."
+  },
+  "MotionDetect": {
+    "type": "MotionDetect",
+    "description": "Frame-differencing motion detector (running average, threshold, dilate, contours). Labels the scene occupied vs unoccupied and boxes moving regions.",
+    "usage": "Use a static camera. Let several frames elapse so the average background forms. Tune minArea and delta threshold if you get noise or missed motion.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Mouse": {
+    "type": "Mouse",
+    "description": "Edge-following \"mouse\" that walks Canny edges with a left-hand wall rule and draws the path — a demo of contour tracing rather than a production detector.",
+    "usage": "Add to a high-contrast scene. It computes Canny internally and overlays a green path. Not for navigation; use FindContours or HoughLines2 for geometry.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Ocr": {
+    "type": "Ocr",
+    "description": "Scene-text pipeline: detect regions with EAST or DBNet (or OCR the full frame), then recognize with a TesseractOcr service. Throttled and can skip blurry frames.",
+    "usage": "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur. Set language on TesseractOcr.",
+    "dependencies": "TesseractOcr service (tessdata). EAST from opencv_east_text_detection zip, or DBNet ONNX downloaded on demand."
+  },
+  "Output": {
+    "type": "Output",
+    "description": "Pass-through at the end of a pipeline so the WebGui can pin the display on a named output stage without changing pixels.",
+    "usage": "Add last when you want displayFilter \"output\" (or your instance name) to show the fully processed image.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Overlay": {
+    "type": "Overlay",
+    "description": "Watermarks the frame with additional images (alpha blend) and/or text. Useful for HUD-style labels and logos.",
+    "usage": "Add overlays in code (image filename + alpha, or text). Size the overlay to the frame. Does not replace AddMask for training cut-outs.",
+    "dependencies": "Optional overlay image files on disk."
+  },
+  "PyramidDown": {
+    "type": "PyramidDown",
+    "description": "Gaussian pyramid down-sample: halves width and height each time. Speeds up heavy detectors on large cameras.",
+    "usage": "Place near the start before Yolo, FaceDetect, or OCR if the camera is 720p/1080p and you do not need full resolution.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "PyramidUp": {
+    "type": "PyramidUp",
+    "description": "Gaussian pyramid up-sample: doubles width and height. Restores size after PyramidDown or enlarges a small ROI.",
+    "usage": "Add after a pipeline that ran at half resolution when later stages or the viewer need the original scale.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "QrCode": {
+    "type": "QrCode",
+    "description": "Detects QR codes with OpenCV's ArUco-based QR detector, and optionally ArUco fiducial markers from a predefined dictionary.",
+    "usage": "Point the camera at a sharp, well-lit code. Choose mode qr, aruco, or both. Pick the ArUco dictionary to match your printed markers. Last payload is shown in the WebGui.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "ResetImageRoi": {
+    "type": "ResetImageRoi",
+    "description": "Clears a previously set image ROI so later filters see the full frame again.",
+    "usage": "Use immediately after filters that called SetImageROI. If you never set an ROI, this is a no-op.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Resize": {
+    "type": "Resize",
+    "description": "Resizes the frame to a fixed destination width/height (default around 480px wide) independent of camera resolution.",
+    "usage": "Add early to standardize size for DNNs or recording. Set destWidth/destHeight to match your model (for example 300 or 640).",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "SampleArray": {
+    "type": "SampleArray",
+    "description": "Samples RGB at configured pixel locations (default: bottom-center) and publishes ColoredPoint values for sensors or scripts.",
+    "usage": "Add the filter and subscribe to publish from OpenCV / the filter. Change the sample coordinates in code for line-following or floor color.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "SampleImage": {
+    "type": "SampleImage",
+    "description": "Draws a reference rectangle / can load a still image for filter development and color experiments (named sample swatches in comments).",
+    "usage": "Used mainly in tests and demos. Call addImage(path) to overlay or replace with a file.",
+    "dependencies": "Optional still image file."
+  },
+  "SetImageROI": {
+    "type": "SetImageROI",
+    "description": "Restricts subsequent processing to a rectangular region of interest until ResetImageRoi.",
+    "usage": "Set the CvRect (x, y, width, height) then add filters that should only see that crop. Always pair with ResetImageRoi if later stages need the full frame.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "SimpleBlobDetector": {
+    "type": "SimpleBlobDetector",
+    "description": "OpenCV SimpleBlobDetector — finds blob keypoints by area, circularity, and color, then publishes 2D points.",
+    "usage": "Works best on high-contrast binary or near-binary images (Threshold / InRange first). Tune detector params if you get no points or too many.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Smooth": {
+    "type": "Smooth",
+    "description": "Gaussian blur (cvSmooth). Reduces noise and fine texture; can also un-focus the image if the kernel is large.",
+    "usage": "Add before Canny or thresholding when the camera is noisy. Too much blur hurts OCR and feature tracking.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Solr": {
+    "type": "Solr",
+    "description": "Overlays text from an Apache Solr search result on the video (demo HUD for a knowledge base).",
+    "usage": "Start or let the filter start a Solr service, set solrUrl (default localhost:8983), then call populateSearch(query, field). Not a vision filter.",
+    "dependencies": "Solr service and a reachable Solr core (default http://localhost:8983/solr/wikipedia)."
+  },
+  "Split": {
+    "type": "Split",
+    "description": "Copies the upper-left quadrant (half width and height) as an extra image source named <filter>_SPLIT.",
+    "usage": "Add when another filter should process only a corner of the frame via sourceKey. Known to be fragile; test carefully (the unit test is ignored because it can crash the JVM).",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "SURF": {
+    "type": "SURF",
+    "description": "Finds a known object with SURF features via JavaCV ObjectFinder. Draw a outline when the object image is found in the scene.",
+    "usage": "Call loadObjectImageFilename with a grayscale picture of the object, then add the filter. SURF is a non-free algorithm and may be unavailable in some OpenCV 4 builds.",
+    "dependencies": "Object template image. SURF may require OpenCV contrib/non-free; often broken on stock OpenCV 4."
+  },
+  "Tesseract": {
+    "type": "Tesseract",
+    "description": "Runs Tesseract OCR on every frame in a background thread and overlays the last string. No region detector — OCRs the whole image, which is CPU-heavy.",
+    "usage": "Prefer the Ocr filter for production (throttling, EAST/DBNet, blur skip). This filter auto-starts a TesseractOcr service named tesseract.",
+    "dependencies": "TesseractOcr service and tessdata language files."
+  },
+  "TextDetector": {
+    "type": "TextDetector",
+    "description": "EAST text detector plus Tesseract on each rotated box. Predecessor of the Ocr filter; always uses the bundled EAST model.",
+    "usage": "Add when you want EAST boxes + OCR without the Ocr filter's model dropdown. Requires the EAST .pb file and TesseractOcr. Consider Ocr instead for DBNet and rate limiting.",
+    "dependencies": "EAST frozen_east_text_detection.pb (opencv_east_text_detection zip) and TesseractOcr."
+  },
+  "Threshold": {
+    "type": "Threshold",
+    "description": "Global binary threshold: pixels below/above a cutoff become black or white. Simple segmentation when lighting is even.",
+    "usage": "Add and set low/high thresholds. For uneven light use AdaptiveThreshold. Follow with Erode/Dilate and FindContours.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Tracker": {
+    "type": "Tracker",
+    "description": "Bounding-box object tracker. CSRT/KCF/MIL/GOTURN are built in; Nano and ViT download ONNX weights. Click the video to set the box.",
+    "usage": "Start capture, add the filter, click the target. Choose tracker type in the WebGui. Enable auto-download for Nano/ViT. Re-click if tracking is lost.",
+    "dependencies": "CSRT/KCF/MIL/GOTURN: none extra. Nano/ViT: ONNX files in data/OpenCV/zoo_models/."
+  },
+  "Transpose": {
+    "type": "Transpose",
+    "description": "Transposes the image matrix (rows become columns), rotating 90° and swapping width/height.",
+    "usage": "Add when a camera is mounted in portrait but the grabber delivers landscape, or the reverse. Combine with Flip if the result is mirrored.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Undistort": {
+    "type": "Undistort",
+    "description": "Applies OpenCV undistort with a hard-coded 640×480 fisheye camera matrix and distortion coefficients to straighten a fisheye frame.",
+    "usage": "Works best on 640×480 fisheye captures matching that calibration. For another lens you must change the matrix in code — the WebGui does not yet expose calibration.",
+    "dependencies": "None beyond the OpenCV service (JavaCV / OpenCV)."
+  },
+  "Yolo": {
+    "type": "Yolo",
+    "description": "Darknet YOLOv2 object detector (COCO classes) running on a background thread. Draws labeled boxes for people, chairs, bottles, etc.",
+    "usage": "Add the filter; it loads yolov2.cfg/weights/names from resource/OpenCV/yolo/. First load is slow. Prefer YoloOnnx (YOLOX) for new projects.",
+    "dependencies": "YOLOv2 cfg, weights, and coco.names from the yolov2 Ivy zip."
+  },
+  "YoloOnnx": {
+    "type": "YoloOnnx",
+    "description": "ONNX YOLO detector. Default is OpenCV Zoo YOLOX-s (COCO). Can also run generic SSD/Darknet-style ONNX via DetectionModel.",
+    "usage": "Add the filter and optionally Download / cache YOLOX. Tune confidence, NMS, and min interval. Set decoder to detection_model for non-YOLOX ONNX. Weights cache in data/OpenCV/zoo_models/.",
+    "dependencies": "YOLOX-s ONNX from OpenCV Zoo (downloaded on demand), or your own ONNX path."
+  },
+  "DepthToPointCloud": {
+    "type": "DepthToPointCloud",
+    "description": "Converts a 16-bit 1-channel depth image (millimeters) to a camera-frame point cloud and a colorized depth preview. Same engine as KinectPointCloud.",
+    "usage": "Use a depth grabber or depth image files. Adjust intrinsics (fx, fy, cx, cy), stride, and depth range. Subscribe to PointCloud publications for 3D views (JMonkeyEngine, etc.).",
+    "dependencies": "A depth camera (Kinect or similar) producing a 16-bit 1-channel depth image. RGB-only webcams will not work."
+  }
+}

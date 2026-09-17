@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', 'mrl', '$uibModal', function($scope, mrl, $uibModal) {
+angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', 'mrl', '$http', '$uibModal', function($scope, mrl, $http, $uibModal) {
     console.info('OpenCVGuiCtrl')
     // grab a reference
     var _self = this
@@ -65,6 +65,35 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
 
     $scope.possibleFilters = null
 
+    $scope.filterCatalog = {}
+
+    $scope.filterInfoType = $scope.selectedFilterType
+
+    $scope.mergeFilterCatalog = function(data) {
+        if (!data) {
+            return
+        }
+        if (Array.isArray(data)) {
+            data.forEach(function(info) {
+                if (info && info.type) {
+                    $scope.filterCatalog[info.type] = info
+                }
+            })
+        } else {
+            Object.keys(data).forEach(function(key) {
+                $scope.filterCatalog[key] = data[key]
+            })
+        }
+    }
+
+    $http.get('OpenCV/filter-catalog.json').then(function(resp) {
+        $scope.mergeFilterCatalog(resp.data)
+    }, function() {
+        $http.get('resource/OpenCV/filter-catalog.json').then(function(resp) {
+            $scope.mergeFilterCatalog(resp.data)
+        })
+    })
+
     // initial state of service.
 
     if ($scope.service.capturing) {
@@ -119,6 +148,28 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     $scope.setDisplayFilter = function(name) {
         console.info('setDisplayFilter', name)
         msg.send('setDisplayFilter', name)
+        $scope.onCurrentFilterSelect()
+    }
+
+    $scope.onAvailableFilterSelect = function() {
+        $scope.filterInfoType = $scope.selectedFilterType
+    }
+
+    $scope.onCurrentFilterSelect = function() {
+        let filter = $scope.getFilter()
+        if (filter && filter.type) {
+            $scope.filterInfoType = filter.type
+        }
+    }
+
+    $scope.getFilterInfo = function(type) {
+        if (!type) {
+            type = $scope.filterInfoType
+        }
+        if (type && $scope.filterCatalog[type]) {
+            return $scope.filterCatalog[type]
+        }
+        return null
     }
 
     this.onMsg = function(inMsg) {
@@ -130,6 +181,19 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
             break
         case 'onPossibleFilters':
             $scope.possibleFilters = data
+            $scope.$apply()
+            break
+        case 'onPossibleFilterInfo':
+            $scope.mergeFilterCatalog(data)
+            $scope.$apply()
+            break
+        case 'onFilterState':
+            if (data && data.name && data.filter) {
+                if (!$scope.service.filters) {
+                    $scope.service.filters = {}
+                }
+                $scope.service.filters[data.name] = data.filter
+            }
             $scope.$apply()
             break
         case 'onWebDisplay':
@@ -181,6 +245,77 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         console.info(filter)
     }
 
+    $scope.ocrDetectionModels = [
+        { id: 'none', label: 'Full frame (Tesseract only)' },
+        { id: 'east', label: 'EAST scene-text detector' },
+        { id: 'db_ic15_r18', label: 'DBNet IC15 ResNet-18 (English, fast)' },
+        { id: 'db_ic15_r50', label: 'DBNet IC15 ResNet-50 (English)' },
+        { id: 'db_td500_r18', label: 'DBNet TD500 ResNet-18 (English + Chinese)' },
+        { id: 'db_td500_r50', label: 'DBNet TD500 ResNet-50 (English + Chinese)' }
+    ]
+
+    $scope.onOcrModelChange = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        let id = filter.detectionModel || 'east'
+        if (id === 'none') {
+            filter.detector = 'none'
+        } else if (id.indexOf('db') === 0) {
+            filter.detector = 'db'
+        } else {
+            filter.detector = 'east'
+        }
+        $scope.setFilterState()
+    }
+
+    $scope.installOcrModel = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        msg.send('installOcrModel', filter.name, filter.detectionModel)
+    }
+
+    $scope.installVisionModel = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        msg.send('installVisionModel', filter.name)
+    }
+
+    $scope.isOcrModelInstalled = function(id) {
+        let filter = $scope.getFilter()
+        if (!filter || !id || id === 'none') {
+            return true
+        }
+        let installed = filter.installedDetectionModels
+        return installed && installed.indexOf(id) >= 0
+    }
+
+    $scope.clearQrHistory = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        filter.history = []
+        filter.lastText = ''
+        msg.send('clearQrHistory', filter.name)
+    }
+
+    $scope.formatQrTime = function(ts) {
+        if (!ts) {
+            return ''
+        }
+        let d = new Date(ts)
+        if (isNaN(d.getTime())) {
+            return ''
+        }
+        return d.toLocaleTimeString()
+    }
+
     $scope.getFilterType = function(typeName) {
         if (!typeName) {
             typeName = $scope.service.displayFilter
@@ -222,6 +357,7 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     msg.subscribe('getPossibleFilters')
     msg.subscribe('publishWebDisplay')
     msg.subscribe('publishState')
+    msg.subscribe('publishFilterState')
     msg.send('getPossibleFilters')
     msg.subscribe(this)
 

@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.PythonConfig
+listeners: null
+peers: null
+type: Python

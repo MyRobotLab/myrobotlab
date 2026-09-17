@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
@@ -27,9 +25,9 @@ public class OpenCVFilterLKOpticalTrackTest extends AbstractOpenCVFilterTest {
 
   @Override
   public OpenCVFilter createFilter() {
-    Loader.load(opencv_java.class);
-    // Just to exercise the null and the default constructor.
-    // This shouldn't blow up
+    // Do not Loader.load(opencv_java.class): that pulls jniopencv_img_hash,
+    // which OpenCV 4.13 / JavaCV 1.5.13 cannot load on Windows. The filter
+    // uses the bytedeco opencv_video / imgproc APIs, loaded on first use.
     OpenCVFilter f = new OpenCVFilterLKOpticalTrack();
     assertNotNull(f.name);
     f.release();

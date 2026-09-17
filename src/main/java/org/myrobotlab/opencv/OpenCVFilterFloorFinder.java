@@ -40,6 +40,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFloorFinder extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FloorFinder",
+        "Flood-fills from a point near the bottom-center of the frame so a homogeneous floor becomes a solid mask for navigation experiments.",
+        "Use a camera aimed at the floor with fairly uniform color. Tune lo/up color difference if the fill leaks into walls or stops too soon.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

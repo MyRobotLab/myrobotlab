@@ -68,6 +68,22 @@ import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvPutText;
 
 public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FloorFinder2",
+        "Floor segmentation that flood-fills, then finds contours and publishes polygons/boxes for the floor region.",
+        "Same setup as FloorFinder. Enable publishBoundingBox / publishPolygon depending on whether you want boxes or polygon points for motion planning.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

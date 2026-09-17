@@ -55,6 +55,22 @@ import org.slf4j.Logger;
  *
  */
 public class OpenCVFilterSolr extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Solr",
+        "Overlays text from an Apache Solr search result on the video (demo HUD for a knowledge base).",
+        "Start or let the filter start a Solr service, set solrUrl (default localhost:8983), then call populateSearch(query, field). Not a vision filter.",
+        "Solr service and a reachable Solr core (default http://localhost:8983/solr/wikipedia).");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterSolr.class);

@@ -1,0 +1,72 @@
+# MyRobotLab with WebGui, serial, video, and (optional) NVIDIA GPU access.
+# Docs: doc/docker.md
+#
+#   docker compose up --build
+#   open http://localhost:8888
+#
+# Switch to InMoov config:
+#   docker compose run --service-ports myrobotlab --log-level info -c inmoov
+#
+# Or mount your own config directory (see volumes below).
+
+services:
+  myrobotlab:
+    build:
+      context: .
+      args:
+        # Full Ivy install of every service (default). Use false only for faster local image experiments.
+        INSTALL_ALL: "true"
+    image: myrobotlab:local
+    container_name: myrobotlab
+    ports:
+      - "8888:8888"
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      JAVA_OPTS: >-
+        -Xms256m -Xmx2g
+        -Djava.library.path=libraries/native
+        -Djna.library.path=libraries/native
+        -Dfile.encoding=UTF-8
+    # Default: Log, Security, WebGui, Intro, Python. For a config set (e.g. InMoov):
+    #   docker compose run --service-ports myrobotlab --log-level info -c inmoov
+    command: ["--log-level", "info", "-s", "log", "Log", "security", "Security", "webgui", "WebGui", "intro", "Intro", "python", "Python"]
+    volumes:
+      # Persist runtime data / configs. Do not mount over /opt/mrl/libraries
+      # unless you intend to replace the image's fully pre-installed deps.
+      - mrl-data:/opt/mrl/data
+      # Inject a custom config set from the host (optional).
+      # Host path must contain runtime.yml (+ service yml files).
+      # Example for InMoov:
+      #   - ./docker/config/inmoov:/opt/mrl/data/config/inmoov
+      # Example for your own tree:
+      #   - ./my-inmoov-config:/opt/mrl/data/config/inmoov
+      - ./docker/config/inmoov:/opt/mrl/data/config/inmoov:ro
+    devices:
+      # Serial / Arduino (uncomment devices present on the host)
+      # - /dev/ttyACM0:/dev/ttyACM0
+      # - /dev/ttyACM1:/dev/ttyACM1
+      # - /dev/ttyUSB0:/dev/ttyUSB0
+      # Video / webcams
+      # - /dev/video0:/dev/video0
+      # - /dev/video1:/dev/video1
+    group_add:
+      - dialout
+      - video
+    # Broader device access alternative (Linux). Prefer explicit devices: above when possible.
+    # privileged: true
+    # volumes:
+    #   - /dev:/dev
+    # NVIDIA GPU (requires NVIDIA Container Toolkit on the host). Uncomment one:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    # runtime: nvidia
+    restart: unless-stopped
+
+volumes:
+  mrl-data:

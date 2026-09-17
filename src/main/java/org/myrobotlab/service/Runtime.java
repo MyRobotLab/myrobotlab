@@ -524,6 +524,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     // iterate through plan - check dependencies and licensing
   }
 
+  // ===== AGENT REGION: CREATE_START =====
+  // create/start services from name+type or CLI lists — see doc/agent/hotspot-map.md
+
   /**
    * Use {@link #start(String, String)} instead.
    *
@@ -882,6 +885,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return java.lang.Runtime.getRuntime().freeMemory();
   }
 
+  // ===== AGENT REGION: SINGLETON =====
+  // process singleton + options bootstrap — see doc/agent/hotspot-map.md
+
   /**
    * Get a handle to the Runtime singleton.
    *
@@ -1084,6 +1090,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     log.info("done");
     return ret;
   }
+
+  // ===== AGENT REGION: REGISTRY =====
+  // global service map, lookup, export — see doc/agent/hotspot-map.md
 
   /**
    * Gets a Map between service names and the service object of all services
@@ -1508,6 +1517,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     return Platform.getLocalInstance().getBranch();
   }
 
+  // ===== AGENT REGION: INSTALL =====
+  // Ivy/repo install threads — see doc/agent/hotspot-map.md
+
   /**
    * Install all services
    *
@@ -1922,6 +1934,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       return registration;
     }
   }
+
+  // ===== AGENT REGION: LIFECYCLE_RELEASE =====
+  // release one/all, shutdown — see doc/agent/hotspot-map.md
 
   /**
    * releases a service - stops the service, its threads, releases its
@@ -2416,6 +2431,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @param autoReconnect
    *          Whether the connection should be re-established if it is dropped
    */
+  // ===== AGENT REGION: NETWORK =====
+  // connect, route, remote services — see doc/agent/hotspot-map.md
+
   // FIXME - implement
   public void connect(String url, boolean autoReconnect) {
     if (!autoReconnect) {
@@ -2704,77 +2722,88 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return The started service
    */
   static public ServiceInterface start(String name, String type) {
+    // Create under processLock, but startService OUTSIDE it.
+    // Blocking services (notably JMonkeyEngine waiting on LWJGL future.get())
+    // must not pin the global lifecycle lock or the display never opens and
+    // other Runtime.start/create callers stall.
+    List<ServiceInterface> startOrder = new ArrayList<>();
+    ServiceInterface requestedService = null;
     synchronized (processLock) {
       try {
 
-        ServiceInterface requestedService = Runtime.getService(name);
+        requestedService = Runtime.getService(name);
         if (requestedService != null) {
           log.info("requested service already exists");
           if (requestedService.isRunning()) {
             log.info("requested service already running");
-          } else {
-            requestedService.startService();
+            return requestedService;
           }
-          return requestedService;
-        }
+          startOrder.add(requestedService);
+        } else {
 
-        Plan plan = Runtime.load(name, type);
+          Plan plan = Runtime.load(name, type);
 
-        Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
+          Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
 
-        if (services == null) {
-          Runtime.getInstance().error("cannot create instance of %s with type %s given current configuration", name, type);
-          return null;
-        }
-
-        requestedService = Runtime.getService(name);
-
-        // FIXME - does some order need to be maintained e.g. all children
-        // before
-        // parent
-        // breadth first, depth first, external order ordinal ?
-        for (ServiceInterface service : services.values()) {
-          if (service.getName().equals(name)) {
-            continue;
+          if (services == null) {
+            Runtime.getInstance().error("cannot create instance of %s with type %s given current configuration", name, type);
+            return null;
           }
-          if (!Runtime.isStarted(service.getName())) {
-            service.startService();
-          }
-        }
 
-        if (requestedService == null) {
-          Runtime.getInstance().error("could not start %s of type %s", name, type);
-          return null;
-        }
+          requestedService = Runtime.getService(name);
 
-        // getConfig() was problematic here for JMonkeyEngine
-        ServiceConfig sc = requestedService.getConfig();
-        // Map<String, Peer> peers = sc.getPeers();
-        // if (peers != null) {
-        // for (String p : peers.keySet()) {
-        // Peer peer = peers.get(p);
-        // log.info("peer {}", peer);
-        // }
-        // }
-        // recursive - start peers of peers of peers ...
-        Map<String, Peer> subPeers = sc.getPeers();
-        if (sc != null && subPeers != null) {
-          for (String subPeerKey : subPeers.keySet()) {
-            // IF AUTOSTART !!!
-            Peer subPeer = subPeers.get(subPeerKey);
-            if (subPeer.autoStart) {
-              Runtime.start(sc.getPeerName(subPeerKey), subPeer.type);
+          // FIXME - does some order need to be maintained e.g. all children
+          // before
+          // parent
+          // breadth first, depth first, external order ordinal ?
+          for (ServiceInterface service : services.values()) {
+            if (service.getName().equals(name)) {
+              continue;
+            }
+            if (!Runtime.isStarted(service.getName())) {
+              startOrder.add(service);
             }
           }
-        }
 
-        requestedService.startService();
-        return requestedService;
+          if (requestedService == null) {
+            Runtime.getInstance().error("could not start %s of type %s", name, type);
+            return null;
+          }
+
+          // getConfig() was problematic here for JMonkeyEngine
+          ServiceConfig sc = requestedService.getConfig();
+          // recursive - create auto-start peers (start them after releasing the lock)
+          Map<String, Peer> subPeers = sc != null ? sc.getPeers() : null;
+          if (subPeers != null) {
+            for (String subPeerKey : subPeers.keySet()) {
+              Peer subPeer = subPeers.get(subPeerKey);
+              if (subPeer.autoStart) {
+                ServiceInterface peerSi = Runtime.create(sc.getPeerName(subPeerKey), subPeer.type);
+                if (peerSi != null && !peerSi.isRunning()) {
+                  startOrder.add(peerSi);
+                }
+              }
+            }
+          }
+
+          startOrder.add(requestedService);
+        }
+      } catch (Exception e) {
+        runtime.error(e);
+        return null;
+      }
+    }
+
+    for (ServiceInterface service : startOrder) {
+      try {
+        if (service != null && !service.isRunning()) {
+          service.startService();
+        }
       } catch (Exception e) {
         runtime.error(e);
       }
-      return null;
     }
+    return requestedService != null ? requestedService : Runtime.getService(name);
   }
 
   /**
@@ -2785,24 +2814,41 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
    * @return
    */
   static public ServiceInterface start(String name) {
+    List<ServiceInterface> startOrder = new ArrayList<>();
+    ServiceInterface requested = null;
     synchronized (processLock) {
       if (Runtime.getService(name) != null) {
         // already exists
-        ServiceInterface si = Runtime.getService(name);
-        if (!si.isRunning()) {
-          si.startService();
+        requested = Runtime.getService(name);
+        if (!requested.isRunning()) {
+          startOrder.add(requested);
+        } else {
+          return requested;
         }
-        return si;
+      } else {
+        Plan plan = Runtime.load(name, null);
+        Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
+        // FIXME - order ?
+        if (services != null) {
+          startOrder.addAll(services.values());
+        }
+        requested = Runtime.getService(name);
       }
-      Plan plan = Runtime.load(name, null);
-      Map<String, ServiceInterface> services = createServicesFromPlan(plan, null, name);
-      // FIXME - order ?
-      for (ServiceInterface service : services.values()) {
-        service.startService();
-      }
-      return Runtime.getService(name);
     }
+    for (ServiceInterface service : startOrder) {
+      try {
+        if (service != null && !service.isRunning()) {
+          service.startService();
+        }
+      } catch (Exception e) {
+        runtime.error(e);
+      }
+    }
+    return requested != null ? requested : Runtime.getService(name);
   }
+
+  // ===== AGENT REGION: CONFIG_PLAN =====
+  // load plan, YAML config paths — see doc/agent/hotspot-map.md
 
   public static Plan load(String name, String type) {
     synchronized (processLock) {
@@ -4248,8 +4294,18 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       // already long form
       return shortname;
     }
+    // During Runtime bootstrap, getInstance() is not ready yet — do not recurse.
+    if (runtime == null) {
+      String bootstrapId = null;
+      if (options != null && options.id != null && !options.id.isEmpty()) {
+        bootstrapId = options.id;
+      } else {
+        bootstrapId = ConfigUtils.getId();
+      }
+      return String.format("%s@%s", shortname, bootstrapId);
+    }
     // if nothing is supplied assume local
-    return String.format("%s@%s", shortname, Runtime.getInstance().getId());
+    return String.format("%s@%s", shortname, runtime.getId());
   }
 
   @Override
@@ -4528,6 +4584,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
     Logging logging = LoggingFactory.getInstance();
     logging.removeAllAppenders();
   }
+
+  // ===== AGENT REGION: MAIN_CLI =====
+  // process entry, picocli options — see doc/agent/hotspot-map.md
 
   /**
    * Main entry point for the MyRobotLab Runtime Check CmdOptions for list of

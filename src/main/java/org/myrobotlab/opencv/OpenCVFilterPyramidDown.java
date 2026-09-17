@@ -37,6 +37,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterPyramidDown extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("PyramidDown",
+        "Gaussian pyramid down-sample: halves width and height each time. Speeds up heavy detectors on large cameras.",
+        "Place near the start before Yolo, FaceDetect, or OCR if the camera is 720p/1080p and you do not need full resolution.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

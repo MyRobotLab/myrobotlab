@@ -58,6 +58,22 @@ import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvPutText;
 
 public class OpenCVFilterFindContours extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FindContours",
+        "Finds external contours in a (usually binary) image, approximates polygons, and can publish bounding boxes.",
+        "Put after Threshold, Canny, ColorTrack, or Detector. Set min/max area to ignore noise. Boxes can feed BoundingBoxToFile or Tracker.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

@@ -51,6 +51,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSURF extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("SURF",
+        "Finds a known object with SURF features via JavaCV ObjectFinder. Draw a outline when the object image is found in the scene.",
+        "Call loadObjectImageFilename with a grayscale picture of the object, then add the filter. SURF is a non-free algorithm and may be unavailable in some OpenCV 4 builds.",
+        "Object template image. SURF may require OpenCV contrib/non-free; often broken on stock OpenCV 4.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

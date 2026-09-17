@@ -44,6 +44,22 @@ import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSimpleBlobDetector extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("SimpleBlobDetector",
+        "OpenCV SimpleBlobDetector — finds blob keypoints by area, circularity, and color, then publishes 2D points.",
+        "Works best on high-contrast binary or near-binary images (Threshold / InRange first). Tune detector params if you get no points or too many.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

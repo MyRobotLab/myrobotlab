@@ -65,8 +65,10 @@ public class SolrTest extends AbstractServiceTest {
   public void testService() throws Exception {
     // LoggingFactory.init("INFO"); please do not do this
     Solr solr = (Solr) service;
-    // String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
-    solr.startEmbedded();
+    // Unique home per run: reused data/Solr leaves Lucene write.lock held in
+    // the surefire JVM (reuseForks) and fails core init.
+    String solrHome = testFolder.getRoot().getAbsolutePath() + File.separator + "solr-home";
+    solr.startEmbedded(solrHome);
     solr.deleteEmbeddedIndex();
     solr.addDocument(makeTestDoc("doc_1"));
     solr.commit();

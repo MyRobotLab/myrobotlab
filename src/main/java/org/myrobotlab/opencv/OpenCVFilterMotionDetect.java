@@ -40,6 +40,22 @@ import org.bytedeco.opencv.opencv_core.Size;
  *
  */
 public class OpenCVFilterMotionDetect extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("MotionDetect",
+        "Frame-differencing motion detector (running average, threshold, dilate, contours). Labels the scene occupied vs unoccupied and boxes moving regions.",
+        "Use a static camera. Let several frames elapse so the average background forms. Tune minArea and delta threshold if you get noise or missed motion.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

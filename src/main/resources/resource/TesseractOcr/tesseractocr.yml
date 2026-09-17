@@ -1,4 +1,14 @@
-!!org.myrobotlab.service.config.ServiceConfig
+!!org.myrobotlab.service.config.TesseractOcrConfig
+autoDownloadLang: true
+blacklist: null
+dpi: 0
+lang: eng
 listeners: null
+oem: 3
 peers: null
+psm: 3
+publishText: true
+tessDataPath: null
+tessdataBaseUrl: https://github.com/tesseract-ocr/tessdata_fast/raw/main
 type: TesseractOcr
+whitelist: null

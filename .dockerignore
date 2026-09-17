@@ -1,0 +1,25 @@
+# Build context exclusions — keep image builds small and deterministic
+target/
+libraries/
+data/
+resource/
+repo/
+dist/
+bin/
+build/
+.idea/
+.settings/
+.project
+.classpath
+.vscode/
+*.log
+*.mp4
+myrobotlab.jar
+**/node_modules/
+src/main/resources/resource/WebGui/react/
+.git/logs/
+.git/objects/
+agent-transcripts/
+terminals/
+**/.DS_Store
+**/Thumbs.db

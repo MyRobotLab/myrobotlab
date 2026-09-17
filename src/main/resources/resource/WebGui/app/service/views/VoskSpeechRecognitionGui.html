@@ -1,0 +1,146 @@
+<div class="row">
+
+  <table class="table marginBottom">
+    <tr>
+      <td style="width: 182px;">
+        <button ng-click="changeListeningState()">
+          <span>
+              <img ng-src="{{micImage}}" width="150"/>
+          </span>
+        </button>
+      </td>
+      <td>
+
+        <table class="tableMic marginBottom">
+          <tr>
+            <td colspan="2">
+              <select class="form-control" ng-model="selectedInstalledModel" ng-change="loadInstalledModel()"
+                      ng-disabled="isBusy()">
+                <option value="">{{installedModels.length ? 'Select installed model' : 'No models installed yet'}}</option>
+                <option ng-repeat="m in installedModels track by m.name" value="{{m.name}}">{{m.language}} — {{m.name}}{{m.size ? ' (' + m.size + ')' : ''}}</option>
+              </select>
+            </td>
+            <td colspan="2" class="leftBorder">
+              <h4>Wake settings</h4>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+               {{service.status}}&nbsp;
+            </td>
+            <td colspan="2" class="leftBorder">
+              Word
+            </td>
+          </tr>
+          <tr>
+            <td class="recordingStatus">
+               Recording:
+              {{isRecording}}
+            </td>
+            <td class="recordingStatus">
+              Loaded: {{loadedModelName || 'none'}}
+            </td>
+            <td class="leftBorder">
+              <input ng-disabled="service.config.wakeWord"  type="text" class="form-control" style="width: 80%" placeholder="Hey Robot" ng-model="service.wakeWord"/>
+            </td>
+            <td>
+              <button ng-show="!service.config.wakeWord" class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">Set</button>
+              <button ng-show="service.config.wakeWord" class="btn btn-default" ng-click="msg.unsetWakeWord()">UnSet</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              After speaking pause
+            </td>
+            <td colspan="2" class="leftBorder">
+              Idle timeout
+            </td>
+          </tr>
+          <tr>
+            <td>
+               <input type="text" class="form-control" ng-model="service.config.afterSpeakingPauseMs"/> ms
+            </td>
+            <td>
+             <button class="btn btn-default" ng-click="msg.setAfterSpeakingPause(service.config.afterSpeakingPauseMs)">Set</button>
+            </td>
+            <td class="leftBorder">
+              <input type="text" class="form-control" ng-model="service.config.wakeWordIdleTimeoutSeconds"/> seconds
+            </td>
+            <td>
+              <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.config.wakeWordIdleTimeoutSeconds)">Set</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <select class="form-control" ng-model="modelToInstall"
+                      ng-options="m.name as ((isInstalled(m.name) ? '✓ ' : '') + m.language + ' — ' + m.description + ' (' + m.size + ') [' + m.name + ']') for m in modelOptions"
+                      ng-disabled="isBusy()">
+                <option value="">Download a model…</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn btn-default" ng-click="installModel()" ng-disabled="!modelToInstall || isBusy()">Install</button>
+            </td>
+            <td colspan="2" class="leftBorder">
+              <small class="text-muted"><a href="https://alphacephei.com/vosk/models" target="_blank">Vosk model list</a></small>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table class="Recognized">
+    <tr>
+      <td>Recognized<br>
+        <span class="glyphicon glyphicon-asterisk" style="color: hsl(calc(({{recognizedResult.confidence || 0}}) * 200 - 100),100%, 35%);"> </span> {{recognizedResult.confidence}}
+      </td>
+      <td class="cellStatusRecognized" style="color: hsl(calc(({{recognizedResult.confidence || 0}}) * 200 - 100),100%, 35%);">
+        <span ng-if="partialText" class="text-muted"><em>{{partialText}}</em></span>
+        <span ng-if="!partialText">{{recognizedResult.text}}</span>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <div class="row text-center">
+    <label>Listening event log</label>
+  </div>
+
+  <table class="table table-striped table-header-rotated marginBottom">
+    <thead>
+      <tr>
+        <th class="rotate-45"><div><span>Confidence</span></div></th>
+        <th class="rotate-45"><div><span>Timestamp</span></div></th>
+        <th class="rotate-45"><div><span>Recording</span></div></th>
+        <th class="rotate-45"><div><span>Listening</span></div></th>
+        <th class="rotate-45"><div><span>Awake</span></div></th>
+        <th class="rotate-45"><div><span>Speaking</span></div></th>
+        <th class="rotate-45"><div><span>Published</span></div></th>
+        <th class="rotate-000"><div><span>Recognized</span></div></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="visibility: collapse;">
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="tableScroll">
+    <table class="table table-striped table-header-rotated marginBottom">
+      <tbody>
+        <tr ng-repeat="entry in log track by $index">
+
+          <td><span class="glyphicon glyphicon-asterisk" style="color: hsl(calc(({{entry.confidence || 0}}) * 200 - 100),100%, 35%);"> </span> {{entry.confidence}}</td>
+          <td>{{entry.ts}}</td>
+          <td class="cellStatus{{entry.isRecording}}">{{entry.isRecording}}</td>
+          <td class="cellStatus{{entry.isListening}}">{{entry.isListening}}</td>
+          <td class="cellStatus{{entry.isAwake}}">{{entry.isAwake}}</td>
+          <td class="cellStatus{{entry.isSpeaking}}">{{entry.isSpeaking}}</td>
+          <td class="cellStatus{{entry.publishText}}">{{entry.publishText}}</td>
+          <td class="cellStatus{{(entry.isSpeaking)?'Robot':'User'}}" style="color: hsl(calc(({{entry.confidence || 0}}) * 200 - 100),100%, 35%);">{{entry.text}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

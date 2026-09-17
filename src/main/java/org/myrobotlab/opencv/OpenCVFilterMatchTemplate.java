@@ -62,6 +62,22 @@ import org.slf4j.Logger;
 // publish list !  - source should be <opencv>_<filtername>_<output/input?>
 
 public class OpenCVFilterMatchTemplate extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("MatchTemplate",
+        "Template matching (squared difference). Finds the best location of a small template image inside the current frame.",
+        "Load a template (crop of the object) then add the filter. A rectangle is drawn at the best match. Template must be smaller than the frame.",
+        "A template IplImage assigned to the filter.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

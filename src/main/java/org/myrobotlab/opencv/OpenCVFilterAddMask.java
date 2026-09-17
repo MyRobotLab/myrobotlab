@@ -49,6 +49,22 @@ import org.slf4j.Logger;
  *
  */
 public class OpenCVFilterAddMask extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("AddMask",
+        "Composites a PNG that has an alpha channel over the live frame so you can hide or emphasize regions (for example, cutting a face out of a busy background for training).",
+        "Add the filter, then load a same-size PNG with transparency. The overlay is blended each frame. Useful as a preprocessing step before FaceRecognizer or training filters.",
+        "A PNG with an alpha channel; path is configured on the filter.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

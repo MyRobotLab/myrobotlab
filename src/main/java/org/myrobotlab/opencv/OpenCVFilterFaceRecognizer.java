@@ -70,6 +70,22 @@ import org.slf4j.Logger;
  *
  */
 public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FaceRecognizer",
+        "Identifies who a face belongs to after training (Eigen, Fisher, or LBPH). Detects a face, aligns it, and predicts a label.",
+        "Collect labeled face crops, set mode to TRAIN with trainName, then switch to RECOGNIZE. Training images live under the training/ directory. Needs commons-lang3 (already an OpenCV Meta dependency).",
+        "Haar cascades for face/eyes plus a trained model. Apache Commons Lang 3.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceRecognizer.class);

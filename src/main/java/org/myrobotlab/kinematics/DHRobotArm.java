@@ -2,6 +2,7 @@ package org.myrobotlab.kinematics;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InverseKinematics3D;
@@ -13,7 +14,41 @@ public class DHRobotArm implements Serializable {
 
   transient public final static Logger log = LoggerFactory.getLogger(DHRobotArm.class);
 
-  private int maxIterations = 10000;
+  /**
+   * Damped least squares with a line search converges in tens of iterations, so
+   * this is a "something is wrong" ceiling rather than a working budget.
+   */
+  private int maxIterations = 600;
+
+  /** Finite-difference step for the Jacobian, radians. */
+  private static final double JACOBIAN_DELTA = 1e-5;
+
+  /** Starting Levenberg damping factor. */
+  private static final double DAMPING_INITIAL = 0.01;
+
+  private static final double DAMPING_MIN = 1e-5;
+
+  /** Above this the configuration is singular or the goal is unreachable. */
+  private static final double DAMPING_MAX = 1e4;
+
+  /** Largest Cartesian correction requested per iteration, meters. */
+  private static final double MAX_CARTESIAN_STEP_M = 0.05;
+
+  /** Largest joint change per iteration, radians (~11°). */
+  private static final double MAX_JOINT_STEP_RAD = 0.2;
+
+  /** How many times the line search halves a rejected step before giving up. */
+  private static final int LINE_SEARCH_STEPS = 6;
+
+  /**
+   * Extra starting configurations tried when the descent gets stuck in a local
+   * minimum. A 4-DOF arm with tight joint limits has plenty of those, and they
+   * are what left the old solver a few millimeters short of reachable goals.
+   */
+  private static final int SEED_ATTEMPTS = 24;
+
+  /** Coprime bases for the Halton seed sequence, one per joint. */
+  private static final int[] HALTON_BASES = { 2, 3, 5, 7, 11, 13, 17, 19 };
 
   private ArrayList<DHLink> links;
 
@@ -21,6 +56,24 @@ public class DHRobotArm implements Serializable {
 
   // for debugging .. hmmm
   public transient InverseKinematics3D ik3D = null;
+
+  /**
+   * Fixed end-effector offset in the last link frame (meters). Applied after the
+   * DH chain so a wrist/palm node that is not the last joint origin still
+   * rotates with the arm. Not an IK joint.
+   */
+  private Point toolOffset = null;
+
+  /**
+   * Affine transform from the DH origin (omoplate) into the world / JME root
+   * frame. Identity leaves the chain at the omoplate. When set to the omoplate
+   * world pose, {@link #getPalmPosition()} is in the same meters / origin as
+   * JMonkeyEngine.
+   */
+  private Matrix baseTransform = identity4();
+
+  /** IK convergence radius in the same units as link lengths (meters). */
+  private double errorThreshold = 0.002;
 
   public DHRobotArm() {
     super();
@@ -34,6 +87,13 @@ public class DHRobotArm implements Serializable {
     for (DHLink link : copy.links) {
       links.add(new DHLink(link));
     }
+    if (copy.toolOffset != null) {
+      toolOffset = new Point(copy.toolOffset);
+    }
+    if (copy.baseTransform != null) {
+      baseTransform = new Matrix(copy.baseTransform);
+    }
+    errorThreshold = copy.errorThreshold;
   }
 
   public ArrayList<DHLink> addLink(DHLink link) {
@@ -41,49 +101,96 @@ public class DHRobotArm implements Serializable {
     return links;
   }
 
-  public Matrix getJInverse() {
-    // something small.
-    // double delta = 0.000001;
-    double delta = 0.0001;
-    int numLinks = this.getNumLinks();
-    // we need a jacobian matrix that is 6 x numLinks
-    // for now we'll only deal with x,y,z we can add rotation later. so only 3
-    // We can add rotation information into slots 4,5,6 when we add it to the
-    // algorithm.
+  /**
+   * Translational Jacobian, {@code 3 x numLinks}, by central difference.
+   *
+   * <p>
+   * Each joint variable is saved and restored exactly rather than being nudged
+   * with {@code incrRotate(+d)} / {@code incrRotate(-d)}, which is not a
+   * round trip at a joint limit. The probe is allowed to step marginally outside
+   * the limits because it only estimates a derivative.
+   * </p>
+   */
+  public Matrix getJacobian() {
+    int numLinks = getNumLinks();
     Matrix jacobian = new Matrix(3, numLinks);
-    // compute the gradient of x,y,z based on the joint movement.
-    Point basePosition = this.getPalmPosition();
-    // log.debug("Base Position : " + basePosition);
-    // for each servo, we'll rotate it forward by delta (and back), and get
-    // the new positions
     for (int j = 0; j < numLinks; j++) {
-      this.getLink(j).incrRotate(delta);
-      Point palmPoint = this.getPalmPosition();
-      Point deltaPoint = palmPoint.subtract(basePosition);
-      this.getLink(j).incrRotate(-delta);
-      // delta position / base position gives us the slope / rate of
-      // change
-      // this is an approx of the gradient of P
-      // UHoh,, what about divide by zero?!
-      // log.debug("Delta Point" + deltaPoint);
-      double dXdj = deltaPoint.getX() / delta;
-      double dYdj = deltaPoint.getY() / delta;
-      double dZdj = deltaPoint.getZ() / delta;
-      jacobian.elements[0][j] = dXdj;
-      jacobian.elements[1][j] = dYdj;
-      jacobian.elements[2][j] = dZdj;
+      DHLink link = getLink(j);
+      double saved = link.getJointVariable();
+
+      link.setJointVariableUnchecked(saved + JACOBIAN_DELTA);
+      Point plus = getPalmPosition();
+      link.setJointVariableUnchecked(saved - JACOBIAN_DELTA);
+      Point minus = getPalmPosition();
+      link.setJointVariableUnchecked(saved);
+
+      double scale = 1.0 / (2.0 * JACOBIAN_DELTA);
+      jacobian.elements[0][j] = (plus.getX() - minus.getX()) * scale;
+      jacobian.elements[1][j] = (plus.getY() - minus.getY()) * scale;
+      jacobian.elements[2][j] = (plus.getZ() - minus.getZ()) * scale;
       // TODO: get orientation roll/pitch/yaw
     }
-    // log.debug("Jacobian(p)approx");
-    // log.info("JACOBIAN\n" +jacobian);
-    // This is the MAGIC! the pseudo inverse should map
-    // deltaTheta[i] to delta[x,y,z]
-    Matrix jInverse = jacobian.pseudoInverse();
-    // log.debug("Pseudo inverse Jacobian(p)approx\n" + jInverse);
+    return jacobian;
+  }
+
+  /**
+   * @return the Moore-Penrose pseudo inverse of {@link #getJacobian()},
+   *         {@code numLinks x 3}
+   */
+  public Matrix getJInverse() {
+    Matrix jInverse = getJacobian().pseudoInverse();
     if (jInverse == null) {
-      jInverse = new Matrix(3, numLinks);
+      // must be numLinks x 3 to multiply a 3x1 Cartesian delta
+      jInverse = new Matrix(getNumLinks(), 3);
     }
     return jInverse;
+  }
+
+  /**
+   * Damped least squares step: {@code dTheta = J^T (J J^T + lambda^2 I)^-1 dP}.
+   *
+   * <p>
+   * The undamped pseudo inverse blows up near singularities — precisely where a
+   * 4-DOF arm ends up when reaching for a distant goal — so the raw solution had
+   * to be thrown away by the joint limits, stalling the solve. Damping trades a
+   * little accuracy for a bounded, well-conditioned step.
+   * </p>
+   *
+   * @return an {@code numLinks x 1} joint delta, or null if the system is
+   *         degenerate
+   */
+  static Matrix solveDamped(Matrix jacobian, Matrix dP, double lambda) {
+    Matrix jt = jacobian.transpose();
+    Matrix jjt = jacobian.multiply(jt);
+    double lambdaSq = lambda * lambda;
+    for (int i = 0; i < 3; i++) {
+      jjt.elements[i][i] += lambdaSq;
+    }
+    Matrix inv = invert3x3(jjt);
+    if (inv == null) {
+      return null;
+    }
+    return jt.multiply(inv.multiply(dP));
+  }
+
+  static Matrix invert3x3(Matrix m) {
+    double[][] a = m.elements;
+    double det = a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) - a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) + a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+    if (Math.abs(det) < 1e-18) {
+      return null;
+    }
+    double invDet = 1.0 / det;
+    Matrix out = new Matrix(3, 3);
+    out.elements[0][0] = (a[1][1] * a[2][2] - a[1][2] * a[2][1]) * invDet;
+    out.elements[0][1] = (a[0][2] * a[2][1] - a[0][1] * a[2][2]) * invDet;
+    out.elements[0][2] = (a[0][1] * a[1][2] - a[0][2] * a[1][1]) * invDet;
+    out.elements[1][0] = (a[1][2] * a[2][0] - a[1][0] * a[2][2]) * invDet;
+    out.elements[1][1] = (a[0][0] * a[2][2] - a[0][2] * a[2][0]) * invDet;
+    out.elements[1][2] = (a[0][2] * a[1][0] - a[0][0] * a[1][2]) * invDet;
+    out.elements[2][0] = (a[1][0] * a[2][1] - a[1][1] * a[2][0]) * invDet;
+    out.elements[2][1] = (a[0][1] * a[2][0] - a[0][0] * a[2][1]) * invDet;
+    out.elements[2][2] = (a[0][0] * a[1][1] - a[0][1] * a[1][0]) * invDet;
+    return out;
   }
 
   public DHLink getLink(int i) {
@@ -104,47 +211,13 @@ public class DHRobotArm implements Serializable {
   }
 
   public synchronized Point getJointPosition(int index) {
-    if (index > this.links.size() || index < 0) {
-      // TODO: bound check
+    if (index >= this.links.size() || index < 0) {
       return null;
     }
 
-    Matrix m = new Matrix(4, 4);
-    // TODO: init to the ident?
-
-    // initial frame orientated around x
-    m.elements[0][0] = 1;
-    m.elements[1][1] = 1;
-    m.elements[2][2] = 1;
-    m.elements[3][3] = 1;
-
-    // initial frame orientated around z
-    // m.elements[0][2] = 1;
-    // m.elements[1][1] = 1;
-    // m.elements[2][0] = 1;
-    // m.elements[3][3] = 1;
-
-    // log.debug("-------------------------");
-    // log.debug(m);
-    // TODO: validate this approach..
-    for (int i = 0; i <= index; i++) {
-      DHLink link = links.get(i);
-      Matrix s = link.resolveMatrix();
-      // log.debug(s);
-      m = m.multiply(s);
-      // log.debug("-------------------------");
-      // log.debug(m);
-    }
-    // now m should be the total translation for the arm
-    // given the arms current position
-    double x = m.elements[0][3];
-    double y = m.elements[1][3];
-    double z = m.elements[2][3];
-    // double ws = m.elements[3][3];
-    // log.debug("World Scale : " + ws);
-    Point jointPosition = new Point(x, y, z, 0, 0, 0);
-    return jointPosition;
-
+    Matrix m = getHomogeneousMatrix(index);
+    boolean includeTool = index == links.size() - 1;
+    return pointFromMatrix(m, includeTool);
   }
 
   /**
@@ -154,44 +227,266 @@ public class DHRobotArm implements Serializable {
    *         with this function
    */
   public Point getPalmPosition(String lastDHLink) {
-    // TODO Auto-generated method stub
-    // return the position of the end effector wrt the base frame
-    Matrix m = new Matrix(4, 4);
-    // TODO: init to the ident?
+    Matrix m = getHomogeneousMatrix(lastDHLink);
+    boolean includeTool = lastDHLink == null || (links.size() > 0 && lastDHLink.equals(links.get(links.size() - 1).getName()));
+    return pointFromMatrix(m, includeTool);
+  }
 
-    // initial frame orientated around x
-    m.elements[0][0] = 1;
-    m.elements[1][1] = 1;
-    m.elements[2][2] = 1;
-    m.elements[3][3] = 1;
+  /**
+   * Homogeneous transform from the DH base to the origin of {@code lastIndex}
+   * (inclusive), without the tool offset. Includes {@link #baseTransform}.
+   */
+  public Matrix getHomogeneousMatrix(int lastIndex) {
+    Matrix m = copyBase();
+    int end = Math.min(lastIndex, links.size() - 1);
+    for (int i = 0; i <= end; i++) {
+      m = m.multiply(links.get(i).resolveMatrix());
+    }
+    return m;
+  }
 
-    // initial frame orientated around z
-    // m.elements[0][2] = 1;
-    // m.elements[1][1] = 1;
-    // m.elements[2][0] = 1;
-    // m.elements[3][3] = 1;
-
-    // log.debug("-------------------------");
-    // log.debug(m);
-    // TODO: validate this approach..
+  /**
+   * Homogeneous transform through {@code lastDHLink} (or the full chain if null).
+   */
+  public Matrix getHomogeneousMatrix(String lastDHLink) {
+    Matrix m = copyBase();
     for (int i = 0; i < links.size(); i++) {
-      Matrix s = links.get(i).resolveMatrix();
-      // log.debug(s);
-      m = m.multiply(s);
-      // log.debug("-------------------------");
-      // log.debug(m);
+      m = m.multiply(links.get(i).resolveMatrix());
       if (links.get(i).getName() != null && links.get(i).getName().equals(lastDHLink)) {
         break;
       }
     }
-    // now m should be the total translation for the arm
-    // given the arms current position
+    return m;
+  }
+
+  /**
+   * Palm in the DH origin frame (omoplate), ignoring {@link #baseTransform}.
+   */
+  public Point getPalmPositionLocal() {
+    Matrix saved = baseTransform;
+    baseTransform = identity4();
+    try {
+      return getPalmPosition();
+    } finally {
+      baseTransform = saved;
+    }
+  }
+
+  public Matrix getHomogeneousMatrix() {
+    return getHomogeneousMatrix(links.size() - 1);
+  }
+
+  public Point getToolOffset() {
+    return toolOffset;
+  }
+
+  public void setToolOffset(Point toolOffset) {
+    this.toolOffset = toolOffset;
+  }
+
+  public void setToolOffset(double x, double y, double z) {
+    this.toolOffset = new Point(x, y, z);
+  }
+
+  public Matrix getBaseTransform() {
+    return baseTransform;
+  }
+
+  public void setBaseTransform(Matrix baseTransform) {
+    this.baseTransform = baseTransform != null ? new Matrix(baseTransform) : identity4();
+  }
+
+  /**
+   * Place the DH origin at a world translation with a right-handed Euler rotation
+   * in degrees (roll=Z, pitch=X, yaw=Y).
+   */
+  public void setBaseTransform(double originX, double originY, double originZ, double rollDeg, double pitchDeg, double yawDeg) {
+    setBaseTransform(Matrix.rigid(originX, originY, originZ, Math.toRadians(rollDeg), Math.toRadians(pitchDeg), Math.toRadians(yawDeg)));
+  }
+
+  /**
+   * @deprecated axis scales of −1 reflect the chain and mirror every solved joint
+   *             angle. Use
+   *             {@link #setBaseTransform(double, double, double, double, double, double)}.
+   */
+  @Deprecated
+  public void setBaseTransform(double originX, double originY, double originZ, double rollDeg, double pitchDeg, double yawDeg, double scaleX, double scaleY, double scaleZ) {
+    if (scaleX < 0 || scaleY < 0 || scaleZ < 0) {
+      log.warn("ignoring reflecting base scale ({}, {}, {}) - a mirrored chain solves to mirrored servo angles", scaleX, scaleY, scaleZ);
+    }
+    setBaseTransform(originX, originY, originZ, rollDeg, pitchDeg, yawDeg);
+  }
+
+  /**
+   * Build a chain from joints measured on a rig (see {@link JointFrame}).
+   *
+   * <p>
+   * The base becomes a pure translation to the first joint, and each link gets a
+   * fixed transform whose Z axis is that joint's real rotation axis. The result
+   * reproduces the rig's forward kinematics exactly for any joint angles, not
+   * just the pose that was sampled — which is the whole point, because a
+   * single-pose position fit cannot distinguish a correct model from one whose
+   * axes are wrong.
+   * </p>
+   *
+   * @param name
+   *          arm name for logging
+   * @param frames
+   *          joints ordered parent to child
+   * @param endEffectorWorld
+   *          the point the solver should drive, e.g. the wrist node, sampled in
+   *          the same pose as {@code frames}
+   */
+  public static DHRobotArm fromJointFrames(String name, List<JointFrame> frames, Point endEffectorWorld) {
+    DHRobotArm arm = new DHRobotArm();
+    arm.name = name;
+    arm.applyJointFrames(frames, endEffectorWorld);
+    return arm;
+  }
+
+  /**
+   * Replace this arm's geometry with measured joint frames, preserving link order
+   * and names. See {@link #fromJointFrames}.
+   *
+   * @return true if the chain was rebuilt
+   */
+  public boolean applyJointFrames(List<JointFrame> frames, Point endEffectorWorld) {
+    if (frames == null || frames.isEmpty()) {
+      log.error("applyJointFrames - no frames supplied");
+      return false;
+    }
+    for (JointFrame frame : frames) {
+      if (frame == null || frame.origin == null || frame.axis == null) {
+        log.error("applyJointFrames - incomplete frame {}", frame);
+        return false;
+      }
+    }
+
+    Point base = frames.get(0).origin;
+    // pure translation: no rotation, no reflection, so the solver's world axes
+    // are the simulator's world axes
+    setBaseTransform(Matrix.translation(base.getX(), base.getY(), base.getZ()));
+
+    ArrayList<DHLink> rebuilt = new ArrayList<DHLink>();
+    Matrix parentInverse = Matrix.identity(4);
+    Matrix lastFrame = null;
+    for (JointFrame frame : frames) {
+      // express the joint in the base-local frame
+      Matrix worldFrame = Matrix.frameFromZAxis(frame.axis.getX(), frame.axis.getY(), frame.axis.getZ(), frame.origin.getX() - base.getX(), frame.origin.getY() - base.getY(),
+          frame.origin.getZ() - base.getZ());
+      Matrix fixed = parentInverse.multiply(worldFrame);
+
+      double bindTheta = Math.toRadians(frame.angleDeg);
+      DHLink link = new DHLink(frame.name, fixed, bindTheta);
+      link.setServoSlope(frame.getServoSlope());
+      link.setOffset(frame.getServoOffset());
+      link.setServoLimits(frame.servoMin, frame.servoMax);
+      link.setTheta(bindTheta);
+      rebuilt.add(link);
+
+      parentInverse = worldFrame.invertAffine();
+      if (parentInverse == null) {
+        log.error("applyJointFrames - joint {} frame is not invertible", frame.name);
+        return false;
+      }
+      lastFrame = worldFrame;
+    }
+
+    links = rebuilt;
+    toolOffset = null;
+    if (endEffectorWorld != null && lastFrame != null) {
+      fitToolOffset(endEffectorWorld);
+    }
+    log.info("{} built from {} measured joints, tool offset {}, palm {}", name, links.size(), toolOffset, getPalmPosition());
+    return true;
+  }
+
+  /** @return true when every link's geometry was measured from a rig. */
+  public boolean isMeasured() {
+    if (links.isEmpty()) {
+      return false;
+    }
+    for (DHLink link : links) {
+      if (!link.isMeasured()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public void setBaseOrigin(double originX, double originY, double originZ) {
+    setBaseTransform(originX, originY, originZ, 0, 0, 0, 1, 1, 1);
+  }
+
+  public Point getBaseOrigin() {
+    if (baseTransform == null) {
+      return new Point(0, 0, 0);
+    }
+    return new Point(baseTransform.elements[0][3], baseTransform.elements[1][3], baseTransform.elements[2][3]);
+  }
+
+  public Point toWorldFrame(Point local) {
+    if (local == null) {
+      return null;
+    }
+    return copyBase().transformPoint(local);
+  }
+
+  public Point toLocalFrame(Point world) {
+    if (world == null) {
+      return null;
+    }
+    Matrix inv = copyBase().invertAffine();
+    if (inv == null) {
+      return world;
+    }
+    return inv.transformPoint(world);
+  }
+
+  public double getErrorThreshold() {
+    return errorThreshold;
+  }
+
+  public void setErrorThreshold(double errorThreshold) {
+    this.errorThreshold = errorThreshold;
+  }
+
+  /**
+   * Solve a last-frame tool offset so {@link #getPalmPosition()} equals
+   * {@code targetPalm} at the current joint thetas. The offset rotates with the
+   * arm; it is not a base-frame translation.
+   */
+  public Point fitToolOffset(Point targetPalm) {
+    toolOffset = null;
+    Matrix m = getHomogeneousMatrix();
+    double dx = targetPalm.getX() - m.elements[0][3];
+    double dy = targetPalm.getY() - m.elements[1][3];
+    double dz = targetPalm.getZ() - m.elements[2][3];
+    double tx = m.elements[0][0] * dx + m.elements[1][0] * dy + m.elements[2][0] * dz;
+    double ty = m.elements[0][1] * dx + m.elements[1][1] * dy + m.elements[2][1] * dz;
+    double tz = m.elements[0][2] * dx + m.elements[1][2] * dy + m.elements[2][2] * dz;
+    toolOffset = new Point(tx, ty, tz);
+    log.info("Fitted EE tool offset {} so palm matches {}", toolOffset, targetPalm);
+    return toolOffset;
+  }
+
+  private Matrix copyBase() {
+    return baseTransform != null ? new Matrix(baseTransform) : identity4();
+  }
+
+  private static Matrix identity4() {
+    return Matrix.identity(4);
+  }
+
+  private Point pointFromMatrix(Matrix m, boolean includeTool) {
     double x = m.elements[0][3];
     double y = m.elements[1][3];
     double z = m.elements[2][3];
-    // double ws = m.elements[3][3];
-    // log.debug("World Scale : " + ws);
-    // TODO: pass /compute the roll pitch and yaw ..
+    if (includeTool && toolOffset != null) {
+      x += m.elements[0][0] * toolOffset.getX() + m.elements[0][1] * toolOffset.getY() + m.elements[0][2] * toolOffset.getZ();
+      y += m.elements[1][0] * toolOffset.getX() + m.elements[1][1] * toolOffset.getY() + m.elements[1][2] * toolOffset.getZ();
+      z += m.elements[2][0] * toolOffset.getX() + m.elements[2][1] * toolOffset.getY() + m.elements[2][2] * toolOffset.getZ();
+    }
     double pitch = Math.atan2(-1.0 * (m.elements[2][0]), Math.sqrt(m.elements[0][0] * m.elements[0][0] + m.elements[1][0] * m.elements[1][0]));
     double roll = 0;
     double yaw = 0;
@@ -203,23 +498,7 @@ public class DHRobotArm implements Serializable {
       roll = Math.atan2(m.elements[2][1] / Math.cos(pitch), m.elements[2][2]) / Math.cos(pitch);
       yaw = Math.atan2(m.elements[1][0] / Math.cos(pitch), m.elements[0][0] / Math.cos(pitch)) - Math.PI / 2;
     }
-    // double pitch=0, roll=0, yaw=0; //attitude, bank, heading
-    // if (m.elements[1][0] > 0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = Math.PI/2;
-    // }
-    // else if (m.elements[1][0] < -0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = -Math.PI/2;
-    // }
-    // else {
-    // yaw = Math.atan2(-m.elements[2][0], m.elements[0][0]);
-    // roll = Math.atan2(-m.elements[1][2], m.elements[1][1]);
-    // pitch = Math.asin(m.elements[1][0]);
-    // }
-    Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
-
-    return palm;
+    return new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
   }
 
   public void centerAllJoints() {
@@ -230,61 +509,201 @@ public class DHRobotArm implements Serializable {
     }
   }
 
+  /**
+   * Drive the joints so {@link #getPalmPosition()} reaches {@code goal}, using
+   * damped least squares with adaptive damping and a backtracking line search.
+   *
+   * <p>
+   * A step is only kept if it reduces the distance to the goal; otherwise it is
+   * halved a few times before the damping is raised and the iteration retried.
+   * That combination is what makes this converge where the old fixed-gain
+   * gradient descent stalled: the undamped pseudo inverse produced enormous joint
+   * deltas near a singularity, the joint limits threw them away, and the loop
+   * ground through its whole iteration budget without moving.
+   * </p>
+   *
+   * @return true if the palm converged inside {@link #getErrorThreshold()}
+   */
   public boolean moveToGoal(Point goal) {
-    // we know where we are.. we know where we want to go.
-    int numSteps = 0;
-    double iterStep = 0.05;
-    // we're in millimeters..
-    double errorThreshold = 2.0;
-    // what's the current point
-    while (true) {
-      numSteps++;
-      if (numSteps >= maxIterations) {
-        log.info("Attempted to iterate, didn't make it. Current Position: {} Goal: {} Distance: {}", getPalmPosition(), goal, goal.distanceTo(getPalmPosition()));
-        // we shouldn't publish if we don't solve!
-        return false;
+    return moveToGoal(goal, SEED_ATTEMPTS);
+  }
+
+  /**
+   * @param seedAttempts
+   *          how many alternative starting configurations to try if descending
+   *          from the current pose gets stuck. The current pose is always tried
+   *          first so the arm keeps moving continuously when it can.
+   */
+  public boolean moveToGoal(Point goal, int seedAttempts) {
+    if (goal == null || getNumLinks() == 0) {
+      return false;
+    }
+    if (descendToGoal(goal)) {
+      return true;
+    }
+    double[] best = jointSnapshot();
+    double bestError = distanceToGoal(goal);
+    for (int attempt = 0; attempt < seedAttempts; attempt++) {
+      seedJoints(attempt);
+      if (descendToGoal(goal)) {
+        return true;
       }
-      // TODO: what if its unreachable!
-      Point currentPos = this.getPalmPosition();
-      log.debug("Current Position " + currentPos);
-      // vector to destination
-      Point deltaPoint = goal.subtract(currentPos);
-      Matrix dP = new Matrix(3, 1);
-      dP.elements[0][0] = deltaPoint.getX();
-      dP.elements[1][0] = deltaPoint.getY();
-      dP.elements[2][0] = deltaPoint.getZ();
-      // scale a vector towards the goal by the increment step.
-      dP = dP.multiply(iterStep);
-
-      Matrix jInverse = this.getJInverse();
-      // why is this zero?
-      Matrix dTheta = jInverse.multiply(dP);
-      log.debug("delta Theta + " + dTheta);
-      for (int i = 0; i < dTheta.getNumRows(); i++) {
-        // update joint positions! move towards the goal!
-        double d = dTheta.elements[i][0];
-        // incr rotate needs to be min/max aware here!
-        this.getLink(i).incrRotate(d);
-      }
-      // delta point represents the direction we need to move in order to
-      // get there.
-      // we should figure out how to scale the steps.
-      // For debugging of trajectories we should publish here?
-
-      // ik3D.publishTelemetry();
-      // try {
-      // Thread.sleep(2);
-      // } catch (InterruptedException e) {
-      // // TODO Auto-generated catch block
-      // e.printStackTrace();
-      // }
-
-      if (deltaPoint.magnitude() < errorThreshold) {
-        log.info("Final Position {} Number of Iterations {}", getPalmPosition(), numSteps);
-        break;
+      double error = distanceToGoal(goal);
+      if (error < bestError) {
+        bestError = error;
+        best = jointSnapshot();
       }
     }
-    return true;
+    restoreJoints(best);
+    log.debug("no solution for {} after {} seeds - closest {} m{}", goal, seedAttempts, bestError, describeLimitedJoints());
+    return false;
+  }
+
+  private double[] jointSnapshot() {
+    double[] snapshot = new double[getNumLinks()];
+    for (int i = 0; i < snapshot.length; i++) {
+      snapshot[i] = getLink(i).getJointVariable();
+    }
+    return snapshot;
+  }
+
+  private void restoreJoints(double[] snapshot) {
+    for (int i = 0; i < snapshot.length && i < getNumLinks(); i++) {
+      getLink(i).setJointVariableUnchecked(snapshot[i]);
+    }
+  }
+
+  /**
+   * Deterministic starting configuration number {@code index}.
+   *
+   * <p>
+   * The first {@code 2^numLinks} seeds are the corners of the joint box, because
+   * poses at the edge of the reachable set need one or more joints pinned at a
+   * limit and descent approaches a boundary very slowly from the interior. The
+   * rest are a Halton sequence, which covers the interior with far fewer attempts
+   * than random sampling. Both are deterministic, so a given goal always solves
+   * to the same pose.
+   * </p>
+   */
+  private void seedJoints(int index) {
+    int numLinks = links.size();
+    int corners = 1 << Math.min(numLinks, 4);
+    for (int i = 0; i < numLinks; i++) {
+      DHLink link = links.get(i);
+      double lo = link.getMin();
+      double hi = link.getMax();
+      double fraction;
+      if (index < corners) {
+        fraction = ((index >> i) & 1) == 0 ? 0.0 : 1.0;
+      } else {
+        fraction = halton(index - corners + 1, HALTON_BASES[i % HALTON_BASES.length]);
+      }
+      link.setJointVariableUnchecked(lo + (hi - lo) * fraction);
+    }
+  }
+
+  static double halton(int index, int base) {
+    double result = 0;
+    double f = 1.0 / base;
+    int i = index;
+    while (i > 0) {
+      result += f * (i % base);
+      i /= base;
+      f /= base;
+    }
+    return result;
+  }
+
+  /** One damped-least-squares descent from the current configuration. */
+  private boolean descendToGoal(Point goal) {
+    int numLinks = getNumLinks();
+    double lambda = DAMPING_INITIAL;
+    double bestError = goal.distanceTo(getPalmPosition());
+    double[] saved = new double[numLinks];
+    int iterations = 0;
+
+    while (iterations < maxIterations) {
+      if (bestError <= errorThreshold) {
+        log.debug("solved {} in {} iterations, error {} m", goal, iterations, bestError);
+        return true;
+      }
+      iterations++;
+
+      Point delta = goal.subtract(getPalmPosition());
+      // asking for the whole remaining distance at once makes the linearization
+      // invalid, so bound the requested correction
+      double magnitude = delta.magnitude();
+      double request = magnitude > MAX_CARTESIAN_STEP_M ? MAX_CARTESIAN_STEP_M / magnitude : 1.0;
+      Matrix dP = new Matrix(3, 1);
+      dP.elements[0][0] = delta.getX() * request;
+      dP.elements[1][0] = delta.getY() * request;
+      dP.elements[2][0] = delta.getZ() * request;
+
+      Matrix dTheta = solveDamped(getJacobian(), dP, lambda);
+      if (dTheta == null) {
+        lambda *= 10.0;
+        if (lambda > DAMPING_MAX) {
+          break;
+        }
+        continue;
+      }
+
+      for (int i = 0; i < numLinks; i++) {
+        saved[i] = getLink(i).getJointVariable();
+      }
+
+      boolean improved = false;
+      double scale = 1.0;
+      for (int attempt = 0; attempt < LINE_SEARCH_STEPS; attempt++) {
+        for (int i = 0; i < numLinks; i++) {
+          double step = 0;
+          if (i < dTheta.getNumRows()) {
+            step = dTheta.elements[i][0] * scale;
+            step = Math.max(-MAX_JOINT_STEP_RAD, Math.min(MAX_JOINT_STEP_RAD, step));
+          }
+          getLink(i).setJointVariableUnchecked(getLink(i).clampToLimits(saved[i] + step));
+        }
+        double error = goal.distanceTo(getPalmPosition());
+        if (error < bestError - 1e-12) {
+          bestError = error;
+          improved = true;
+          break;
+        }
+        scale *= 0.5;
+      }
+
+      if (improved) {
+        lambda = Math.max(DAMPING_MIN, lambda * 0.7);
+      } else {
+        for (int i = 0; i < numLinks; i++) {
+          getLink(i).setJointVariableUnchecked(saved[i]);
+        }
+        lambda *= 6.0;
+        if (lambda > DAMPING_MAX) {
+          break;
+        }
+      }
+    }
+
+    return bestError <= errorThreshold;
+  }
+
+  private String describeLimitedJoints() {
+    StringBuilder sb = new StringBuilder();
+    for (DHLink link : links) {
+      if (link.isAtLimit()) {
+        sb.append(sb.length() == 0 ? " (at limit: " : ", ").append(link.getName());
+      }
+    }
+    return sb.length() == 0 ? "" : sb.append(")").toString();
+  }
+
+  /**
+   * @return the distance from the palm to {@code goal} in the current
+   *         configuration, meters
+   */
+  public double distanceToGoal(Point goal) {
+    return goal == null ? Double.NaN : goal.distanceTo(getPalmPosition());
   }
 
   public void setLinks(ArrayList<DHLink> links) {

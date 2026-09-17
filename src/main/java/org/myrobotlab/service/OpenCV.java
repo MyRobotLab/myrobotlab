@@ -116,10 +116,17 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
+import org.myrobotlab.opencv.OpenCVFilterCatalog;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
+import org.myrobotlab.opencv.OpenCVFilterInfo;
 import org.myrobotlab.opencv.OpenCVFilterFaceRecognizer;
+import org.myrobotlab.opencv.OpenCVFilterFaceDetectYN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterOcr;
+import org.myrobotlab.opencv.OpenCVFilterQrCode;
+import org.myrobotlab.opencv.OpenCVFilterTracker;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
+import org.myrobotlab.opencv.OpenCVFilterYoloOnnx;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
@@ -128,6 +135,7 @@ import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.data.ImageData;
 import org.myrobotlab.service.interfaces.ImageListener;
 import org.myrobotlab.service.interfaces.ImagePublisher;
+import org.myrobotlab.service.interfaces.PointCloudPublisher;
 // import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
@@ -143,7 +151,7 @@ import org.slf4j.Logger;
  * Audet : https://github.com/bytedeco/javacv
  * 
  */
-public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher {
+public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements ImagePublisher, PointCloudPublisher {
 
   int vpId = 0;
 
@@ -333,12 +341,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
   transient final static public String PART = "part";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
-      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
-      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
-      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
-      "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = OpenCVFilterCatalog.POSSIBLE_FILTERS;
 
   static final long serialVersionUID = 1L;
 
@@ -455,6 +458,16 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
    */
   static public String[] getPossibleFilters() {
     return POSSIBLE_FILTERS;
+  }
+
+  /**
+   * Descriptions for every filter in {@link #POSSIBLE_FILTERS}: what it does,
+   * how to use it, and extra dependencies. Used by the WebGui filter guide.
+   *
+   * @return unmodifiable map keyed by filter type name
+   */
+  static public Map<String, OpenCVFilterInfo> getPossibleFilterInfo() {
+    return OpenCVFilterCatalog.getAll();
   }
 
   public void stopStreamer() {
@@ -1855,6 +1868,82 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     newFilterStates.put(otherFilter.name, otherFilter);
   }
 
+  /**
+   * Download and cache the OCR detector currently selected on an {@code Ocr}
+   * filter (EAST or DBNet). Works even when capture is not running.
+   *
+   * @param filterName
+   *          name of the {@link org.myrobotlab.opencv.OpenCVFilterOcr} filter
+   * @return absolute path of the cached model, or null for full-frame mode
+   */
+  public String installOcrModel(String filterName) {
+    return installOcrModel(filterName, null);
+  }
+
+  /**
+   * Select a catalog id ({@code east}, {@code db_ic15_r18}, …) then download
+   * and cache it.
+   */
+  public String installOcrModel(String filterName, String modelId) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter == null) {
+      error("installOcrModel - could not find filter %s", filterName);
+      return null;
+    }
+    if (!(filter instanceof OpenCVFilterOcr)) {
+      error("%s is not an Ocr filter", filterName);
+      return null;
+    }
+    OpenCVFilterOcr ocr = (OpenCVFilterOcr) filter;
+    if (modelId != null && !modelId.trim().isEmpty()) {
+      ocr.detectionModel = modelId.trim();
+    }
+    String path = ocr.installSelectedModel();
+    broadcastState();
+    return path;
+  }
+
+  /**
+   * Download zoo ONNX weights for {@code FaceDetectYN}, {@code YoloOnnx}, or
+   * Nano/ViT {@code Tracker} filters.
+   */
+  public String installVisionModel(String filterName) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter == null) {
+      error("installVisionModel - could not find filter %s", filterName);
+      return null;
+    }
+    String path = null;
+    if (filter instanceof OpenCVFilterFaceDetectYN) {
+      path = ((OpenCVFilterFaceDetectYN) filter).installSelectedModel();
+    } else if (filter instanceof OpenCVFilterYoloOnnx) {
+      path = ((OpenCVFilterYoloOnnx) filter).installSelectedModel();
+    } else if (filter instanceof OpenCVFilterTracker) {
+      path = ((OpenCVFilterTracker) filter).installTrackerModels();
+    } else {
+      error("%s does not use OpenCV Zoo models", filterName);
+      return null;
+    }
+    broadcastState();
+    return path;
+  }
+
+  /**
+   * Clear the QR / ArUco scan history on a {@link OpenCVFilterQrCode} filter.
+   */
+  public void clearQrHistory(String filterName) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter instanceof OpenCVFilterQrCode) {
+      ((OpenCVFilterQrCode) filter).clearHistory();
+      return;
+    }
+    if (filter == null) {
+      error("clearQrHistory - could not find filter %s", filterName);
+      return;
+    }
+    error("clearQrHistory - %s is not a QrCode filter", filterName);
+  }
+
   public String setGrabberType(String grabberType) {
     this.grabberType = grabberType;
     return grabberType;
@@ -1997,6 +2086,7 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     return putCacheFile(url, data);
   }
 
+  @Override
   public PointCloud publishPointCloud(PointCloud pointCloud) {
     lastPointCloud = pointCloud;
     return pointCloud;
@@ -2151,14 +2241,15 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
       cv.capture();
 
-      cv.addFilter(new OpenCVFilterYolo("yolo"));
-      sleep(1000);
-      cv.removeFilters();
+      //cv.addFilter(new OpenCVFilterYolo("yolo"));
+      //sleep(1000);
+      //cv.removeFilters();
 
-      OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
-      cv.addFilter(fr);
-      // OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
-      // cv.addFilter(tracker);
+      //OpenCVFilter fr = new OpenCVFilterFaceRecognizer("fr");
+      //cv.addFilter(fr);
+      OpenCVFilterTracker tracker = new OpenCVFilterTracker("tracker");
+      cv.addFilter(tracker);
+      
       // OpenCVFilterLKOpticalTrack lk = new OpenCVFilterLKOpticalTrack("lk");
       // cv.addFilter(lk);
       // OpenCVFilterFaceDetectDNN faceDnn = new

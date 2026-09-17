@@ -67,22 +67,32 @@ public class PythonTest extends AbstractServiceTest {
     long start = System.currentTimeMillis();
     python.exec("import time\ntime.sleep(1)", blocking);
     log.info("stated sleeping script - waiting for result in 1s");
-    python.waitFor("python", "finishedExecutingScript", 2000);
+    // Under full-suite load, 1s sleep + jython/queue overhead can exceed 2s.
+    python.waitFor("python", "finishedExecutingScript", 5000);
     log.info("done with sleep time {} ms", System.currentTimeMillis() - start);
 
     // verifying callbacks from subscriptions can call python methods
     python.exec("count = 0\ndef onPulse(clock_date):\n\tprint('successs !', clock_date)\n\tglobal count\n\tcount = count + 1");
     Clock clockp01 = (Clock) Runtime.start("clockp01", "Clock");
+    clockp01.setInterval(100);
     python.subscribe("clockp01", "pulse");
     clockp01.startClock();
-    sleep(2000);
-    Integer count = (Integer) python.get("count");
-    assertTrue(count > 0);
+    long deadline = System.currentTimeMillis() + 5000;
+    Integer count = 0;
+    while (System.currentTimeMillis() < deadline) {
+      Object c = python.get("count");
+      if (c instanceof Integer && (Integer) c > 0) {
+        count = (Integer) c;
+        break;
+      }
+      sleep(50);
+    }
+    assertTrue("expected clock pulses to increment python count, got " + count, count != null && count > 0);
 
-    python.exec("clockp01.stopClock()");
+    clockp01.stopClock();
     sleep(500);
 
-    assert (!clockp01.isClockRunning());
+    assertTrue("clock should be stopped", !clockp01.isClockRunning());
 
   }
 

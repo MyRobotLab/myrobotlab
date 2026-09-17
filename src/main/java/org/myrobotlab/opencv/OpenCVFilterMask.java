@@ -37,6 +37,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterMask extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Mask",
+        "Copies the current image through a named mask stored on the OpenCV data (another filter's output).",
+        "Set maskName to the data key of a binary/gray mask produced earlier (for example a depth mask). The masked copy is the output.",
+        "An upstream filter that puts a mask IplImage on OpenCV data under maskName.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterMask.class.getCanonicalName());
