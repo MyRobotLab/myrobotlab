@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CVData;
@@ -41,6 +42,7 @@ import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
+import org.myrobotlab.jme3.JmePlatform;
 import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
@@ -171,7 +173,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   protected transient AnalogListener analog = null;
 
-  protected transient Jme3App app;
+  protected transient volatile Jme3App app;
 
   protected transient AssetManager assetManager;
 
@@ -1042,28 +1044,31 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   public void enableFullScreen(boolean fullscreen) {
     this.fullscreen = fullscreen;
 
+    if (app == null) {
+      error("simulator is not running");
+      return;
+    }
+
     if (fullscreen) {
-      GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-      displayMode = device.getDisplayMode();
-      // DisplayMode[] modes = device.getDisplayModes(); list of possible diplay
-      // modes
-
-      // remember last display mode
-      displayMode = device.getDisplayMode();
-
-      settings = app.getContext().getSettings();
-      log.info("settings {}", settings);
-      settings.setTitle(getName());
-      settings.setResolution(displayMode.getWidth(), displayMode.getHeight());
-      settings.setFrequency(displayMode.getRefreshRate());
-      settings.setBitsPerPixel(displayMode.getBitDepth());
-
-      // settings.setFullscreen(device.isFullScreenSupported());
-      settings.setFullscreen(fullscreen);
-      app.setSettings(settings);
-      app.restart();
-
-      // app.restart(); // restart the context to apply changes
+      try {
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        displayMode = device.getDisplayMode();
+        settings = app.getContext().getSettings();
+        log.info("settings {}", settings);
+        settings.setTitle(getName());
+        settings.setResolution(displayMode.getWidth(), displayMode.getHeight());
+        settings.setFrequency(displayMode.getRefreshRate());
+        settings.setBitsPerPixel(displayMode.getBitDepth());
+        settings.setFullscreen(fullscreen);
+        app.setSettings(settings);
+        app.restart();
+      } catch (Exception e) {
+        log.warn("AWT display mode unavailable (headless JRE) — using configured resolution for fullscreen", e);
+        settings = app.getContext().getSettings();
+        settings.setFullscreen(fullscreen);
+        app.setSettings(settings);
+        app.restart();
+      }
     } else {
       settings = app.getContext().getSettings();
       log.info("settings {}", settings);
@@ -1092,14 +1097,75 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * @return spatial object
    */
   public Spatial find(String name, Node startNode) {
+    if (name == null) {
+      return null;
+    }
     if (name.equals(ROOT)) {
       return rootNode;
     }
     if (startNode == null) {
       startNode = rootNode;
     }
+    if (startNode == null) {
+      return null;
+    }
 
     return startNode.getChild(name);
+  }
+
+  /**
+   * True after {@link #simpleInitApp()} has assigned the live scene graph.
+   * Servo callbacks attach in the constructor (existing InMoov peers) and must
+   * no-op until then — otherwise jaw/speech moves NPE while GLFW is still
+   * starting, or if the window never appears.
+   */
+  public boolean isSceneReady() {
+    return app != null && rootNode != null;
+  }
+
+  /**
+   * Run work on {@code jME3 Main} and wait. JME's {@code AppTask.get(timeout)}
+   * treats a {@code null} callable result as a timeout, so this always returns
+   * {@link JmePlatform#ENQUEUE_DONE} from the queue and puts the real value in
+   * a box.
+   */
+  <T> T enqueueGet(Callable<T> work, long timeout, TimeUnit unit) throws Exception {
+    if (work == null) {
+      return null;
+    }
+    if (app == null || JmePlatform.isJmeRenderThread()) {
+      return work.call();
+    }
+    AtomicReference<T> box = new AtomicReference<>();
+    AtomicReference<Exception> err = new AtomicReference<>();
+    Boolean done = app.enqueue(() -> {
+      try {
+        box.set(work.call());
+      } catch (Exception e) {
+        err.set(e);
+      }
+      return JmePlatform.ENQUEUE_DONE;
+    }).get(timeout, unit);
+    if (!JmePlatform.ENQUEUE_DONE.equals(done)) {
+      throw new java.util.concurrent.TimeoutException("JME enqueue did not complete");
+    }
+    if (err.get() != null) {
+      throw err.get();
+    }
+    return box.get();
+  }
+
+  boolean runOnJmeThread(Runnable work, int timeoutSec) {
+    try {
+      enqueueGet(() -> {
+        work.run();
+        return JmePlatform.ENQUEUE_DONE;
+      }, timeoutSec, TimeUnit.SECONDS);
+      return true;
+    } catch (Exception e) {
+      log.error("JME scene work failed or timed out", e);
+      return false;
+    }
   }
 
   public String format(Node node, Integer selected) {
@@ -1790,7 +1856,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
       
       log.info("loading {}", assetPath);
-      model = assetManager.loadModel(assetPath);
+      model = loadModelFromAssetManager(assetPath);
       log.info("loaded {} name={}", assetPath, model != null ? model.getName() : null);
       if (model != null) {
         if (model.getName() == null || model.getName().isEmpty() || model.getName().equals(assetPath)) {
@@ -1814,6 +1880,37 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       error(e);
     }
     return model;
+  }
+
+  /**
+   * Resolve a model name through registered locators, then each
+   * {@link #getModelsSearchPaths()} directory.
+   */
+  private Spatial loadModelFromAssetManager(String assetPath) {
+    if (assetManager == null) {
+      return null;
+    }
+    registerModelLocators();
+    try {
+      return assetManager.loadModel(assetPath);
+    } catch (Exception first) {
+      String base = modelBasename(assetPath);
+      for (String dir : getModelsSearchPaths()) {
+        File f = new File(dir, base);
+        if (!f.isFile()) {
+          continue;
+        }
+        try {
+          assetManager.registerLocator(dir, FileLocator.class);
+          Spatial spatial = assetManager.loadModel(base);
+          log.info("Loaded {} from {}", base, dir);
+          return spatial;
+        } catch (Exception retry) {
+          log.debug("could not load {} from {}: {}", base, dir, retry.toString());
+        }
+      }
+      throw first instanceof RuntimeException ? (RuntimeException) first : new RuntimeException(first);
+    }
   }
 
   private static String modelBasename(String assetPath) {
@@ -3030,15 +3127,14 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return null;
     }
     try {
-      Future<Point3df> future = app.enqueue(() -> {
+      return enqueueGet(() -> {
         Spatial spatial = find(name);
         if (spatial == null) {
           return null;
         }
         Vector3f v = spatial.getWorldTranslation();
         return new Point3df(v.x, v.y, v.z);
-      });
-      return future.get(5, TimeUnit.SECONDS);
+      }, 5, TimeUnit.SECONDS);
     } catch (Exception e) {
       log.error("getWorldTranslation({}) failed", name, e);
       return null;
@@ -3056,7 +3152,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return null;
     }
     try {
-      Future<Matrix> future = app.enqueue(() -> {
+      return enqueueGet(() -> {
         Spatial spatial = find(name);
         if (spatial == null) {
           return null;
@@ -3073,8 +3169,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         m.elements[1][3] = t.y;
         m.elements[2][3] = t.z;
         return m;
-      });
-      return future.get(5, TimeUnit.SECONDS);
+      }, 5, TimeUnit.SECONDS);
     } catch (Exception e) {
       log.error("getWorldMatrix({}) failed", name, e);
       return null;
@@ -3100,8 +3195,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return empty;
     }
     try {
-      Future<Map<String, Point3df>> future = app.enqueue(() -> {
-        Map<String, Point3df> out = new LinkedHashMap<>();
+      Map<String, Point3df> out = enqueueGet(() -> {
+        Map<String, Point3df> found = new LinkedHashMap<>();
         for (String name : names) {
           if (name == null) {
             continue;
@@ -3111,11 +3206,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
             continue;
           }
           Vector3f v = spatial.getWorldTranslation();
-          out.put(name, new Point3df(v.x, v.y, v.z));
+          found.put(name, new Point3df(v.x, v.y, v.z));
         }
-        return out;
-      });
-      return future.get(5, TimeUnit.SECONDS);
+        return found;
+      }, 5, TimeUnit.SECONDS);
+      return out != null ? out : empty;
     } catch (Exception e) {
       log.error("getWorldTranslations failed", e);
       return empty;
@@ -3144,8 +3239,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return frames;
     }
     try {
-      Future<List<JointFrame>> future = app.enqueue(() -> {
-        List<JointFrame> out = new ArrayList<>();
+      List<JointFrame> out = enqueueGet(() -> {
+        List<JointFrame> found = new ArrayList<>();
         for (String name : names) {
           if (name == null) {
             continue;
@@ -3162,11 +3257,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
           if (data.mapper != null) {
             frame.withServoMap(data.mapper.getMinX(), data.mapper.getMaxX(), data.mapper.getMinY(), data.mapper.getMaxY());
           }
-          out.add(frame);
+          found.add(frame);
         }
-        return out;
-      });
-      return future.get(5, TimeUnit.SECONDS);
+        return found;
+      }, 5, TimeUnit.SECONDS);
+      return out != null ? out : frames;
     } catch (Exception e) {
       log.error("getJointFrames failed", e);
       return frames;
@@ -3206,15 +3301,14 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       return null;
     }
     try {
-      Future<Point3df> future = app.enqueue(() -> {
+      return enqueueGet(() -> {
         Spatial spatial = findHandSpatial(robot, side);
         if (spatial == null) {
           return null;
         }
         Vector3f v = spatial.getWorldTranslation();
         return new Point3df(v.x, v.y, v.z);
-      });
-      return future.get(5, TimeUnit.SECONDS);
+      }, 5, TimeUnit.SECONDS);
     } catch (Exception e) {
       log.error("getHandWorldTranslation({}, {}) failed", robot, side, e);
       return null;
@@ -3504,6 +3598,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * 
    */
   public void rotateOnAxis(String name, String axis, double degrees, double speed) {
+    if (!isSceneReady()) {
+      return;
+    }
     interpolator.addAnimation("rotateTo", name, axis, degrees, speed);
   }
 
@@ -3843,8 +3940,25 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   transient private Thread mainThread;
 
   public void simpleInitApp() {
+    simpleInitApp(app);
+  }
 
-    stateManager = app.getStateManager();
+  /**
+   * JME calls this on {@code jME3 Main}. Use the live {@link Jme3App} argument
+   * — {@link #start(String, String)} must not clear {@link #app} just because
+   * the launcher thread finished ({@code Application.start()} returns after
+   * spawning this thread).
+   */
+  public void simpleInitApp(Jme3App jmeApp) {
+    if (jmeApp == null) {
+      log.error("simpleInitApp: Jme3App is null - scene will not initialize");
+      return;
+    }
+    if (app == null) {
+      app = jmeApp;
+    }
+
+    stateManager = jmeApp.getStateManager();
 
     if (usePhysics) {
       bulletAppState = new BulletAppState();
@@ -3855,18 +3969,18 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     setDisplayStatView(false);
 
-    assetManager = app.getAssetManager();
+    assetManager = jmeApp.getAssetManager();
 
-    inputManager = app.getInputManager();
+    inputManager = jmeApp.getInputManager();
 
-    guiNode = app.getGuiNode();
+    guiNode = jmeApp.getGuiNode();
     
-    cam = app.getCamera();
-    rootNode = app.getRootNode();
+    cam = jmeApp.getCamera();
+    rootNode = jmeApp.getRootNode();
     rootNode.setName(ROOT);
     rootNode.attachChild(camera);
 
-    viewPort = app.getViewPort();
+    viewPort = jmeApp.getViewPort();
     // Setting the direction to Spatial to camera, this means the camera will
     // copy the movements of the Node
     camNode = new CameraNode("cam", cam);
@@ -3908,20 +4022,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     // config was applied (Eclipse often uses src/main/resources/resource).
     refreshAssetPaths();
 
-    assetManager.registerLocator("./", FileLocator.class);
-    assetManager.registerLocator(getDataDir(), FileLocator.class);
-    assetManager.registerLocator(assetsDir, FileLocator.class);
-    assetManager.registerLocator(modelsDir, FileLocator.class);
-    assetManager.registerLocator(getResourceDir(), FileLocator.class);
-    // Also register fallback model dirs (extracted /resource with VinMoov5.j3o)
-    for (String modelPath : getModelsSearchPaths()) {
-      assetManager.registerLocator(modelPath, FileLocator.class);
-      File parentAssets = new File(modelPath).getParentFile();
-      if (parentAssets != null) {
-        assetManager.registerLocator(parentAssets.getPath(), FileLocator.class);
-      }
-      log.info("Registered JME model locator {}", modelPath);
-    }
+    registerModelLocators();
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
     /**
@@ -4080,7 +4181,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (usePhysics) {
       bulletAppState.setDebugEnabled(false);
       PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
-      PhysicsTestHelper.createBallShooter(app, rootNode, bulletAppState.getPhysicsSpace());
+      PhysicsTestHelper.createBallShooter(jmeApp, rootNode, bulletAppState.getPhysicsSpace());
     }
 
   }
@@ -4134,8 +4235,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   // dynamic create of type... TODO fix name start --> create
   synchronized public SimpleApplication start(String appName, String appType) {
-    if (Service.isHeadless()) {
-      log.warn("running in headless mode - will not start jmonkey app");
+    if (!JmePlatform.prepareNativeDisplay()) {
+      error("%s", JmePlatform.windowUnavailableMessage());
       return null;
     }
 
@@ -4162,20 +4263,23 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       settings.setUseInput(true);
       settings.setAudioRenderer(null);
       settings.setResizable(true);
+      JmePlatform.apply(settings, (JMonkeyEngineConfig) config, Platform.getLocalInstance());
       app.setSettings(settings);
 
       app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
 
-      // the all important "start" - anyone goofing around with the engine
-      // before this is done will
-      // will generate error from jmonkey - this should "block"
+      // Application.start() returns after spawning "jME3 Main". This launcher
+      // thread then exits — that is not a failed init. Fail only if start()
+      // throws or the real jME3 Main thread dies before simpleInitApp.
+      final AtomicReference<Throwable> startError = new AtomicReference<>();
       mainThread = new Thread() {
         @Override
         public void run() {
           try {
             app.start();
           } catch (Throwable t) {
+            startError.set(t);
             log.error("JMonkeyEngine app.start() failed", t);
           }
         }
@@ -4193,18 +4297,40 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       };
       Future<String> future = app.enqueue(callable);
       try {
-        // Timeout so a failed LWJGL/native init cannot hang Runtime forever
-        future.get(60, java.util.concurrent.TimeUnit.SECONDS);
+        long deadline = System.currentTimeMillis() + 60_000;
+        boolean initialized = false;
+        Thread jmeMain = null;
+        while (System.currentTimeMillis() < deadline) {
+          try {
+            future.get(200, TimeUnit.MILLISECONDS);
+            initialized = true;
+            break;
+          } catch (java.util.concurrent.TimeoutException slice) {
+            if (jmeMain == null) {
+              jmeMain = JmePlatform.findJmeMainThread();
+            }
+            if (JmePlatform.jmeInitThreadFailed(startError.get(), jmeMain)) {
+              error("JMonkeyEngine window thread exited during GLFW/OpenGL init. %s",
+                  JmePlatform.glFailureHint(Platform.getLocalInstance()));
+              app = null;
+              return null;
+            }
+          }
+        }
+        if (!initialized) {
+          error("JMonkeyEngine failed to initialize within 60s — check LWJGL natives / display. %s",
+              JmePlatform.glFailureHint(Platform.getLocalInstance()));
+          log.error("JMonkeyEngine init timeout");
+          app = null;
+          return null;
+        }
 
-        // default positioning
+        // default positioning (addMsg is drained on the render thread)
         moveTo(CAMERA, 0, 3, 6);
         cameraLookAtRoot();
         rotateOnAxis(CAMERA, "x", -20);
-        setFloorGrid(true);
+        runOnJmeThread(() -> setFloorGrid(true), 15);
 
-      } catch (java.util.concurrent.TimeoutException e) {
-        error("JMonkeyEngine failed to initialize within 60s — check LWJGL natives / display");
-        log.error("JMonkeyEngine init timeout", e);
       } catch (Exception e) {
         log.warn("future threw", e);
       }
@@ -4223,7 +4349,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       // config should be set at before this time
       SimpleApplication app = start();
       if (app == null) {
-        log.warn("jmonkey app not starting");
+        error("JMonkeyEngine window did not start — servo animation is disabled until the simulator initializes");
         return;
       }
       // notify me if new services are created
@@ -4448,6 +4574,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   @Override
   public void onEncoderData(EncoderData data) {
+    if (data == null || data.source == null || !isSceneReady()) {
+      return;
+    }
     String name = data.source;
 
     String[] multi = multiMapped.get(name);
@@ -4476,7 +4605,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   @Override
   public void onServoMoveTo(ServoControl servo) {
-    if (servo == null) {
+    if (servo == null || !isSceneReady()) {
       return;
     }
     Double velocity = servo.getSpeed();
@@ -4492,7 +4621,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * simulator moves even if TimeEncoder is delayed/disabled.
    */
   public void onServoMove(ServoMove move) {
-    if (move == null || move.name == null || move.inputPos == null) {
+    if (move == null || move.name == null || move.inputPos == null || !isSceneReady()) {
       return;
     }
     rotateNamedNode(move.name, move.inputPos, defaultServoSpeed);
@@ -4551,6 +4680,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   public void loadDefaultModels() {
     refreshAssetPaths();
+    registerModelLocators();
     // Load each model basename at most once across all search directories
     LinkedHashSet<String> pendingBasenames = new LinkedHashSet<>();
     for (String dir : getModelsSearchPaths()) {
@@ -4598,7 +4728,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
     refreshAssetPaths();
     unique.add(modelsDir);
+    unique.add(FileIO.gluePaths(getDataDir(), "assets/Models"));
+    unique.add(FileIO.gluePaths("data", "JMonkeyEngine/assets/Models"));
     unique.add(FileIO.gluePaths("resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("src/main/resources/resource", "JMonkeyEngine/assets/Models"));
     unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "JMonkeyEngine/assets/Models"));
 
     for (String p : unique) {
@@ -4608,6 +4741,26 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
     return paths;
+  }
+
+  void registerModelLocators() {
+    if (assetManager == null) {
+      return;
+    }
+    refreshAssetPaths();
+    assetManager.registerLocator("./", FileLocator.class);
+    assetManager.registerLocator(getDataDir(), FileLocator.class);
+    assetManager.registerLocator(assetsDir, FileLocator.class);
+    assetManager.registerLocator(modelsDir, FileLocator.class);
+    assetManager.registerLocator(getResourceDir(), FileLocator.class);
+    for (String modelPath : getModelsSearchPaths()) {
+      assetManager.registerLocator(modelPath, FileLocator.class);
+      File parentAssets = new File(modelPath).getParentFile();
+      if (parentAssets != null) {
+        assetManager.registerLocator(parentAssets.getPath(), FileLocator.class);
+      }
+      log.debug("Registered JME model locator {}", modelPath);
+    }
   }
 
   /**
@@ -4647,23 +4800,20 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   public ServiceConfig loadDelayed(ServiceConfig c) {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
-
-    if (config.models != null && config.models.size() > 0) {
-      List<String> tempList = new ArrayList<>(config.models);
-      for (String modelPath : tempList) {
-        loadModel(modelPath);
-      }
-    } else {
-      // scan resource dir
-      loadDefaultModels();
-    }
-
-    // Bind + mappers must run on the JME render thread. Doing this from the
-    // service/main thread after app.start() can deadlock and hang startService
-    // (demo never reaches ik3d / motion loops).
     final String robotName = inferRobotNameFromNodeConfig(config);
     final String lookAt = config.cameraLookAt;
-    Runnable sceneSetup = () -> {
+    // Load + bind + mappers on the render thread. AppTask.get(timeout) also
+    // throws if the callable returns null — runOnJmeThread always returns a
+    // non-null sentinel.
+    boolean ok = runOnJmeThread(() -> {
+      if (config.models != null && config.models.size() > 0) {
+        List<String> tempList = new ArrayList<>(config.models);
+        for (String modelPath : tempList) {
+          loadModel(modelPath);
+        }
+      } else {
+        loadDefaultModels();
+      }
       if (robotName != null) {
         bindVinMoovRoot(robotName);
       }
@@ -4672,19 +4822,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         cameraLookAt(lookAt);
       }
       ensureChestDepthCameraOnRenderThread(config);
-    };
-
-    if (app != null) {
-      try {
-        app.enqueue(() -> {
-          sceneSetup.run();
-          return null;
-        }).get(30, java.util.concurrent.TimeUnit.SECONDS);
-      } catch (Exception e) {
-        log.error("loadDelayed scene setup failed or timed out — continuing without full node mappers", e);
-      }
-    } else {
-      sceneSetup.run();
+    }, 120);
+    if (!ok) {
+      log.error("loadDelayed scene setup failed or timed out - continuing without full node mappers");
     }
 
     invoke("publishSceneReady", getName());

@@ -10,6 +10,14 @@ import org.myrobotlab.jme3.UserDataConfig;
 public class JMonkeyEngineConfig extends ServiceConfig {
 
   /**
+   * JME renderer id ({@code LWJGL-OpenGL2}, {@code LWJGL-OpenGL31}, …). Null
+   * chooses from the CPU: OpenGL 2.0 on ARM / Raspberry Pi (Mesa is not 3.2
+   * core), OpenGL 3.2 elsewhere.
+   */
+  public String renderer;
+
+
+  /**
    * Models for JMonkeyEngine to load - can be of format
    */
   public List<String> models = new ArrayList<>();

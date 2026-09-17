@@ -136,7 +136,8 @@ public class MavenWrapper extends Repo implements Serializable {
 
     for (MetaData meta : serviceMetaData.values()) {
       for (ServiceDependency serviceDependency : meta.getDependencies()) {
-        String key = serviceDependency.getProjectCoordinates();
+        String key = serviceDependency.getOrgId() + ":" + serviceDependency.getArtifactId() + ":"
+            + String.valueOf(serviceDependency.getClassifier()) + ":" + String.valueOf(serviceDependency.getExt());
         if (!allDependencies.containsKey(key)) {
           allDependencies.put(key, new ArrayList<>(List.of(serviceDependency)));
         } else {
@@ -191,6 +192,9 @@ public class MavenWrapper extends Repo implements Serializable {
         }
         if (dependency.getExt() != null) {
           dep.append(String.format("      <type>%s</type>\n", dependency.getExt()));
+        }
+        if (dependency.getClassifier() != null) {
+          dep.append(String.format("      <classifier>%s</classifier>\n", dependency.getClassifier()));
         }
         List<ServiceExclude> excludes = dependency.getExcludes();
 

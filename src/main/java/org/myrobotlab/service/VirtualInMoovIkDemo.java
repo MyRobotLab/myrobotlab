@@ -77,7 +77,7 @@ public class VirtualInMoovIkDemo {
 
       log.info("Starting JMonkeyEngine simulator...");
       JMonkeyEngine simulator = (JMonkeyEngine) i01.startSimulator();
-      if (simulator == null || !simulator.isRunning()) {
+      if (simulator == null || !simulator.isSceneReady()) {
         log.error("Simulator failed to start — aborting IK demo");
         return;
       }

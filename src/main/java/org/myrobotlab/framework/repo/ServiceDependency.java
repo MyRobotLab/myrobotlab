@@ -17,6 +17,8 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   private String artifactId;
   private String version;
   private String ext; // ext
+  /** Maven classifier (e.g. natives-linux-arm64). Null for the main artifact. */
+  private String classifier;
 
   private boolean installed = false;
 
@@ -61,6 +63,16 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
       this.version = split[2];
       if (!split[3].equals("null")) {
         this.ext = split[3];
+      }
+    } else if (split.length == 5) {
+      this.groupId = split[0];
+      this.artifactId = split[1];
+      this.version = split[2];
+      if (!split[3].equals("null")) {
+        this.ext = split[3];
+      }
+      if (!split[4].equals("null")) {
+        this.classifier = split[4];
       }
     } else {
       String err = String.format("%s not a valid library key", key);
@@ -108,6 +120,14 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
     return ext;
   }
 
+  public String getClassifier() {
+    return classifier;
+  }
+
+  public void setClassifier(String classifier) {
+    this.classifier = classifier;
+  }
+
   public boolean getIncludeInOneJar() {
     return includeInOneJar;
   }
@@ -139,6 +159,9 @@ public class ServiceDependency implements Serializable, Comparator<ServiceDepend
   }
 
   public String getKey() {
+    if (classifier != null && !classifier.isBlank()) {
+      return String.format("%s/%s/%s/%s/%s", groupId, artifactId, version, ext, classifier);
+    }
     return String.format("%s/%s/%s/%s", groupId, artifactId, version, ext);
   }
 

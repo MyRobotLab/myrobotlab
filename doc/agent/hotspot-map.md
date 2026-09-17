@@ -22,16 +22,17 @@ Line numbers drift; use the region banners and method names below as the source 
 
 Do **not** big-bang rewrite Runtime. When adding new behavior:
 
-1. Put new cohesive logic in a focused class under `org.myrobotlab.framework` (or a subpackage) when it does not need `Runtime` private state.
+1. Put new cohesive logic in a focused class under `org.myrobotlab.framework` or `org.myrobotlab.framework.runtime` when it does not need `Runtime` private state.
 2. Keep `Runtime` as a thin delegator for new APIs.
 3. Prefer extending existing helpers (`Repo`, `RouteTable`, `Plan`, `CodecUtils`) over growing `Runtime` further.
 
 Existing extraction-friendly collaborators already outside Runtime:
 
 - `org.myrobotlab.framework.repo.Repo` / `IvyWrapper` / `MavenWrapper` — install
-- `org.myrobotlab.framework.Plan` — start plans
+- `org.myrobotlab.framework.Plan` — start/config plans
 - `org.myrobotlab.framework.MethodCache` — invoke resolution
-- `org.myrobotlab.framework.registration.*` — registration records
+- `org.myrobotlab.framework.Registration` / `org.myrobotlab.framework.registration.*` — registry records
+- `org.myrobotlab.codec.CodecUtils` — serialization
 
 ## Service (`org.myrobotlab.framework.Service`)
 
