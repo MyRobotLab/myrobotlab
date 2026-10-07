@@ -225,6 +225,62 @@ public abstract class OpenCVFilter implements Serializable, CVFilter {
     this.setSourceKey(sourceKey);
   }
 
+  /**
+   * Catalog copy for WebGui and {@code OpenCV.getPossibleFilterInfo()}. Prefer
+   * the static {@code catalogInfo()} on the concrete filter class so metadata
+   * can be read without constructing the filter (some constructors start
+   * services or native loaders).
+   */
+  public OpenCVFilterInfo getFilterInfo() {
+    return lookupCatalogInfo(getClass());
+  }
+
+  /**
+   * Default catalog entry used only when a concrete filter has not declared
+   * {@code public static OpenCVFilterInfo catalogInfo()}.
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return OpenCVFilterInfo.of("OpenCVFilter", "Base class for OpenCV pipeline filters.",
+        "Subclass this and implement process / processDisplay. Add the subclass type via OpenCV.addFilter.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  /**
+   * Resolve catalog metadata from {@code clazz} without instantiating it.
+   * Looks for {@code public static OpenCVFilterInfo catalogInfo()} on the
+   * class, then on OpenCVFilter superclasses.
+   */
+  public static OpenCVFilterInfo lookupCatalogInfo(Class<?> clazz) {
+    if (clazz == null || !OpenCVFilter.class.isAssignableFrom(clazz)) {
+      return catalogInfo();
+    }
+    Class<?> cursor = clazz;
+    while (cursor != null && OpenCVFilter.class.isAssignableFrom(cursor)) {
+      try {
+        java.lang.reflect.Method m = cursor.getDeclaredMethod("catalogInfo");
+        if (java.lang.reflect.Modifier.isStatic(m.getModifiers()) && m.getParameterCount() == 0) {
+          m.setAccessible(true);
+          return (OpenCVFilterInfo) m.invoke(null);
+        }
+      } catch (NoSuchMethodException ignored) {
+        // try superclass
+      } catch (Throwable e) {
+        log.warn("catalogInfo() failed for {}", cursor.getName(), e);
+        break;
+      }
+      if (cursor == OpenCVFilter.class) {
+        break;
+      }
+      cursor = cursor.getSuperclass();
+    }
+    String typeName = clazz.getSimpleName();
+    if (typeName.startsWith("OpenCVFilter") && typeName.length() > "OpenCVFilter".length()) {
+      typeName = typeName.substring("OpenCVFilter".length());
+    }
+    return OpenCVFilterInfo.of(typeName, "OpenCV pipeline filter (" + typeName + ").",
+        "Add the filter and start capture. See the filter class for parameters.", OpenCVFilterInfo.DEP_CORE);
+  }
+
   public void broadcastFilterState() {
     FilterWrapper fw = new FilterWrapper(this.name, this);
     if (opencv != null) {

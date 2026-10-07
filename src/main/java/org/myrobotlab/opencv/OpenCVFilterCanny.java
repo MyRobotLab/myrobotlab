@@ -39,6 +39,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterCanny extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Canny",
+        "Canny edge detector: finds intensity gradients and thins them into a binary edge map. Widely used as a first step for contours, lines, and shape analysis.",
+        "Add the filter and tune aperture size plus low/high hysteresis thresholds. Feed the output into FindContours, HoughLines2, or Mouse. Color input is converted to gray first.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

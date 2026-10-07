@@ -1,3 +1,41 @@
+<h3>left hand reach</h3>
+<p class="text-muted">Cyan cloud of palm positions the InMoov left arm can reach (forward kinematics over joint limits). Same overlay as the FABRIK panel checkbox.</p>
+<label>
+    <input type="checkbox" ng-model="service.config.reachCloud" ng-change="setReachCloud()"/>
+    Show left-hand reach cloud
+    <span ng-show="service.reachCloudPointCount" class="text-muted">
+        ({{service.reachCloudPointCount}} voxels)
+    </span>
+</label>
+<h3>depth overlay</h3>
+<p class="text-muted">Vertices are camera-frame meters (JME / IK world). Scale 1 is real-world.
+The yellow stick in the simulator is 1 m along the camera. Click the mesh, type a tape-measured
+distance, then Calibrate if objects look too small or large.</p>
+<table class="table">
+    <tr>
+        <td style="width: 8em;">scale {{service.config.depthCloudScale | number:3}}</td>
+        <td>
+            <input type="range" min="0.2" max="5" step="0.01" style="width: 16em;"
+                ng-model="service.config.depthCloudScale" ng-change="setDepthCloudScale()"/>
+            <button class="btn btn-default btn-sm" ng-click="resetDepthCloudScale()">Reset 1.0</button>
+        </td>
+    </tr>
+    <tr>
+        <td>last click</td>
+        <td>
+            <span ng-show="service.lastClickDistanceM">{{service.lastClickDistanceM | number:3}} m from camera</span>
+            <span ng-hide="service.lastClickDistanceM" class="text-muted">click the overlay in the simulator</span>
+        </td>
+    </tr>
+    <tr>
+        <td>measured m</td>
+        <td>
+            <input type="number" class="form-control" style="width: 8em; display: inline-block;"
+                ng-model="knownDistanceM" min="0.05" max="10" step="0.01"/>
+            <button class="btn btn-primary btn-sm" ng-click="calibrateDepthScale()">Calibrate from last click</button>
+        </td>
+    </tr>
+</table>
 <h3>nodes</h3>
 <div>selected {{selectedPath}}</div>
 <table class="table table-striped">

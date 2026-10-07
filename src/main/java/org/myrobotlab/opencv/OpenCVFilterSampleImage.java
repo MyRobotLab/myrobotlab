@@ -39,6 +39,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSampleImage extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("SampleImage",
+        "Draws a reference rectangle / can load a still image for filter development and color experiments (named sample swatches in comments).",
+        "Used mainly in tests and demos. Call addImage(path) to overlay or replace with a file.",
+        "Optional still image file.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

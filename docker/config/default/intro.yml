@@ -1,0 +1,4 @@
+!!org.myrobotlab.service.config.IntroConfig
+listeners: null
+peers: null
+type: Intro

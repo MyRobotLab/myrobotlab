@@ -81,6 +81,22 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceTraining extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FaceTraining",
+        "Helper that captures Haar-detected face crops and trains an EigenFace recognizer, switching between training and predicting modes.",
+        "Point the camera at a person, add the filter, and let it gather samples into its training folder, then switch to predicting. FaceRecognizer is the more complete API for production use.",
+        OpenCVFilterInfo.DEP_HAAR);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

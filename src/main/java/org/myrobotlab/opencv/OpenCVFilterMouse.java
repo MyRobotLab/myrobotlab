@@ -54,6 +54,22 @@ import org.slf4j.Logger;
  */
 
 public class OpenCVFilterMouse extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Mouse",
+        "Edge-following \"mouse\" that walks Canny edges with a left-hand wall rule and draws the path — a demo of contour tracing rather than a production detector.",
+        "Add to a high-contrast scene. It computes Canny internally and overlays a green path. Not for navigation; use FindContours or HoughLines2 for geometry.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   public final class Node {
     public int x;

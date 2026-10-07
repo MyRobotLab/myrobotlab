@@ -17,11 +17,14 @@ import org.myrobotlab.string.StringUtil;
 
 /**
  * <pre>
- * 
+ *
+ ===== GENERATED FILE — DO NOT HAND-EDIT =====
  Welcome to Msg.java
  Its created by running ArduinoMsgGenerator
- which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
- with the cpp template (src/resource/Arduino/generate/Msg.java.template)
+ which combines the MrlComm message schema
+ (src/main/resources/resource/Arduino/generate/arduinoMsgs.schema)
+ with the template (src/main/resources/resource/Arduino/generate/Msg.java.template)
+ See doc/GENERATED.md and AGENTS.md.
 
    Schema Type Conversions
 

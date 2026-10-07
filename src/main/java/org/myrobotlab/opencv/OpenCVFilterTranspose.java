@@ -38,6 +38,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterTranspose extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Transpose",
+        "Transposes the image matrix (rows become columns), rotating 90° and swapping width/height.",
+        "Add when a camera is mounted in portrait but the grabber delivers landscape, or the reverse. Combine with Flip if the result is mirrored.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

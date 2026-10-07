@@ -42,6 +42,22 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 
 public class OpenCVFilterResize extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Resize",
+        "Resizes the frame to a fixed destination width/height (default around 480px wide) independent of camera resolution.",
+        "Add early to standardize size for DNNs or recording. Set destWidth/destHeight to match your model (for example 300 or 640).",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

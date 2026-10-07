@@ -17,7 +17,12 @@
     mvn exec:java -Dexec.mainClass=org.myrobotlab.service.Runtime -Dexec.args="-s webgui WebGui intro Intro python Python"
 
     # specific test
-    mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"  
+    mvn test -Dtest="org.myrobotlab.service.WebGuiTest#postTest"
+
+    # fast agent / PR suite (framework + codec, no heavy service installs)
+    mvn test -Pagent-tests
+
+    # agent docs: AGENTS.md , doc/agent/ , CONTRIBUTING.md
 
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
@@ -402,7 +407,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.11</version>
+        <version>0.8.15</version>
         <executions>
           <execution>
             <goals>
@@ -442,4 +447,56 @@
     <system>github</system>
     <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
   </issueManagement>
+
+  <!--
+    agent-tests: deterministic, relatively fast suite for PR / agent loops.
+    See AGENTS.md. Does not replace a full mvn test before releases.
+  -->
+  <profiles>
+    <profile>
+      <id>agent-tests</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.2</version>
+            <configuration>
+              <forkCount>1</forkCount>
+              <reuseForks>true</reuseForks>
+              <argLine>${argLine} -Djava.library.path=libraries/native
+                -Djna.library.path=libraries/native</argLine>
+              <!-- Curated fast suite: avoid InMoov/Config/Repo install-heavy tests -->
+              <includes>
+                <include>**/org/myrobotlab/framework/DependencyTest.java</include>
+                <include>**/org/myrobotlab/framework/StaticTypeTest.java</include>
+                <include>**/org/myrobotlab/framework/MethodCacheTest.java</include>
+                <include>**/org/myrobotlab/framework/CmdOptionsTest.java</include>
+                <include>**/org/myrobotlab/framework/TaskTest.java</include>
+                <include>**/org/myrobotlab/framework/BlockingTest.java</include>
+                <include>**/org/myrobotlab/framework/ResourceTest.java</include>
+                <include>**/org/myrobotlab/framework/ProxyFactoryTest.java</include>
+                <include>**/org/myrobotlab/framework/AttachTest.java</include>
+                <include>**/org/myrobotlab/framework/repo/ServiceDataTest.java</include>
+                <include>**/org/myrobotlab/codec/CodecUtilsTest.java</include>
+                <include>**/org/myrobotlab/math/geometry/DepthToPointCloudTest.java</include>
+                <include>**/org/myrobotlab/math/geometry/DepthToRgbMeshTest.java</include>
+                <include>**/org/myrobotlab/math/geometry/DepthCloudJmeTest.java</include>
+                <include>**/org/myrobotlab/service/OakDInstallTest.java</include>
+              </includes>
+              <excludes>
+                <exclude>**/integration/*</exclude>
+                <exclude>**/ServiceLifeCycleTest.java</exclude>
+                <exclude>**/ConfigTest.java</exclude>
+                <exclude>**/LocalizeTest.java</exclude>
+                <exclude>**/RepoTest.java</exclude>
+              </excludes>
+              <forkNode
+                implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory" />
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

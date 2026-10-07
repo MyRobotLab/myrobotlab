@@ -39,6 +39,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterDetector extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Detector",
+        "Background subtractor (MOG2). Learns a model of the static scene and outputs a foreground mask of things that moved.",
+        "Point a fixed camera at a scene, add the filter, and let it learn (learningRate -1). Call learn() to resume adapting or set learningRate to 0 to freeze the model. Follow with FindContours to box movers.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

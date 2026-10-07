@@ -31,6 +31,22 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Yolo",
+        "Darknet YOLOv2 object detector (COCO classes) running on a background thread. Draws labeled boxes for people, chairs, bottles, etc.",
+        "Add the filter; it loads yolov2.cfg/weights/names from resource/OpenCV/yolo/. First load is slow. Prefer YoloOnnx (YOLOX) for new projects.",
+        "YOLOv2 cfg, weights, and coco.names from the yolov2 Ivy zip.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterYolo.class);

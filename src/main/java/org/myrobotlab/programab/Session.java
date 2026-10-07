@@ -143,7 +143,7 @@ public class Session {
     // invoke them all if configured to do so
     if (processOOB) {
       for (OOBPayload payload : oobTags) {
-        // assumption is this is non blocking invoking!
+        // Non-blocking: fire-and-forget via the service inbox.
         boolean oobRes = OOBPayload.invokeOOBPayload(payload, programab.getName(), false);
         if (!oobRes) {
           // there was a failure invoking

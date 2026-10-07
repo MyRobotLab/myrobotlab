@@ -1,0 +1,127 @@
+<div class="row">
+    <div class="col-md-10">
+        <p>
+            Tesseract 5 OCR. Use <strong>line</strong> or <strong>sparse</strong> page segmentation for camera signs,
+            and <strong>auto</strong> for scanned documents. Attach an OpenCV <code>Ocr</code> filter for region detection.
+        </p>
+        <table class="table table-striped">
+            <tr>
+                <td>Language model</td>
+                <td>
+                    <select class="form-control" ng-model="service.config.lang" ng-change="dirty=true"
+                            ng-options="l.code as l.label for l in langModels">
+                    </select>
+                    <input class="form-control" style="margin-top: 6px" ng-model="service.config.lang"
+                        ng-change="dirty=true" placeholder="eng" />
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="installLang()">download lang</button>
+                    <div ng-show="service.installedLanguages && service.installedLanguages.length">
+                        installed: {{service.installedLanguages.join(', ')}}
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Page seg (PSM)</td>
+                <td>
+                    <select class="form-control" ng-model="service.config.psm" ng-change="dirty=true"
+                            ng-options="p.value as p.name for p in psmPresets">
+                    </select>
+                </td>
+                <td>3 auto · 7 single line · 11 sparse text</td>
+            </tr>
+            <tr>
+                <td>Engine (OEM)</td>
+                <td>
+                    <select class="form-control" ng-model="service.config.oem" ng-change="dirty=true">
+                        <option ng-value="1">1 LSTM only</option>
+                        <option ng-value="3">3 default</option>
+                    </select>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>DPI</td>
+                <td><input class="form-control" type="number" ng-model="service.config.dpi" ng-change="dirty=true" /></td>
+                <td>0 = Tesseract default</td>
+            </tr>
+            <tr>
+                <td>Whitelist</td>
+                <td><input class="form-control" ng-model="service.config.whitelist" ng-change="dirty=true"
+                        placeholder="ABC0123456789" /></td>
+                <td>Optional character restriction</td>
+            </tr>
+            <tr>
+                <td>Blacklist</td>
+                <td><input class="form-control" ng-model="service.config.blacklist" ng-change="dirty=true" /></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Tessdata path</td>
+                <td><input class="form-control" ng-model="service.config.tessDataPath" ng-change="dirty=true"
+                        placeholder="(auto)" /></td>
+                <td>Parent of tessdata, or leave empty</td>
+            </tr>
+            <tr>
+                <td>Auto-download lang</td>
+                <td>
+                    <input type="checkbox" ng-model="service.config.autoDownloadLang" ng-change="dirty=true" />
+                </td>
+                <td>Fetch missing tessdata_fast models into the service data dir</td>
+            </tr>
+            <tr>
+                <td>
+                    <button class="btn btn-default" ng-click="saveConfig()">apply</button>
+                </td>
+                <td>
+                    <span ng-show="service.ready" class="text-success">ready</span>
+                    <span ng-show="!service.ready" class="text-danger">not ready</span>
+                    <span ng-show="dirty"> — save to apply</span>
+                </td>
+                <td>{{service.loadedTessDataPath}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">OCR a file</div>
+            <div class="panel-body">
+                <form class="form-inline" ng-submit="runOcr()">
+                    <input class="form-control" style="width: 70%" type="text" ng-model="imagePath"
+                        placeholder="path to png/jpg" />
+                    <button class="btn btn-primary" type="submit">ocr</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="lastOcr">
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Result
+                <span ng-show="lastOcr.meanConfidence"> · confidence {{lastOcr.meanConfidence}}</span>
+                <span ng-show="lastOcr.lang"> · {{lastOcr.lang}}</span>
+            </div>
+            <div class="panel-body">
+                <pre style="white-space: pre-wrap;">{{lastOcr.text}}</pre>
+                <table class="table table-condensed" ng-show="lastOcr.words && lastOcr.words.length">
+                    <tr>
+                        <th>word</th>
+                        <th>conf</th>
+                        <th>box</th>
+                    </tr>
+                    <tr ng-repeat="w in lastOcr.words">
+                        <td>{{w.text}}</td>
+                        <td>{{w.confidence | number:1}}</td>
+                        <td>{{w.x}},{{w.y}} {{w.width}}x{{w.height}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

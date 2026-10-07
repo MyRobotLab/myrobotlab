@@ -37,6 +37,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFlip extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Flip",
+        "Mirrors the image. flipCode 0 is upside-down, 1 is left-right, -1 is both — useful when a camera is mounted inverted.",
+        "Add near the start of the pipeline so later filters see a correctly oriented image. Change flipCode from Python if the default is wrong.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

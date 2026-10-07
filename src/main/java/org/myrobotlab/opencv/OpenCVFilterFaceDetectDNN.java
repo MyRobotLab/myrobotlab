@@ -51,6 +51,22 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FaceDetectDNN",
+        "2016-era Caffe SSD face detector (res10_300x300). More robust than Haar, slower than YuNet.",
+        "Add the filter; it loads deploy.prototxt and the caffemodel from resource/OpenCV/models/facedetectdnn/. Prefer FaceDetectYN for new projects.",
+        "Caffe prototxt + caffemodel from the opencv_facedetectdnn Ivy zip.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());

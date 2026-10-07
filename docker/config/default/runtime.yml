@@ -1,0 +1,16 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+id: docker
+listeners: []
+locale: null
+logLevel: info
+peers: null
+registry:
+- runtime
+- log
+- security
+- webgui
+- intro
+- python
+resource: resource
+type: Runtime
+virtual: false

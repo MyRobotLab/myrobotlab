@@ -1,4 +1,31 @@
-!!org.myrobotlab.service.config.ServiceConfig
-listeners: null
+!!org.myrobotlab.service.config.InverseKinematics3DConfig
+# joints is the real calibration - each entry is a measured rotation axis, a
+# point on it, the angle it was measured at, and the servo -> mesh degree map.
+# Empty means "use the arm's built-in default geometry"; press
+# "Calibrate from simulator" in the WebGui to measure it off VinMoov.
+joints: [
+  ]
+endEffectorSet: false
+endEffectorX: 0.0
+endEffectorY: 0.0
+endEffectorZ: 0.0
+# reported measurements, in meters - the solver reads joints, not these
+bicepA: null
+omoplateA: null
+rotateD: null
+shoulderD: null
+listeners: [
+  ]
+originPitch: 0.0
+originRoll: 0.0
+originX: 0.0
+originY: 0.0
+originYaw: 0.0
+originZ: 0.0
 peers: null
+toolOffsetSet: false
+toolOffsetX: 0.0
+toolOffsetY: 0.0
+toolOffsetZ: 0.0
 type: InverseKinematics3D
+worldFrame: true

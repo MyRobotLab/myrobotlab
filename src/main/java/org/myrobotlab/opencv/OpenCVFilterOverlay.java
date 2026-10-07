@@ -49,6 +49,22 @@ import org.slf4j.Logger;
 
 // helpful url - https://www.pyimagesearch.com/2016/04/25/watermarking-images-with-opencv-and-python/
 public class OpenCVFilterOverlay extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Overlay",
+        "Watermarks the frame with additional images (alpha blend) and/or text. Useful for HUD-style labels and logos.",
+        "Add overlays in code (image filename + alpha, or text). Size the overlay to the frame. Does not replace AddMask for training cut-outs.",
+        "Optional overlay image files on disk.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

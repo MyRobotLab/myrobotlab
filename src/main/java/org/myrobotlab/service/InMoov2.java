@@ -37,6 +37,7 @@ import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -2247,10 +2248,67 @@ public class InMoov2 extends Service<InMoov2Config>
     startPeer("torso");
   }
 
+  /**
+   * Start the JMonkeyEngine simulator peer.
+   * <p>
+   * Uses {@link Runtime#create(String, String)} + {@code startService()} rather
+   * than relying solely on legacy behavior; {@link Runtime#start} releases
+   * {@code processLock} before {@code startService} so LWJGL window init cannot
+   * pin the global lifecycle lock.
+   */
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-    Simulator si = (Simulator) startPeer("simulator");
-    return si;
+    String simName = getPeerName("simulator");
+    if (simName == null) {
+      simName = getName() + ".simulator";
+    }
+
+    ServiceInterface existing = Runtime.getService(simName);
+    if (existing != null) {
+      if (!existing.isRunning()) {
+        existing.startService();
+      }
+      return (Simulator) existing;
+    }
+
+    // Create under plan (InMoov node mappings). loadDelayed (inside
+    // startService) binds VinMoov and applies node mappers — do not touch the
+    // live scene graph again here from this thread (JME is not thread-safe).
+    JMonkeyEngine jme = (JMonkeyEngine) Runtime.create(simName, "JMonkeyEngine");
+    if (jme == null) {
+      error("could not create simulator peer %s", simName);
+      return null;
+    }
+    jme.startService();
+    return jme;
+  }
+
+  /**
+   * Start the OAK-D chest depth peer, attach it to the simulator overlay, and
+   * begin publishing (live device or synthetic fallback).
+   */
+  public OakD startChestCamera() {
+    OakD oakd = (OakD) startPeer("oakd");
+    ServiceInterface sim = getPeer("simulator");
+    if (sim instanceof JMonkeyEngine && oakd != null) {
+      try {
+        ((JMonkeyEngine) sim).attach(oakd);
+        ((JMonkeyEngine) sim).ensureChestDepthCamera();
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    if (oakd != null) {
+      oakd.startDepth();
+    }
+    return oakd;
+  }
+
+  public void stopChestCamera() {
+    OakD oakd = (OakD) getPeer("oakd");
+    if (oakd != null) {
+      oakd.stopDepth();
+    }
   }
 
   public void stop() {
@@ -2327,6 +2385,10 @@ public class InMoov2 extends Service<InMoov2Config>
       warn("No ultrasonicLeft attached");
       return 0.0;
     }
+  }
+
+  public Classification onClassification(Classification c) {
+    return c;
   }
 
   public Map publishClassification(Map<String, Object> c) {

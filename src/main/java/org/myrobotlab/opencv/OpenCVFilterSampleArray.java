@@ -34,6 +34,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSampleArray extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("SampleArray",
+        "Samples RGB at configured pixel locations (default: bottom-center) and publishes ColoredPoint values for sensors or scripts.",
+        "Add the filter and subscribe to publish from OpenCV / the filter. Change the sample coordinates in code for line-following or floor color.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

@@ -9,8 +9,8 @@ public class Py4jConfig extends ServiceConfig {
   public String scriptRootDir;
 
   /**
-   * Whether to use the bundled Python executable
-   * or invoke the system Python.
+   * Reserved: a bundled interpreter is not wired yet. Py4j always creates
+   * {@code data/Py4j/venv} from {@code python3} or {@code python} on PATH.
    */
   public boolean useBundledPython = true;
   

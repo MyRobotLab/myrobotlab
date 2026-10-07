@@ -50,10 +50,56 @@ public class DHLink implements Serializable {
   public double currentPos = 0.0;
   public double offset = 0.0;
 
+  /**
+   * Servo degrees per degree of {@link #theta}, normally +1 or −1. Together with
+   * {@link #offset} this is the whole joint-space calibration:
+   * {@code servoDeg = servoSlope * thetaDeg + offset}.
+   *
+   * <p>
+   * When the link is built from a {@link JointFrame} this comes straight from the
+   * simulator's node mapper, so the solver, the mesh and the physical servo
+   * cannot disagree about direction.
+   * </p>
+   */
+  private double servoSlope = 1.0;
+
+  /**
+   * Measured transform from the previous link's frame to this link's frame at
+   * {@link #bindTheta}, replacing the Denavit-Hartenberg {@code d/r/alpha}
+   * parameters when non-null.
+   *
+   * <p>
+   * The frame's Z axis is the real rotation axis of the rig's joint and its
+   * origin is a point on that axis, so {@code resolveMatrix()} becomes
+   * {@code fixedTransform * Rz(theta - bindTheta)}. That reproduces a rigged
+   * skeleton exactly, whereas DH parameters can only approximate an arbitrary
+   * bone hierarchy.
+   * </p>
+   */
+  private Matrix fixedTransform;
+
+  /** The {@link #theta} at which {@link #fixedTransform} was measured. */
+  private double bindTheta = 0.0;
+
   // private Matrix m;
   // TODO: add max/min angle
   public DHLink(String name, double d, double r, double theta, double alpha) {
     this(name, d, r, theta, alpha, 0);
+  }
+
+  /**
+   * A revolute joint measured from a rig: the axis and origin come from
+   * {@code fixedTransform}, and {@code theta} is in the same units and direction
+   * as the simulator's mesh angle.
+   */
+  public DHLink(String name, Matrix fixedTransform, double bindTheta) {
+    super();
+    this.name = name;
+    this.fixedTransform = fixedTransform;
+    this.bindTheta = bindTheta;
+    this.theta = bindTheta;
+    this.initialTheta = bindTheta;
+    this.type = DHLinkType.REVOLUTE;
   }
 
   public DHLink(String name, double d, double r, double theta, double alpha, double offset) {
@@ -89,12 +135,20 @@ public class DHLink implements Serializable {
     this.servoMax = copy.servoMax;
     this.servoMin = copy.servoMin;
     this.currentPos = copy.currentPos;
+    this.offset = copy.offset;
+    this.servoSlope = copy.servoSlope;
+    this.bindTheta = copy.bindTheta;
+    this.fixedTransform = copy.fixedTransform != null ? new Matrix(copy.fixedTransform) : null;
   }
 
   /**
-   * @return a 4x4 homogenous transformation matrix for the given D-H parameters
+   * @return a 4x4 homogenous transformation matrix for this link at its current
+   *         {@link #getTheta()}
    */
   public Matrix resolveMatrix() {
+    if (fixedTransform != null) {
+      return fixedTransform.multiply(Matrix.rotationZ(theta - bindTheta));
+    }
     Matrix m = new Matrix(4, 4);
     // elements we need
     double cosTheta = Math.cos(theta);
@@ -242,28 +296,131 @@ public class DHLink implements Serializable {
         + MathUtils.radToDeg(max) + "]";
   }
 
+  /**
+   * Move the joint variable by {@code delta}, clamping at the limits.
+   *
+   * <p>
+   * This clamps rather than rejecting. Rejecting made
+   * {@code incrRotate(+d); incrRotate(-d)} asymmetric at the upper limit — the
+   * {@code +d} was dropped but the {@code -d} applied — so every Jacobian probe
+   * silently dragged a joint that sat at its maximum away from it. Over thousands
+   * of solver iterations that drifted the model tens of degrees away from the
+   * pose it was reporting.
+   * </p>
+   */
   public void incrRotate(double delta) {
     if (DHLinkType.REVOLUTE.equals(type)) {
-      // we shouldn't go beyond the max
-      double destAngle = this.theta + delta;
-      // I suppose this means min/max are in radians..
-      if (destAngle > max || destAngle < min) {
-        // we're out of range
-        // log.info("Link {} angle out of range {} ", name, destAngle);
-      } else {
-        this.theta = destAngle;
-      }
+      this.theta = clampToLimits(this.theta + delta);
     } else if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
-      // we shouldn't go beyond the max
-      double destAngle = alpha + delta;
-      // I suppose this means min/max are in radians..
-      if (destAngle > max || destAngle < min) {
-        // we're out of range
-        // log.info("Link {} angle out of range {} ", name, destAngle);
-      } else {
-        alpha = destAngle;
-      }
+      alpha = clampToLimits(alpha + delta);
     }
+  }
+
+  /** Clamp a joint variable (radians) into {@code [min, max]}. */
+  public double clampToLimits(double value) {
+    if (value > max) {
+      return max;
+    }
+    if (value < min) {
+      return min;
+    }
+    return value;
+  }
+
+  /** @return true if the joint variable sits on one of its limits. */
+  public boolean isAtLimit() {
+    double v = DHLinkType.REVOLUTE_ALPHA.equals(type) ? alpha : theta;
+    double eps = 1e-9;
+    return v >= max - eps || v <= min + eps;
+  }
+
+  /**
+   * Set the joint variable directly with no limit checking. Used by the Jacobian
+   * probe, which must be able to restore the exact previous value and may step
+   * marginally outside the range to estimate a derivative.
+   */
+  public void setJointVariableUnchecked(double value) {
+    if (DHLinkType.REVOLUTE_ALPHA.equals(type)) {
+      alpha = value;
+    } else {
+      theta = value;
+    }
+  }
+
+  /** @return the joint variable ({@link #theta}, or {@link #alpha} for alpha links). */
+  public double getJointVariable() {
+    return DHLinkType.REVOLUTE_ALPHA.equals(type) ? alpha : theta;
+  }
+
+  public double getServoSlope() {
+    return servoSlope;
+  }
+
+  /**
+   * @param servoSlope
+   *          servo degrees per degree of theta — ±1 for a rig whose mesh turns
+   *          one degree per servo degree. Zero is ignored.
+   */
+  public void setServoSlope(double servoSlope) {
+    if (servoSlope == 0.0 || Double.isNaN(servoSlope)) {
+      log.warn("ignoring servoSlope {} for link {}", servoSlope, name);
+      return;
+    }
+    this.servoSlope = servoSlope;
+  }
+
+  public Matrix getFixedTransform() {
+    return fixedTransform;
+  }
+
+  public void setFixedTransform(Matrix fixedTransform) {
+    this.fixedTransform = fixedTransform != null ? new Matrix(fixedTransform) : null;
+  }
+
+  public double getBindTheta() {
+    return bindTheta;
+  }
+
+  public void setBindTheta(double bindTheta) {
+    this.bindTheta = bindTheta;
+  }
+
+  /** @return true when the link geometry was measured rather than hand-tuned. */
+  public boolean isMeasured() {
+    return fixedTransform != null;
+  }
+
+  /**
+   * @return the servo command for the current theta:
+   *         {@code servoSlope * thetaDeg + offset}, clamped to the servo range
+   *         implied by the joint limits so a solved pose can never ask a servo
+   *         for something it will silently clip.
+   */
+  public double toServoDegrees() {
+    double raw = servoSlope * getThetaDegrees() + offset;
+    double a = servoSlope * Math.toDegrees(min) + offset;
+    double b = servoSlope * Math.toDegrees(max) + offset;
+    double lo = Math.min(a, b);
+    double hi = Math.max(a, b);
+    return Math.max(lo, Math.min(hi, raw));
+  }
+
+  /** Inverse of {@link #toServoDegrees()} — read a servo position into the model. */
+  public void setFromServoDegrees(double servoDeg) {
+    this.theta = Math.toRadians((servoDeg - offset) / servoSlope);
+  }
+
+  /**
+   * Set the joint limits from the servo's input range, mapped through
+   * {@link #getServoSlope()} / {@link #getOffset()}.
+   */
+  public void setServoLimits(double servoMinDeg, double servoMaxDeg) {
+    double a = (servoMinDeg - offset) / servoSlope;
+    double b = (servoMaxDeg - offset) / servoSlope;
+    this.min = Math.toRadians(Math.min(a, b));
+    this.max = Math.toRadians(Math.max(a, b));
+    this.servoMin = Math.min(servoMinDeg, servoMaxDeg);
+    this.servoMax = Math.max(servoMinDeg, servoMaxDeg);
   }
 
   public double getThetaDegrees() {

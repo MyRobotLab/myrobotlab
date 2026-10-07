@@ -1,0 +1,12 @@
+---
+description: Arduino Msg/VirtualMsg are generated — edit schema only
+globs: src/main/java/org/myrobotlab/arduino/Msg.java,src/main/java/org/myrobotlab/arduino/VirtualMsg.java,src/main/resources/resource/Arduino/generate/**
+alwaysApply: false
+---
+
+# Arduino protocol edits
+
+- `Msg.java` and `VirtualMsg.java` are **generated**. Do not patch message methods by hand.
+- Edit `src/main/resources/resource/Arduino/generate/arduinoMsgs.schema` (and templates here).
+- Regenerate with `org.myrobotlab.arduino.ArduinoMsgGenerator`.
+- Details: `doc/GENERATED.md`.

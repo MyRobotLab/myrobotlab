@@ -4,7 +4,6 @@ import static org.bytedeco.opencv.global.opencv_core.CV_64F;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.meanStdDev;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_THRESH_BINARY;
 import static org.bytedeco.opencv.global.opencv_imgproc.Laplacian;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 
@@ -17,6 +16,22 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVFilterBlurDetector extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("BlurDetector",
+        "Estimates how sharp the whole frame is by computing the variance of the Laplacian. Lower scores mean a blurrier image (typically < 100 is quite blurry).",
+        "Add it early in a pipeline (for example before Ocr). It publishes blurriness on the OpenCV data so later filters can skip unusable frames. The on-screen label uses a display threshold of 100.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 
@@ -67,11 +82,12 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    // gray scale the image.
-    IplImage gray = cvCreateImage(image.cvSize(), 8, CV_THRESH_BINARY);
+    // gray scale the image. (1 channel — not CV_THRESH_BINARY, which is 0)
+    IplImage gray = cvCreateImage(image.cvSize(), 8, 1);
     cvCvtColor(image, gray, CV_BGR2GRAY);
     // compute the variance of the laplacian.
     data.setBlurriness(varianceOfLaplacian(gray));
+    gray.release();
     return image;
   }
 

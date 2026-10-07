@@ -21,6 +21,22 @@ import org.myrobotlab.service.TesseractOcr;
 import org.slf4j.Logger;
 
 public class OpenCVFilterTesseract extends OpenCVFilter implements Runnable {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Tesseract",
+        "Runs Tesseract OCR on every frame in a background thread and overlays the last string. No region detector — OCRs the whole image, which is CPU-heavy.",
+        "Prefer the Ocr filter for production (throttling, EAST/DBNet, blur skip). This filter auto-starts a TesseractOcr service named tesseract.",
+        "TesseractOcr service and tessdata language files.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTesseract.class);

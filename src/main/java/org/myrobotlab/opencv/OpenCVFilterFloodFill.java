@@ -40,6 +40,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFloodFill extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("FloodFill",
+        "Flood-fills a connected region from a seed point, replacing similar colors. Used to paint a surface (for example floor) a uniform color.",
+        "Click the video to set a seed, or set the seed in code. Related to FloorFinder, which flood-fills from a default interior point.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

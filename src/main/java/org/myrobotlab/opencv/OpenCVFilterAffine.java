@@ -21,6 +21,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterAffine extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Affine",
+        "Applies a 2D affine transform (rotation plus optional translation) that keeps lines and parallelism. Typical use is rotating a camera image so the world is upright.",
+        "Add the filter and start capture. Drag the angle slider in the WebGui, or set angle/dx/dy from Python. Clicking the video records a point the filter can use as a rotation reference.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class);
 

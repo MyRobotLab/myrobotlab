@@ -50,6 +50,22 @@ import org.slf4j.Logger;
 import com.sun.jna.ptr.IntByReference;
 
 public class OpenCVFilterGoodFeaturesToTrack extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("GoodFeaturesToTrack",
+        "Shi-Tomasi corner detector. Finds strong, trackable points (the same features LK optical flow uses).",
+        "Add to inspect corners, or use LKOpticalTrack which calls this internally when you click Get Features. Works best on textured scenes.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterGoodFeaturesToTrack.class.getCanonicalName());

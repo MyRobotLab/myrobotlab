@@ -44,6 +44,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterInRange extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("InRange",
+        "Keeps pixels whose HSV (or channel) values lie between min and max scalars — a multi-channel color gate.",
+        "Convert to HSV first (this filter can convert), click the video to sample, then tighten min/max. Combine with FindContours for a colored-object tracker.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInRange.class.getCanonicalName());

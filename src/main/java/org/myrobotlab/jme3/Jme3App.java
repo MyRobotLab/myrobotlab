@@ -47,7 +47,7 @@ public class Jme3App extends SimpleApplication {
     // jme service provides the "default app" - if you really need something
     // different
     // you should derive from this class and write your own init...
-    jme.simpleInitApp();
+    jme.simpleInitApp(this);
 
   }
 
