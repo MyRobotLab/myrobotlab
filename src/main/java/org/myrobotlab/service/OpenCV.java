@@ -1944,6 +1944,22 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     error("clearQrHistory - %s is not a QrCode filter", filterName);
   }
 
+  /**
+   * Clear the OCR scan history on an {@link OpenCVFilterOcr} filter.
+   */
+  public void clearOcrHistory(String filterName) {
+    OpenCVFilter filter = getFilter(filterName);
+    if (filter instanceof OpenCVFilterOcr) {
+      ((OpenCVFilterOcr) filter).clearHistory();
+      return;
+    }
+    if (filter == null) {
+      error("clearOcrHistory - could not find filter %s", filterName);
+      return;
+    }
+    error("clearOcrHistory - %s is not an Ocr filter", filterName);
+  }
+
   public String setGrabberType(String grabberType) {
     this.grabberType = grabberType;
     return grabberType;

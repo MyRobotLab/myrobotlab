@@ -67,7 +67,7 @@ public class OpenCVFilterOcr extends OpenCVFilter {
   public static OpenCVFilterInfo catalogInfo() {
     return new OpenCVFilterInfo("Ocr",
         "Scene-text pipeline: detect regions with EAST or DBNet (or OCR the full frame), then recognize with a TesseractOcr service. Throttled and can skip blurry frames.",
-        "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur. Set language on TesseractOcr.",
+        "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. Detected text and a scan history appear in the filter panel. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur.",
         "TesseractOcr service (tessdata). EAST from opencv_east_text_detection zip, or DBNet ONNX downloaded on demand.");
   }
 
@@ -150,6 +150,14 @@ public class OpenCVFilterOcr extends OpenCVFilter {
    * Last stitched OCR string, also shown in the OpenCV WebGui filter panel.
    */
   public String lastText = "";
+
+  /**
+   * Newest-first OCR history for the WebGui. A new entry is added when the
+   * recognized string changes, not on every throttled pass of the same text.
+   */
+  public ArrayList<Detection> history = new ArrayList<>();
+
+  public int maxHistory = 50;
 
   /**
    * Human-readable model load / download status for the WebGui.
@@ -257,9 +265,52 @@ public class OpenCVFilterOcr extends OpenCVFilter {
       }
     }
     combined.text = line.toString().trim();
-    lastText = combined.text;
+    if (!combined.text.isEmpty() && !combined.text.equals(lastText)) {
+      lastText = combined.text;
+      remember(combined.text, spec.detector);
+      broadcastFilterState();
+    }
     publishCombined(combined);
     return regions;
+  }
+
+  /**
+   * Scan record shown in the WebGui history list.
+   */
+  public static class Detection implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
+    public long ts;
+    public String text;
+    public String kind;
+
+    public Detection() {
+    }
+
+    public Detection(String text, String kind) {
+      this.ts = System.currentTimeMillis();
+      this.text = text;
+      this.kind = kind == null ? "ocr" : kind;
+    }
+  }
+
+  void remember(String text, String kind) {
+    Detection hit = new Detection(text, kind);
+    if (history == null) {
+      history = new ArrayList<>();
+    }
+    history.add(0, hit);
+    int max = maxHistory < 1 ? 50 : maxHistory;
+    while (history.size() > max) {
+      history.remove(history.size() - 1);
+    }
+  }
+
+  public void clearHistory() {
+    if (history != null) {
+      history.clear();
+    }
+    lastText = "";
+    broadcastFilterState();
   }
 
   private void publishCombined(OcrResult combined) {

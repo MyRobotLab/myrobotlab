@@ -272,7 +272,7 @@
   "Ocr": {
     "type": "Ocr",
     "description": "Scene-text pipeline: detect regions with EAST or DBNet (or OCR the full frame), then recognize with a TesseractOcr service. Throttled and can skip blurry frames.",
-    "usage": "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur. Set language on TesseractOcr.",
+    "usage": "Start TesseractOcr (or enable auto-start). Pick a detector in the WebGui. Detected text and a scan history appear in the filter panel. EAST ships with OpenCV; DBNet ONNX files download into data/OpenCV/ocr_models/. Put BlurDetector before this filter to skip blur.",
     "dependencies": "TesseractOcr service (tessdata). EAST from opencv_east_text_detection zip, or DBNet ONNX downloaded on demand."
   },
   "Output": {

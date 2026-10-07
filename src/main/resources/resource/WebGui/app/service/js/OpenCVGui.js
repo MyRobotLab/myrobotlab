@@ -295,6 +295,16 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         return installed && installed.indexOf(id) >= 0
     }
 
+    $scope.clearOcrHistory = function() {
+        let filter = $scope.getFilter()
+        if (!filter) {
+            return
+        }
+        filter.history = []
+        filter.lastText = ''
+        msg.send('clearOcrHistory', filter.name)
+    }
+
     $scope.clearQrHistory = function() {
         let filter = $scope.getFilter()
         if (!filter) {

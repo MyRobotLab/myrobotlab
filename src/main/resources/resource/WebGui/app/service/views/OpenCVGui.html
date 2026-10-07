@@ -352,7 +352,34 @@
             <hr>
             <strong>Model:</strong> {{getFilter().modelStatus}}
             <div ng-show="getFilter().loadedModelPath"><small>{{getFilter().loadedModelPath}}</small></div>
-            <strong>Last text:</strong> {{getFilter().lastText}}
+            <hr>
+            <strong>Last detected:</strong>
+            <div class="well well-sm" style="margin-top:6px;margin-bottom:8px;word-break:break-all;white-space:pre-wrap">
+                {{getFilter().lastText || '(none yet)'}}
+            </div>
+            <div ng-show="getFilter().history && getFilter().history.length">
+                <strong>History</strong>
+                <button class="btn btn-default btn-xs pull-right" ng-click="clearOcrHistory()">Clear</button>
+                <table class="table table-condensed" style="margin-top:8px">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Detector</th>
+                            <th>Text</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="hit in getFilter().history">
+                            <td>{{formatQrTime(hit.ts)}}</td>
+                            <td>{{hit.kind || 'ocr'}}</td>
+                            <td style="word-break:break-all;white-space:pre-wrap">{{hit.text}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div ng-hide="getFilter().history && getFilter().history.length" class="text-muted">
+                No OCR history yet.
+            </div>
         </div>
         <div ng-show="isFilterType('FaceDetectYN')" class="col-md-12">
             YuNet face detector (OpenCV 4.x FaceDetectorYN). ONNX weights (~233 KB) download into

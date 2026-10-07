@@ -97,6 +97,22 @@ public class OpenCVFilterCatalogTest {
   }
 
   @Test
+  public void ocrAndQrHistoryFieldsArePublic() throws Exception {
+    ClassLoader loader = OpenCVFilterCatalogTest.class.getClassLoader();
+    for (String type : new String[] { "Ocr", "QrCode" }) {
+      Class<?> clazz = Class.forName("org.myrobotlab.opencv.OpenCVFilter" + type, false, loader);
+      Field lastText = clazz.getDeclaredField("lastText");
+      Field history = clazz.getDeclaredField("history");
+      assertTrue(type + ".lastText must be public for WebGui JSON", Modifier.isPublic(lastText.getModifiers()));
+      assertTrue(type + ".history must be public for WebGui JSON", Modifier.isPublic(history.getModifiers()));
+      Class<?> detection = Class.forName("org.myrobotlab.opencv.OpenCVFilter" + type + "$Detection", false, loader);
+      assertNotNull(detection.getDeclaredField("ts"));
+      assertNotNull(detection.getDeclaredField("text"));
+      assertNotNull(detection.getDeclaredField("kind"));
+    }
+  }
+
+  @Test
   public void trackerNativeFieldsAreTransient() throws Exception {
     Class<?> clazz = Class.forName("org.myrobotlab.opencv.OpenCVFilterTracker", false,
         OpenCVFilterCatalogTest.class.getClassLoader());

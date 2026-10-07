@@ -65,8 +65,24 @@ public class OpenCVFilterQrCode extends OpenCVFilter {
   public static final String MODE_ARUCO = "aruco";
   public static final String MODE_BOTH = "both";
 
+  private static volatile boolean nativesLoaded;
+
+  /**
+   * JavaCV natives must be loaded before the QR and ArUco detectors run.
+   * Deserialized filters skip constructors, so {@link #process} also calls
+   * this. The native load itself happens only once.
+   */
   private static void loadNatives() {
-    Loader.load(opencv_objdetect.class);
+    if (nativesLoaded) {
+      return;
+    }
+    synchronized (OpenCVFilterQrCode.class) {
+      if (nativesLoaded) {
+        return;
+      }
+      Loader.load(opencv_objdetect.class);
+      nativesLoaded = true;
+    }
   }
 
   /**
