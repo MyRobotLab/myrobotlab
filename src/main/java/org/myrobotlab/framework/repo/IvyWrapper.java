@@ -475,6 +475,8 @@ public class IvyWrapper extends Repo implements Serializable {
         installedLibraries.put(library.toString(), library);
         info("installed %s platform %s", library, platform.getPlatformId());
       }
+      removeSupersededRevisions(new File(location, "jar"), targetLibraries);
+      forgetSupersededRevisions(targetLibraries);
       save();
     }
 
@@ -513,6 +515,65 @@ public class IvyWrapper extends Repo implements Serializable {
       }
 
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
+    }
+  }
+
+  /**
+   * Drop jars from an older revision of an artifact that was just installed.
+   * Ivy retrieve keeps every {@code [artifact]-[revision]} file, so a version
+   * bump leaves the previous jars on the classpath.
+   */
+  static void removeSupersededRevisions(File jarDir, Iterable<ServiceDependency> installed) {
+    if (installed == null) {
+      return;
+    }
+    for (ServiceDependency library : installed) {
+      removeOtherRevisionJars(jarDir, library.getArtifactId(), library.getVersion());
+    }
+  }
+
+  static void removeOtherRevisionJars(File jarDir, String artifactId, String version) {
+    if (jarDir == null || artifactId == null || version == null || version.isEmpty()) {
+      return;
+    }
+    File[] files = jarDir.listFiles();
+    if (files == null) {
+      return;
+    }
+    String prefix = artifactId + "-";
+    String versionAndClassifier = version + "-";
+    for (File file : files) {
+      String name = file.getName();
+      if (!name.startsWith(prefix) || !name.endsWith(".jar")) {
+        continue;
+      }
+      String rest = name.substring(prefix.length(), name.length() - ".jar".length());
+      // "lwjgl" must not match "lwjgl-opengl-3.3.2.jar". A revision starts with a digit.
+      if (rest.isEmpty() || !Character.isDigit(rest.charAt(0))) {
+        continue;
+      }
+      if (rest.equals(version) || rest.startsWith(versionAndClassifier)) {
+        continue;
+      }
+      if (!file.delete()) {
+        log.warn("could not delete superseded jar {}", file.getAbsolutePath());
+      } else {
+        log.info("removed superseded jar {}", file.getName());
+      }
+    }
+  }
+
+  private void forgetSupersededRevisions(Iterable<ServiceDependency> installed) {
+    if (installed == null) {
+      return;
+    }
+    for (ServiceDependency library : installed) {
+      if (library.getOrgId() == null || library.getArtifactId() == null || library.getVersion() == null) {
+        continue;
+      }
+      String project = library.getOrgId() + "/" + library.getArtifactId() + "/";
+      String currentRevision = project + library.getVersion() + "/";
+      installedLibraries.keySet().removeIf(key -> key.startsWith(project) && !key.startsWith(currentRevision));
     }
   }
 

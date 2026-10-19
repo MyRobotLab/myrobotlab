@@ -1,6 +1,10 @@
 package org.myrobotlab.framework.repo;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.nio.file.Files;
 
 import org.junit.Test;
 
@@ -21,6 +25,29 @@ public class IvyWrapperClassifierTest {
   public void retrievePatternKeepsClassifier() {
     assertTrue(IvyWrapper.IVY_RETRIEVE_PATTERN.contains("[classifier]"));
     assertTrue(IvyWrapper.IVY_RETRIEVE_PATTERN.contains("[artifact]-[revision]"));
+  }
+
+  @Test
+  public void supersededRevisionJarsAreRemoved() throws Exception {
+    File dir = Files.createTempDirectory("mrl-ivy-jars").toFile();
+    File current = new File(dir, "lwjgl-3.3.2.jar");
+    File currentNative = new File(dir, "lwjgl-3.3.2-natives-windows.jar");
+    File old = new File(dir, "lwjgl-3.2.3.jar");
+    File oldNative = new File(dir, "lwjgl-3.2.3-natives-linux.jar");
+    File otherModule = new File(dir, "lwjgl-opengl-3.2.3.jar");
+    assertTrue(current.createNewFile());
+    assertTrue(currentNative.createNewFile());
+    assertTrue(old.createNewFile());
+    assertTrue(oldNative.createNewFile());
+    assertTrue(otherModule.createNewFile());
+
+    IvyWrapper.removeOtherRevisionJars(dir, "lwjgl", "3.3.2");
+
+    assertTrue(current.exists());
+    assertTrue(currentNative.exists());
+    assertTrue(otherModule.exists());
+    assertFalse(old.exists());
+    assertFalse(oldNative.exists());
   }
 
 }

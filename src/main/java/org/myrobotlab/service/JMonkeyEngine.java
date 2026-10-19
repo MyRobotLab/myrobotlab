@@ -1217,9 +1217,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * The joint's input (servo) angle. Read from the angle last applied by
-   * {@link Jme3Util#rotateTo}, which is exact — recovering it from the node's
-   * quaternion via Euler angles is lossy and clamps the Z axis to ±90°.
+   * The joint's input (servo) angle about {@code axis}.
+   * <p>
+   * Measured from the node's local rotation relative to its bind pose, about the
+   * requested axis (or the node's rotation mask when {@code axis} is null). A
+   * full Euler decomposition is lossy and clamps Z to ±90°; the twist about one
+   * known axis is exact for rotations written by {@link Jme3Util#rotateTo} and
+   * still follows animation, physics, or a loaded scene.
    */
   public Float getAngle(String name, String axis) {
     Spatial s = get(name);
@@ -1230,7 +1234,16 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (data == null) {
       return null;
     }
-    double meshAngle = data.getCurrentAngleDeg();
+    String axisName = axis != null ? axis : data.rotationMask;
+    Vector3f axisVec = util.getUnitVector(axisName);
+    if (axisVec == null) {
+      return null;
+    }
+    Quaternion bind = data.captureBindRotation();
+    if (bind == null) {
+      return null;
+    }
+    double meshAngle = Jme3Util.signedDegreesAboutAxis(bind, s.getLocalRotation(), axisVec);
     if (data.mapper != null) {
       return Double.valueOf(data.mapper.calcInput(meshAngle)).floatValue();
     }
@@ -1437,6 +1450,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (data == null) {
       // not sure if this is right - using the nodeName as "path"
       data = new UserData(this, node);
+      // Authored pose, before animation or rotateTo. Later angle reads are
+      // relative to this, including joints never driven through rotateTo.
+      data.captureBindRotation();
       String nodeName = node.getName();
       if (nodes.containsKey(nodeName)) {
         error("collision on node name %s", nodeName);
@@ -1475,6 +1491,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     UserData userData = spatial.getUserData("data");
     if (userData == null) {
       userData = new UserData(this, spatial);
+      userData.captureBindRotation();
 
       if (this.nodes.containsKey(path)) {
         error("collision on node name %s", path);
@@ -3253,7 +3270,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
           }
           JointFrame frame = new JointFrame(name, new Point(axis[0], axis[1], axis[2]), new Point(axis[3], axis[4], axis[5]));
           frame.rotationMask = data.rotationMask;
-          frame.angleDeg = data.getCurrentAngleDeg();
+          Quaternion bind = data.captureBindRotation();
+          Vector3f localAxis = util.getUnitVector(data.rotationMask);
+          if (bind != null && data.getSpatial() != null && localAxis != null) {
+            frame.angleDeg = Jme3Util.signedDegreesAboutAxis(bind, data.getSpatial().getLocalRotation(), localAxis);
+          } else {
+            frame.angleDeg = data.getCurrentAngleDeg();
+          }
           if (data.mapper != null) {
             frame.withServoMap(data.mapper.getMinX(), data.mapper.getMaxX(), data.mapper.getMinY(), data.mapper.getMaxY());
           }

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
@@ -550,18 +551,59 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   
   
   private String findVenvPythonExecutable() {
-    String venv = getDataDir() + fs + "venv";
-    String venvPython = Platform.getLocalInstance().isWindows() 
-        ? venv + fs + "Scripts" + fs + "python.exe" 
-        : venv + fs + "bin" + fs + "python";
+    String venvPython = venvPythonPath();
+    if (venvPython == null) {
+      error("Could not find venv Python under %s", getDataDir() + fs + "venv");
+    }
+    return venvPython;
+  }
 
+  private String venvPythonPath() {
+    String venv = getDataDir() + fs + "venv";
+    String venvPython = Platform.getLocalInstance().isWindows()
+        ? venv + fs + "Scripts" + fs + "python.exe"
+        : venv + fs + "bin" + fs + "python";
     File check = new File(venvPython);
-    if (!check.exists()){
-      error("Could not find %s", venvPython);
+    if (!check.exists()) {
       return null;
     }
     return venvPython;
-}
+  }
+
+  /**
+   * @return true when each module imports in the venv, with no pip and no network
+   */
+  public boolean venvCanImport(String... modules) {
+    if (modules == null || modules.length == 0) {
+      return true;
+    }
+    String python = venvPythonPath();
+    if (python == null) {
+      return false;
+    }
+    StringBuilder code = new StringBuilder();
+    for (String module : modules) {
+      if (module == null || !module.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+        log.warn("refusing to import invalid module name {}", module);
+        return false;
+      }
+      code.append("import ").append(module).append('\n');
+    }
+    ProcessBuilder check = new ProcessBuilder(python, "-c", code.toString());
+    check.redirectErrorStream(true);
+    try {
+      Process proc = check.start();
+      proc.getInputStream().readAllBytes();
+      if (!proc.waitFor(30, TimeUnit.SECONDS)) {
+        proc.destroyForcibly();
+        return false;
+      }
+      return proc.exitValue() == 0;
+    } catch (Exception e) {
+      log.info("venv import check failed: {}", e.getMessage());
+      return false;
+    }
+  }
 
 
 
@@ -608,7 +650,7 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     info("pip: %s", String.join(" ", commandArgs));
     ProcessBuilder pipProcess = new ProcessBuilder(commandArgs);
     Process proc = pipProcess.redirectErrorStream(true).start();
-    StringBuilder pipOut = new StringBuilder();
+    StringBuffer pipOut = new StringBuffer();
     Thread reader = new Thread(() -> {
       try (BufferedReader stdOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
         String s;
@@ -624,7 +666,14 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     int ret;
     try {
       ret = proc.waitFor();
+      // The process has exited, so its stdout pipe should close and the reader
+      // should finish. If a child still holds the pipe, stop it and join again
+      // before reading the buffer.
       reader.join(8000);
+      if (reader.isAlive()) {
+        proc.destroyForcibly();
+        reader.join(2000);
+      }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new IOException("pip install interrupted", e);

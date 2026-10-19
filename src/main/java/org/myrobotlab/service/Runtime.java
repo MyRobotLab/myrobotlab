@@ -568,7 +568,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
         if (s != null) {
           try {
-            s.startService();
+            startQueued(Collections.singletonList(s));
           } catch (Exception e) {
             runtime.error(e.getMessage());
             Logging.logError(e);
@@ -1994,6 +1994,12 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         return false;
       }
 
+      // Set before unregister so a startService that has not entered yet
+      // will no-op instead of launching threads for this instance.
+      if (si instanceof Service) {
+        ((Service) si).cancelPendingStart();
+      }
+
       // FIXME - TODO invoke and or blocking on preRelease - Future
 
       // send msg to service to self terminate
@@ -2683,9 +2689,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
     // for all newly created services start them
     Map<String, ServiceInterface> created = Runtime.createServicesFromPlan(plan, null, null);
-    for (ServiceInterface si : created.values()) {
-      si.startService();
-    }
+    startQueued(new ArrayList<>(created.values()));
 
     runtime.processingConfig = false; // multiple inbox threads not available
     runtime.invoke("publishConfigFinished", configName);
@@ -2772,19 +2776,9 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
 
           // getConfig() was problematic here for JMonkeyEngine
           ServiceConfig sc = requestedService.getConfig();
-          // recursive - create auto-start peers (start them after releasing the lock)
-          Map<String, Peer> subPeers = sc != null ? sc.getPeers() : null;
-          if (subPeers != null) {
-            for (String subPeerKey : subPeers.keySet()) {
-              Peer subPeer = subPeers.get(subPeerKey);
-              if (subPeer.autoStart) {
-                ServiceInterface peerSi = Runtime.create(sc.getPeerName(subPeerKey), subPeer.type);
-                if (peerSi != null && !peerSi.isRunning()) {
-                  startOrder.add(peerSi);
-                }
-              }
-            }
-          }
+          // Create auto-start peers (and their auto-start peers) under the lock.
+          // They are started after the lock is released.
+          enqueueAutoStartPeers(sc, startOrder, new HashSet<>());
 
           startOrder.add(requestedService);
         }
@@ -2794,16 +2788,89 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
       }
     }
 
+    startQueued(startOrder);
+    return requestedService != null ? requestedService : Runtime.getService(name);
+  }
+
+  /**
+   * Create each autoStart peer and its own autoStart descendants, and queue
+   * them to start. Descendants are queued first so a child is running before
+   * its parent. {@link #create} does not start anything, so the descendants
+   * have to be collected here.
+   */
+  private static void enqueueAutoStartPeers(ServiceConfig sc, List<ServiceInterface> startOrder, Set<String> visited) {
+    if (sc == null || startOrder == null) {
+      return;
+    }
+    Map<String, Peer> subPeers = sc.getPeers();
+    if (subPeers == null) {
+      return;
+    }
+    for (String subPeerKey : subPeers.keySet()) {
+      Peer subPeer = subPeers.get(subPeerKey);
+      if (subPeer == null || !subPeer.autoStart) {
+        continue;
+      }
+      String peerName = sc.getPeerName(subPeerKey);
+      if (peerName == null || !visited.add(peerName)) {
+        continue;
+      }
+      ServiceInterface peerSi = Runtime.create(peerName, subPeer.type);
+      if (peerSi == null) {
+        continue;
+      }
+      enqueueAutoStartPeers(peerSi.getConfig(), startOrder, visited);
+      if (!peerSi.isRunning() && !containsService(startOrder, peerSi)) {
+        startOrder.add(peerSi);
+      }
+    }
+  }
+
+  private static boolean containsService(List<ServiceInterface> startOrder, ServiceInterface service) {
+    for (ServiceInterface existing : startOrder) {
+      if (existing == service) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Start queued services outside {@link #processLock}. Skip an instance that
+   * was released or unregistered after it was queued, so a racing
+   * {@link #release(String)} cannot leave a started service with no registry
+   * entry.
+   */
+  private static void startQueued(List<ServiceInterface> startOrder) {
+    if (startOrder == null) {
+      return;
+    }
     for (ServiceInterface service : startOrder) {
       try {
-        if (service != null && !service.isRunning()) {
+        if (service == null || !canStart(service)) {
+          continue;
+        }
+        if (!service.isRunning()) {
           service.startService();
         }
       } catch (Exception e) {
         runtime.error(e);
       }
     }
-    return requestedService != null ? requestedService : Runtime.getService(name);
+  }
+
+  private static boolean canStart(ServiceInterface service) {
+    synchronized (processLock) {
+      if (getService(service.getName()) != service) {
+        log.info("not starting {}, it is no longer registered", service.getName());
+        return false;
+      }
+    }
+    if (service instanceof Service && ((Service) service).isStartCancelled()) {
+      log.info("not starting {}, it was released", service.getName());
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -2835,15 +2902,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
         requested = Runtime.getService(name);
       }
     }
-    for (ServiceInterface service : startOrder) {
-      try {
-        if (service != null && !service.isRunning()) {
-          service.startService();
-        }
-      } catch (Exception e) {
-        runtime.error(e);
-      }
-    }
+    startQueued(startOrder);
     return requested != null ? requested : Runtime.getService(name);
   }
 

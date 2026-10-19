@@ -97,7 +97,9 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
     super.startService();
     if (config.py4jInstall) {
       py4j = (Py4j) startPeer("py4j");
-      installDepthAi();
+      if (py4j == null || !py4j.venvCanImport("depthai", "numpy", "cv2")) {
+        installDepthAi();
+      }
     }
     wireSimulatorCalibration();
   }
@@ -232,7 +234,7 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
       required.add(OPENCV_PIP_SPEC);
       // Refuse source builds — compiling depthai 2.x is what produced
       // "subprocess returned 1" with no useful pip text on Python 3.14.
-      py4j.installPipPackages(required, List.of("--upgrade", "--only-binary=depthai"));
+      py4j.installPipPackages(required, List.of("--only-binary=depthai"));
       try {
         List<String> optional = new ArrayList<>();
         optional.add(BLOBCONVERTER_PIP_SPEC);

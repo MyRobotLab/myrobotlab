@@ -145,6 +145,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
 
   private boolean isRunning = false;
 
+  /**
+   * Set by release before this instance is unregistered. {@link #startService}
+   * checks it so a start that lost the race with release does not launch
+   * threads for a service that is no longer registered.
+   */
+  private volatile boolean startCancelled = false;
+
   transient protected Thread thisThread = null;
 
   final transient protected Inbox inbox;
@@ -2094,8 +2101,28 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
   }
 
+  /**
+   * @return true when {@link #releaseService()} has cancelled a not-yet-started
+   *         launch of this instance
+   */
+  public boolean isStartCancelled() {
+    return startCancelled;
+  }
+
+  /**
+   * Drop a start that has not run yet. Called from release while this instance
+   * is still registered.
+   */
+  public void cancelPendingStart() {
+    startCancelled = true;
+  }
+
   @Override
   synchronized public void startService() {
+    if (startCancelled) {
+      log.info("startService skipped, {} was released", getName());
+      return;
+    }
     if (!isRunning()) {
       log.info("starting {}", getName());
       outbox.start();

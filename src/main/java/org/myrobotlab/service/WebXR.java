@@ -89,19 +89,9 @@ public class WebXR extends Service<WebXRConfig> {
 
       ik.centerAllJoints("left");
 
-      for (int i = 0; i < 1000; ++i) {
-        
-        ik.centerAllJoints("left");
-        ik.moveTo("left", 0, 0.0+ i * 0.02, 0.0);
-
-        
-        // ik.moveTo(pose.name, new Point(0, -200, 50));
-      }
-      
-      // map name
-      // and then map all position and rotation too :P
-      Point p = new Point(70 + pose.position.x, -550 + pose.position.y, pose.position.z);
-      
+      // Controller positions are meters, matching InMoov2Arm DH lengths.
+      // 0.07 m out and 0.55 m down is the old millimeter shoulder offset.
+      Point p = new Point(0.07 + pose.position.x, -0.55 + pose.position.y, pose.position.z);
       ik.moveTo(pose.name, p);
     }
 

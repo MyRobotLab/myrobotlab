@@ -2249,38 +2249,24 @@ public class InMoov2 extends Service<InMoov2Config>
   }
 
   /**
-   * Start the JMonkeyEngine simulator peer.
+   * Start the simulator peer from config.
    * <p>
-   * Uses {@link Runtime#create(String, String)} + {@code startService()} rather
-   * than relying solely on legacy behavior; {@link Runtime#start} releases
-   * {@code processLock} before {@code startService} so LWJGL window init cannot
-   * pin the global lifecycle lock.
+   * {@link #startPeer} uses the configured type and publishes state.
+   * {@link Runtime#start} releases the lifecycle lock before {@code startService},
+   * so the LWJGL window init does not pin it. Do not touch the live scene graph
+   * from this thread after start; JME is not thread-safe, and {@code loadDelayed}
+   * inside {@code startService} binds VinMoov and applies node mappers.
    */
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-    String simName = getPeerName("simulator");
-    if (simName == null) {
-      simName = getName() + ".simulator";
+    ServiceInterface si = startPeer("simulator");
+    if (si instanceof Simulator) {
+      return (Simulator) si;
     }
-
-    ServiceInterface existing = Runtime.getService(simName);
-    if (existing != null) {
-      if (!existing.isRunning()) {
-        existing.startService();
-      }
-      return (Simulator) existing;
+    if (si != null) {
+      error("simulator peer %s is %s, expected a Simulator", si.getName(), si.getSimpleName());
     }
-
-    // Create under plan (InMoov node mappings). loadDelayed (inside
-    // startService) binds VinMoov and applies node mappers — do not touch the
-    // live scene graph again here from this thread (JME is not thread-safe).
-    JMonkeyEngine jme = (JMonkeyEngine) Runtime.create(simName, "JMonkeyEngine");
-    if (jme == null) {
-      error("could not create simulator peer %s", simName);
-      return null;
-    }
-    jme.startService();
-    return jme;
+    return null;
   }
 
   /**

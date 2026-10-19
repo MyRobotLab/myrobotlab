@@ -365,6 +365,26 @@ public class Jme3Util {
     return rootUnitVector; // FIXME - THIS IS NOT CORRECT !
   }
 
+  /**
+   * Signed angle in degrees of {@code local} relative to {@code bind}, about
+   * {@code axis}. This is the inverse of {@link #rotateTo}: that method stores
+   * {@code bind * fromAngleAxis(degrees, axis)}. Extracting one known axis stays
+   * valid at ±90°, where a full Euler decomposition clamps Z.
+   */
+  public static double signedDegreesAboutAxis(Quaternion bind, Quaternion local, Vector3f axis) {
+    if (bind == null || local == null || axis == null || axis.lengthSquared() == 0f) {
+      return 0;
+    }
+    Quaternion inverse = bind.inverse();
+    if (inverse == null) {
+      return 0;
+    }
+    Quaternion delta = inverse.mult(local);
+    Vector3f unit = axis.normalize();
+    float halfSin = delta.getX() * unit.x + delta.getY() * unit.y + delta.getZ() * unit.z;
+    return 2.0 * FastMath.atan2(halfSin, delta.getW()) * FastMath.RAD_TO_DEG;
+  }
+
   public Vector3f getUnitVector(String axis) {
     if (axis == null) {
       return Vector3f.UNIT_Y; // default Y

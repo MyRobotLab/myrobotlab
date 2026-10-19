@@ -584,8 +584,11 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    * @throws IOException
    *           if the model cannot be obtained or loaded
    */
-  public synchronized String loadModel() throws IOException {
-    String path = resolveModelPath(true);
+  public String loadModel() throws IOException {
+    String path;
+    synchronized (this) {
+      path = resolveModelPath(true);
+    }
     return loadModelFromPath(path);
   }
 
@@ -597,9 +600,11 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    *          model directory name
    * @return absolute path loaded
    */
-  public synchronized String setModel(String modelName) throws IOException {
-    config.model = modelName;
-    config.modelPath = null;
+  public String setModel(String modelName) throws IOException {
+    synchronized (this) {
+      config.model = modelName;
+      config.modelPath = null;
+    }
     String path;
     if (isModelInstalled(modelName)) {
       path = getModelPath(modelName);
@@ -618,9 +623,12 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
    * @param localeTag
    *          e.g. {@code en-US}
    */
-  public synchronized String setLanguage(String localeTag) throws IOException {
-    setLocale(localeTag);
-    String modelName = getDefaultModelForLocale(localeTag);
+  public String setLanguage(String localeTag) throws IOException {
+    String modelName;
+    synchronized (this) {
+      setLocale(localeTag);
+      modelName = getDefaultModelForLocale(localeTag);
+    }
     return setModel(modelName);
   }
 
@@ -648,7 +656,7 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     throw new IOException("Vosk model not installed: " + modelName + " (set autoDownloadModel=true or call installModel)");
   }
 
-  private synchronized String loadModelFromPath(String path) throws IOException {
+  private String loadModelFromPath(String path) throws IOException {
     if (path == null) {
       throw new IOException("model path is null");
     }
@@ -657,34 +665,41 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
       throw new IOException("invalid Vosk model directory: " + path);
     }
 
-    boolean wasRecording = micRunning;
+    boolean wasRecording;
+    synchronized (this) {
+      wasRecording = micRunning;
+    }
     if (wasRecording) {
+      // Join the capture thread without holding this lock. The thread publishes
+      // results and must be able to finish before closeVosk frees the recognizer.
       stopMicrophoneCapture();
     }
 
-    closeVosk();
+    synchronized (this) {
+      closeVosk();
 
-    status = "loading model " + dir.getName();
-    broadcastState();
-    try {
-      LibVosk.setLogLevel(LogLevel.WARNINGS);
-      voskModel = new Model(dir.getAbsolutePath());
-      voskRecognizer = new Recognizer(voskModel, config.sampleRate);
-      loadedModelPath = dir.getAbsolutePath();
-      status = "model loaded: " + dir.getName();
-      info("loaded Vosk model from %s", loadedModelPath);
+      status = "loading model " + dir.getName();
       broadcastState();
-    } catch (Exception e) {
-      status = "load failed";
-      loadedModelPath = null;
-      broadcastState();
-      throw new IOException("failed to load Vosk model from " + path, e);
-    }
+      try {
+        LibVosk.setLogLevel(LogLevel.WARNINGS);
+        voskModel = new Model(dir.getAbsolutePath());
+        voskRecognizer = new Recognizer(voskModel, config.sampleRate);
+        loadedModelPath = dir.getAbsolutePath();
+        status = "model loaded: " + dir.getName();
+        info("loaded Vosk model from %s", loadedModelPath);
+        broadcastState();
+      } catch (Exception e) {
+        status = "load failed";
+        loadedModelPath = null;
+        broadcastState();
+        throw new IOException("failed to load Vosk model from " + path, e);
+      }
 
-    if (wasRecording || config.recording) {
-      startMicrophoneCapture();
+      if (wasRecording || config.recording) {
+        startMicrophoneCapture();
+      }
+      return loadedModelPath;
     }
-    return loadedModelPath;
   }
 
   private void closeVosk() {
@@ -738,7 +753,9 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
   @Override
   public void stopService() {
     stopMicrophoneCapture();
-    closeVosk();
+    synchronized (this) {
+      closeVosk();
+    }
     super.stopService();
   }
 
@@ -796,24 +813,35 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     invoke("publishListening", true);
   }
 
-  private synchronized void stopMicrophoneCapture() {
-    micRunning = false;
-    if (recognitionThread != null) {
+  private void stopMicrophoneCapture() {
+    Thread thread;
+    synchronized (this) {
+      micRunning = false;
+      // Close the line before joining so a blocked microphone.read returns.
+      if (microphone != null) {
+        try {
+          microphone.stop();
+          microphone.close();
+        } catch (Exception e) {
+          log.warn("error closing microphone", e);
+        }
+        microphone = null;
+      }
+      thread = recognitionThread;
+    }
+    if (thread != null) {
       try {
-        recognitionThread.join(2000);
+        // Wait until the thread has left acceptWaveForm / getFinalResult.
+        // Closing the native recognizer before that can crash the JVM.
+        thread.join();
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
-      recognitionThread = null;
     }
-    if (microphone != null) {
-      try {
-        microphone.stop();
-        microphone.close();
-      } catch (Exception e) {
-        log.warn("error closing microphone", e);
+    synchronized (this) {
+      if (recognitionThread == thread) {
+        recognitionThread = null;
       }
-      microphone = null;
     }
   }
 
