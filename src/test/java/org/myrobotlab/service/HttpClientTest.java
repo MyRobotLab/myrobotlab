@@ -33,11 +33,11 @@ public class HttpClientTest
       String test = http.postForm("https://postman-echo.com/post", "foo1", "bar1", "foo2", "bar2", "foo3", "bar with spaces");
       assertNotNull(test);
 
-      // TODO - getByteArray(...)
-      byte[] bytes = http.getBytes("https://www.cs.tut.fi/~jkorpela/forms/testing.html");
+      // cs.tut.fi redirects to www.tuni.fi, whose HARICA ECC 2021 root is not in the JDK trust store.
+      byte[] bytes = http.getBytes("https://postman-echo.com/get?foo1=bar1&foo2=bar2");
       assertNotNull(bytes);
 
-      String response = http.post("http://www.cs.tut.fi/cgi-bin/run/~jkorpela/echo.cgi");
+      String response = http.post("https://postman-echo.com/post");
       assertNotNull(response);
       log.info(response);
 

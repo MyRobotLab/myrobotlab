@@ -6,6 +6,9 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -4702,6 +4705,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * Scans and loads the default resource location and loads any models not already loaded
    */
   public void loadDefaultModels() {
+    ensureVinMoovModel();
     refreshAssetPaths();
     registerModelLocators();
     // Load each model basename at most once across all search directories
@@ -4725,7 +4729,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
     removeDuplicateVinMoovRoots("i01");
     if (loaded == 0 && !hasVinMoovOrRobotRoot()) {
-      error("No JME models loaded — place VinMoov5.j3o under resource/JMonkeyEngine/assets/Models/");
+      error("No JME models loaded — VinMoov5.j3o was not found under resource/JMonkeyEngine/assets/Models or resource/InMoov2/JMonkeyEngine/assets/Models");
     } else {
       bindVinMoovRoot("i01");
       removeDuplicateVinMoovRoots("i01");
@@ -4741,29 +4745,130 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * Candidate directories that may contain VinMoov / other models. Dev Eclipse
-   * configs often point resource at {@code src/main/resources/resource} (no large
-   * j3o), while the extracted model lives under {@code resource/...}.
+   * Published with the InMoov2 repo. About 64 MB. Fetched once into
+   * {@code resource/JMonkeyEngine/assets/Models} when no local VinMoov mesh exists.
+   */
+  static final String VINMOOV_MODEL_URL = "https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/peers/JMonkeyEngine/assets/Models/VinMoov5.j3o";
+
+  /**
+   * Candidate directories that may contain VinMoov / other models. Eclipse dev
+   * runs often have an empty {@code src/main/resources/resource} tree. The mesh
+   * ships in the InMoov2 repo at {@code peers/JMonkeyEngine/assets/Models} and,
+   * after that service's resources are installed, under
+   * {@code resource/InMoov2/JMonkeyEngine/assets/Models}.
    */
   public List<String> getModelsSearchPaths() {
     List<String> paths = new ArrayList<>();
-    LinkedHashSet<String> unique = new LinkedHashSet<>();
-
-    refreshAssetPaths();
-    unique.add(modelsDir);
-    unique.add(FileIO.gluePaths(getDataDir(), "assets/Models"));
-    unique.add(FileIO.gluePaths("data", "JMonkeyEngine/assets/Models"));
-    unique.add(FileIO.gluePaths("resource", "JMonkeyEngine/assets/Models"));
-    unique.add(FileIO.gluePaths("src/main/resources/resource", "JMonkeyEngine/assets/Models"));
-    unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "JMonkeyEngine/assets/Models"));
-
-    for (String p : unique) {
+    for (String p : modelCandidateDirs()) {
       File dir = new File(p);
       if (dir.isDirectory()) {
         paths.add(dir.getPath());
       }
     }
     return paths;
+  }
+
+  private List<String> modelCandidateDirs() {
+    refreshAssetPaths();
+    LinkedHashSet<String> unique = new LinkedHashSet<>();
+    unique.add(modelsDir);
+    unique.add(FileIO.gluePaths(getDataDir(), "assets/Models"));
+    unique.add(FileIO.gluePaths("data", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("resource", "InMoov2/JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("resource", "InMoov2/JMonkeyEngine"));
+    unique.add(FileIO.gluePaths("src/main/resources/resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("src/main/resources/resource", "InMoov2/JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("src/main/resources/resource", "InMoov2/peers/JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("dev/InMoov2", "peers/JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("..", "InMoov2/peers/JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "JMonkeyEngine/assets/Models"));
+    unique.add(FileIO.gluePaths("target/myrobotlab-0.0.1-SNAPSHOT/resource", "InMoov2/JMonkeyEngine/assets/Models"));
+    return new ArrayList<>(unique);
+  }
+
+  /**
+   * @return a local VinMoov {@code .j3o}, or null when none of the candidate
+   *         directories contain one
+   */
+  File findVinMoovModel() {
+    for (String dir : modelCandidateDirs()) {
+      File folder = new File(dir);
+      File[] files = folder.listFiles((d, name) -> {
+        String lower = name.toLowerCase();
+        return lower.startsWith("vinmoov") && lower.endsWith(".j3o");
+      });
+      if (files != null) {
+        for (File file : files) {
+          if (file.isFile() && file.length() > 1_000_000L) {
+            return file;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Download {@code VinMoov5.j3o} into the JMonkeyEngine models directory when
+   * it is not already on disk. The InMoov mesh is not in this repo; without it
+   * the simulator window opens on an empty scene.
+   */
+  public void ensureVinMoovModel() {
+    if (findVinMoovModel() != null) {
+      return;
+    }
+    refreshAssetPaths();
+    File dir = new File(modelsDir);
+    if (!dir.isDirectory() && !dir.mkdirs()) {
+      error("could not create models directory %s", dir.getAbsolutePath());
+      return;
+    }
+    File dest = new File(dir, "VinMoov5.j3o");
+    File part = new File(dir, "VinMoov5.j3o.part");
+    info("VinMoov model not found locally — downloading %s", VINMOOV_MODEL_URL);
+    HttpURLConnection connection = null;
+    try {
+      connection = (HttpURLConnection) new URL(VINMOOV_MODEL_URL).openConnection();
+      connection.setInstanceFollowRedirects(true);
+      connection.setRequestProperty("User-Agent", "myrobotlab");
+      connection.setConnectTimeout(20000);
+      connection.setReadTimeout(120000);
+      int status = connection.getResponseCode();
+      if (status >= 400) {
+        error("VinMoov download failed: HTTP %s", status);
+        return;
+      }
+      try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(part)) {
+        byte[] buffer = new byte[65536];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+          out.write(buffer, 0, n);
+        }
+      }
+      long downloaded = part.length();
+      if (downloaded < 1_000_000L) {
+        part.delete();
+        error("VinMoov download was incomplete (%s bytes)", downloaded);
+        return;
+      }
+      if (dest.exists() && !dest.delete()) {
+        error("could not replace %s", dest.getAbsolutePath());
+        return;
+      }
+      if (!part.renameTo(dest)) {
+        error("could not move download into %s", dest.getAbsolutePath());
+        return;
+      }
+      info("Saved VinMoov model to %s (%s bytes)", dest.getAbsolutePath(), dest.length());
+    } catch (Exception e) {
+      part.delete();
+      error("Could not download VinMoov5.j3o: %s", e.getMessage());
+    } finally {
+      if (connection != null) {
+        connection.disconnect();
+      }
+    }
   }
 
   void registerModelLocators() {
@@ -4825,6 +4930,11 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
     final String robotName = inferRobotNameFromNodeConfig(config);
     final String lookAt = config.cameraLookAt;
+    // Fetch the mesh on this thread. A multi-tens-of-MB download must not run
+    // inside the render-thread timeout.
+    if (config.models == null || config.models.isEmpty()) {
+      ensureVinMoovModel();
+    }
     // Load + bind + mappers on the render thread. AppTask.get(timeout) also
     // throws if the callable returns null — runOnJmeThread always returns a
     // non-null sentinel.
