@@ -133,44 +133,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
     // for (ServiceDependency dependency : dependencies) {
 
-    sb.append("  <dependency"); // conf="provided->master"
-    sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(),
-        dependency.getVersion() == null ? "latest.integration" : dependency.getVersion()));
-
-    List<ServiceExclude> excludes = dependency.getExcludes();
-    boolean twoTags = dependency.getExt() != null || excludes != null && excludes.size() > 0;
-    if (twoTags) {
-      // more stuffs ! - we have 2 tags - end this one without />
-      sb.append(">\n");
-    }
-
-    if (dependency.getExt() != null) {
-      // http://ant.apache.org/ivy/history/latest-milestone/ivyfile/artifact.html
-      // " <artifact name=\"foo-src\" type=\"%s\" ext=\"%s\"
-      // conf=\"provided->master\"
-      // />\n",
-      sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(), dependency.getExt(), dependency.getExt()));
-    }
-
-    // exclusions begin ---
-    if (excludes != null && excludes.size() > 0) {
-      StringBuilder ex = new StringBuilder();
-      for (ServiceExclude exclude : excludes) {
-        ex.append("      <exclude ");
-        ex.append(String.format(" org=\"%s\" ", exclude.getOrgId()));
-        ex.append(String.format(" name=\"%s\" ", exclude.getArtifactId()));
-        ex.append("/>\n");
-      }
-
-      sb.append(ex);
-    }
-
-    if (twoTags) {
-      sb.append("  </dependency>\n");
-    } else {
-      // single tag
-      sb.append("/>\n");
-    }
+    appendIvyDependency(sb, dependency);
     // exclusions end ---
     // } // for each dependency
     // sb.append(String.format("<!-- %s end -->\n\n",
@@ -219,45 +182,7 @@ public class IvyWrapper extends Repo implements Serializable {
           continue;
         }
 
-        sb.append("  <dependency"); // conf="provided->master"
-        sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(),
-            dependency.getVersion() == null ? "latest.integration" : dependency.getVersion()));
-
-        List<ServiceExclude> excludes = dependency.getExcludes();
-        boolean twoTags = dependency.getExt() != null || excludes != null & excludes.size() > 0;
-        if (twoTags) {
-          // more stuffs ! - we have 2 tags - end this one without />
-          sb.append(">\n");
-        }
-
-        if (dependency.getExt() != null) {
-          // http://ant.apache.org/ivy/history/latest-milestone/ivyfile/artifact.html
-          // " <artifact name=\"foo-src\" type=\"%s\" ext=\"%s\"
-          // conf=\"provided->master\"
-          // />\n",
-          sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(), dependency.getExt(), dependency.getExt()));
-        }
-
-        // exclusions begin ---
-        if (excludes != null & excludes.size() > 0) {
-          StringBuilder ex = new StringBuilder();
-          for (ServiceExclude exclude : excludes) {
-            ex.append("      <exclude ");
-            ex.append(String.format(" org=\"%s\" ", exclude.getOrgId()));
-            ex.append(String.format(" name=\"%s\" ", exclude.getArtifactId()));
-            ex.append("/>\n");
-          }
-
-          sb.append(ex);
-        }
-
-        if (twoTags) {
-          sb.append("  </dependency>\n");
-        } else {
-          // single tag
-          sb.append("/>\n");
-        }
-        // exclusions end ---
+        appendIvyDependency(sb, dependency);
       } // for each dependency
         // sb.append(String.format("<!-- %s end -->\n\n",
         // service.getSimpleName()));
@@ -298,6 +223,54 @@ public class IvyWrapper extends Repo implements Serializable {
     createFilteredFile(snr, location, "ivysettings", "xml");
   }
 
+  /**
+   * Keep classifier in the retrieved filename so LWJGL
+   * {@code natives-linux-arm64} jars do not overwrite {@code lwjgl.jar}.
+   */
+  static final String IVY_RETRIEVE_PATTERN = "/jar/[artifact]-[revision](-[classifier]).[ext]";
+
+  /**
+   * Emit one Ivy {@code <dependency>} including optional Maven classifier.
+   */
+  static void appendIvyDependency(StringBuilder sb, ServiceDependency dependency) {
+    sb.append("  <dependency");
+    sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(),
+        dependency.getVersion() == null ? "latest.integration" : dependency.getVersion()));
+
+    List<ServiceExclude> excludes = dependency.getExcludes();
+    boolean hasExcludes = excludes != null && excludes.size() > 0;
+    boolean hasExt = dependency.getExt() != null;
+    boolean hasClassifier = dependency.getClassifier() != null && !dependency.getClassifier().isBlank();
+    boolean twoTags = hasExt || hasExcludes || hasClassifier;
+    if (twoTags) {
+      sb.append(">\n");
+    }
+
+    if (hasClassifier) {
+      String ext = hasExt ? dependency.getExt() : "jar";
+      sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" m:classifier=\"%s\" />\n",
+          dependency.getArtifactId(), ext, ext, dependency.getClassifier()));
+    } else if (hasExt) {
+      sb.append(String.format("    <artifact name=\"%s\" type=\"%s\" ext=\"%s\" />\n", dependency.getArtifactId(),
+          dependency.getExt(), dependency.getExt()));
+    }
+
+    if (hasExcludes) {
+      for (ServiceExclude exclude : excludes) {
+        sb.append("      <exclude ");
+        sb.append(String.format(" org=\"%s\" ", exclude.getOrgId()));
+        sb.append(String.format(" name=\"%s\" ", exclude.getArtifactId()));
+        sb.append("/>\n");
+      }
+    }
+
+    if (twoTags) {
+      sb.append("  </dependency>\n");
+    } else {
+      sb.append("/>\n");
+    }
+  }
+
   public String[] buidCmdLine(String location) {
 
     // TODO - noterminate :P
@@ -305,7 +278,8 @@ public class IvyWrapper extends Repo implements Serializable {
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
     // location + "/jar" + "/[originalname].[ext]", "-noterminate" };
     // [artifact]-[revision].[ext]
-    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+    String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
+        location + IVY_RETRIEVE_PATTERN };
     // String[] cmd = new String[] { "-settings", location +
     // "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve",
     // location + "/jar" + "/[artifact]-[revision].[ext]" };
@@ -444,7 +418,7 @@ public class IvyWrapper extends Repo implements Serializable {
     cmd.add("-ivy");
     cmd.add(location + "/ivy.xml");
     cmd.add("-retrieve");
-    cmd.add(location + "/jar" + "/[originalname].[ext]");
+    cmd.add(location + IVY_RETRIEVE_PATTERN);
 
     int msgLevel = Message.MSG_WARN;
     if (log.isInfoEnabled()) {
@@ -501,6 +475,8 @@ public class IvyWrapper extends Repo implements Serializable {
         installedLibraries.put(library.toString(), library);
         info("installed %s platform %s", library, platform.getPlatformId());
       }
+      removeSupersededRevisions(new File(location, "jar"), targetLibraries);
+      forgetSupersededRevisions(targetLibraries);
       save();
     }
 
@@ -539,6 +515,65 @@ public class IvyWrapper extends Repo implements Serializable {
       }
 
       publishStatus(Status.newInstance(Repo.class.getSimpleName(), StatusLevel.INFO, Repo.INSTALL_FINISHED, String.format("finished install of %s", (Object[]) serviceTypes)));
+    }
+  }
+
+  /**
+   * Drop jars from an older revision of an artifact that was just installed.
+   * Ivy retrieve keeps every {@code [artifact]-[revision]} file, so a version
+   * bump leaves the previous jars on the classpath.
+   */
+  static void removeSupersededRevisions(File jarDir, Iterable<ServiceDependency> installed) {
+    if (installed == null) {
+      return;
+    }
+    for (ServiceDependency library : installed) {
+      removeOtherRevisionJars(jarDir, library.getArtifactId(), library.getVersion());
+    }
+  }
+
+  static void removeOtherRevisionJars(File jarDir, String artifactId, String version) {
+    if (jarDir == null || artifactId == null || version == null || version.isEmpty()) {
+      return;
+    }
+    File[] files = jarDir.listFiles();
+    if (files == null) {
+      return;
+    }
+    String prefix = artifactId + "-";
+    String versionAndClassifier = version + "-";
+    for (File file : files) {
+      String name = file.getName();
+      if (!name.startsWith(prefix) || !name.endsWith(".jar")) {
+        continue;
+      }
+      String rest = name.substring(prefix.length(), name.length() - ".jar".length());
+      // "lwjgl" must not match "lwjgl-opengl-3.3.2.jar". A revision starts with a digit.
+      if (rest.isEmpty() || !Character.isDigit(rest.charAt(0))) {
+        continue;
+      }
+      if (rest.equals(version) || rest.startsWith(versionAndClassifier)) {
+        continue;
+      }
+      if (!file.delete()) {
+        log.warn("could not delete superseded jar {}", file.getAbsolutePath());
+      } else {
+        log.info("removed superseded jar {}", file.getName());
+      }
+    }
+  }
+
+  private void forgetSupersededRevisions(Iterable<ServiceDependency> installed) {
+    if (installed == null) {
+      return;
+    }
+    for (ServiceDependency library : installed) {
+      if (library.getOrgId() == null || library.getArtifactId() == null || library.getVersion() == null) {
+        continue;
+      }
+      String project = library.getOrgId() + "/" + library.getArtifactId() + "/";
+      String currentRevision = project + library.getVersion() + "/";
+      installedLibraries.keySet().removeIf(key -> key.startsWith(project) && !key.startsWith(currentRevision));
     }
   }
 

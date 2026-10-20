@@ -64,6 +64,22 @@ import org.slf4j.Logger;
  * </pre>
  */
 public class OpenCVFilterKinectFloorFinder extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("KinectFloorFinder",
+        "Scans Kinect depth from the bottom of the frame to find the widest deep path over the floor and publishes that corridor for navigation.",
+        "Requires a depth camera aimed forward and slightly down. Tune min width and how far up the image to scan (typically up to the horizon).",
+        OpenCVFilterInfo.DEP_KINECT);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   // useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
   // not good data

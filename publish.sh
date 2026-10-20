@@ -58,7 +58,7 @@ Open Source Framework for Robotics and Creative Machine Control\n\n\
 * Download Built Application: [Nixie $VERSION](https://myrobotlab-repo.s3.us-east-1.amazonaws.com/myrobotlab-$VERSION.zip)\n\
 * [Javadocs](https://myrobotlab-repo.s3.us-east-1.amazonaws.com/target/site/apidocs/org/myrobotlab/service/package-summary.html)\n\n\
 ## Base Requirements\n\n\
-You will need Java 11 or newer. If you are only running MyRobotLab, you need the JRE (Java Runtime Environment). If you are going to be building from source, you'll need the JDK (Java Development Kit). Oracle or OpenJDK will work.",
+You will need Java 17 or newer. If you are only running MyRobotLab, you need the JRE (Java Runtime Environment). If you are going to be building from source, you'll need the JDK (Java Development Kit). Oracle or OpenJDK will work.",
   "draft": false,
   "prerelease": false,
   "generate_release_notes": true

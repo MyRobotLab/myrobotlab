@@ -38,6 +38,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterKinectDepthMask extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("KinectDepthMask",
+        "Builds a mask from Kinect depth so far/near pixels can be ignored. Useful to isolate a person or table from the background.",
+        "Requires a depth stream. Tune the depth band so the subject stays in-range; use the mask with And or as a later sourceKey.",
+        OpenCVFilterInfo.DEP_KINECT);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterKinectDepthMask.class);

@@ -51,6 +51,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterHoughLines2 extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("HoughLines2",
+        "Probabilistic Hough line detector. Runs Canny then finds line segments — good for walls, horizons, and calibration targets.",
+        "Add after a reasonably sharp image. Adjust Canny thresholds if you get too many or too few lines. Output is drawn on the display.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

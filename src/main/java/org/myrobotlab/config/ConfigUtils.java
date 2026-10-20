@@ -84,6 +84,12 @@ public class ConfigUtils {
       config.id = options.id;
     }
 
+    // runtime.yml may explicitly set id: null; that breaks Runtime bootstrap
+    // (createService → getFullName → getInstance recursion). Always ensure an id.
+    if (config.id == null || config.id.trim().isEmpty()) {
+      config.id = org.myrobotlab.framework.NameGenerator.getName();
+    }
+
     return config;
   }
 

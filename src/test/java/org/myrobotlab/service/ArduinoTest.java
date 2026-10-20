@@ -189,8 +189,11 @@ public class ArduinoTest extends AbstractTest {
     catcher.clear();
     arduino01.enablePin(analogPin);
     arduino01.attachPinArrayListener(catcher);
-    sleep(50);
-    assertTrue(catcher.containsPinArrayFromPin(analogPin));
+    long deadline = System.currentTimeMillis() + 2000;
+    while (System.currentTimeMillis() < deadline && !catcher.containsPinArrayFromPin(analogPin)) {
+      sleep(50);
+    }
+    assertTrue("expected pin array data for " + analogPin, catcher.containsPinArrayFromPin(analogPin));
     arduino01.disablePin(analogPin);
   }
 

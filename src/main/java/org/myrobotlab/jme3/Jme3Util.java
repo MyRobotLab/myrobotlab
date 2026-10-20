@@ -122,6 +122,13 @@ public class Jme3Util {
     s.setLocalRotation(q);
   }
 
+  /**
+   * @deprecated no longer used for rotation. It returns null for a signed axis
+   *             such as {@code -x}, and Euler component indices cannot express a
+   *             rotation about an arbitrary bone axis anyway — see
+   *             {@link #rotateTo(String, String, double)}.
+   */
+  @Deprecated
   public static Integer getIndexFromUnitVector(Vector3f vector) {
     if (vector == null) {
       // default is Y
@@ -173,33 +180,59 @@ public class Jme3Util {
 
       // highest priority override is if the parameter is supplied
       if (axis != null) {
-        rotMask = getUnitVector(axis);
+        Vector3f supplied = getUnitVector(axis);
+        if (supplied == null) {
+          jme.error("rotateTo %s - %s is not an axis", name, axis);
+          return;
+        }
+        rotMask = supplied;
       }
 
       log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
-      // int angleIndex = getIndexFromUnitVector(rotMask);
       if (o.mapper != null) {
         degrees = o.mapper.calcOutput(degrees);
         log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
       }
 
-      // get current local rotations
       Node n = o.getNode();
 
-      // convert current local to euler representation
-      Quaternion q = n.getLocalRotation();
-      float[] euler = new float[3];
-      q.toAngles(euler);
-
-      // find the masking axis - replace that value with desired value
-      int indexOfAxisRotation = getIndexFromUnitVector(rotMask);
-      euler[indexOfAxisRotation] = ((float) degrees) * FastMath.PI / 180;
-      q.fromAngles(euler[0], euler[1], euler[2]);
-      n.setLocalRotation(q);
+      // Rotate about the bone's own axis, starting from its authored bind pose.
+      // Decomposing to Euler angles and substituting one term (the old approach)
+      // rewrites the bind rotation and gimbal-locks the Z axis at ±90°.
+      Quaternion bind = o.captureBindRotation();
+      Quaternion joint = new Quaternion();
+      joint.fromAngleAxis((float) degrees * FastMath.DEG_TO_RAD, rotMask.normalize());
+      n.setLocalRotation(bind.mult(joint));
+      o.currentAngleDeg = degrees;
 
     } catch (Exception e) {
       log.error("{}.rotateTo threw", jme.getName(), e);
     }
+  }
+
+  /**
+   * The node's rotation axis in world coordinates, and a point on it — the two
+   * things a solver needs to model the joint exactly.
+   *
+   * @param name
+   *          node name
+   * @return {@code { originX, originY, originZ, axisX, axisY, axisZ }} in world
+   *         meters, or null if the node or its rotation mask is missing
+   */
+  public double[] getWorldJointAxis(String name) {
+    UserData o = jme.getUserData(name);
+    if (o == null || o.getSpatial() == null) {
+      return null;
+    }
+    Vector3f localAxis = getUnitVector(o.rotationMask);
+    if (localAxis == null) {
+      localAxis = Vector3f.UNIT_Y;
+    }
+    o.captureBindRotation();
+    Spatial spatial = o.getSpatial();
+    Vector3f origin = spatial.getWorldTranslation();
+    Vector3f axis = spatial.getWorldRotation().mult(localAxis.normalize()).normalizeLocal();
+    return new double[] { origin.x, origin.y, origin.z, axis.x, axis.y, axis.z };
   }
 
   public void bind(String child, String parent) {
@@ -330,6 +363,26 @@ public class Jme3Util {
     // rootUnitVector.subtract(vec)
     // return axes[0];
     return rootUnitVector; // FIXME - THIS IS NOT CORRECT !
+  }
+
+  /**
+   * Signed angle in degrees of {@code local} relative to {@code bind}, about
+   * {@code axis}. This is the inverse of {@link #rotateTo}: that method stores
+   * {@code bind * fromAngleAxis(degrees, axis)}. Extracting one known axis stays
+   * valid at ±90°, where a full Euler decomposition clamps Z.
+   */
+  public static double signedDegreesAboutAxis(Quaternion bind, Quaternion local, Vector3f axis) {
+    if (bind == null || local == null || axis == null || axis.lengthSquared() == 0f) {
+      return 0;
+    }
+    Quaternion inverse = bind.inverse();
+    if (inverse == null) {
+      return 0;
+    }
+    Quaternion delta = inverse.mult(local);
+    Vector3f unit = axis.normalize();
+    float halfSin = delta.getX() * unit.x + delta.getY() * unit.y + delta.getZ() * unit.z;
+    return 2.0 * FastMath.atan2(halfSin, delta.getW()) * FastMath.RAD_TO_DEG;
   }
 
   public Vector3f getUnitVector(String axis) {

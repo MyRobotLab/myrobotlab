@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: "11"
-          distribution: "adopt"
+          java-version: "17"
+          distribution: "temurin"
           cache: "maven"
 
       - name: Install Missing Dependencies
@@ -117,7 +117,7 @@ jobs:
             * [JavaDocs](https://build.myrobotlab.org:8443/job/myrobotlab/job/develop/$build/artifact/target/site/apidocs/org/myrobotlab/service/package-summary.html)  
 
             ## Base Requirements
-            You will need **Java 11 or newer**. If you are only running MyRobotLab, you need the JRE (Java Runtime Environment).  
+            You will need **Java 17 or newer**. If you are only running MyRobotLab, you need the JRE (Java Runtime Environment).  
             If you are building from source, you will need the JDK (Java Development Kit). Oracle or OpenJDK will work.
 
             ${{ env.CHANGELOG }}

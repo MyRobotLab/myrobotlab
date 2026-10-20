@@ -1,0 +1,12 @@
+---
+description: Minimize edits to Runtime/Service megaclass hotspots; use AGENT REGION map
+globs: src/main/java/org/myrobotlab/service/Runtime.java,src/main/java/org/myrobotlab/framework/Service.java
+alwaysApply: false
+---
+
+# Runtime / Service hotspots
+
+- Prefer fixing a specific service before changing these files.
+- Search `AGENT REGION` banners to jump to CREATE_START, REGISTRY, INSTALL, NETWORK, CONFIG_PLAN, MAIN_CLI (Runtime) or MESSAGING, INVOKE, PEERS, CONFIG, LIFECYCLE, STATUS (Service).
+- New process-level helpers belong under `org.myrobotlab.framework.runtime` (or existing Repo/Plan/MethodCache), with Runtime delegating — do not grow Runtime further when avoidable.
+- Map: `doc/agent/hotspot-map.md`.

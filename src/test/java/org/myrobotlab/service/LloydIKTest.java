@@ -45,30 +45,6 @@ public class LloydIKTest extends AbstractTest {
     log.info("Left IK center position is : {}", position);
 
     int numLinks = leftIK.getCurrentArm(partName).getNumLinks();
-    // let's iterate the joints. set the approproate angles.. and validate the
-    // position to make sure our math is right.
-    // test angles
-    // IK "rest" input angles
-    double omoplate = MathUtils.degrees2radian(-90);
-    // partName straight down
-    double shoulder = MathUtils.degrees2radian(90);
-    // partName straight forward
-    // double shoulder = MathUtils.degrees2radian(180);
-    double rotate = MathUtils.degrees2radian(0);
-    double bicep = MathUtils.degrees2radian(90);
-
-    // // InMoov "servo rest" angles.
-    // double omoplateIM = MathUtils.degrees2radian(0);
-    // double shoulderIM = MathUtils.degrees2radian(90);
-    // double rotateIM = MathUtils.degrees2radian(90);
-    // double bicepIM = MathUtils.degrees2radian(0);
-    //
-    //
-    // double omoplateDelta = -90;
-    // double shoulderDelta = -90;
-    // double rotateDelta = 90;
-    // double bicepDelta = -90;
-
     DHRobotArm arm = leftIK.getCurrentArm(partName);
 
     // centered ..
@@ -76,10 +52,11 @@ public class LloydIKTest extends AbstractTest {
       System.out.println(l);
     }
 
-    arm.getLink(0).setTheta(omoplate);
-    arm.getLink(1).setTheta(shoulder);
-    arm.getLink(2).setTheta(rotate);
-    arm.getLink(3).setTheta(bicep);
+    // theta is the mesh angle now, so servo rest is theta 0 on every joint
+    arm.getLink(0).setFromServoDegrees(InMoov2Arm.OMOPLATE_SERVO_REST);
+    arm.getLink(1).setFromServoDegrees(InMoov2Arm.SHOULDER_SERVO_REST);
+    arm.getLink(2).setFromServoDegrees(InMoov2Arm.ROTATE_SERVO_REST);
+    arm.getLink(3).setFromServoDegrees(InMoov2Arm.BICEP_SERVO_REST);
     position = arm.getPalmPosition();
     // What are all the current angles?
     printArmDetails(arm);
@@ -93,13 +70,11 @@ public class LloydIKTest extends AbstractTest {
     // double y = -0.338;
     // double z = -0.274;
 
-    double x = -0.252;
-    double y = -0.308;
-    double z = -0.274;
-
-    // scale from meters to mm.
-    // TODO: z axis is reversed between the reference frames?! i'm confused.
-    leftIK.createInputScale(1000.0, 1000.0, -1000.0);
+    // solver is native meters in the simulator's world frame - no scaling
+    Point goal = leftIK.currentPosition(partName);
+    double x = goal.getX() + 0.02;
+    double y = goal.getY() + 0.02;
+    double z = goal.getZ();
 
     leftIK.moveTo(partName, x, y, z);
 

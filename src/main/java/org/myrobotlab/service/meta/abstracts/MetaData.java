@@ -166,6 +166,15 @@ public class MetaData implements Serializable {
     dependencies.add(library);
   }
 
+  /**
+   * Same as {@link #addDependency(String, String, String, String)} plus a Maven
+   * classifier (LWJGL {@code natives-linux-arm64}, etc.).
+   */
+  public void addDependency(String groupId, String artifactId, String version, String ext, String classifier) {
+    addDependency(groupId, artifactId, version, ext);
+    lastDependency.setClassifier(classifier);
+  }
+
   public void addDescription(String description) {
     this.description = description;
   }

@@ -1,4 +1,4 @@
-<ivy-module version="2.0" xmlns:extra="http://ant.apache.org/ivy/extra">
+<ivy-module version="2.0" xmlns:extra="http://ant.apache.org/ivy/extra" xmlns:m="http://ant.apache.org/ivy/maven">
 
   <info organisation="org.myrobotlab" module="myrobotlab-core"/>
 

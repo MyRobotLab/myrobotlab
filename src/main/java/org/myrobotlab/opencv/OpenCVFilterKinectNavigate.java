@@ -38,6 +38,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterKinectNavigate extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("KinectNavigate",
+        "Turns Kinect depth into a simple occupancy / navigable view (near vs far) for robot obstacle experiments.",
+        "Use a forward-facing depth camera. Click to sample. displayCamera can overlay the RGB view when both streams exist.",
+        OpenCVFilterInfo.DEP_KINECT);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   // useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
   // not good data

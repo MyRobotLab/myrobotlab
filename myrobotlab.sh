@@ -29,16 +29,16 @@ elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
     echo found java executable in JAVA_HOME
     _java="$JAVA_HOME/bin/java"
 else
-    echo "java is not installed please install java 11 e.g. sudo apt install openjdk-11-jdk "
+    echo "java is not installed please install java 17 e.g. sudo apt install openjdk-17-jdk "
     exit
 fi
 
 JAVA_VER=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
 
-if [ "$JAVA_VER" -ge 11 ]; then
-    echo "found java version equal or greater to 11"
+if [ "$JAVA_VER" -ge 17 ]; then
+    echo "found java version equal or greater to 17"
 else
-    echo "incompatible version of java, java 11 required"
+    echo "incompatible version of java, java 17 required"
     exit
 fi
 

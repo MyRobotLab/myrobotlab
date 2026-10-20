@@ -80,6 +80,22 @@ import org.slf4j.Logger;
  *
  */
 public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("LKOpticalTrack",
+        "Lucas–Kanade pyramidal optical flow. Tracks sparse corners from frame to frame as a 2D motion field.",
+        "Start capture, add the filter, click Get Features (or click the video to add points). Tune max points, quality, min distance, and block size. Clear Points to reset.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterLKOpticalTrack.class);
   private static final long serialVersionUID = 1L;

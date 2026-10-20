@@ -1,0 +1,18 @@
+!!org.myrobotlab.service.config.RuntimeConfig
+id: docker
+listeners: []
+locale: null
+logLevel: info
+peers: null
+registry:
+- runtime
+- log
+- security
+- webgui
+- intro
+- python
+- i01
+resource: resource
+type: Runtime
+# Set true to exercise InMoov without physical hardware / serial ports.
+virtual: false

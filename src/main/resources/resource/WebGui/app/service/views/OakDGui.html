@@ -1,51 +1,47 @@
-<table>
+<table class="table">
     <tr>
         <td>
-            <label> </label>
+            <label>OAK-D stereo depth</label>
+            <div ng-show="service.capturing">capturing<span ng-show="service.usingSynthetic"> (synthetic)</span></div>
+            <div ng-show="service.lastError" class="text-danger">{{service.lastError}}</div>
         </td>
     </tr>
     <tr>
         <td>
-            <label>WORK IN PROGRESS</label>
+            <button class="btn btn-default" ng-click="startDepth()">Start depth</button>
+            <button class="btn btn-info" ng-click="stopDepth()">Stop</button>
+            <button class="btn btn-default" ng-click="startSynthetic()">Synthetic</button>
+            <label style="margin-left: 12px;">
+                <input type="checkbox" ng-model="service.config.rgbMesh" ng-change="setRgbMesh()"/>
+                RGB mesh
+            </label>
+            <span class="text-muted">unchecked = voxel cloud. Click the overlay in the simulator to send that point to FABRIK.</span>
         </td>
     </tr>
     <tr>
         <td>
-            <button class="btn btn-default" ng-show="!startedAI" ng-click="execScript('resource/OakD/startScripts/AI_start.py')">AI</button>
-            <button class="btn btn-info" ng-show="startedAI" ng-click="execScript('resource/OakD/startScripts/AI_stop.py')">AI</button>
-            <button class="btn btn-default" ng-show="!startedDepth" ng-click="execScript('resource/OakD/startScripts/Depth_start.py')">Depth</button>
-            <button class="btn btn-info" ng-show="startedDepth" ng-click="execScript('resource/OakD/startScripts/Depth_stop.py')">Depth</button>
-            <div class="btn btn-default" ng-show="!startedCamera" ng-click="setPanel('camera')">Camera</div>
-            <button class="btn btn-info" ng-show="startedCamera" ng-click="execScript('resource/OakD/startScripts/Camera_stop.py')">Camera</button>
-            <button class="btn btn-default" ng-show="!startedMisc" ng-click="execScript('resource/OakD/startScripts/Misc_start.py')">Misc</button>
-            <button class="btn btn-info" ng-show="startedMisc" ng-click="execScript('resource/OakD/startScripts/Misc_stop.py')">Misc</button>
+            <label>World scale</label>
+            <div class="text-muted">1.0 is real-world meters (same as IK). Yellow stick in the simulator is 1 m.
+            Click the mesh, type a tape-measured distance, then Calibrate if objects look too small.</div>
+            scale {{service.depthCloudScale | number:3}}
+            <input type="range" min="0.2" max="5" step="0.01" style="width: 16em; display: inline-block; vertical-align: middle;"
+                ng-model="service.depthCloudScale" ng-change="setDepthCloudScale()"/>
+            <button class="btn btn-default btn-sm" ng-click="resetDepthCloudScale()">Reset 1.0</button>
+            <div>
+                last click
+                <span ng-show="service.lastClickDistanceM">{{service.lastClickDistanceM | number:3}} m from camera</span>
+                <span ng-hide="service.lastClickDistanceM" class="text-muted">—</span>
+                &nbsp; measured
+                <input type="number" ng-model="knownDistanceM" min="0.05" max="10" step="0.01" style="width: 5em;"/>
+                m
+                <button class="btn btn-primary btn-sm" ng-click="calibrateDepthScale()">Calibrate</button>
+            </div>
         </td>
     </tr>
-    <!------------------------ hand begin ------------------------------>
-    <table ng-show="showPanel('camera')" class="inmoov-sub-panel table table-striped">
-    <tr>
+    <tr ng-show="classification">
         <td>
-            <label>COLOR</label>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <label>FPS</label>
-                <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init=""  placeholder="30"/>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Resolution</button>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">Enable sync</button>
-            <button class="btn btn-info" ng-show="startedCamera"
-                ng-click="execScript('resource/OakD/startScripts/oakD_stop.py')">RGB-Depth Alignment</button>
-        </td>
-    </tr>
-    </table>
-            <!------------------------ camera end ------------------------------>
-    <tr>
-        <td>
-            <button class="btn btn-default" 
-                ng-click="execScript('resource/OakD/startScripts/depthai_demo.py')">Apply and Restart</button>
+            {{classification.label}} {{classification.confidence}}
+            xyz {{classification.x}} {{classification.y}} {{classification.z}}
         </td>
     </tr>
 </table>

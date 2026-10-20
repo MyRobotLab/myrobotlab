@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.jme3.JmePlatform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
@@ -166,6 +167,7 @@ public class Launcher {
     if (platform.isLinux()) {
       String ldPath = String.format("libraries/native:libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
       env.put("LD_LIBRARY_PATH", ldPath);
+      JmePlatform.putLinuxDisplay(env);
     } else if (platform.isMac()) {
       String dyPath = String.format("libraries/native:libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
       env.put("DYLD_LIBRARY_PATH", dyPath);

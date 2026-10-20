@@ -44,6 +44,22 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 
 public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("BoundingBoxToFile",
+        "Crops every published bounding box from the current frame and writes those image patches to disk. Intended for collecting training samples from detectors that already emit boxes.",
+        "Put this after a detector (FaceDetect, Yolo, YoloOnnx, QrCode, FindContours, ...). Crops are written under <opencvName>.<filterName>/ as frames arrive.",
+        "Requires an upstream filter that publishes Rectangle bounding boxes on the OpenCV data.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

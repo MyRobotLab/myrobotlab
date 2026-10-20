@@ -13,7 +13,7 @@ Open Source Framework for Robotics and Creative Machine Control
 
 ## Base Requirements
 
-You will need Java 11 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
+You will need Java 17 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
 
 ## Download the myrobotlab.zip
 Download
@@ -36,6 +36,17 @@ This can take a long time depending on the speed of your internet connection.
 The subsequent starting of myrobotlab will skip the installation stage.  If a browser does not automatically start you
 can go to http://localhost:8888 to see the web user interface.
 
+### Docker
+
+Build and run with WebGui on port 8888. The image build runs a full service `--install`, so the container is ready without a first-boot dependency download (build needs network and can take a while):
+
+```bash
+docker build -t myrobotlab .
+docker run --rm -p 8888:8888 myrobotlab
+```
+
+See **[doc/docker.md](doc/docker.md)** for Linux device access, **Windows Docker Desktop** serial/webcam passthrough (`usbipd-win`), Compose, and mounting a custom InMoov config (`-c inmoov`).
+
 ## Building Project
 MyRobotLab core is written in Java, it is a maven project - Any IDE which can load maven should work.  Its web ui is written in AngularJs and html.  
 A few services (e.g. InMoov2 & ProgramAB) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.
@@ -57,8 +68,8 @@ cd c:\dev\myrobotlab
 If you want to be making core changes, you will need to install a 
 Java developement environment
 
-#### Install Java 11
-https://www.oracle.com/java/technologies/downloads/#java11
+#### Install Java 17
+https://www.oracle.com/java/technologies/downloads/#java17
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
@@ -89,6 +100,15 @@ If you want to compile and skip the tests, you can use the standard maven approa
 * [No semi-colons for field names if labels exist](https://ux.stackexchange.com/questions/3611/should-label-and-field-be-separated-with-colon)
 
 ## Contributing
+
+**Agents / automated assistants:** start with [`AGENTS.md`](AGENTS.md) and [`doc/agent/`](doc/agent/).  
+**Humans:** see also [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+Fast PR-oriented tests:
+
+```bash
+mvn test -Pagent-tests
+```
 
 All development is done on the `develop` branch.  To contribute code, the typical approach is to create an issue about the feature/bug you're working on.
 

@@ -37,6 +37,7 @@ import org.myrobotlab.service.config.InMoov2Config;
 import org.myrobotlab.service.config.OpenCVConfig;
 import org.myrobotlab.service.config.PythonConfig;
 import org.myrobotlab.service.config.SpeechSynthesisConfig;
+import org.myrobotlab.service.data.Classification;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -2247,10 +2248,53 @@ public class InMoov2 extends Service<InMoov2Config>
     startPeer("torso");
   }
 
+  /**
+   * Start the simulator peer from config.
+   * <p>
+   * {@link #startPeer} uses the configured type and publishes state.
+   * {@link Runtime#start} releases the lifecycle lock before {@code startService},
+   * so the LWJGL window init does not pin it. Do not touch the live scene graph
+   * from this thread after start; JME is not thread-safe, and {@code loadDelayed}
+   * inside {@code startService} binds VinMoov and applies node mappers.
+   */
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
-    Simulator si = (Simulator) startPeer("simulator");
-    return si;
+    ServiceInterface si = startPeer("simulator");
+    if (si instanceof Simulator) {
+      return (Simulator) si;
+    }
+    if (si != null) {
+      error("simulator peer %s is %s, expected a Simulator", si.getName(), si.getSimpleName());
+    }
+    return null;
+  }
+
+  /**
+   * Start the OAK-D chest depth peer, attach it to the simulator overlay, and
+   * begin publishing (live device or synthetic fallback).
+   */
+  public OakD startChestCamera() {
+    OakD oakd = (OakD) startPeer("oakd");
+    ServiceInterface sim = getPeer("simulator");
+    if (sim instanceof JMonkeyEngine && oakd != null) {
+      try {
+        ((JMonkeyEngine) sim).attach(oakd);
+        ((JMonkeyEngine) sim).ensureChestDepthCamera();
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    if (oakd != null) {
+      oakd.startDepth();
+    }
+    return oakd;
+  }
+
+  public void stopChestCamera() {
+    OakD oakd = (OakD) getPeer("oakd");
+    if (oakd != null) {
+      oakd.stopDepth();
+    }
   }
 
   public void stop() {
@@ -2327,6 +2371,10 @@ public class InMoov2 extends Service<InMoov2Config>
       warn("No ultrasonicLeft attached");
       return 0.0;
     }
+  }
+
+  public Classification onClassification(Classification c) {
+    return c;
   }
 
   public Map publishClassification(Map<String, Object> c) {

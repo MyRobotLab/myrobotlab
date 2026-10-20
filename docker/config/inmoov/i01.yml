@@ -1,0 +1,17 @@
+!!org.myrobotlab.service.config.InMoov2Config
+# Minimal InMoov2 service config for Docker.
+# Peer services (head, arms, Arduino controllers, OpenCV, mouth, etc.) are
+# created from InMoov2 defaults when this service loads. Override peer YAML
+# files in this same config directory (e.g. i01.left.yml) as needed.
+#
+# Serial ports inside the container are Linux device nodes, for example:
+#   /dev/ttyACM0  /dev/ttyACM1  /dev/ttyUSB0
+# Map those devices from the host at docker run / compose time (see doc/docker.md).
+type: InMoov2
+listeners: null
+execScript: false
+loadGestures: true
+loadInitScripts: false
+loadAppsScripts: false
+reportOnBoot: true
+heartbeat: true

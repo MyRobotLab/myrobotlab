@@ -1,5 +1,6 @@
 !!org.myrobotlab.service.config.InMoov2ArmConfig
-listeners: null
+listeners: [
+  ]
 peers:
   bicep:
     autoStart: true

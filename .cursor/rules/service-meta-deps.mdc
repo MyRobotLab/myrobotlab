@@ -1,0 +1,12 @@
+---
+description: Keep service Meta dependencies in sync with pom.xml
+globs: src/main/java/org/myrobotlab/service/meta/**/*.java,pom.xml
+alwaysApply: false
+---
+
+# Meta + Maven dependencies
+
+- Service runtime jars are declared with `addDependency(...)` in `*Meta` classes.
+- Mirror GAV (and classifiers/excludes) in root `pom.xml` (usually `provided` scope).
+- After bumps, clear stale `libraries/` if needed and run `mvn test -Dtest=org.myrobotlab.framework.DependencyTest`.
+- Full cookbook: `doc/agent/dependency-updates.md`.

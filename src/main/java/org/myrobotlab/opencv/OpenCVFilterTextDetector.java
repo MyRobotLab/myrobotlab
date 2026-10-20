@@ -51,6 +51,22 @@ import org.opencv.imgproc.Imgproc;
  *
  */
 public class OpenCVFilterTextDetector extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("TextDetector",
+        "EAST text detector plus Tesseract on each rotated box. Predecessor of the Ocr filter; always uses the bundled EAST model.",
+        "Add when you want EAST boxes + OCR without the Ocr filter's model dropdown. Requires the EAST .pb file and TesseractOcr. Consider Ocr instead for DBNet and rate limiting.",
+        "EAST frozen_east_text_detection.pb (opencv_east_text_detection zip) and TesseractOcr.");
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   ArrayList<DetectedText> classifications = new ArrayList<DetectedText>();

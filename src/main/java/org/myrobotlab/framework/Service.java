@@ -92,6 +92,9 @@ import org.slf4j.Logger;
 public abstract class Service<T extends ServiceConfig> implements Runnable, Serializable, ServiceInterface, Broadcaster,
     QueueReporter, FutureInvoker, ConfigurableService<T> {
 
+  // AGENT REGIONS (search "AGENT REGION"): MESSAGING, INVOKE, PEERS, CONFIG,
+  // LIFECYCLE, STATUS, RESOURCES — see doc/agent/hotspot-map.md
+
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
 
@@ -141,6 +144,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   protected String typeKey;
 
   private boolean isRunning = false;
+
+  /**
+   * Set by release before this instance is unregistered. {@link #startService}
+   * checks it so a start that lost the race with release does not launch
+   * threads for a service that is no longer registered.
+   */
+  private volatile boolean startCancelled = false;
 
   transient protected Thread thisThread = null;
 
@@ -424,6 +434,7 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return dataDir;
   }
 
+  // ===== AGENT REGION: RESOURCES =====
   // ============== resources begin ======================================
 
   /**
@@ -713,6 +724,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     addListener(data.get("topicMethod").toString(), data.get("callbackName").toString(),
         data.get("callbackMethod").toString());
   }
+
+  // ===== AGENT REGION: MESSAGING =====
+  // inbox/outbox listeners — see doc/agent/hotspot-map.md
 
   public void addListener(MRLListener listener) {
     addListener(listener.topicMethod, listener.callbackName, listener.callbackMethod);
@@ -1112,6 +1126,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     return lastError != null;
   }
 
+  // ===== AGENT REGION: PEERS =====
+  // peer keys / peer lifecycle — see doc/agent/hotspot-map.md
+
   @Override
   public Map<String, Peer> getPeers() {
     if (getConfig() == null) {
@@ -1174,6 +1191,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   public void in(Message msg) {
     inbox.add(msg);
   }
+
+  // ===== AGENT REGION: INVOKE =====
+  // reflection dispatch / MethodCache — see doc/agent/hotspot-map.md
 
   /**
    * This is where all messages are routed to and processed
@@ -1474,6 +1494,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     runtime.broadcastState();
   }
 
+  // ===== AGENT REGION: CONFIG =====
+  // typed config apply/load/save — see doc/agent/hotspot-map.md
+
   /**
    * Super class apply using template type. The default assigns config of the
    * templated type, and also add listeners from subscriptions found on the base
@@ -1617,6 +1640,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   public Service<T> publishState() {
     return this;
   }
+
+  // ===== AGENT REGION: LIFECYCLE =====
+  // start/stop/release — see doc/agent/hotspot-map.md
 
   /**
    * Releases resources, and unregisters service from the runtime
@@ -2075,8 +2101,28 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     }
   }
 
+  /**
+   * @return true when {@link #releaseService()} has cancelled a not-yet-started
+   *         launch of this instance
+   */
+  public boolean isStartCancelled() {
+    return startCancelled;
+  }
+
+  /**
+   * Drop a start that has not run yet. Called from release while this instance
+   * is still registered.
+   */
+  public void cancelPendingStart() {
+    startCancelled = true;
+  }
+
   @Override
   synchronized public void startService() {
+    if (startCancelled) {
+      log.info("startService skipped, {} was released", getName());
+      return;
+    }
     if (!isRunning()) {
       log.info("starting {}", getName());
       outbox.start();
@@ -2279,6 +2325,9 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   public Status publishWarn(Status status) {
     return status;
   }
+
+  // ===== AGENT REGION: STATUS =====
+  // status/error publishing — see doc/agent/hotspot-map.md
 
   @Override
   public Status publishStatus(Status status) {

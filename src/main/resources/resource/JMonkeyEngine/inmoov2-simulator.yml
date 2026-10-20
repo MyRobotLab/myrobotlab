@@ -1,0 +1,487 @@
+!!org.myrobotlab.service.config.JMonkeyEngineConfig
+# Generated from InMoov2Config.getDefault — VinMoov node mappers.
+# Arm joints are 1° servo = 1° mesh, rest → 0° bind pose.
+cameraLookAt: i01.torso.lowStom
+listeners: [
+  ]
+models: [
+  ]
+multiMapped:
+  i01.leftHand.index:
+  - i01.leftHand.index
+  - i01.leftHand.index2
+  - i01.leftHand.index3
+  i01.leftHand.majeure:
+  - i01.leftHand.majeure
+  - i01.leftHand.majeure2
+  - i01.leftHand.majeure3
+  i01.leftHand.pinky:
+  - i01.leftHand.pinky
+  - i01.leftHand.pinky2
+  - i01.leftHand.pinky3
+  i01.leftHand.ringFinger:
+  - i01.leftHand.ringFinger
+  - i01.leftHand.ringFinger2
+  - i01.leftHand.ringFinger3
+  i01.leftHand.thumb:
+  - i01.leftHand.thumb1
+  - i01.leftHand.thumb2
+  - i01.leftHand.thumb3
+  i01.rightHand.index:
+  - i01.rightHand.index
+  - i01.rightHand.index2
+  - i01.rightHand.index3
+  i01.rightHand.majeure:
+  - i01.rightHand.majeure
+  - i01.rightHand.majeure2
+  - i01.rightHand.majeure3
+  i01.rightHand.pinky:
+  - i01.rightHand.pinky
+  - i01.rightHand.pinky2
+  - i01.rightHand.pinky3
+  i01.rightHand.ringFinger:
+  - i01.rightHand.ringFinger
+  - i01.rightHand.ringFinger2
+  - i01.rightHand.ringFinger3
+  i01.rightHand.thumb:
+  - i01.rightHand.thumb1
+  - i01.rightHand.thumb2
+  - i01.rightHand.thumb3
+nodes:
+  i01.head.jaw:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 25.0
+      minX: 0.0
+      minY: 0.0
+    rotationMask: x
+  i01.head.neck:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -20.0
+      minX: 0.0
+      minY: 20.0
+    rotationMask: x
+  i01.head.rothead:
+    mapper: null
+    rotationMask: y
+  i01.head.rollNeck:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -30.0
+      minX: 0.0
+      minY: 30.0
+    rotationMask: z
+  i01.head.eyeY:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 140.0
+      minX: 0.0
+      minY: 40.0
+    rotationMask: x
+  i01.head.eyeX:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 70.0
+      minX: 0.0
+      minY: -10.0
+    rotationMask: y
+  i01.torso.topStom:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 30.0
+      minX: 0.0
+      minY: -30.0
+    rotationMask: z
+  i01.torso.midStom:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 130.0
+      minX: 0.0
+      minY: 50.0
+    rotationMask: y
+  i01.torso.lowStom:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 30.0
+      minX: 0.0
+      minY: -30.0
+    rotationMask: x
+  i01.rightArm.bicep:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -180.0
+      minX: 0.0
+      minY: 0.0
+    rotationMask: x
+  i01.leftArm.bicep:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -180.0
+      minX: 0.0
+      minY: 0.0
+    rotationMask: x
+  i01.rightArm.shoulder:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -150.0
+      minX: 0.0
+      minY: 30.0
+    rotationMask: x
+  i01.leftArm.shoulder:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -150.0
+      minX: 0.0
+      minY: 30.0
+    rotationMask: x
+  i01.rightArm.rotate:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -90.0
+      minX: 0.0
+      minY: 90.0
+    rotationMask: y
+  i01.leftArm.rotate:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 90.0
+      minX: 0.0
+      minY: -90.0
+    rotationMask: y
+  i01.rightArm.omoplate:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -170.0
+      minX: 0.0
+      minY: 10.0
+    rotationMask: z
+  i01.leftArm.omoplate:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 170.0
+      minX: 0.0
+      minY: -10.0
+    rotationMask: z
+  i01.rightHand.wrist:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 60.0
+      minX: 0.0
+      minY: -20.0
+    rotationMask: y
+  i01.leftHand.wrist:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -60.0
+      minX: 0.0
+      minY: 20.0
+    rotationMask: y
+  i01.leftHand.thumb1:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -100.0
+      minX: 0.0
+      minY: -30.0
+    rotationMask: y
+  i01.leftHand.thumb2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 20.0
+      minX: 0.0
+      minY: 80.0
+    rotationMask: x
+  i01.leftHand.thumb3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 20.0
+      minX: 0.0
+      minY: 80.0
+    rotationMask: x
+  i01.leftHand.index:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.index2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.index3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.majeure:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.majeure2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.majeure3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.ringFinger:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.ringFinger2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.ringFinger3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.pinky:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.pinky2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.leftHand.pinky3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -179.0
+      minX: 0.0
+      minY: -110.0
+    rotationMask: x
+  i01.rightHand.thumb1:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: 110.0
+      minX: 0.0
+      minY: 30.0
+    rotationMask: y
+  i01.rightHand.thumb2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -150.0
+      minX: 0.0
+      minY: -100.0
+    rotationMask: x
+  i01.rightHand.thumb3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -160.0
+      minX: 0.0
+      minY: -100.0
+    rotationMask: x
+  i01.rightHand.index:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 65.0
+    rotationMask: x
+  i01.rightHand.index2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.index3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.majeure:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 65.0
+    rotationMask: x
+  i01.rightHand.majeure2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.majeure3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.ringFinger:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 65.0
+    rotationMask: x
+  i01.rightHand.ringFinger2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.ringFinger3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.pinky:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 65.0
+    rotationMask: x
+  i01.rightHand.pinky2:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 70.0
+    rotationMask: x
+  i01.rightHand.pinky3:
+    mapper:
+      clip: true
+      inverted: false
+      maxX: 180.0
+      maxY: -10.0
+      minX: 0.0
+      minY: 60.0
+    rotationMask: x
+peers: null
+type: JMonkeyEngine

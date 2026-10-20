@@ -52,7 +52,9 @@ public class MathUtils {
   }
 
   static public double radToDeg(double radians) {
-    return radians * 57.2957795;
+    // 57.2957795 was truncated at 9 digits, which is ~2e-8 degrees of error at
+    // the end of a servo range - enough to trip an exact round trip assertion
+    return radians * (180.0 / Math.PI);
   }
 
   static public String msToString(long ms) {

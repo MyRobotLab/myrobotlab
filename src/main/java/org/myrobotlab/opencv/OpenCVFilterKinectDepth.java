@@ -44,6 +44,22 @@ import org.myrobotlab.math.geometry.Point;
 import org.slf4j.Logger;
 
 public class OpenCVFilterKinectDepth extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("KinectDepth",
+        "Interprets a 16-bit Kinect-style depth frame and can colorize it or return raw depth. Click the image to sample depth at a point.",
+        "Set the grabber to a depth device (or depth file). Click the video to add sample points. Toggle color vs gray depth visualization.",
+        OpenCVFilterInfo.DEP_KINECT);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   // useful data for the kinect is 632 X 480 - 8 pixels on the right edge are
   // not good data

@@ -36,6 +36,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSetImageROI extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("SetImageROI",
+        "Restricts subsequent processing to a rectangular region of interest until ResetImageRoi.",
+        "Set the CvRect (x, y, width, height) then add filters that should only see that crop. Always pair with ResetImageRoi if later stages need the full frame.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
   private transient CvRect rect = null;

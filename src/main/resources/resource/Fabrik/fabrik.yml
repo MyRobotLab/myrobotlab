@@ -1,0 +1,18 @@
+!!org.myrobotlab.service.config.FabrikConfig
+# joints is the real calibration - each entry is a measured rotation axis.
+# Empty means "use the arm's built-in default geometry"; press
+# "Calibrate from simulator" in the WebGui to measure it off VinMoov.
+joints: [
+  ]
+endEffectorSet: false
+endEffectorX: 0.0
+endEffectorY: 0.0
+endEffectorZ: 0.0
+listeners: [
+  ]
+originX: 0.0
+originY: 0.0
+originZ: 0.0
+peers: null
+type: Fabrik
+worldFrame: true

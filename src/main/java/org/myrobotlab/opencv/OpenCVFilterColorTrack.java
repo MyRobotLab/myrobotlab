@@ -41,6 +41,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterColorTrack extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("ColorTrack",
+        "Converts BGR to HSV and keeps pixels whose hue/saturation/value fall in a configured range — a classic color blob tracker.",
+        "Start capture, add the filter, then sample a color by clicking the video (samplePoint) or set HSV min/max in code. Follow with FindContours or SimpleBlobDetector to get a centroid.",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 

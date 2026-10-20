@@ -15,9 +15,9 @@ public class OakDMeta extends MetaData {
    */
   public OakDMeta() {
 
-    addDescription("Control a Oak-D hardware");
-    setAvailable(true); // false if you do not want it viewable in a
-    addCategory("control", "display");
+    addDescription("OAK-D stereo depth camera — voxel cloud, RGB mesh, and HUD overlay");
+    setAvailable(true);
+    addCategory("video", "vision", "sensors");
 
   }
 

@@ -39,6 +39,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class OpenCVFilterSplit extends OpenCVFilter {
+  /**
+   * Catalog metadata for the WebGui filter guide. Static so it can be read
+   * without constructing the filter (constructors may start services).
+   */
+  public static OpenCVFilterInfo catalogInfo() {
+    return new OpenCVFilterInfo("Split",
+        "Copies the upper-left quadrant (half width and height) as an extra image source named <filter>_SPLIT.",
+        "Add when another filter should process only a corner of the frame via sourceKey. Known to be fragile; test carefully (the unit test is ignored because it can crash the JVM).",
+        OpenCVFilterInfo.DEP_CORE);
+  }
+
+  @Override
+  public OpenCVFilterInfo getFilterInfo() {
+    return catalogInfo();
+  }
+
 
   private static final long serialVersionUID = 1L;
 
