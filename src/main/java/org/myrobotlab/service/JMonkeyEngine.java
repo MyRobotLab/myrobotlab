@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -4705,7 +4707,12 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * Scans and loads the default resource location and loads any models not already loaded
    */
   public void loadDefaultModels() {
-    ensureVinMoovModel();
+    // ensureVinMoovModel blocks for the connect and read timeouts. loadDelayed
+    // already downloads before queueing this method on the render thread. A
+    // second attempt here freezes the window when the first one failed.
+    if (!JmePlatform.isJmeRenderThread()) {
+      ensureVinMoovModel();
+    }
     refreshAssetPaths();
     registerModelLocators();
     // Load each model basename at most once across all search directories
@@ -4745,10 +4752,41 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * Published with the InMoov2 repo. About 64 MB. Fetched once into
+   * Commit that contains {@code VinMoov5.j3o}. The mesh is a JME binary, and
+   * BinaryImporter instantiates the classes named in the file, so this is not
+   * a floating branch tip.
+   */
+  static final String VINMOOV_MODEL_COMMIT = "79cb407d20e40864dc87856057e00be58b126954";
+
+  /**
+   * Published with the InMoov2 repo. Fetched once into
    * {@code resource/JMonkeyEngine/assets/Models} when no local VinMoov mesh exists.
    */
-  static final String VINMOOV_MODEL_URL = "https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/peers/JMonkeyEngine/assets/Models/VinMoov5.j3o";
+  static final String VINMOOV_MODEL_URL = "https://raw.githubusercontent.com/MyRobotLab/InMoov2/"
+      + VINMOOV_MODEL_COMMIT + "/peers/JMonkeyEngine/assets/Models/VinMoov5.j3o";
+
+  /** Exact size of {@code VinMoov5.j3o} at {@link #VINMOOV_MODEL_COMMIT}. */
+  static final long VINMOOV_MODEL_BYTES = 67_449_927L;
+
+  /** SHA-256 of {@code VinMoov5.j3o} at {@link #VINMOOV_MODEL_COMMIT}. */
+  static final String VINMOOV_MODEL_SHA256 = "14f0f17fb550f64515eb2edfa7092a0e62779bc1727a97be734bf904af91bb2a";
+
+  /**
+   * @param contentLength
+   *          server Content-Length, or {@code -1} when the server did not send one
+   * @param bytes
+   *          bytes written to disk
+   * @param sha256
+   *          hex SHA-256 of those bytes
+   * @return true when the payload is the pinned mesh and, if the server sent a
+   *         length, the body was not truncated
+   */
+  static boolean vinMoovPayloadOk(long contentLength, long bytes, String sha256) {
+    if (contentLength >= 0 && contentLength != bytes) {
+      return false;
+    }
+    return bytes == VINMOOV_MODEL_BYTES && sha256 != null && VINMOOV_MODEL_SHA256.equalsIgnoreCase(sha256);
+  }
 
   /**
    * Candidate directories that may contain VinMoov / other models. Eclipse dev
@@ -4815,16 +4853,26 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    * the simulator window opens on an empty scene.
    */
   public void ensureVinMoovModel() {
+    refreshAssetPaths();
+    // A previous download only checked size > 1 MB, so a truncated VinMoov5.j3o
+    // in the models directory would be kept forever. Other local meshes are left
+    // alone.
+    File dest = new File(modelsDir, "VinMoov5.j3o");
+    if (dest.isFile() && dest.length() != VINMOOV_MODEL_BYTES) {
+      info("Replacing %s (%s bytes, expected %s)", dest.getAbsolutePath(), dest.length(), VINMOOV_MODEL_BYTES);
+      if (!dest.delete()) {
+        error("could not replace %s", dest.getAbsolutePath());
+        return;
+      }
+    }
     if (findVinMoovModel() != null) {
       return;
     }
-    refreshAssetPaths();
-    File dir = new File(modelsDir);
+    File dir = dest.getParentFile();
     if (!dir.isDirectory() && !dir.mkdirs()) {
       error("could not create models directory %s", dir.getAbsolutePath());
       return;
     }
-    File dest = new File(dir, "VinMoov5.j3o");
     File part = new File(dir, "VinMoov5.j3o.part");
     info("VinMoov model not found locally — downloading %s", VINMOOV_MODEL_URL);
     HttpURLConnection connection = null;
@@ -4839,17 +4887,25 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
         error("VinMoov download failed: HTTP %s", status);
         return;
       }
+      long contentLength = connection.getContentLengthLong();
+      if (contentLength >= 0 && contentLength != VINMOOV_MODEL_BYTES) {
+        error("VinMoov download refused: Content-Length %s, expected %s", contentLength, VINMOOV_MODEL_BYTES);
+        return;
+      }
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
       try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(part)) {
         byte[] buffer = new byte[65536];
         int n;
         while ((n = in.read(buffer)) != -1) {
           out.write(buffer, 0, n);
+          digest.update(buffer, 0, n);
         }
       }
       long downloaded = part.length();
-      if (downloaded < 1_000_000L) {
+      String sha256 = HexFormat.of().formatHex(digest.digest());
+      if (!vinMoovPayloadOk(contentLength, downloaded, sha256)) {
         part.delete();
-        error("VinMoov download was incomplete (%s bytes)", downloaded);
+        error("VinMoov download failed integrity check (%s of %s bytes)", downloaded, contentLength);
         return;
       }
       if (dest.exists() && !dest.delete()) {

@@ -591,9 +591,12 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     }
     ProcessBuilder check = new ProcessBuilder(python, "-c", code.toString());
     check.redirectErrorStream(true);
+    // Discard instead of readAllBytes(). Reading the pipe here blocks until
+    // the child exits, so the 30s waitFor below would never time out a hung
+    // import (depthai probing USB, for example).
+    check.redirectOutput(ProcessBuilder.Redirect.DISCARD);
     try {
       Process proc = check.start();
-      proc.getInputStream().readAllBytes();
       if (!proc.waitFor(30, TimeUnit.SECONDS)) {
         proc.destroyForcibly();
         return false;

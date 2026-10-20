@@ -665,44 +665,59 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
       throw new IOException("invalid Vosk model directory: " + path);
     }
 
-    boolean wasRecording;
+    boolean restartCapture;
     synchronized (this) {
-      wasRecording = micRunning;
+      restartCapture = micRunning || config.recording;
     }
-    if (wasRecording) {
-      // Join the capture thread without holding this lock. The thread publishes
-      // results and must be able to finish before closeVosk frees the recognizer.
+    // startListening / startRecording / apply can pass the unlocked gap after
+    // the check above and start a RecognitionThread that still sees the old
+    // recognizer. Close only once that thread has left acceptWaveForm.
+    while (true) {
+      synchronized (this) {
+        if (micRunning || recognitionThread != null) {
+          restartCapture = true;
+        } else {
+          closeVosk();
+
+          status = "loading model " + dir.getName();
+          broadcastState();
+          try {
+            LibVosk.setLogLevel(LogLevel.WARNINGS);
+            voskModel = new Model(dir.getAbsolutePath());
+            voskRecognizer = new Recognizer(voskModel, config.sampleRate);
+            loadedModelPath = dir.getAbsolutePath();
+            status = "model loaded: " + dir.getName();
+            info("loaded Vosk model from %s", loadedModelPath);
+            broadcastState();
+          } catch (Exception e) {
+            status = "load failed";
+            loadedModelPath = null;
+            broadcastState();
+            throw new IOException("failed to load Vosk model from " + path, e);
+          }
+
+          if (restartCapture) {
+            startMicrophoneCapture();
+          }
+          return loadedModelPath;
+        }
+      }
+      // Join without holding this lock. The capture thread publishes results
+      // and must finish before closeVosk frees the recognizer.
       stopMicrophoneCapture();
-    }
-
-    synchronized (this) {
-      closeVosk();
-
-      status = "loading model " + dir.getName();
-      broadcastState();
-      try {
-        LibVosk.setLogLevel(LogLevel.WARNINGS);
-        voskModel = new Model(dir.getAbsolutePath());
-        voskRecognizer = new Recognizer(voskModel, config.sampleRate);
-        loadedModelPath = dir.getAbsolutePath();
-        status = "model loaded: " + dir.getName();
-        info("loaded Vosk model from %s", loadedModelPath);
-        broadcastState();
-      } catch (Exception e) {
-        status = "load failed";
-        loadedModelPath = null;
-        broadcastState();
-        throw new IOException("failed to load Vosk model from " + path, e);
-      }
-
-      if (wasRecording || config.recording) {
-        startMicrophoneCapture();
-      }
-      return loadedModelPath;
     }
   }
 
   private void closeVosk() {
+    // Same lock the capture thread holds around acceptWaveForm / getResult.
+    // Callers that already hold it re-enter; a caller that does not still
+    // cannot free the native recognizer mid-call.
+    synchronized (this) {
+      closeVoskHoldingLock();
+    }
+  }
+
+  private void closeVoskHoldingLock() {
     if (voskRecognizer != null) {
       try {
         voskRecognizer.close();
@@ -752,9 +767,16 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
 
   @Override
   public void stopService() {
-    stopMicrophoneCapture();
-    synchronized (this) {
-      closeVosk();
+    // A start can land between an unlocked stop and closeVosk. Repeat until
+    // the capture thread is gone, then free the recognizer under the lock.
+    while (true) {
+      synchronized (this) {
+        if (!micRunning && recognitionThread == null) {
+          closeVosk();
+          break;
+        }
+      }
+      stopMicrophoneCapture();
     }
     super.stopService();
   }
@@ -857,31 +879,51 @@ public class VoskSpeechRecognition extends AbstractSpeechRecognizer<VoskSpeechRe
     @Override
     public void run() {
       byte[] buffer = new byte[4096];
+      // One read of the field. stopMicrophoneCapture nulls it under the lock,
+      // and a second read in this loop can observe that null.
+      TargetDataLine line = microphone;
       info("Vosk recognition thread started");
       try {
-        while (micRunning && microphone != null) {
-          int nbytes = microphone.read(buffer, 0, buffer.length);
+        while (micRunning && line != null) {
+          int nbytes = line.read(buffer, 0, buffer.length);
           if (nbytes <= 0) {
             continue;
           }
-          Recognizer recognizer = voskRecognizer;
-          if (recognizer == null) {
-            continue;
+          String json = null;
+          boolean isFinal = false;
+          synchronized (VoskSpeechRecognition.this) {
+            Recognizer recognizer = voskRecognizer;
+            if (recognizer == null) {
+              continue;
+            }
+            if (recognizer.acceptWaveForm(buffer, nbytes)) {
+              json = recognizer.getResult();
+              isFinal = true;
+            } else if (config.publishPartial) {
+              json = recognizer.getPartialResult();
+            }
           }
-          if (recognizer.acceptWaveForm(buffer, nbytes)) {
-            handleResultJson(recognizer.getResult(), true);
-          } else if (config.publishPartial) {
-            handleResultJson(recognizer.getPartialResult(), false);
+          if (json != null) {
+            handleResultJson(json, isFinal);
           }
         }
-        Recognizer recognizer = voskRecognizer;
-        if (recognizer != null) {
-          handleResultJson(recognizer.getFinalResult(), true);
+        String json = null;
+        synchronized (VoskSpeechRecognition.this) {
+          Recognizer recognizer = voskRecognizer;
+          if (recognizer != null) {
+            json = recognizer.getFinalResult();
+          }
+        }
+        if (json != null) {
+          handleResultJson(json, true);
         }
       } catch (Exception e) {
-        error(e);
-        status = "recognition error";
-        broadcastState();
+        // Closing the line to unblock read throws. That is a stop, not a failure.
+        if (micRunning) {
+          error(e);
+          status = "recognition error";
+          broadcastState();
+        }
       } finally {
         info("Vosk recognition thread stopped");
       }
