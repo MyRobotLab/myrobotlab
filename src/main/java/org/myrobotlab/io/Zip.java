@@ -229,12 +229,23 @@ public class Zip {
     new File(newPath).mkdir();
     Enumeration<?> zipFileEntries = zip.entries();
 
+    File canonicalNewPath = new File(newPath).getCanonicalFile();
+
     // Process each entry
     while (zipFileEntries.hasMoreElements()) {
       // grab a zip file entry
       ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
       String currentEntry = entry.getName();
       File destFile = new File(newPath, currentEntry);
+        
+      // Canonicalize the destination file path
+      File canonicalDestFile = destFile.getCanonicalFile();
+
+      // Check if the canonical destination path starts with the canonical newPath
+      if (!canonicalDestFile.getPath().startsWith(canonicalNewPath.getPath())) {
+        throw new IOException("Attempt to write outside of the target directory: " + currentEntry);
+      }
+
       // destFile = new File(newPath, destFile.getName());
       File destinationParent = destFile.getParentFile();
 
