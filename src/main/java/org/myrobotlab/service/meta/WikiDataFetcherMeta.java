@@ -22,9 +22,10 @@ public class WikiDataFetcherMeta extends MetaData {
     // force using httpClient service httpcomponents version
     exclude("org.apache.httpcomponents", "*");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
+    addDependency("org.apache.commons", "commons-compress", "1.21");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.17.1");
     setCloudService(true);
 
   }

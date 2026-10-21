@@ -57,7 +57,6 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import org.apache.commons.io.Charsets;
 import org.myrobotlab.config.ConfigUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
@@ -1271,7 +1270,8 @@ public class FileIO {
    * 
    */
   public static InputStream toInputStream(String input, Charset encoding) {
-    return new ByteArrayInputStream(input.getBytes(Charsets.toCharset(encoding)));
+    Charset charset = encoding == null ? Charset.defaultCharset() : encoding;
+    return new ByteArrayInputStream(input.getBytes(charset));
   }
 
   /**
@@ -1287,7 +1287,8 @@ public class FileIO {
    * 
    */
   public static InputStream toInputStream(String input, String encoding) throws IOException {
-    byte[] bytes = input.getBytes(Charsets.toCharset(encoding));
+    Charset charset = encoding == null ? Charset.defaultCharset() : Charset.forName(encoding);
+    byte[] bytes = input.getBytes(charset);
     return new ByteArrayInputStream(bytes);
   }
 

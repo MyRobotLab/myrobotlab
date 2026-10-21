@@ -18,6 +18,7 @@ public class ElasticsearchMeta extends MetaData {
     setAvailable(true); // false if you do not want it viewable in a gui
 
     addDependency("pl.allegro.tech", "embedded-elasticsearch", "2.7.0");
+    addDependency("org.rauschig", "jarchivelib", "1.1.0");
 
     setAvailable(false);
     addCategory("general");

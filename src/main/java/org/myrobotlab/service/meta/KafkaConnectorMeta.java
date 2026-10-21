@@ -16,6 +16,7 @@ public class KafkaConnectorMeta extends MetaData {
     addDescription("Provides a string/string consumer for a kafka topic.");
     addCategory("cloud");
     addDependency("org.apache.kafka", "kafka-clients", "1.0.1");
+    addDependency("org.xerial.snappy", "snappy-java", "1.1.10.8");
   }
 
 }

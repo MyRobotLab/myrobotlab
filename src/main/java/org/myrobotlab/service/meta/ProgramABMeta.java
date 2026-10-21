@@ -24,15 +24,16 @@ public class ProgramABMeta extends MetaData {
     exclude("ch.qos.logback", "logback-classic");
     exclude("ch.qos.logback", "logback-core");
     
-    addDependency("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.14.0");
+    addDependency("com.fasterxml.jackson.dataformat", "jackson-dataformat-xml", "2.17.1");
+    // Pin the revisions Ivy selects. dataformat-xml 2.14 brought older Woodstox.
+    addDependency("com.fasterxml.woodstox", "woodstox-core", "7.0.0");
+    addDependency("org.codehaus.woodstox", "stax2-api", "4.2.2");
 
     addDependency("org.json", "json", "20230227");
-    // used by FileIO
-    addDependency("commons-io", "commons-io", "2.15.1");
-    // TODO: This is for CJK support in ProgramAB move this into the published
-    // POM for ProgramAB so they are pulled in transiently.
-    addDependency("org.apache.lucene", "lucene-analysis-common", "9.10.0");
-    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.10.0");
+    addDependency("commons-io", "commons-io", "2.22.0");
+    // JapaneseAnalyzer (org.apache.lucene.analysis.ja) is in lucene-analysis-kuromoji.
+    addDependency("org.apache.lucene", "lucene-analysis-common", "9.12.3");
+    addDependency("org.apache.lucene", "lucene-analysis-kuromoji", "9.12.3");
     addCategory("ai", "control");
 
   }

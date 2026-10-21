@@ -16,7 +16,7 @@ public class TestMeta extends MetaData {
     addDescription("Testing service");
     addCategory("testing");
     setAvailable(false);
-    addDependency("junit", "junit", "4.13.1");
+    addDependency("junit", "junit", "4.13.2");
     // addPeer("python", "Python", "python to excercise python scripts");
 
   }

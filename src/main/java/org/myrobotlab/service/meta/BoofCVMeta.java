@@ -16,6 +16,9 @@ public class BoofCVMeta extends MetaData {
   public BoofCVMeta() {
 
     addDependency("org.boofcv", "boofcv-all", "0.40.1");
+    // BoofCV pulls SnakeYAML 1.23. Runtime shades 1.32, which Ivy will not see
+    // unless a service outside the one-jar also requests it.
+    addDependency("org.yaml", "snakeyaml", "1.32");
     addDescription("BoofCV computer vision service");
     addCategory("vision");
   }

@@ -22,8 +22,9 @@ public class WebGuiMeta extends MetaData {
     addDependency("org.jmdns", "jmdns", "3.5.5");
     addDependency("org.atmosphere", "nettosphere", "3.2.2");
     exclude("io.netty", "*"); // it brings in an old version of netty
-    exclude("logback-classic", "*"); 
-    exclude("logback-core", "*"); 
+    // Nettosphere 3.2.2 depends on logback 1.2.3. Leave runtime's 1.2.13 in place.
+    exclude("ch.qos.logback", "logback-classic");
+    exclude("ch.qos.logback", "logback-core"); 
 
     addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
     // force correct version of netty

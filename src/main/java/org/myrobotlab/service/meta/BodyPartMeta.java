@@ -16,7 +16,7 @@ public class BodyPartMeta extends MetaData {
     addDescription("An easier way to control a body ...");
     addCategory("robot");
     setAvailable(true);
-    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    addDependency("org.apache.commons", "commons-lang3", "3.19.0");
   }
 
 }

@@ -16,7 +16,8 @@ public class AzureTranslatorMeta extends MetaData {
   public AzureTranslatorMeta() {
     addDescription("interface to Azure translation services");
     addCategory("translation", "cloud", "ai");
-    addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
+    addDependency("com.squareup.okhttp3", "okhttp", "4.10.0");
+    addDependency("org.jetbrains.kotlin", "kotlin-stdlib-common", "1.6.20");
     setCloudService(true);
     setRequiresKeys(true);
   }

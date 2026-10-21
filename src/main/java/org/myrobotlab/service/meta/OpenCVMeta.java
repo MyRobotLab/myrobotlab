@@ -51,7 +51,7 @@ public class OpenCVMeta extends MetaData {
     addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.12");
 
     // FaceRecognizer no worky if missing it
-    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    addDependency("org.apache.commons", "commons-lang3", "3.19.0");
     // for the mjpeg streamer frame grabber
     addDependency("net.sf.jipcam", "jipcam", "0.9.1");
     exclude("javax.servlet", "servlet-api");
@@ -61,6 +61,9 @@ public class OpenCVMeta extends MetaData {
     // jipcam use commons-lang-1.0 it break marySpeech
     exclude("commons-lang", "commons-lang");
     addDependency("commons-lang", "commons-lang", "2.6");
+    // Pin the revisions Ivy selects. jipcam declares commons-cli 1.0 and httpclient 3.0-rc4.
+    addDependency("commons-cli", "commons-cli", "1.10.0");
+    addDependency("commons-httpclient", "commons-httpclient", "3.1");
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
     addDependency("opencv", "opencv_classifiers", "0.0.2", "zip");
     // the DNN Face Detection module

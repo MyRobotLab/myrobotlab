@@ -36,6 +36,7 @@ public class DocumentPipelineMeta extends MetaData {
     // for parsing wikitext
     addDependency("org.sweble.wikitext", "swc-engine", "3.1.7");
     addDependency("org.sweble.wom3", "sweble-wom3-core", "3.1.7");
+    addDependency("joda-time", "joda-time", "2.10.10");
     addDependency("com.thoughtworks.xstream", "xstream", "1.4.19");
 
     // FIXME - add service page, python script, give example of how to use
