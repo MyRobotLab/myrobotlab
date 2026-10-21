@@ -27,7 +27,9 @@ public class GoogleTranslateMeta extends MetaData {
     addCategory("translation", "programming");
     
     addDependency("com.google.cloud", "google-cloud-translate", "2.2.0");
-    addDependency("com.google.auth", "google-auth-library-credentials", "1.3.0");
+    // Credentials is the base type; GoogleCredentials lives in the oauth2 jar.
+    addDependency("com.google.auth", "google-auth-library-credentials", "1.7.0");
+    addDependency("com.google.auth", "google-auth-library-oauth2-http", "1.7.0");
 
   }
 

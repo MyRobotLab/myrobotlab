@@ -16,7 +16,7 @@ public class HtmlFilterMeta extends MetaData {
     addDescription("This service will strip html markup from the input text");
     addCategory("filter");
     addDependency("org.jsoup", "jsoup", "1.15.3");
-    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    addDependency("org.apache.commons", "commons-lang3", "3.19.0");
   }
 
 }

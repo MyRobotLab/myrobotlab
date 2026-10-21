@@ -22,9 +22,9 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     // add dependency if necessary
     addCategory("speech", "sound");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.17.1");
 
     addDependency("com.amazonaws", "aws-java-sdk-polly", "1.12.253");
 
@@ -35,7 +35,7 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
 
-    addDependency("org.apache.commons", "commons-lang3", "3.3.2");
+    addDependency("org.apache.commons", "commons-lang3", "3.19.0");
     // force using Runtimes httpclient version exclude here
 
     addCategory("speech", "cloud");

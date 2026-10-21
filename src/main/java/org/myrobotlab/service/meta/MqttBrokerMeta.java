@@ -23,9 +23,11 @@ public class MqttBrokerMeta extends MetaData {
     exclude("io.netty", "*");
     exclude("org.slf4j", "slf4j-log4j12");
 
-    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.14.0");
-    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.14.0");
+    addDependency("io.dropwizard.metrics", "metrics-core", "4.2.26");
+    addDependency("io.dropwizard.metrics", "metrics-jvm", "4.2.26");
+    addDependency("com.fasterxml.jackson.core", "jackson-core", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.17.1");
+    addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.17.1");
 
     addDependency("io.netty", "netty-all", "4.1.82.Final");
 

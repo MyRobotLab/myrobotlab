@@ -19,6 +19,7 @@ public class OculusRiftMeta extends MetaData {
     // dependencies. we also need lwjgl3 added here. currently it's pulled in
     // from jme3-lwjgl3
     addDependency("org.saintandreas", "jovr", "1.8.0.0");
+    addDependency("net.java.dev.jna", "jna", "5.7.0");
     addDependency("slick-util", "slick-util", "1.0.0");
     addDependency("org.jscience", "jscience", "4.3.1");
     addDependency("org.saintandreas", "xres", "1.0.3");

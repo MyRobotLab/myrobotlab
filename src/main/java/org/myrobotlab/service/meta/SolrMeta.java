@@ -40,7 +40,7 @@ public class SolrMeta extends MetaData {
     exclude("com.fasterxml.jackson.core", "*");
     exclude("io.netty", "*");
 
-    addDependency("commons-io", "commons-io", "2.15.1");
+    addDependency("commons-io", "commons-io", "2.22.0");
 
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
@@ -50,7 +50,8 @@ public class SolrMeta extends MetaData {
     // force correct version of netty
     addDependency("io.netty", "netty-all", "4.1.82.Final");
 
-    addDependency("org.glassfish.jersey.core", "jersey-server","3.1.5");
+    addDependency("org.glassfish.jersey.core", "jersey-server", "3.1.11");
+    addDependency("org.glassfish.jersey.core", "jersey-client", "3.1.11");
     
     // Dependencies issue
     setAvailable(true);
