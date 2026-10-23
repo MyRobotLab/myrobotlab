@@ -1,5 +1,6 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -23,6 +24,25 @@ public class OakDInstallTest {
     assertTrue(OakD.DEPTHAI_PIP_SPEC.contains("<4"));
     assertFalse(OakD.DEPTHAI_PIP_SPEC.contains("2.29"));
     assertFalse(OakD.DEPTHAI_PIP_SPEC.contains("==2."));
+    assertEquals(OakD.DEPTHAI_PIP_SPEC, OakD.requiredPipPackages().get(0));
+    assertEquals(1, OakD.requiredPipPackages().size());
+    assertTrue(OakD.depthaiPipOptions(true).contains("--only-binary=depthai,numpy"));
+    assertTrue(OakD.depthaiPipOptions(true).contains(OakD.LUXONIS_PIP_EXTRA_INDEX));
+    assertFalse(OakD.depthaiPipOptions(false).contains(OakD.LUXONIS_PIP_EXTRA_INDEX));
+    assertFalse(OakD.requiredPipPackages().contains(OakD.OPENCV_PIP_SPEC));
+    assertTrue(OakD.depthaiWheelHint("armv7l").contains("32-bit"));
+    assertTrue(OakD.depthaiWheelHint("aarch64").isEmpty());
+    assertTrue(OakD.depthaiWheelHint("x86_64").isEmpty());
+    assertTrue(OakD.usePiwheels("armv7l"));
+    assertFalse(OakD.usePiwheels("aarch64"));
+    assertTrue(OakD.needsDepthaiInstall("ModuleNotFoundError: No module named 'depthai'"));
+    assertTrue(OakD.needsDepthaiInstall("Py4j venv Python was not found under data/Py4j/venv"));
+    assertFalse(OakD.needsDepthaiInstall("ImportError: libusb-1.0.so.0: cannot open shared object file"));
+    assertFalse(OakD.needsDepthaiInstall(null));
+    assertTrue(OakD.MOVIDIUS_UDEV_RULE.contains("03e7"));
+    assertTrue(Py4j.venvNeedsDebianPackage("The virtual environment was not created successfully because ensurepip is not available."));
+    assertTrue(Py4j.venvNeedsDebianPackage("No module named venv"));
+    assertFalse(Py4j.venvNeedsDebianPackage("No matching distribution found for depthai"));
   }
 
   @Test
@@ -54,5 +74,8 @@ public class OakDInstallTest {
     assertTrue(src.contains("onStridedDepth"));
     assertTrue(src.contains("setOutputSize"));
     assertTrue(src.contains("DEPTH_W"));
+    assertTrue(src.contains("_annotate_device_error"));
+    assertTrue(src.contains("03e7"));
+    assertTrue(src.contains("getAllAvailableDevices"));
   }
 }

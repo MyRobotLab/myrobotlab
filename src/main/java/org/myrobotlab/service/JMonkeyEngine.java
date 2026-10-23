@@ -61,6 +61,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.geometry.DepthCloudJme;
 import org.myrobotlab.math.geometry.DepthColorMap;
+import org.myrobotlab.math.geometry.DepthImageClick;
 import org.myrobotlab.math.geometry.DepthToRgbMesh;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
@@ -71,6 +72,7 @@ import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.ServoMove;
+import org.myrobotlab.service.data.DepthClick;
 import org.myrobotlab.service.data.DepthFrame;
 import org.myrobotlab.service.data.DepthHud;
 import org.myrobotlab.service.interfaces.DepthFrameListener;
@@ -275,6 +277,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   /** Chest camera world translation (copied on the render thread). */
   protected final Vector3f lastChestCameraWorld = new Vector3f();
+
+  /** Latest depth frame, so a mesh click can be drawn back on the image. */
+  private transient DepthFrame lastDepthFrame;
 
   protected boolean fullscreen = false;
 
@@ -751,8 +756,102 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       Point p = new Point(hit.world.x, hit.world.y, hit.world.z);
       onIkGoal(p);
       invoke("publishClickPoint", p);
+      DepthClick click = projectWorldClick(hit.world, p);
+      if (click != null) {
+        invoke("publishDepthClick", click);
+      }
     }
     return hit.geometry;
+  }
+
+  /**
+   * WebGui click on the aligned RGB or depth image. {@code sample} is camera
+   * meters (X right, Y down, Z forward). Placed on the chest overlay with the
+   * same scale and Y flip as the mesh, then published like a simulator click
+   * so FABRIK moves the arm.
+   */
+  public void clickFromCamera(DepthImageClick sample) {
+    if (sample == null) {
+      return;
+    }
+    if (app != null) {
+      app.enqueue(() -> {
+        emitCameraClick(sample);
+        return null;
+      });
+      return;
+    }
+    emitCameraClick(sample);
+  }
+
+  private void emitCameraClick(DepthImageClick sample) {
+    float scale = depthVertexScale();
+    Vector3f local = new Vector3f(sample.camX * scale, -sample.camY * scale, sample.camZ * scale);
+    Vector3f world = local;
+    boolean posed = depthOverlayNode != null && depthOverlayNode.getParent() != null;
+    if (posed) {
+      world = depthOverlayNode.localToWorld(local, null);
+    }
+    Point point = new Point(world.x, world.y, world.z);
+    JMonkeyEngineConfig cfg = config;
+    if (posed && (cfg == null || cfg.depthClickToIk)) {
+      onIkGoal(point);
+      invoke("publishClickPoint", point);
+    } else if (!posed) {
+      log.info("OAK-D image click {} — chest overlay is not in the scene, arm not moved", point);
+    }
+    DepthClick click = depthClickFrom(sample, point);
+    click.distanceM = distanceToChestCamera(point);
+    invoke("publishDepthClick", click);
+  }
+
+  /**
+   * Mesh contact → image pixel, using the overlay pose backwards. Null when
+   * no depth frame has arrived to supply intrinsics.
+   */
+  private DepthClick projectWorldClick(Vector3f world, Point point) {
+    DepthFrame frame = lastDepthFrame;
+    if (frame == null || world == null || point == null) {
+      return null;
+    }
+    Vector3f local = world;
+    if (depthOverlayNode != null) {
+      local = depthOverlayNode.worldToLocal(world, null);
+    }
+    float scale = depthVertexScale();
+    if (Math.abs(scale) < 1e-6f) {
+      scale = 1f;
+    }
+    float camX = local.x / scale;
+    float camY = -local.y / scale;
+    float camZ = local.z / scale;
+    float[] norm = DepthImageClick.normalize(frame, camX, camY, camZ);
+    if (norm == null) {
+      return null;
+    }
+    DepthClick click = new DepthClick();
+    click.nx = norm[0];
+    click.ny = norm[1];
+    click.u = Math.round(norm[2]);
+    click.v = Math.round(norm[3]);
+    click.x = point.getX();
+    click.y = point.getY();
+    click.z = point.getZ();
+    click.distanceM = distanceToChestCamera(point);
+    return click;
+  }
+
+  private static DepthClick depthClickFrom(DepthImageClick sample, Point point) {
+    DepthClick click = new DepthClick();
+    click.nx = sample.nx;
+    click.ny = sample.ny;
+    click.u = sample.u;
+    click.v = sample.v;
+    click.depthMm = sample.depthMm;
+    click.x = point.getX();
+    click.y = point.getY();
+    click.z = point.getZ();
+    return click;
   }
 
   /**
@@ -792,6 +891,14 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   /** Meters from the chest camera to the last overlay click. */
   public float publishClickDistance(float meters) {
     return meters;
+  }
+
+  /**
+   * Image position of an OAK-D click (WebGui or simulator), plus the world
+   * point. OakD listens and forwards this to the panel marker.
+   */
+  public DepthClick publishDepthClick(DepthClick click) {
+    return click;
   }
 
   /**
@@ -2398,6 +2505,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   @Override
   public void onDepthFrame(DepthFrame frame) {
+    if (frame != null) {
+      lastDepthFrame = frame;
+    }
     if (frame == null || app == null || assetManager == null) {
       return;
     }

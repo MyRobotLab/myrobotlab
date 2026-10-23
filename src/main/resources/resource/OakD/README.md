@@ -11,9 +11,31 @@ JSON blob next to it was `Py4j.getScriptList()` dumping config — not the pip
 error.
 
 **Fix:** install DepthAI **3.x** (`depthai>=3.2.0,<4`) with
-`--only-binary=depthai` so pip never compiles. DepthAI 3.9+ ships a Windows
-`cp314` wheel. The depth script speaks the v3 Camera API and still has a v2
+`--only-binary=depthai,numpy` so pip never compiles. DepthAI is installed on
+its own; OpenCV is a later, optional step so a failed `opencv` build cannot
+roll DepthAI back. Pip unpacks wheels under `data/Py4j/pip-tmp` because
+Raspberry Pi OS Trixie keeps `/tmp` on a small tmpfs (`No space left on
+device`). DepthAI 3.11+ publishes a `manylinux_2_28_aarch64` wheel that
+covers CPython 3.13 (64-bit Trixie). 32-bit ARM (`armv7l`) has no DepthAI 3
+wheel. The depth script speaks the v3 Camera API and still has a v2
 fallback.
+
+If `python3 -m venv` fails with `ensurepip is not available`, install the
+Debian package and start OakD again:
+
+```text
+sudo apt install python3-venv python3-pip
+```
+
+The installer tries that command with `sudo -n` (no password prompt). The
+camera also needs a USB rule or DepthAI reports that it cannot find a device:
+
+```text
+echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+OakD writes that rule when it can. Replug the camera if it was already connected.
 
 ## Where packages land
 
@@ -32,13 +54,17 @@ Installed by `OakD.installDepthAi()` when `OakDConfig.py4jInstall` is true
 
 | Spec | Role |
 |------|------|
-| `depthai>=3.2.0,<4` | Required. Stereo depth. Binary wheels only. |
-| `numpy` | Required (also a depthai dependency). |
-| `opencv-python` | Required for RGB JPEG (mesh texture). |
+| `depthai>=3.2.0,<4` | Required. Stereo depth. Binary wheel only, installed before OpenCV. |
+| `numpy` | Required (pulled in with depthai; also binary only). |
+| `opencv-python-headless`, then `opencv-python` | Optional. RGB JPEG (mesh texture). A failure here does not remove depthai. |
 | `blobconverter==1.4.3` | Optional. YOLO `.blob` download for **DepthAI 2.x** spatial detections. |
 
-Python **3.9–3.14** with a depthai 3.x wheel is expected. There is no Java
-`*Meta.addDependency` for these — they are Python, not Ivy/Maven.
+The DepthAI install also passes
+`--extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/`
+and, if that host fails, retries from PyPI only. Python **3.9–3.14** with a
+depthai 3.x wheel is expected, including **aarch64 / Python 3.13** on
+Raspberry Pi OS Trixie. There is no Java `*Meta.addDependency` for these —
+they are Python, not Ivy/Maven.
 
 ## Hardware
 
@@ -56,8 +82,8 @@ The OakD WebGui checkbox **RGB mesh** switches the JMonkeyEngine overlay:
 | On | Organized triangle mesh textured from the color camera |
 
 Live RGB is a JPEG from CAM_A (quality ~55) so Py4j does not send a full RGB int
-list. `opencv-python` is required to encode that JPEG; without it the mesh falls
-back to the depth colormap. Depth is aligned to RGB with `setDepthAlign(CAM_A)`
+list. `opencv-python-headless` (or `opencv-python`) encodes that JPEG; without
+it the mesh falls back to the depth colormap and stereo depth still runs. Depth is aligned to RGB with `setDepthAlign(CAM_A)`
 **and** `setOutputSize(640, 400)`. Aligning without an explicit size uses the RGB
 sensor width (e.g. IMX214 half-res **2104**, not a multiple of 16) and DepthAI
 crashes the device (`X_LINK_ERROR` / access violation).
@@ -103,7 +129,9 @@ Reset to `1.0` to return to the metric default.
 ## Manual install
 
 ```text
-data/Py4j/venv/Scripts/python.exe -m pip install --upgrade --only-binary=depthai "depthai>=3.2.0,<4" numpy
+data/Py4j/venv/bin/python -m pip install --upgrade pip
+data/Py4j/venv/bin/python -m pip install --upgrade --only-binary=depthai,numpy --extra-index-url https://artifacts.luxonis.com/artifactory/luxonis-python-snapshot-local/ "depthai>=3.2.0,<4"
+data/Py4j/venv/bin/python -m pip install --only-binary=:all: opencv-python-headless
 ```
 
-On Linux/macOS use `data/Py4j/venv/bin/python`.
+On Windows use `data/Py4j/venv/Scripts/python.exe`.
