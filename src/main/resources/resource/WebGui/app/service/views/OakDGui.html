@@ -12,10 +12,53 @@
             <button class="btn btn-info" ng-click="stopDepth()">Stop</button>
             <button class="btn btn-default" ng-click="startSynthetic()">Synthetic</button>
             <label style="margin-left: 12px;">
+                <input type="checkbox" ng-model="service.config.displayWeb" ng-change="setDisplayWeb()"/>
+                Live view
+            </label>
+            <label style="margin-left: 12px;">
                 <input type="checkbox" ng-model="service.config.rgbMesh" ng-change="setRgbMesh()"/>
                 RGB mesh
             </label>
-            <span class="text-muted">unchecked = voxel cloud. Click the overlay in the simulator to send that point to FABRIK.</span>
+            <span class="text-muted">RGB mesh unchecked draws a voxel cloud. Click either image, or the overlay in the simulator, to send that point to FABRIK.</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+                <div style="flex:1 1 0; min-width:0;">
+                    <div><b>RGB</b></div>
+                    <div ng-show="preview.rgb" style="position:relative; width:100%;">
+                        <div ng-style="previewBox()"></div>
+                        <img ng-src="{{preview.rgb}}" alt="RGB" ng-click="clickView($event)"
+                            style="position:absolute; top:0; right:0; bottom:0; left:0; width:100%; height:100%; background:#111; cursor:crosshair;" />
+                        <div ng-show="click" ng-style="clickMarker()"
+                            style="position:absolute; width:14px; height:14px; margin-left:-7px; margin-top:-7px; border:2px solid #fff; border-radius:50%; box-shadow:0 0 0 1px #000, inset 0 0 0 2px #e33; pointer-events:none;"></div>
+                    </div>
+                    <div ng-hide="preview.rgb" class="text-muted"
+                        style="background:#1a1a1a; color:#999; min-height:140px; display:flex; align-items:center; justify-content:center;">
+                        waiting for RGB
+                    </div>
+                </div>
+                <div style="flex:1 1 0; min-width:0;">
+                    <div><b>Depth</b> <span class="text-muted">near red · far blue</span></div>
+                    <div ng-show="preview.depth" style="position:relative; width:100%;">
+                        <div ng-style="previewBox()"></div>
+                        <img ng-src="{{preview.depth}}" alt="Depth map" ng-click="clickView($event)"
+                            style="position:absolute; top:0; right:0; bottom:0; left:0; width:100%; height:100%; background:#111; image-rendering:pixelated; cursor:crosshair;" />
+                        <div ng-show="click" ng-style="clickMarker()"
+                            style="position:absolute; width:14px; height:14px; margin-left:-7px; margin-top:-7px; border:2px solid #fff; border-radius:50%; box-shadow:0 0 0 1px #000, inset 0 0 0 2px #e33; pointer-events:none;"></div>
+                    </div>
+                    <div ng-hide="preview.depth" class="text-muted"
+                        style="background:#1a1a1a; color:#999; min-height:140px; display:flex; align-items:center; justify-content:center;">
+                        waiting for depth
+                    </div>
+                </div>
+            </div>
+            <div class="text-muted">
+                <span ng-show="stats.fps">{{stats.fps}} fps</span>
+                <span ng-show="preview.width"> {{preview.width}}×{{preview.height}}</span>
+                <span ng-hide="preview">Start depth to see the color camera and depth map side by side.</span>
+            </div>
         </td>
     </tr>
     <tr>
@@ -29,8 +72,11 @@
             <button class="btn btn-default btn-sm" ng-click="resetDepthCloudScale()">Reset 1.0</button>
             <div>
                 last click
-                <span ng-show="service.lastClickDistanceM">{{service.lastClickDistanceM | number:3}} m from camera</span>
-                <span ng-hide="service.lastClickDistanceM" class="text-muted">—</span>
+                <span ng-show="click">{{click.x | number:3}}, {{click.y | number:3}}, {{click.z | number:3}}
+                    <span ng-show="click.distanceM">({{click.distanceM | number:3}} m from camera)</span>
+                </span>
+                <span ng-show="!click && service.lastClickDistanceM">{{service.lastClickDistanceM | number:3}} m from camera</span>
+                <span ng-hide="click || service.lastClickDistanceM" class="text-muted">—</span>
                 &nbsp; measured
                 <input type="number" ng-model="knownDistanceM" min="0.05" max="10" step="0.01" style="width: 5em;"/>
                 m
