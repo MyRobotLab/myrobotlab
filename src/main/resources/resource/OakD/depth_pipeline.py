@@ -19,6 +19,38 @@ def _dai_major(dai):
         return 3
 
 
+def _device_hint():
+    """Linux hides the OAK USB device (vendor 03e7) from non-root until udev is set."""
+    import sys
+
+    if not sys.platform.startswith("linux"):
+        return ""
+    return (
+        " On Linux the camera is invisible without USB permission. Install once, then replug the OAK-D: "
+        "echo 'SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"03e7\", MODE=\"0666\"' "
+        "| sudo tee /etc/udev/rules.d/80-movidius.rules "
+        "&& sudo udevadm control --reload-rules && sudo udevadm trigger"
+    )
+
+
+def _annotate_device_error(exc):
+    text = str(exc)
+    low = text.lower()
+    if any(token in low for token in ("device", "available", "xlink", "permission", "libusb")):
+        return text + _device_hint()
+    return text
+
+
+def _log_devices(dai):
+    try:
+        found = dai.Device.getAllAvailableDevices()
+        print("oakd depthai", getattr(dai, "__version__", "?"), "devices", found)
+        if not found:
+            print("oakd: no devices enumerated.", _device_hint())
+    except Exception as scan_err:
+        print("oakd device scan:", scan_err)
+
+
 def _try_get(q):
     if q is None:
         return None
@@ -241,7 +273,7 @@ def _run_v3(dai, np, oakd, run_id):
                     last_rgb = rgb_pkt
                 _publish_depth(oakd, dai, np, pkt, stride, calib, cache, last_rgb)
     except Exception as e:
-        oakd.onHardwareFailed(str(e))
+        oakd.onHardwareFailed(_annotate_device_error(e))
         return
     try:
         pipeline.stop()
@@ -346,7 +378,7 @@ def _run_v2(dai, np, oakd, run_id):
     try:
         device = dai.Device(pipeline)
     except Exception as e:
-        oakd.onHardwareFailed(str(e))
+        oakd.onHardwareFailed(_annotate_device_error(e))
         return
 
     oakd.onHardwareStarted()
@@ -421,8 +453,9 @@ def _oakd_depth_loop(run_id):
         import depthai as dai
         import numpy as np
     except Exception as e:
-        oakd.onHardwareFailed("depthai import failed: " + str(e))
+        oakd.onHardwareFailed("depthai import failed: " + _annotate_device_error(e))
         return
+    _log_devices(dai)
 
     try:
         if _dai_major(dai) >= 3:
@@ -433,9 +466,9 @@ def _oakd_depth_loop(run_id):
         try:
             _run_v2(dai, np, oakd, run_id)
         except Exception as e:
-            oakd.onHardwareFailed(str(e))
+            oakd.onHardwareFailed(_annotate_device_error(e))
     except Exception as e:
-        oakd.onHardwareFailed(str(e))
+        oakd.onHardwareFailed(_annotate_device_error(e))
 
 
 OAKD_STOP = bool(globals().get("OAKD_STOP", False))

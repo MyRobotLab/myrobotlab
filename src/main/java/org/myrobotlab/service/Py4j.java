@@ -122,6 +122,19 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
 
   private static final long serialVersionUID = 1L;
 
+  /** DepthAI's wheel is large; a Pi on a slow link can take many minutes. */
+  private static final long PIP_TIMEOUT_MS = 20L * 60L * 1000L;
+
+  private static final class CommandResult {
+    final int exit;
+    final String output;
+
+    CommandResult(int exit, String output) {
+      this.exit = exit;
+      this.output = output;
+    }
+  }
+
   /**
    * py4j clients currently attached to this service
    */
@@ -469,62 +482,36 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * MessageHandler and setup for runtime references to work
    */
   public void startPythonProcess() {
-      try {
-          // Determine Python executable
-          String pythonCommand = findSystemPythonExecutable();
-          if (pythonCommand == null) {
-              error("Python is not installed or not found in system PATH.");
-              return;
-          }
-
-          // Define paths
-          String venv = getDataDir() + fs + "venv";
-          String pythonScript = new File(getResourceDir() + fs + "Py4j.py").getAbsolutePath();
-          String[] pythonArgs = { getFullName() };
-
-          // Check if virtual environment exists, if not, create and install dependencies
-          File venvDir = new File(venv);
-          String venvPython = Platform.getLocalInstance().isWindows() 
-              ? venv + fs + "Scripts" + fs + "python.exe" 
-              : venv + fs + "bin" + fs + "python";
-
-          info("Py4j using system Python '%s' for venv at %s", pythonCommand, venv);
-
-          if (!venvDir.exists()) {
-              ProcessBuilder venvProcess = new ProcessBuilder(pythonCommand, "-m", "venv", venv);
-              int ret = venvProcess.inheritIO().start().waitFor();
-              if (ret != 0) {
-                  error("Failed to create virtual environment.");
-                  return;
-              }
-
-              // Install py4j inside venv
-              ProcessBuilder pipProcess = new ProcessBuilder(venvPython, "-m", "pip", "install", "py4j");
-              ret = pipProcess.inheritIO().start().waitFor();
-              if (ret != 0) {
-                  error("Failed to install py4j in the virtual environment.");
-                  return;
-              }
-          }
-
-          // Validate py4j is installed
-          ProcessBuilder checkPy4j = new ProcessBuilder(venvPython, "-c", "import py4j");
-          int checkRet = checkPy4j.inheritIO().start().waitFor();
-          if (checkRet != 0) {
-              error("py4j is not installed properly in the virtual environment.");
-              return;
-          }
-
-          // Ensure the virtual environment's Python is used
-          ProcessBuilder processBuilder = new ProcessBuilder(venvPython, pythonScript);
-          processBuilder.redirectErrorStream(true);
-          processBuilder.command().addAll(List.of(pythonArgs));
-
-          pythonProcess = new Py4jClient(this, processBuilder.start());
-
-      } catch (Exception e) {
-          error(e);
+    try {
+      if (isPythonRunning()) {
+        return;
       }
+      String venvPython;
+      try {
+        venvPython = ensureVenv();
+      } catch (IOException e) {
+        error(e.getMessage());
+        return;
+      }
+
+      String pythonScript = new File(getResourceDir() + fs + "Py4j.py").getAbsolutePath();
+      String py4jImport = moduleImportError(venvPython, new String[] { "py4j" }, 30_000);
+      if (py4jImport != null) {
+        error("py4j is not installed properly in the virtual environment. %s", py4jImport);
+        return;
+      }
+
+      ProcessBuilder processBuilder = new ProcessBuilder(venvPython, pythonScript);
+      processBuilder.redirectErrorStream(true);
+      processBuilder.command().add(getFullName());
+      pythonProcess = new Py4jClient(this, processBuilder.start());
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public boolean isPythonRunning() {
+    return pythonProcess != null && pythonProcess.process != null && pythonProcess.process.isAlive();
   }
 
   /**
@@ -550,14 +537,6 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
   }
   
   
-  private String findVenvPythonExecutable() {
-    String venvPython = venvPythonPath();
-    if (venvPython == null) {
-      error("Could not find venv Python under %s", getDataDir() + fs + "venv");
-    }
-    return venvPython;
-  }
-
   private String venvPythonPath() {
     String venv = getDataDir() + fs + "venv";
     String venvPython = Platform.getLocalInstance().isWindows()
@@ -574,38 +553,158 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    * @return true when each module imports in the venv, with no pip and no network
    */
   public boolean venvCanImport(String... modules) {
+    return venvImportError(modules) == null;
+  }
+
+  /**
+   * @return null when every module imports, otherwise the interpreter error
+   *         (or a timeout). Does not run pip.
+   */
+  public String venvImportError(String... modules) {
     if (modules == null || modules.length == 0) {
-      return true;
+      return null;
     }
     String python = venvPythonPath();
     if (python == null) {
-      return false;
+      return "Py4j venv Python was not found under " + getDataDir() + fs + "venv";
     }
-    StringBuilder code = new StringBuilder();
-    for (String module : modules) {
-      if (module == null || !module.matches("[A-Za-z_][A-Za-z0-9_]*")) {
-        log.warn("refusing to import invalid module name {}", module);
-        return false;
+    return moduleImportError(python, modules, 45_000);
+  }
+
+  /**
+   * Create {@code data/Py4j/venv} when it is missing and make sure pip and
+   * py4j import. On Debian and Raspberry Pi OS, {@code python3 -m venv} fails
+   * until the separate {@code python3-venv} package is installed; this tries
+   * that install once with {@code sudo -n} so a password prompt cannot hang.
+   */
+  public String ensureVenv() throws IOException {
+    String systemPython = findSystemPythonExecutable();
+    if (systemPython == null) {
+      throw new IOException(
+          "Python is not on PATH (tried python3 and python). On Raspberry Pi OS: sudo apt install python3 python3-venv python3-pip");
+    }
+    if (venvPythonPath() == null) {
+      createVenv(systemPython);
+    }
+    String venvPython = venvPythonPath();
+    if (venvPython == null) {
+      throw new IOException("Py4j venv Python was not found under " + getDataDir() + fs + "venv");
+    }
+    CommandResult version = runCommand(List.of(venvPython, "--version"), null, 20_000);
+    if (version.exit != 0) {
+      throw new IOException("Py4j venv Python failed to start (" + venvPython
+          + "). Delete data/Py4j/venv and start again. " + tailLines(version.output, 20));
+    }
+    info("Py4j venv %s", oneLine(version.output));
+    if (!pipWorks(venvPython)) {
+      CommandResult ensured = runCommand(List.of(venvPython, "-m", "ensurepip", "--upgrade"), pipEnv(), 180_000);
+      if (ensured.exit != 0 || !pipWorks(venvPython)) {
+        throw new IOException("pip is missing in the Py4j venv. " + tailLines(ensured.output, 30)
+            + " On Raspberry Pi OS / Debian: sudo apt install python3-venv python3-pip");
       }
-      code.append("import ").append(module).append('\n');
     }
-    ProcessBuilder check = new ProcessBuilder(python, "-c", code.toString());
-    check.redirectErrorStream(true);
-    // Discard instead of readAllBytes(). Reading the pipe here blocks until
-    // the child exits, so the 30s waitFor below would never time out a hung
-    // import (depthai probing USB, for example).
-    check.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+    String py4jError = moduleImportError(venvPython, new String[] { "py4j" }, 30_000);
+    if (py4jError != null) {
+      CommandResult pip = runCommand(List.of(venvPython, "-m", "pip", "install", "py4j"), pipEnv(), PIP_TIMEOUT_MS);
+      if (pip.exit != 0) {
+        throw new IOException("Failed to install py4j in the virtual environment. " + tailLines(pip.output, 40));
+      }
+    }
+    return venvPython;
+  }
+
+  /**
+   * Best-effort pip upgrade. DepthAI's wheel tags need a current pip; a failed
+   * upgrade does not abort the depthai install.
+   */
+  public void upgradePip() {
     try {
-      Process proc = check.start();
-      if (!proc.waitFor(30, TimeUnit.SECONDS)) {
-        proc.destroyForcibly();
-        return false;
+      String python = ensureVenv();
+      info("Upgrading pip in the Py4j venv");
+      CommandResult upgraded = runCommand(List.of(python, "-m", "pip", "install", "--upgrade", "pip"), pipEnv(),
+          PIP_TIMEOUT_MS);
+      if (upgraded.exit != 0) {
+        warn("pip upgrade failed; continuing with the current pip. %s", tailLines(upgraded.output, 20));
       }
-      return proc.exitValue() == 0;
-    } catch (Exception e) {
-      log.info("venv import check failed: {}", e.getMessage());
+    } catch (IOException e) {
+      warn("pip upgrade failed; continuing. %s", e.getMessage());
+    }
+  }
+
+  /**
+   * {@code platform.machine()} of the venv interpreter, for example
+   * {@code aarch64} or {@code armv7l}.
+   */
+  public String pythonMachine() {
+    String python = venvPythonPath();
+    if (python == null) {
+      python = findSystemPythonExecutable();
+    }
+    if (python == null) {
+      return null;
+    }
+    try {
+      CommandResult result = runCommand(List.of(python, "-c", "import platform; print(platform.machine())"), null,
+          20_000);
+      if (result.exit != 0) {
+        return null;
+      }
+      String[] lines = result.output.split("\\R");
+      for (int i = lines.length - 1; i >= 0; i--) {
+        if (!lines[i].trim().isEmpty()) {
+          return lines[i].trim();
+        }
+      }
+      return null;
+    } catch (IOException e) {
+      log.info("python machine probe failed: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Non-interactive apt install. Returns false when this is not Linux, sudo
+   * needs a password, or apt fails. Does not prompt.
+   */
+  public boolean tryAptInstall(String... packages) {
+    if (packages == null || packages.length == 0 || !Platform.getLocalInstance().isLinux()) {
       return false;
     }
+    List<String> install = aptCommand("install", "-y");
+    Collections.addAll(install, packages);
+    try {
+      CommandResult result = runCommand(install, aptEnv(), 8L * 60L * 1000L);
+      if (result.exit == 0) {
+        return true;
+      }
+      String out = result.output == null ? "" : result.output.toLowerCase();
+      if (out.contains("unable to locate") || out.contains("failed to fetch") || out.contains("404")) {
+        CommandResult update = runCommand(aptCommand("update"), aptEnv(), 5L * 60L * 1000L);
+        if (update.exit != 0) {
+          warn("apt-get update failed. %s", tailLines(update.output, 15));
+          return false;
+        }
+        result = runCommand(install, aptEnv(), 8L * 60L * 1000L);
+        return result.exit == 0;
+      }
+      warn("apt install failed (%s). %s", String.join(" ", packages), tailLines(result.output, 20));
+      return false;
+    } catch (IOException e) {
+      warn("apt install failed: %s", e.getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Debian/Ubuntu venv failures that are fixed by the {@code python3-venv}
+   * package. Raspberry Pi OS Trixie does not always install that package.
+   */
+  public static boolean venvNeedsDebianPackage(String output) {
+    if (output == null) {
+      return false;
+    }
+    String text = output.toLowerCase();
+    return text.contains("ensurepip") || text.contains("python3-venv") || text.contains("no module named venv");
   }
 
 
@@ -637,9 +736,9 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
    *          extra pip arguments, or empty
    */
   public void installPipPackages(List<String> packages, List<String> pipOptions) throws IOException {
-    String python = findVenvPythonExecutable();
+    String python = venvPythonPath();
     if (python == null) {
-      throw new IOException("Py4j venv Python was not found under " + getDataDir() + fs + "venv");
+      python = ensureVenv();
     }
     List<String> commandArgs = new ArrayList<>();
     commandArgs.add(python);
@@ -649,43 +748,171 @@ public class Py4j extends Service<Py4jConfig> implements GatewayServerListener, 
     if (pipOptions != null) {
       commandArgs.addAll(pipOptions);
     }
-    commandArgs.addAll(packages);
-    info("pip: %s", String.join(" ", commandArgs));
-    ProcessBuilder pipProcess = new ProcessBuilder(commandArgs);
-    Process proc = pipProcess.redirectErrorStream(true).start();
-    StringBuffer pipOut = new StringBuffer();
+    if (packages != null) {
+      commandArgs.addAll(packages);
+    }
+    CommandResult result = runCommand(commandArgs, pipEnv(), PIP_TIMEOUT_MS);
+    if (result.exit != 0) {
+      String msg = "Could not install packages (pip exit " + result.exit + "). " + tailLines(result.output, 40);
+      error(msg);
+      throw new IOException(msg);
+    }
+  }
+
+  private void createVenv(String systemPython) throws IOException {
+    String venv = getDataDir() + fs + "venv";
+    new File(getDataDir()).mkdirs();
+    info("Creating Py4j venv with %s at %s", systemPython, venv);
+    CommandResult created = runCommand(List.of(systemPython, "-m", "venv", venv), null, 180_000);
+    if (created.exit != 0 && venvNeedsDebianPackage(created.output)
+        && tryAptInstall("python3-venv", "python3-pip")) {
+      info("Retrying venv creation after installing python3-venv");
+      created = runCommand(List.of(systemPython, "-m", "venv", venv), null, 180_000);
+    }
+    if (created.exit != 0 || venvPythonPath() == null) {
+      String hint = venvNeedsDebianPackage(created.output)
+          ? " On Raspberry Pi OS / Debian: sudo apt install python3-venv python3-pip"
+          : "";
+      throw new IOException(
+          "Failed to create virtual environment at " + venv + ". " + tailLines(created.output, 40) + hint);
+    }
+    CommandResult pip = runCommand(List.of(venvPythonPath(), "-m", "pip", "install", "py4j"), pipEnv(), PIP_TIMEOUT_MS);
+    if (pip.exit != 0) {
+      throw new IOException("Failed to install py4j in the virtual environment. " + tailLines(pip.output, 40));
+    }
+  }
+
+  private boolean pipWorks(String python) {
+    try {
+      CommandResult result = runCommand(List.of(python, "-m", "pip", "--version"), null, 30_000);
+      return result.exit == 0;
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  private String moduleImportError(String python, String[] modules, long timeoutMs) {
+    StringBuilder code = new StringBuilder();
+    for (String module : modules) {
+      if (module == null || !module.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+        return "refusing to import invalid module name " + module;
+      }
+      code.append("import ").append(module).append('\n');
+    }
+    try {
+      // A reader thread plus waitFor, so a hung native import (depthai probing
+      // USB) cannot block forever on a full stdout pipe.
+      CommandResult result = runCommand(List.of(python, "-c", code.toString()), null, timeoutMs);
+      if (result.exit == 0) {
+        return null;
+      }
+      return tailLines(result.output, 30);
+    } catch (IOException e) {
+      return e.getMessage();
+    }
+  }
+
+  /**
+   * Raspberry Pi OS Trixie mounts {@code /tmp} as a small tmpfs. Pip unpacks
+   * the depthai wheel there and fails with "No space left on device".
+   */
+  private Map<String, String> pipEnv() {
+    File tmp = new File(getDataDir() + fs + "pip-tmp");
+    tmp.mkdirs();
+    Map<String, String> env = new HashMap<>();
+    String path = tmp.getAbsolutePath();
+    env.put("TMPDIR", path);
+    env.put("TEMP", path);
+    env.put("TMP", path);
+    env.put("PIP_DISABLE_PIP_VERSION_CHECK", "1");
+    env.put("PIP_DEFAULT_TIMEOUT", "60");
+    return env;
+  }
+
+  private List<String> aptCommand(String... args) {
+    List<String> command = new ArrayList<>();
+    if (!"root".equals(System.getProperty("user.name"))) {
+      command.add("sudo");
+      command.add("-n");
+    }
+    command.add("apt-get");
+    if (args != null) {
+      Collections.addAll(command, args);
+    }
+    return command;
+  }
+
+  private static Map<String, String> aptEnv() {
+    Map<String, String> env = new HashMap<>();
+    env.put("DEBIAN_FRONTEND", "noninteractive");
+    return env;
+  }
+
+  private CommandResult runCommand(List<String> command, Map<String, String> extraEnv, long timeoutMs) throws IOException {
+    info("run: %s", String.join(" ", command));
+    ProcessBuilder pb = new ProcessBuilder(command);
+    pb.redirectErrorStream(true);
+    if (extraEnv != null) {
+      pb.environment().putAll(extraEnv);
+    }
+    Process proc = pb.start();
+    StringBuilder output = new StringBuilder();
     Thread reader = new Thread(() -> {
       try (BufferedReader stdOutput = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-        String s;
-        while ((s = stdOutput.readLine()) != null) {
-          pipOut.append(s).append('\n');
-          handleStdOut(s);
+        String line;
+        while ((line = stdOutput.readLine()) != null) {
+          synchronized (output) {
+            output.append(line).append('\n');
+          }
+          handleStdOut(line);
         }
       } catch (IOException e) {
-        error(e);
+        log.info("command output closed: {}", e.getMessage());
       }
-    }, getName() + "-pip-stdout");
+    }, getName() + "-cmd");
+    reader.setDaemon(true);
     reader.start();
-    int ret;
+    boolean finished;
     try {
-      ret = proc.waitFor();
-      // The process has exited, so its stdout pipe should close and the reader
-      // should finish. If a child still holds the pipe, stop it and join again
-      // before reading the buffer.
+      finished = proc.waitFor(timeoutMs, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      proc.destroyForcibly();
+      joinReader(reader);
+      throw new IOException("command interrupted: " + command, e);
+    }
+    if (!finished) {
+      proc.destroyForcibly();
+      joinReader(reader);
+      throw new IOException(
+          "command timed out after " + timeoutMs + "ms: " + command + "\n" + tailLines(copyOutput(output), 30));
+    }
+    joinReader(reader);
+    return new CommandResult(proc.exitValue(), copyOutput(output));
+  }
+
+  private static String copyOutput(StringBuilder output) {
+    synchronized (output) {
+      return output.toString();
+    }
+  }
+
+  private static String oneLine(String text) {
+    if (text == null) {
+      return "";
+    }
+    return text.replace('\n', ' ').replace('\r', ' ').trim();
+  }
+
+  private void joinReader(Thread reader) {
+    try {
       reader.join(8000);
       if (reader.isAlive()) {
-        proc.destroyForcibly();
+        reader.interrupt();
         reader.join(2000);
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw new IOException("pip install interrupted", e);
-    }
-    if (ret != 0) {
-      String tail = tailLines(pipOut.toString(), 40);
-      String msg = "Could not install packages (pip exit " + ret + "). " + tail;
-      error(msg);
-      throw new IOException(msg);
     }
   }
 

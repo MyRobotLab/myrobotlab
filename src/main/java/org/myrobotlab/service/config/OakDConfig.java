@@ -8,12 +8,15 @@ public class OakDConfig extends ServiceConfig {
    * Install DepthAI 3.x into the shared Py4j venv ({@code data/Py4j/venv}) on
    * start. First run is slow (pip). Set false afterward if packages are
    * already installed. Requires a PATH Python that has a depthai 3.x wheel
-   * (3.9–3.14 as of depthai 3.9). Do not use depthai 2.29.0 on Python 3.13+.
+   * (3.9–3.14). Raspberry Pi OS Trixie 64-bit (aarch64, Python 3.13) is
+   * supported. 32-bit ARM has no DepthAI 3 wheel. Do not use depthai 2.29.0
+   * on Python 3.13+.
    */
   public boolean py4jInstall = true;
 
   /**
-   * Publish JPEG/PNG snapshots to WebGui when a classification arrives.
+   * Publish a live RGB image and colorized depth map on
+   * {@code publishWebDisplay} while a WebGui panel is subscribed.
    */
   public boolean displayWeb = true;
 
