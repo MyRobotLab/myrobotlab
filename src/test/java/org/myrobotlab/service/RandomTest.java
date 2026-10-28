@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +13,13 @@ import org.myrobotlab.service.Random.RandomMessage;
 import org.myrobotlab.test.AbstractTest;
 
 public class RandomTest extends AbstractTest {
+
+  /**
+   * Random waits up to {@code maxIntervalMs} and only samples every
+   * {@code RandomConfig.rate} (100 ms), then delivers the call through the
+   * outbox. A fixed sleep near that budget fails when the suite is busy.
+   */
+  private static final long RANDOM_EVENT_TIMEOUT_MS = 3000;
 
   @Before /* before each test */
   public void setUp() throws IOException {
@@ -36,12 +44,12 @@ public class RandomTest extends AbstractTest {
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.enable();
 
-    sleep(1000);
-
     assertTrue("should have method", random.getKeySet().contains("clock.setInterval"));
 
-    assertTrue(String.format("random method 1 should be %d => 5000 values", clock.getInterval()), 5000 <= clock.getInterval());
-    assertTrue(String.format("random method 1 should be %d <= 10000 values", clock.getInterval()), clock.getInterval() <= 10000);
+    waitUntil("random method 1 should be in [5000, 10000]", () -> {
+      Integer interval = clock.getInterval();
+      return interval != null && interval >= 5000 && interval <= 10000;
+    });
 
     random.remove("clock.setInterval");
 
@@ -50,8 +58,7 @@ public class RandomTest extends AbstractTest {
     random.addRandom(0, 200, "clock", "setInterval", 5000, 10000);
     random.addRandom(0, 200, "clock", "startClock");
 
-    sleep(500);
-    assertTrue("clock should be started 1", clock.isClockRunning());
+    waitUntil("clock should be started 1", clock::isClockRunning);
 
     // disable all of a services random events
     random.disable("clock.startClock");
@@ -61,8 +68,7 @@ public class RandomTest extends AbstractTest {
 
     // enable all of a service's random events
     random.enable("clock.startClock");
-    sleep(250);
-    assertTrue("clock should be started 2", clock.isClockRunning());
+    waitUntil("clock should be started 2", clock::isClockRunning);
 
     // disable one method - leave other enabled
     random.disable("clock.startClock");
@@ -99,6 +105,21 @@ public class RandomTest extends AbstractTest {
     clock.releaseService();
     random.releaseService();
 
+  }
+
+  /**
+   * Poll until {@code condition} is true. Returns as soon as it is, and fails
+   * only after {@link #RANDOM_EVENT_TIMEOUT_MS}.
+   */
+  private static void waitUntil(String message, BooleanSupplier condition) {
+    long deadline = System.currentTimeMillis() + RANDOM_EVENT_TIMEOUT_MS;
+    while (System.currentTimeMillis() < deadline) {
+      if (condition.getAsBoolean()) {
+        return;
+      }
+      sleep(20);
+    }
+    assertTrue(message, condition.getAsBoolean());
   }
 
 }
