@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.Main;
@@ -35,6 +36,22 @@ public class IvyWrapper extends Repo implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public static final String IVY_VERSION = "2.5.2";
+
+  /**
+   * HttpClient 4.5's default cookie spec only accepts Netscape expires dates
+   * ({@code EEE, dd-MMM-yy HH:mm:ss z}). Cloudflare sets {@code __cf_bm} on
+   * repo.maven.apache.org with an RFC 1123 expires value, so each Ivy download
+   * logs a JUL warning and then discards the cookie. The artifact response is
+   * still used. 4.5.14 is the last 4.x release, and Ivy cannot select
+   * {@code CookieSpecs.STANDARD}.
+   */
+  static void quietInvalidCookieWarnings() {
+    Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies").setLevel(java.util.logging.Level.SEVERE);
+  }
+
+  static {
+    quietInvalidCookieWarnings();
+  }
 
   class IvyWrapperLogger extends AbstractMessageLogger {
 

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -19,6 +21,20 @@ public class IvyWrapperClassifierTest {
     String xml = sb.toString();
     assertTrue(xml.contains("m:classifier=\"natives-linux-arm64\""));
     assertTrue(xml.contains("name=\"lwjgl\""));
+  }
+
+  @Test
+  public void cloudflareCookieWarningsAreSuppressed() {
+    Logger logger = Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies");
+    Level previous = logger.getLevel();
+    try {
+      logger.setLevel(Level.INFO);
+      IvyWrapper.quietInvalidCookieWarnings();
+      assertFalse(logger.isLoggable(Level.WARNING));
+      assertTrue(logger.isLoggable(Level.SEVERE));
+    } finally {
+      logger.setLevel(previous);
+    }
   }
 
   @Test
