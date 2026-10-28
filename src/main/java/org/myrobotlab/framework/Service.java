@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
@@ -107,10 +108,19 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
   protected MetaData serviceType;
 
   /**
-   * Config member - configuration of type {ServiceType}Config Runtime applys
-   * either the default config or a saved config during service creation
+   * Config member - configuration of type {ServiceType}Config. A blank instance
+   * is created before registration so the service is never visible with a null
+   * config. {@link #apply(ServiceConfig)} replaces it with the saved or default
+   * config and is the point at which the config becomes authoritative.
    */
   protected T config;
+
+  /**
+   * True after a non-null config has been applied. A service can be registered
+   * with only the blank constructor config before {@link #apply(ServiceConfig)}
+   * runs.
+   */
+  private volatile boolean configApplied = false;
 
   private static final long serialVersionUID = 1L;
 
@@ -681,6 +691,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       }
     }
 
+    // Visible to other threads as soon as we register. Give them a typed config
+    // so getConfig/getPeerConfig cannot observe a null config mid-construction.
+    // apply() replaces this with the saved or default config.
+    if (config == null) {
+      config = newConfigInstance();
+    }
+
     // register this service if local - if we are a foreign service, we probably
     // are being created in a
     // registration already
@@ -688,6 +705,39 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
       Registration registration = new Registration(this);
       Runtime.register(registration);
     }
+  }
+
+  /**
+   * Build an empty typed config from this service's generic config parameter.
+   * Does not call {@code getDefault}, which can touch Runtime and peer graphs.
+   */
+  @SuppressWarnings("unchecked")
+  protected T newConfigInstance() {
+    Class<?> cursor = getClass();
+    while (cursor != null && cursor != Object.class) {
+      Type generic = cursor.getGenericSuperclass();
+      if (generic instanceof ParameterizedType) {
+        for (Type arg : ((ParameterizedType) generic).getActualTypeArguments()) {
+          if (arg instanceof Class && ServiceConfig.class.isAssignableFrom((Class<?>) arg)) {
+            try {
+              return (T) ((Class<?>) arg).getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+              log.warn("could not construct config {} for {}", arg.getTypeName(), getName(), e);
+              return null;
+            }
+          }
+        }
+      }
+      cursor = cursor.getSuperclass();
+    }
+    return null;
+  }
+
+  /**
+   * @return true after {@link #apply(ServiceConfig)} has stored a non-null config
+   */
+  public boolean isConfigApplied() {
+    return configApplied;
   }
 
   /**
@@ -1449,24 +1499,76 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
     // Java generics don't let us create a new StaticType using
     // P here because the type variable is erased, so we have to cast anyway for
     // now
-    ConfigurableService<P> si = (ConfigurableService<P>) Runtime.getService(peerName);
-    if (si != null) {
-      // peer is currently running - get its config
-      P c = si.getConfig();
-      if (type.asClass().isAssignableFrom(c.getClass())) {
-        return c;
+    ServiceInterface peerService = Runtime.getService(peerName);
+    if (peerService instanceof ConfigurableService && peerConfigApplied(peerService)) {
+      try {
+        @SuppressWarnings("unchecked")
+        ConfigurableService<P> si = (ConfigurableService<P>) peerService;
+        // peer has been apply()'d - get its config. A registered service can
+        // still have a null config if apply never completed.
+        P c = si.getConfig();
+        if (c != null && type.asClass().isAssignableFrom(c.getClass())) {
+          return c;
+        }
+      } catch (RuntimeException e) {
+        log.warn("could not read live config for peer {} ({})", peerKey, peerName, e);
       }
     }
 
-    // peer is not currently running attempt to read from config
+    // peer is not currently applied, or its live config is unusable.
+    // Read the current config set, then the type's default.
     Runtime runtime = Runtime.getInstance();
-    // read current service config for this peer service
     P sc = runtime.readServiceConfig(peerName, type);
+    if (sc == null) {
+      sc = defaultPeerConfig(peerName, peerType(peerKey), type);
+    }
     if (sc == null) {
       error("peer service %s is defined, but %s.yml not available on filesystem", peerKey, peerName);
       return null;
     }
+    // A running peer with no applied config still answers getPeerConfig from the
+    // UI (InMoov2 asks for opencv as soon as its panel opens). Push the saved
+    // config on so later getConfig/flip calls are not against null.
+    if (peerService instanceof ConfigurableService && peerService.isRunning() && !peerConfigApplied(peerService)) {
+      try {
+        @SuppressWarnings("unchecked")
+        ConfigurableService<P> si = (ConfigurableService<P>) peerService;
+        si.apply(sc);
+      } catch (RuntimeException e) {
+        log.warn("could not apply saved config to running peer {} ({})", peerKey, peerName, e);
+      }
+    }
     return sc;
+  }
+
+  private boolean peerConfigApplied(ServiceInterface peer) {
+    return peer instanceof Service && ((Service<?>) peer).isConfigApplied();
+  }
+
+  private String peerType(String peerKey) {
+    T parentConfig = getConfig();
+    if (parentConfig == null) {
+      return null;
+    }
+    Peer peer = parentConfig.getPeer(peerKey);
+    return peer == null ? null : peer.type;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <P extends ServiceConfig> P defaultPeerConfig(String peerName, String peerType, StaticType<P> type) {
+    if (peerType == null) {
+      return null;
+    }
+    try {
+      Plan plan = ServiceConfig.getDefault(new Plan("runtime"), peerName, peerType);
+      ServiceConfig fallback = plan == null ? null : plan.get(peerName);
+      if (fallback != null && type.asClass().isAssignableFrom(fallback.getClass())) {
+        return (P) fallback;
+      }
+    } catch (RuntimeException e) {
+      log.warn("could not build default config for peer {} type {}", peerName, peerType, e);
+    }
+    return null;
   }
 
   public void setPeerConfigValue(String peerKey, String fieldname, Object value)
@@ -1503,7 +1605,12 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    * class ServiceConfig.listeners
    */
   public T apply(T c) {
+    if (c == null) {
+      error("null config apply for %s", getName());
+      return config;
+    }
     config = c;
+    configApplied = true;
     addConfigListeners(c);
     return config;
   }
@@ -1528,8 +1635,13 @@ public abstract class Service<T extends ServiceConfig> implements Runnable, Seri
    */
   @Override
   public ServiceConfig getFilteredConfig() {
+    ServiceConfig current = getConfig();
+    if (current == null) {
+      error("no config to save for %s", getName());
+      return null;
+    }
     // Make a copy, because we don't want to modify the original
-    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(getConfig()), config.getClass());
+    ServiceConfig sc = CodecUtils.fromYaml(CodecUtils.toYaml(current), current.getClass());
     Map<String, List<MRLListener>> listeners = getOutbox().notifyList;
     List<Listener> newListeners = new ArrayList<>();
 

@@ -2128,6 +2128,10 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
    * @param toFlip
    */
   public void flip(boolean toFlip) {
+    if (config == null) {
+      error("opencv config is null, cannot flip");
+      return;
+    }
     config.flip = toFlip;
     if (config.flip) {
       addFilter("Flip");
@@ -2196,6 +2200,13 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
 
   @Override
   public OpenCVConfig getConfig() {
+    // The service is registered in the constructor, before apply(). InMoov2's
+    // panel calls getPeerConfig("opencv") as soon as it opens, which lands here.
+    // Writing onto a null config is what produced:
+    // Cannot assign field "capturing" because "this.config" is null
+    if (config == null) {
+      return null;
+    }
     super.getConfig();
     // FIXME - remove member vars use config only
     config.capturing = capturing;
@@ -2207,13 +2218,19 @@ public class OpenCV extends AbstractComputerVision<OpenCVConfig> implements Imag
     config.nativeViewer = nativeViewer;
     config.webViewer = webViewer;
     config.filters = new LinkedHashMap<>();
-    config.filters.putAll(filters);
+    if (filters != null) {
+      config.filters.putAll(filters);
+    }
 
     return config;
   }
 
   @Override
   public OpenCVConfig apply(OpenCVConfig c) {
+    if (c == null) {
+      error("null OpenCV config");
+      return getConfig();
+    }
     super.apply(c);
     setCameraIndex(c.cameraIndex);
     setGrabberType(c.grabberType);

@@ -562,6 +562,9 @@ public abstract class AbstractSpeechRecognizer<C extends SpeechRecognizerConfig>
   @Override
   public C getConfig() {
     C c = super.getConfig();
+    if (c == null) {
+      return null;
+    }
     c.listening = isListening();
     c.wakeWord = getWakeWord();
     return c;

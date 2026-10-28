@@ -1125,6 +1125,9 @@ public abstract class AbstractSpeechSynthesis<C extends SpeechSynthesisConfig> e
   @Override
   public C getConfig() {
     C c = super.getConfig();
+    if (c == null) {
+      return null;
+    }
     if (voice != null) {
       c.voice = voice.name;
     }
