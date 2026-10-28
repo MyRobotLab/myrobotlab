@@ -447,7 +447,7 @@ public class Runtime extends Service<RuntimeConfig> implements MessageListener, 
             ((ConfigurableService) si).apply(sc);
           } catch (Exception e) {
             Runtime.getInstance().error(e);
-            Runtime.getInstance().error("could not apply config of type %s to service %s, using default config", sc.type, si.getName(), sc.type);
+            Runtime.getInstance().error("could not apply config of type %s to service %s", sc.type, si.getName());
           }
         }
         createdServices.put(service, si);

@@ -1176,6 +1176,9 @@ public abstract class AbstractServo<C extends ServoConfig> extends Service<C> im
   public C getConfig() {
 
     super.getConfig();
+    if (config == null) {
+      return null;
+    }
 
     config.enabled = enabled;
 
