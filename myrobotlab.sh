@@ -19,28 +19,42 @@ JAVA=java
 # if we decide to package the jvm
 if [ -x "${APPDIR}/java/bin/java" ]; then
   JAVA=${APPDIR}/java/bin/java
-fi
-
-# verify java exists
-if type -p java; then
-    echo found java executable in PATH
-    _java=java
-elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+elif ! command -v java >/dev/null 2>&1; then
+  if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
     echo found java executable in JAVA_HOME
-    _java="$JAVA_HOME/bin/java"
-else
-    echo "java is not installed please install java 17 e.g. sudo apt install openjdk-17-jdk "
-    exit
+    JAVA="$JAVA_HOME/bin/java"
+  else
+    echo "Java was not found. MyRobotLab requires Java 17.0.20 or newer."
+    echo "For example: sudo apt install openjdk-17-jdk"
+    exit 1
+  fi
 fi
 
-JAVA_VER=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
-
-if [ "$JAVA_VER" -ge 17 ]; then
-    echo "found java version equal or greater to 17"
-else
-    echo "incompatible version of java, java 17 required"
-    exit
+# Java 17.0.19 and older ship a Visual C++ runtime that cannot load the OpenCV
+# natives on Windows (UnsatisfiedLinkError on jniopencv_core.dll).
+JAVA_SPEC=$("$JAVA" -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///')
+JAVA_MAJOR=$(printf '%s' "$JAVA_SPEC" | cut -d'.' -f1 | cut -d'-' -f1 | cut -d'+' -f1)
+JAVA_UPDATE=$(printf '%s' "$JAVA_SPEC" | cut -d'.' -f3 | cut -d'_' -f1 | cut -d'+' -f1 | cut -d'-' -f1)
+if [ -z "$JAVA_UPDATE" ]; then
+  JAVA_UPDATE=0
 fi
+
+JAVA_TOO_OLD=0
+if [ "$JAVA_MAJOR" -lt 17 ]; then
+  JAVA_TOO_OLD=1
+elif [ "$JAVA_MAJOR" -eq 17 ] && [ "$((10#$JAVA_UPDATE))" -lt 20 ]; then
+  JAVA_TOO_OLD=1
+fi
+
+if [ "$JAVA_TOO_OLD" -eq 1 ]; then
+  echo "Your Java version (${JAVA_SPEC}) is too old."
+  echo "MyRobotLab requires Java 17.0.20 or newer."
+  echo "Older Java 17 builds include a Visual C++ runtime that is too old to load the OpenCV native libraries on Windows."
+  echo "Starting OpenCV then fails with: UnsatisfiedLinkError: jniopencv_core.dll: Can't find dependent libraries."
+  echo "Install Java 17.0.20 or later, or a newer release such as Java 21 or 25, and run MyRobotLab with that java."
+  exit 1
+fi
+echo "found java ${JAVA_SPEC}"
 
 
 # Processing/Arduino handle this in an array - no need for now

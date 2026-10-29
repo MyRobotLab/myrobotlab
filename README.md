@@ -13,7 +13,7 @@ Open Source Framework for Robotics and Creative Machine Control
 
 ## Base Requirements
 
-You will need Java 17 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit) Oracle or OpenJDK will work
+You will need Java 17.0.20 or newer. Older versions of Java, including Java 17.0.19 and earlier, will fail. On Windows those builds ship a Visual C++ runtime that is too old to load the OpenCV native libraries, and starting OpenCV reports `UnsatisfiedLinkError: jniopencv_core.dll: Can't find dependent libraries`. Java 21 and Java 25 are fine. `myrobotlab.bat` and `myrobotlab.sh` check the version and stop when it is too old. If you are only running MyRobotLab you need the JRE (Java Runtime Environment.) If you are going to be building from source, you'll need the JDK (Java Development Kit). Oracle or OpenJDK will work.
 
 ## Download the myrobotlab.zip
 Download
@@ -68,8 +68,10 @@ cd c:\dev\myrobotlab
 If you want to be making core changes, you will need to install a 
 Java developement environment
 
-#### Install Java 17
+#### Install Java 17.0.20 or newer
 https://www.oracle.com/java/technologies/downloads/#java17
+
+Java 17.0.19 and older are not supported. The launch scripts refuse to start with those builds because OpenCV's native libraries will not load.
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
