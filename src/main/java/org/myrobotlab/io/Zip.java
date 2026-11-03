@@ -226,7 +226,12 @@ public class Zip {
     ZipFile zip = new ZipFile(file);
     // String newPath = zipFile.substring(0, zipFile.length() - 4);
 
-    new File(newPath).mkdir();
+    File destDir = new File(newPath);
+    destDir.mkdir();
+    
+    // Get canonical path of destination directory for security validation
+    String canonicalDestDir = destDir.getCanonicalPath();
+    
     Enumeration<?> zipFileEntries = zip.entries();
 
     // Process each entry
@@ -234,7 +239,21 @@ public class Zip {
       // grab a zip file entry
       ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
       String currentEntry = entry.getName();
-      File destFile = new File(newPath, currentEntry);
+      
+      // Security: Validate entry name to prevent Zip Slip attacks
+      if (currentEntry.contains("..") || currentEntry.startsWith("/") || currentEntry.startsWith("\\")) {
+        throw new IOException("Unsafe zip entry detected: " + currentEntry);
+      }
+      
+      File destFile = new File(destDir, currentEntry);
+      
+      // Security: Verify the resolved file path is within the destination directory
+      String canonicalFilePath = destFile.getCanonicalPath();
+      if (!canonicalFilePath.startsWith(canonicalDestDir + File.separator) && 
+          !canonicalFilePath.equals(canonicalDestDir)) {
+        throw new IOException("Zip Slip attack detected: " + currentEntry);
+      }
+      
       // destFile = new File(newPath, destFile.getName());
       File destinationParent = destFile.getParentFile();
 
