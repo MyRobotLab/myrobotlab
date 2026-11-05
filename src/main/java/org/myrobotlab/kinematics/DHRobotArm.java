@@ -577,7 +577,7 @@ public class DHRobotArm implements Serializable {
    * Deterministic starting configuration number {@code index}.
    *
    * <p>
-   * The first {@code 2^numLinks} seeds are the corners of the joint box, because
+   * The first {@code 2^min(numLinks, 5)} seeds are the corners of the joint box, because
    * poses at the edge of the reachable set need one or more joints pinned at a
    * limit and descent approaches a boundary very slowly from the interior. The
    * rest are a Halton sequence, which covers the interior with far fewer attempts
@@ -587,7 +587,7 @@ public class DHRobotArm implements Serializable {
    */
   private void seedJoints(int index) {
     int numLinks = links.size();
-    int corners = 1 << Math.min(numLinks, 4);
+    int corners = 1 << Math.min(numLinks, 5);
     for (int i = 0; i < numLinks; i++) {
       DHLink link = links.get(i);
       double lo = link.getMin();

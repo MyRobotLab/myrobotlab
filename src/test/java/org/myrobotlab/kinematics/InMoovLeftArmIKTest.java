@@ -75,6 +75,21 @@ public class InMoovLeftArmIKTest extends AbstractTest {
     assertTrue("omoplate raises the hand", raised.getY() > rest.getY() + 0.01);
   }
 
+  /**
+   * Wrist roll is about the forearm. The grasp point sits off that axis, so
+   * turning the wrist must move the hand sideways instead of spinning in place.
+   */
+  @Test
+  public void testWristRollMovesTheGraspPoint() {
+    DHRobotArm arm = InMoov2Arm.getDHRobotArm("i01", "left");
+    Point rest = arm.getPalmPosition();
+    arm.getLink(4).setFromServoDegrees(InMoov2Arm.WRIST_SERVO_MAX);
+    Point turned = arm.getPalmPosition();
+    log.info("wrist rest {} turned {}", rest, turned);
+    assertEquals("wrist roll keeps the hand's height", rest.getY(), turned.getY(), 1e-6);
+    assertTrue("wrist roll moves the grasp point", rest.distanceTo(turned) > 0.03);
+  }
+
   /** Increasing the shoulder servo brings the hand forward, on both arms. */
   @Test
   public void testShoulderSwingsForward() {

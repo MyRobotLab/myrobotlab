@@ -233,6 +233,12 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   protected static final String IK_LEFT_HAND_MARKER = "_marker.ikLeftHand";
 
+  /**
+   * Distal finger nodes, then the wrist pin. Blue/red HUD dots and the arm
+   * solver's end effector both use this order, so wrist roll moves the same point.
+   */
+  private static final String[] GRASP_NODE_SUFFIXES = { "majeure3", "index3", "majeure", "index", "wrist" };
+
   /** World-space radius of the left/right hand position dots. */
   protected float handMarkerRadius = 0.05f;
 
@@ -242,10 +248,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   protected transient Geometry ikLeftHandMarker;
 
-  /** IK Cartesian goal in world coordinates (green marker). */
+  /** IK Cartesian goal in world coordinates (green marker). The solver palm is the grasp point past the wrist. */
   protected Vector3f ikLeftHandGoal;
 
-  /** Latest IK forward-kinematics palm (HUD). */
+  /** Latest IK forward-kinematics grasp point, including the wrist (HUD). */
   protected Vector3f ikLeftHandCurrent;
 
   /** Displayed green marker: goal if set, otherwise current FK. */
@@ -3061,10 +3067,13 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * Upper-left HUD + colored dots at InMoov left/right hand world positions.
-   * Blue = left, red = right. Called each frame from {@link #simpleUpdate(float)}.
-   * Positioned from the GUI camera so a resize or DPI scale cannot drop it
-   * onto the OAK-D heatmap in the lower-left.
+   * Upper-left HUD + colored dots at the InMoov grasp points. Blue = left mesh,
+   * red = right mesh, green = left IK goal (or the solver palm when no goal is
+   * set). The mesh dots use the same finger node the arm chain treats as the
+   * end effector, past the wrist, so wrist roll moves them with the solver.
+   * Called each frame from {@link #simpleUpdate(float)}. Positioned from the
+   * GUI camera so a resize or DPI scale cannot drop it onto the OAK-D heatmap
+   * in the lower-left.
    */
   protected void updateHandPositionHud() {
     if (!showHandPositions || app == null || rootNode == null) {
@@ -3079,8 +3088,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
 
-    Spatial leftHand = findHandSpatial(robot, "left");
-    Spatial rightHand = findHandSpatial(robot, "right");
+    Spatial leftHand = findGraspSpatial(robot, "left");
+    Spatial rightHand = findGraspSpatial(robot, "right");
     Vector3f left = leftHand != null ? leftHand.getWorldTranslation() : null;
     Vector3f right = rightHand != null ? rightHand.getWorldTranslation() : null;
     Vector3f ikLeft = ikLeftHandWorld;
@@ -3199,8 +3208,23 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     }
   }
 
+  /**
+   * Finger node the solver drives, then the wrist pin. Same order as
+   * {@link #getGraspWorldTranslation}. Must run on the render thread.
+   */
+  private Spatial findGraspSpatial(String robot, String side) {
+    String hand = robot + "." + side + "Hand.";
+    for (String suffix : GRASP_NODE_SUFFIXES) {
+      Spatial spatial = find(hand + suffix);
+      if (spatial != null) {
+        return spatial;
+      }
+    }
+    return findHandSpatial(robot, side);
+  }
+
+  /** Wrist pin. The grasp point used by the HUD and the solver is past this. */
   private Spatial findHandSpatial(String robot, String side) {
-    // Prefer wrist (configured InMoov hand root); fall back to common aliases
     String[] candidates = new String[] {
         robot + "." + side + "Hand.wrist",
         robot + "." + side + "Hand",
@@ -3411,7 +3435,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
    */
   public List<JointFrame> getArmJointFrames(String robot, String side) {
     String prefix = robot + "." + side + "Arm.";
-    return getJointFrames(prefix + "omoplate", prefix + "shoulder", prefix + "rotate", prefix + "bicep");
+    return getJointFrames(prefix + "omoplate", prefix + "shoulder", prefix + "rotate", prefix + "bicep", robot + "." + side + "Hand.wrist");
   }
 
   /**
@@ -3428,6 +3452,31 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
     return chain;
+  }
+
+  /**
+   * World position the arm solver should reach: a finger node distal to the
+   * wrist, so wrist roll moves the target. Falls back to the wrist pin when
+   * the hand mesh has no finger nodes.
+   */
+  public Point3df getGraspWorldTranslation(String robot, String side) {
+    if (app == null) {
+      log.warn("getGraspWorldTranslation({}, {}) — JME app not started", robot, side);
+      return null;
+    }
+    try {
+      return enqueueGet(() -> {
+        Spatial spatial = findGraspSpatial(robot, side);
+        if (spatial == null) {
+          return null;
+        }
+        Vector3f v = spatial.getWorldTranslation();
+        return new Point3df(v.x, v.y, v.z);
+      }, 5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      log.error("getGraspWorldTranslation({}, {}) failed", robot, side, e);
+      return null;
+    }
   }
 
   /**
@@ -3500,7 +3549,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   /**
    * Show or hide the cyan left-hand reach cloud. When turning on with no cloud
-   * yet, sample VinMoov's left arm (omoplate → wrist) via forward kinematics.
+   * yet, sample VinMoov's left arm (omoplate → grasp point) via forward kinematics.
    */
   public boolean setReachCloud(boolean show) {
     if (config == null) {
@@ -3589,16 +3638,16 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     int steps = cfg != null && cfg.reachCloudSteps > 1 ? cfg.reachCloudSteps : ReachCloud.DEFAULT_STEPS;
     float voxel = cfg != null && cfg.reachCloudVoxelM > 0f ? cfg.reachCloudVoxelM : ReachCloud.DEFAULT_VOXEL_M;
     List<JointFrame> frames = getArmJointFrames(robot, "left");
-    if (frames.size() < 4) {
-      log.warn("sampleLeftHandReachFromVinMoov — measured {} of 4 left-arm joints", frames.size());
+    if (frames.size() < 5) {
+      log.warn("sampleLeftHandReachFromVinMoov — measured {} of 5 left-arm joints (omoplate through wrist)", frames.size());
       return null;
     }
-    Point3df wrist = getHandWorldTranslation(robot, "left");
-    if (wrist == null) {
-      log.warn("sampleLeftHandReachFromVinMoov — no left wrist node");
+    Point3df grasp = getGraspWorldTranslation(robot, "left");
+    if (grasp == null) {
+      log.warn("sampleLeftHandReachFromVinMoov — no left grasp point");
       return null;
     }
-    PointCloud cloud = ReachCloud.sample(frames, new Point(wrist.x, wrist.y, wrist.z), steps, voxel);
+    PointCloud cloud = ReachCloud.sample(frames, new Point(grasp.x, grasp.y, grasp.z), steps, voxel);
     reachCloudPointCount = cloud.size();
     log.info("Left-hand reach cloud {} voxels from VinMoov {} ({} joint steps, {} m cells)", cloud.size(), robot, steps, voxel);
     return cloud;

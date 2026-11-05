@@ -17,7 +17,7 @@ public class ReachCloudTest extends AbstractTest {
   public void sampleCountIsJointGrid() {
     FabrikArm arm = leftArm();
     List<Point> palms = arm.samplePalmWorkspace(3);
-    assertEquals(81, palms.size());
+    assertEquals(243, palms.size());
   }
 
   @Test

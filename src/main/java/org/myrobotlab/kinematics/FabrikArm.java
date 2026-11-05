@@ -60,7 +60,7 @@ public class FabrikArm implements Serializable {
 
   /**
    * Extra starting configurations when descent from the current pose stalls. A
-   * 4-DOF InMoov arm has local minima; seeds are what close the last few
+   * 5-DOF InMoov arm (including the wrist) has local minima; seeds are what close the last few
    * millimeters on reachable goals.
    */
   public static final int DEFAULT_SEED_ATTEMPTS = 24;
@@ -594,7 +594,7 @@ public class FabrikArm implements Serializable {
 
   private void seedJoints(int index) {
     int n = frames.size();
-    int corners = 1 << Math.min(n, 4);
+    int corners = 1 << Math.min(n, 5);
     for (int i = 0; i < n; i++) {
       JointFrame frame = frames.get(i);
       double lo = Math.min(frame.angleAtServoMin, frame.angleAtServoMax);

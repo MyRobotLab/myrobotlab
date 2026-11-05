@@ -43,9 +43,10 @@ public class InverseKinematics3DTest extends AbstractTest {
   public void testDefaultArmIsBuiltFromJointFrames() {
     DHRobotArm dh = InMoov2Arm.getDHRobotArm("i01", "left");
     Assert.assertTrue("arm geometry should be measured joint frames", dh.isMeasured());
-    Assert.assertEquals(4, dh.getNumLinks());
+    Assert.assertEquals(5, dh.getNumLinks());
     Assert.assertEquals("i01.leftArm.omoplate", dh.getLink(0).getName());
     Assert.assertEquals("i01.leftArm.bicep", dh.getLink(3).getName());
+    Assert.assertEquals("i01.leftHand.wrist", dh.getLink(4).getName());
   }
 
   /**
@@ -56,15 +57,20 @@ public class InverseKinematics3DTest extends AbstractTest {
   @Test
   public void testRestPoseIsThetaZeroAndServoMapRoundTrips() {
     DHRobotArm dh = InMoov2Arm.getDHRobotArm("i01", "left");
-    double[] rests = { InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.SHOULDER_SERVO_REST, InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.BICEP_SERVO_REST };
-    for (int i = 0; i < 4; i++) {
+    double[] rests = { InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.SHOULDER_SERVO_REST, InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.BICEP_SERVO_REST,
+        InMoov2Arm.WRIST_SERVO_REST };
+    for (int i = 0; i < rests.length; i++) {
       DHLink link = dh.getLink(i);
       Assert.assertEquals("link " + i + " rest theta is zero", 0.0, link.getThetaDegrees(), 1e-9);
       Assert.assertEquals("link " + i + " rest servo", rests[i], link.toServoDegrees(), 1e-9);
-      Assert.assertEquals("link " + i + " slope magnitude is 1", 1.0, Math.abs(link.getServoSlope()), 1e-9);
+      if (i < 4) {
+        Assert.assertEquals("link " + i + " slope magnitude is 1", 1.0, Math.abs(link.getServoSlope()), 1e-9);
+      }
     }
+    // The wrist mesh only travels about 80° across the 180° servo, so its slope is not 1.
+    Assert.assertEquals("wrist servo degrees per mesh degree", 180.0 / 80.0, Math.abs(dh.getLink(4).getServoSlope()), 1e-9);
     // round trip every joint over its whole range
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < rests.length; i++) {
       DHLink link = dh.getLink(i);
       for (double servo = link.servoMin; servo <= link.servoMax; servo += 5) {
         link.setFromServoDegrees(servo);
@@ -97,10 +103,12 @@ public class InverseKinematics3DTest extends AbstractTest {
   public void testRestPoseHangsDownLikeVinMoovBind() {
     DHRobotArm dh = InMoov2Arm.getDHRobotArm("i01", "left");
     Point rest = dh.getPalmPosition();
+    Point expected = InMoov2Arm.getDefaultEndEffector("left");
     log.info("rest palm {}", rest);
     Assert.assertTrue("rest palm hangs down, not straight up: " + rest, rest.getY() < -0.40);
-    Assert.assertEquals("rest near hanging X", 0.12, rest.getX(), 0.05);
-    Assert.assertEquals("rest near hanging Z", 0.0, rest.getZ(), 0.05);
+    Assert.assertEquals("rest grasp X", expected.getX(), rest.getX(), 1e-6);
+    Assert.assertEquals("rest grasp Y", expected.getY(), rest.getY(), 1e-6);
+    Assert.assertEquals("rest grasp Z", expected.getZ(), rest.getZ(), 1e-6);
   }
 
   /** Right arm mirrors in X; the rotation directions come from the mapper slopes. */
@@ -113,13 +121,14 @@ public class InverseKinematics3DTest extends AbstractTest {
     Assert.assertEquals(left.getZ(), right.getZ(), 1e-9);
   }
 
-  /** The measured tool offset is the wrist relative to the elbow, not an artifact. */
+  /** The last-frame tool offset is the grasp point relative to the wrist pin. */
   @Test
-  public void testToolOffsetIsForearmSized() {
+  public void testToolOffsetIsPalmSized() {
     DHRobotArm dh = InMoov2Arm.getDHRobotArm("i01", "left");
     Point tool = dh.getToolOffset();
     Assert.assertNotNull(tool);
-    Assert.assertEquals("tool offset is the forearm", InMoov2Arm.DH_BICEP_A, tool.magnitude(), 0.01);
+    double palm = Math.hypot(InMoov2Arm.DH_PALM_ALONG, InMoov2Arm.DH_PALM_OFFSET);
+    Assert.assertEquals("tool offset is the palm lever", palm, tool.magnitude(), 0.01);
   }
 
   @Test
@@ -205,11 +214,13 @@ public class InverseKinematics3DTest extends AbstractTest {
   public void testMeasuredSegmentLengths() {
     List<JointFrame> frames = InMoov2Arm.getDefaultJointFrames("i01", "left");
     List<Double> segments = InverseKinematics3D.measuredSegmentLengths(frames, InMoov2Arm.getDefaultEndEffector("left"));
-    Assert.assertEquals(4, segments.size());
+    Assert.assertEquals(5, segments.size());
     Assert.assertEquals("omoplate to shoulder", InMoov2Arm.DH_OMOPLATE_A, segments.get(0), 1e-4);
     Assert.assertEquals("shoulder to rotate", InMoov2Arm.DH_SHOULDER_D, segments.get(1), 1e-4);
     Assert.assertEquals("upper arm", InMoov2Arm.DH_ROTATE_D, segments.get(2), 1e-4);
     Assert.assertEquals("forearm", InMoov2Arm.DH_BICEP_A, segments.get(3), 1e-4);
+    double palm = Math.hypot(InMoov2Arm.DH_PALM_ALONG, InMoov2Arm.DH_PALM_OFFSET);
+    Assert.assertEquals("wrist to grasp point", palm, segments.get(4), 1e-4);
   }
 
   @Test
@@ -254,8 +265,9 @@ public class InverseKinematics3DTest extends AbstractTest {
     DHRobotArm dh = InMoov2Arm.getDHRobotArm("i01", "left");
     ik3d.setCurrentArm(arm, dh);
     Runtime.setAllVirtual(true);
-    String[] names = new String[] { "i01.leftArm.omoplate", "i01.leftArm.shoulder", "i01.leftArm.rotate", "i01.leftArm.bicep" };
-    double[] servoPos = new double[] { InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.SHOULDER_SERVO_REST, InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.BICEP_SERVO_REST };
+    String[] names = new String[] { "i01.leftArm.omoplate", "i01.leftArm.shoulder", "i01.leftArm.rotate", "i01.leftArm.bicep", "i01.leftHand.wrist" };
+    double[] servoPos = new double[] { InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.SHOULDER_SERVO_REST, InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.BICEP_SERVO_REST,
+        InMoov2Arm.WRIST_SERVO_REST };
     for (int i = 0; i < names.length; i++) {
       Servo servo = (Servo) Runtime.start(names[i], "Servo");
       // Snap immediately. moveTo() only sets targetPos; currentInputPos stays
@@ -264,12 +276,13 @@ public class InverseKinematics3DTest extends AbstractTest {
     }
     Point world = ik3d.computePositionFromServos();
     Assert.assertNotNull(world);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < names.length; i++) {
       Assert.assertEquals("servo rest reads back as theta zero, link " + i, 0.0, dh.getLink(i).getThetaDegrees(), 1e-6);
     }
     Assert.assertNotNull(ik3d.worldPosition);
-    Assert.assertEquals("rest X m", 0.12, world.getX(), 0.05);
-    Assert.assertEquals("rest Y m (hanging)", -0.56, world.getY(), 0.08);
+    Point restPalm = InMoov2Arm.getDefaultEndEffector("left");
+    Assert.assertEquals("rest X m", restPalm.getX(), world.getX(), 0.02);
+    Assert.assertEquals("rest Y m (hanging)", restPalm.getY(), world.getY(), 0.02);
     Assert.assertTrue("FK reach is an arm not a room: " + world, world.magnitude() < 1.0);
   }
 
@@ -389,7 +402,7 @@ public class InverseKinematics3DTest extends AbstractTest {
     ik3d.calibrateFromJointFrames(arm, frames, wrist);
 
     InverseKinematics3DConfig cfg = ik3d.getConfig();
-    Assert.assertEquals("all four joints persisted", 4, cfg.joints.size());
+    Assert.assertEquals("arm and wrist joints persisted", 5, cfg.joints.size());
     Assert.assertTrue(cfg.endEffectorSet);
     Assert.assertEquals("measured forearm persisted", InMoov2Arm.DH_BICEP_A, cfg.bicepA, 1e-3);
 
@@ -403,7 +416,7 @@ public class InverseKinematics3DTest extends AbstractTest {
     // and the restored chain must agree with the original away from rest, too
     DHRobotArm a = ik3d.getCurrentArm(arm);
     DHRobotArm b = ik2.getCurrentArm(arm);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < a.getNumLinks(); i++) {
       double servo = (a.getLink(i).servoMin + a.getLink(i).servoMax) / 2 + 7;
       a.getLink(i).setFromServoDegrees(servo);
       b.getLink(i).setFromServoDegrees(servo);

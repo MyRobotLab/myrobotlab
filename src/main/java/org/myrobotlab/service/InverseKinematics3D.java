@@ -291,10 +291,11 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
    * Rebuild the current arm from joints measured on the simulator's rig.
    *
    * <p>
-   * Each of the arm's nodes contributes its real rotation axis, a point on that
-   * axis, its current angle and the servo&rarr;mesh map it was configured with.
-   * The end effector is the wrist node's world position, which depends only on
-   * the four arm joints. Nothing here guesses axis signs or fits DH parameters —
+   * Each joint from the omoplate through the wrist contributes its real rotation
+   * axis, a point on that axis, its current angle and the servo&rarr;mesh map it
+   * was configured with. The end effector is a finger node past the wrist, so
+   * wrist roll moves the point the solver is chasing. Nothing here guesses axis
+   * signs or fits DH parameters —
    * the previous approach matched one pose by translation, which cannot detect a
    * chain whose joint axes or rotation directions are wrong, so the error grew
    * with every degree the arm moved.
@@ -324,12 +325,12 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
       error("Measured %d of %d %s arm joints — check VinMoov node names and that simulator node mappers were applied", frames.size(), arm.getNumLinks(), side);
       return null;
     }
-    Point wrist = toPoint3(jme.getHandWorldTranslation(robot, side));
-    if (wrist == null) {
-      error("No wrist node for %s %s — cannot place the end effector", robot, side);
+    Point grasp = toPoint3(jme.getGraspWorldTranslation(robot, side));
+    if (grasp == null) {
+      error("No grasp point for %s %s — cannot place the end effector", robot, side);
       return null;
     }
-    return calibrateFromJointFrames(name, frames, wrist);
+    return calibrateFromJointFrames(name, frames, grasp);
   }
 
   /**
@@ -402,7 +403,7 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
 
   /**
    * Sweep each joint across its range, command the rig directly and compare the
-   * simulated wrist to the model's end effector.
+   * simulated grasp point to the model's end effector.
    *
    * <p>
    * This is the check a single-pose fit cannot do. A model with the wrong joint
@@ -448,12 +449,12 @@ public class InverseKinematics3D extends Service<InverseKinematics3DConfig> impl
           jme.rotateOnAxis(link.getName(), null, servo);
           link.setFromServoDegrees(servo);
           sleep(150);
-          Point simWrist = toPoint3(jme.getHandWorldTranslation(robot, side));
-          if (simWrist == null) {
+          Point simGrasp = toPoint3(jme.getGraspWorldTranslation(robot, side));
+          if (simGrasp == null) {
             continue;
           }
-          double err = arm.getPalmPosition().distanceTo(simWrist);
-          log.info("verify {} servo {} model {} sim {} err {} m", link.getName(), servo, arm.getPalmPosition(), simWrist, err);
+          double err = arm.getPalmPosition().distanceTo(simGrasp);
+          log.info("verify {} servo {} model {} sim {} err {} m", link.getName(), servo, arm.getPalmPosition(), simGrasp, err);
           if (err > worst) {
             worst = err;
             worstLabel = String.format("%s @ %.1f", link.getName(), servo);

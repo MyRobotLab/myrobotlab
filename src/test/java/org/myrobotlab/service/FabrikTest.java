@@ -48,6 +48,7 @@ public class FabrikTest extends AbstractTest {
     Assert.assertTrue(servos.containsKey("i01.leftArm.shoulder"));
     Assert.assertTrue(servos.containsKey("i01.leftArm.rotate"));
     Assert.assertTrue(servos.containsKey("i01.leftArm.bicep"));
+    Assert.assertTrue(servos.containsKey("i01.leftHand.wrist"));
     Runtime.release("fabrik-map");
   }
 

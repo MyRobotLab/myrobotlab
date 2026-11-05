@@ -252,7 +252,7 @@ public class VirtualInMoovIkDemo {
 
   private static boolean compareHands(String label, InverseKinematics3D ik3d, JMonkeyEngine simulator) {
     Point ikWorld = ik3d.currentPositionWorld(ARM_KEY);
-    Point simHand = toPoint(simulator.getHandWorldTranslation(ROBOT, ARM_KEY));
+    Point simHand = toPoint(simulator.getGraspWorldTranslation(ROBOT, ARM_KEY));
     if (ikWorld != null) {
       simulator.setIkHandWorldPosition(ikWorld.getX(), ikWorld.getY(), ikWorld.getZ());
     }

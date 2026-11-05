@@ -232,12 +232,12 @@ public class Fabrik extends Service<FabrikConfig> implements IKJointAnglePublish
       error("Measured %d of %d %s arm joints — check VinMoov node names", measured.size(), arm.getNumJoints(), parsed[1]);
       return null;
     }
-    Point wrist = toPoint3(jme.getHandWorldTranslation(parsed[0], parsed[1]));
-    if (wrist == null) {
-      error("No wrist node for %s %s", parsed[0], parsed[1]);
+    Point grasp = toPoint3(jme.getGraspWorldTranslation(parsed[0], parsed[1]));
+    if (grasp == null) {
+      error("No grasp point for %s %s", parsed[0], parsed[1]);
       return null;
     }
-    return calibrateFromJointFrames(name, measured, wrist);
+    return calibrateFromJointFrames(name, measured, grasp);
   }
 
   public Point calibrateFromJointFrames(String name, List<JointFrame> frames, Point endEffectorWorld) {

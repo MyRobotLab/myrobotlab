@@ -96,7 +96,7 @@ public class FabrikArmTest extends AbstractTest {
     arm.centerAllJoints();
     Point before = arm.getPalmPosition();
     java.util.List<Point> palms = arm.samplePalmWorkspace(2);
-    Assert.assertEquals(16, palms.size());
+    Assert.assertEquals(32, palms.size());
     Assert.assertEquals(0.0, before.distanceTo(arm.getPalmPosition()), 1e-9);
   }
 

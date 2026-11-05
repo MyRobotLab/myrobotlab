@@ -48,6 +48,19 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   public static final double DH_ROTATE_D = 0.280;
   public static final double DH_BICEP_A = 0.280;
 
+  /**
+   * Wrist pin to the grasp point, continuing along the hand. The solver drives
+   * this point, not the wrist pivot.
+   */
+  public static final double DH_PALM_ALONG = 0.110;
+
+  /**
+   * Grasp point off the wrist roll axis, toward the palm. A point on the axis
+   * would not move when the wrist turns, so this offset is what makes the wrist
+   * a position degree of freedom.
+   */
+  public static final double DH_PALM_OFFSET = 0.050;
+
   /** Servo rest / limits matching {@link org.myrobotlab.service.config.InMoov2ArmConfig} (degrees). */
   public static final double OMOPLATE_SERVO_MIN = 10.0;
   public static final double OMOPLATE_SERVO_MAX = 80.0;
@@ -64,6 +77,11 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   public static final double BICEP_SERVO_MIN = 0.0;
   public static final double BICEP_SERVO_MAX = 90.0;
   public static final double BICEP_SERVO_REST = 0.0;
+
+  /** Wrist servo range. Mesh travel is about 80°, not 1:1 with the servo. */
+  public static final double WRIST_SERVO_MIN = 0.0;
+  public static final double WRIST_SERVO_MAX = 180.0;
+  public static final double WRIST_SERVO_REST = 0.0;
 
   /** Mesh rotation direction of each arm node, matching {@code InMoov2Config}. */
   public static final double OMOPLATE_MESH_SLOPE_LEFT = 1;
@@ -88,9 +106,31 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   }
 
   /**
-   * The four arm joints as measured on a nominal printed InMoov, in an arm-root
-   * frame whose origin is the omoplate: {@code +X} out to the robot's left,
-   * {@code +Y} up, {@code +Z} forward (the JMonkeyEngine convention).
+   * Wrist servo → mesh map shared with the VinMoov wrist node.
+   *
+   * <p>
+   * Servo 0 is the bind pose (0°). Servo 180 is −80° on the left and +80° on
+   * the right, which is the historical {@code fromBind(0, 180, ±20, ∓60, 0)}
+   * range shifted so rest stays on the pose the hand was modeled in.
+   * </p>
+   *
+   * @param right
+   *          true for the right hand
+   */
+  public static MapperLinear vinMoovWristMapper(boolean right) {
+    double minOut = right ? -20.0 : 20.0;
+    double maxOut = right ? 60.0 : -60.0;
+    double slope = (maxOut - minOut) / (WRIST_SERVO_MAX - WRIST_SERVO_MIN);
+    double atRest = minOut + (WRIST_SERVO_REST - WRIST_SERVO_MIN) * slope;
+    return new MapperLinear(WRIST_SERVO_MIN, WRIST_SERVO_MAX, minOut - atRest, maxOut - atRest, true, false);
+  }
+
+  /**
+   * The four arm joints plus the hand wrist, as measured on a nominal printed
+   * InMoov, in an arm-root frame whose origin is the omoplate: {@code +X} out
+   * to the robot's left, {@code +Y} up, {@code +Z} forward (the JMonkeyEngine
+   * convention). The wrist rolls about the forearm. The grasp point sits off
+   * that axis so the roll moves the hand in space.
    *
    * <p>
    * Each joint is an origin plus a real rotation axis, not a set of
@@ -122,13 +162,26 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
         SHOULDER_SERVO_MAX));
     frames.add(jointFrame(String.format("%s.%sArm.rotate", name, side), rotateX, 0, 0, 0, -1, 0, "y", ROTATE_SERVO_REST, rotateSlope, ROTATE_SERVO_MIN, ROTATE_SERVO_MAX));
     frames.add(jointFrame(String.format("%s.%sArm.bicep", name, side), rotateX, elbowY, 0, 1, 0, 0, "x", BICEP_SERVO_REST, BICEP_MESH_SLOPE, BICEP_SERVO_MIN, BICEP_SERVO_MAX));
+    Point wrist = getDefaultWristOrigin(side);
+    frames.add(jointFrameFromMapper(String.format("%s.%sHand.wrist", name, side), wrist.getX(), wrist.getY(), wrist.getZ(), 0, 1, 0, "y", vinMoovWristMapper(right),
+        WRIST_SERVO_MIN, WRIST_SERVO_MAX, WRIST_SERVO_REST));
     return frames;
   }
 
-  /** Nominal wrist position for {@link #getDefaultJointFrames}, arm-root frame. */
-  public static Point getDefaultEndEffector(String side) {
+  /** Nominal wrist-pin position, arm-root frame. The grasp point is past this. */
+  public static Point getDefaultWristOrigin(String side) {
     double mirror = "right".equalsIgnoreCase(side) ? -1.0 : 1.0;
     return new Point(mirror * (DH_OMOPLATE_A + DH_SHOULDER_D), -(DH_ROTATE_D + DH_BICEP_A), 0);
+  }
+
+  /**
+   * Grasp point the solver drives, arm-root frame. Distal to the wrist pin and
+   * offset toward the palm so wrist roll changes x, y, z.
+   */
+  public static Point getDefaultEndEffector(String side) {
+    double mirror = "right".equalsIgnoreCase(side) ? -1.0 : 1.0;
+    Point wrist = getDefaultWristOrigin(side);
+    return new Point(wrist.getX() - mirror * DH_PALM_OFFSET, wrist.getY() - DH_PALM_ALONG, wrist.getZ());
   }
 
   /**
@@ -140,7 +193,11 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
    */
   private static JointFrame jointFrame(String name, double ox, double oy, double oz, double ax, double ay, double az, String mask, double servoRest, double meshSlope,
       double servoMin, double servoMax) {
-    MapperLinear mapper = vinMoovArmMapper(servoRest, meshSlope);
+    return jointFrameFromMapper(name, ox, oy, oz, ax, ay, az, mask, vinMoovArmMapper(servoRest, meshSlope), servoMin, servoMax, servoRest);
+  }
+
+  private static JointFrame jointFrameFromMapper(String name, double ox, double oy, double oz, double ax, double ay, double az, String mask, MapperLinear mapper,
+      double servoMin, double servoMax, double servoRest) {
     JointFrame frame = new JointFrame(name, new Point(ox, oy, oz), new Point(ax, ay, az));
     frame.rotationMask = mask;
     frame.angleDeg = mapper.calcOutput(servoRest);
@@ -149,7 +206,7 @@ public class InMoov2Arm extends Service<InMoov2ArmConfig> implements IKJointAngl
   }
 
   /**
-   * InMoov left/right arm kinematic chain.
+   * InMoov left/right arm kinematic chain, including the wrist.
    *
    * <p>
    * Built from {@link #getDefaultJointFrames} so the link geometry is real joint

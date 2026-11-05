@@ -346,8 +346,8 @@ public class InMoov2Config extends ServiceConfig {
     simulator.nodes.put(name + ".leftArm.rotate", new UserDataConfig(InMoov2Arm.vinMoovArmMapper(InMoov2Arm.ROTATE_SERVO_REST, InMoov2Arm.ROTATE_MESH_SLOPE_LEFT), "y"));
     simulator.nodes.put(name + ".rightArm.omoplate", new UserDataConfig(InMoov2Arm.vinMoovArmMapper(InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.OMOPLATE_MESH_SLOPE_RIGHT), "z"));
     simulator.nodes.put(name + ".leftArm.omoplate", new UserDataConfig(InMoov2Arm.vinMoovArmMapper(InMoov2Arm.OMOPLATE_SERVO_REST, InMoov2Arm.OMOPLATE_MESH_SLOPE_LEFT), "z"));
-    simulator.nodes.put(name + ".rightHand.wrist", new UserDataConfig(fromBind(0.0, 180.0, -20.0, 60.0, 0.0), "y"));
-    simulator.nodes.put(name + ".leftHand.wrist", new UserDataConfig(fromBind(0.0, 180.0, 20.0, -60.0, 0.0), "y"));
+    simulator.nodes.put(name + ".rightHand.wrist", new UserDataConfig(InMoov2Arm.vinMoovWristMapper(true), "y"));
+    simulator.nodes.put(name + ".leftHand.wrist", new UserDataConfig(InMoov2Arm.vinMoovWristMapper(false), "y"));
     simulator.nodes.put(name + ".leftHand.thumb1", new UserDataConfig(fromBind(0.0, 180.0, -30.0, -100.0, 0.0), "y"));
     simulator.nodes.put(name + ".leftHand.thumb2", new UserDataConfig(fromBind(0.0, 180.0, 80.0, 20.0, 0.0), "x"));
     simulator.nodes.put(name + ".leftHand.thumb3", new UserDataConfig(fromBind(0.0, 180.0, 80.0, 20.0, 0.0), "x"));

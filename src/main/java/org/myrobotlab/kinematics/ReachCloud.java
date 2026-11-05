@@ -19,7 +19,7 @@ import org.myrobotlab.math.geometry.PointCloud;
  */
 public final class ReachCloud {
 
-  /** Servo samples per joint. 8^4 = 4096 FK evaluations for an InMoov arm. */
+  /** Servo samples per joint. 8^5 = 32768 FK evaluations for an InMoov arm with a wrist. */
   public static final int DEFAULT_STEPS = 8;
 
   /** Merge palms that land in the same cell so the overlay reads as a volume. */
