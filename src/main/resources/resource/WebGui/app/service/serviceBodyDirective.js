@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', function(peer, $compile, $templateCache, mrl, modalService, $state, $stateParams) {
+angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '$templateCache', 'mrl', 'modalService', '$state', '$stateParams', '$http', function(peer, $compile, $templateCache, mrl, modalService, $state, $stateParams, $http) {
     return {
         scope: {
             panel: '='
@@ -52,6 +52,81 @@ angular.module('mrlapp.service').directive('serviceBody', ['peer', '$compile', '
 
                     newscope.showPeers = function(show) {
                         scope.panel.showPeerTable = show
+                    }
+
+                    // subscriptions drill-down: methods, then the services listening on the chosen method
+                    newscope.showSubscriptionTable = false
+                    newscope.subscriptionMethods = []
+                    newscope.subscriptionMap = {}
+                    newscope.selectedSubscriptionMethod = null
+                    newscope.subscriptionLoading = false
+                    newscope.subscriptionError = null
+
+                    newscope.toggleSubscriptions = function() {
+                        newscope.showSubscriptionTable = !newscope.showSubscriptionTable
+                        if (newscope.showSubscriptionTable) {
+                            newscope.selectedSubscriptionMethod = null
+                            newscope.loadSubscriptions()
+                        }
+                    }
+
+                    newscope.selectSubscriptionMethod = function(method) {
+                        newscope.selectedSubscriptionMethod = method
+                    }
+
+                    newscope.subscriberType = function(callbackName) {
+                        var svc = mrl.getService(callbackName)
+                        return svc ? svc.simpleName : null
+                    }
+
+                    newscope.openSubscriber = function(callbackName) {
+                        if (mrl.getService(callbackName)) {
+                            mrl.changeTab(callbackName)
+                        }
+                    }
+
+                    newscope.loadSubscriptions = function() {
+                        var name = (newscope.service && newscope.service.name) ? newscope.service.name : scope.panel.name
+                        newscope.subscriptionLoading = true
+                        newscope.subscriptionError = null
+                        // quoted string arg matches the runtime REST path used by the old menu link
+                        var url = '/api/service/runtime/getNotifyEntries/"' + encodeURIComponent(name) + '"'
+                        $http.get(url).then(function(response) {
+                            var data = response.data
+                            var methodsForService = {}
+                            if (angular.isObject(data) && !angular.isArray(data)) {
+                                methodsForService = data[name]
+                                if (!methodsForService) {
+                                    var keys = Object.keys(data)
+                                    methodsForService = keys.length ? data[keys[0]] : {}
+                                }
+                            }
+                            if (!angular.isObject(methodsForService) || angular.isArray(methodsForService)) {
+                                methodsForService = {}
+                            }
+                            var methodNames = Object.keys(methodsForService).sort()
+                            var normalized = {}
+                            angular.forEach(methodNames, function(method) {
+                                var listeners = angular.isArray(methodsForService[method]) ? methodsForService[method].slice() : []
+                                listeners.sort(function(a, b) {
+                                    var an = (a && a.callbackName ? a.callbackName : '') + '.' + (a && a.callbackMethod ? a.callbackMethod : '')
+                                    var bn = (b && b.callbackName ? b.callbackName : '') + '.' + (b && b.callbackMethod ? b.callbackMethod : '')
+                                    return an.localeCompare(bn)
+                                })
+                                normalized[method] = listeners
+                            })
+                            newscope.subscriptionMap = normalized
+                            newscope.subscriptionMethods = methodNames
+                            if (newscope.selectedSubscriptionMethod && !normalized[newscope.selectedSubscriptionMethod]) {
+                                newscope.selectedSubscriptionMethod = null
+                            }
+                            newscope.subscriptionLoading = false
+                        }, function() {
+                            newscope.subscriptionMap = {}
+                            newscope.subscriptionMethods = []
+                            newscope.subscriptionError = 'could not load subscriptions'
+                            newscope.subscriptionLoading = false
+                        })
                     }
 
                     newscope.saveDefault = function() {

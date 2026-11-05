@@ -51,10 +51,10 @@
               </a>
             </li>
             <li>
-              <!-- a href="" target="_blank" ng-click="showMethods=!showMethods" -->
-              <a href='/api/service/runtime/getNotifyEntries/"{{service.name}}"' target="_blank">
+              <a href="" ng-click="servicemenuDropdownOpen = false; toggleSubscriptions()" title="methods and the services subscribed to them">
                 <i class="glyphicon glyphicon-list-alt"></i>
-                &nbsp;&nbsp;subscriptions
+                <span ng-show="!showSubscriptionTable">&nbsp;&nbsp;subscriptions</span>
+                <span ng-show="showSubscriptionTable">&nbsp;&nbsp;hide subscriptions</span>
               </a>
             </li>
           </ul>
@@ -117,6 +117,68 @@
             />
           </td>
           <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div ng-show="showSubscriptionTable">
+    <div style="margin: 8px 0;">
+      <a href="" ng-click="selectSubscriptionMethod(null)" ng-show="selectedSubscriptionMethod">subscriptions</a>
+      <span ng-show="!selectedSubscriptionMethod"><strong>subscriptions</strong></span>
+      <span ng-show="selectedSubscriptionMethod">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <strong>{{selectedSubscriptionMethod}}</strong>
+      </span>
+      <span class="pull-right">
+        <button class="btn btn-default btn-xs" ng-click="loadSubscriptions()" title="reload subscriptions">
+          <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+        <button class="btn btn-default btn-xs" ng-click="showSubscriptionTable = false" title="close">
+          <span class="glyphicon glyphicon-remove"></span>
+        </button>
+      </span>
+    </div>
+    <div ng-show="subscriptionLoading">loading subscriptions…</div>
+    <div ng-show="subscriptionError" class="text-danger">{{subscriptionError}}</div>
+    <table class="table table-sm" ng-show="!subscriptionLoading && !selectedSubscriptionMethod">
+      <thead>
+        <tr>
+          <th scope="col">method</th>
+          <th scope="col">subscribers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-if="subscriptionMethods.length === 0 && !subscriptionError">
+          <td colspan="2">no subscriptions</td>
+        </tr>
+        <tr ng-repeat="method in subscriptionMethods track by method" style="cursor: pointer;" ng-click="selectSubscriptionMethod(method)">
+          <td>
+            <a href="" ng-click="selectSubscriptionMethod(method); $event.preventDefault()">{{method}}</a>
+          </td>
+          <td>{{subscriptionMap[method].length}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="table table-sm" ng-show="!subscriptionLoading && selectedSubscriptionMethod">
+      <thead>
+        <tr>
+          <th scope="col">service</th>
+          <th scope="col">callback</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-if="!subscriptionMap[selectedSubscriptionMethod] || subscriptionMap[selectedSubscriptionMethod].length === 0">
+          <td colspan="2">no services subscribed to {{selectedSubscriptionMethod}}</td>
+        </tr>
+        <tr ng-repeat="listener in subscriptionMap[selectedSubscriptionMethod] track by $index">
+          <td>
+            <a href="" ng-if="subscriberType(listener.callbackName)" ng-click="openSubscriber(listener.callbackName)">
+              <img width="16" ng-src="/{{subscriberType(listener.callbackName) + '.png'}}" alt="" />
+              {{listener.callbackName}}
+            </a>
+            <span ng-if="!subscriberType(listener.callbackName)">{{listener.callbackName}}</span>
+          </td>
+          <td>{{listener.callbackMethod}}</td>
         </tr>
       </tbody>
     </table>

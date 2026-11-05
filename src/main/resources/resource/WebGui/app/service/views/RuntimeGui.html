@@ -1,4 +1,79 @@
 <h3> {{service.platform.arch}}.{{service.platform.jvmBitness}}.{{service.platform.os}} {{service.platform.mrlVersion}} {{service.id}}</h3>
+
+<style>
+    #runtime-message-graph {
+        width: 100%;
+        height: 520px;
+        background: #1b1e24;
+        border-radius: 4px;
+        cursor: grab;
+    }
+    .message-flow-detail {
+        max-height: 520px;
+        overflow: auto;
+    }
+</style>
+<div class="message-flow">
+    <h4>message flow</h4>
+    <p class="text-muted">Services are nodes. An edge points from the publisher to the service subscribed to that method.</p>
+    <div class="form-inline" style="margin-bottom: 8px;">
+        <button class="btn btn-default" ng-click="refreshMessageGraph()" title="reload services and subscriptions">
+            <span class="glyphicon glyphicon-refresh"></span> refresh
+        </button>
+        <label style="margin-left: 12px; font-weight: normal;">
+            <input type="checkbox" ng-model="graph.registeredOnly" ng-change="rebuildMessageGraph()"> registered services only
+        </label>
+        <input class="form-control" style="margin-left: 12px; width: 16em;" type="text" ng-model="graph.query" ng-change="applyGraphQuery()" placeholder="find service">
+        <span class="text-muted" style="margin-left: 12px;">{{graph.status}}</span>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div id="runtime-message-graph"></div>
+            <p class="text-muted">Drag to rotate. Scroll to zoom. Drag a node to pin it. Click a node for its subscriptions, or an edge for the method name.</p>
+        </div>
+        <div class="col-md-4 message-flow-detail">
+            <div ng-show="!graph.selected && !graph.selectedEdge">
+                Select a service to see its subscriptions, or click an edge to see the method that flows across it.
+            </div>
+            <div ng-show="graph.selectedEdge && !graph.selected">
+                <div class="text-muted">
+                    <a href="" ng-click="selectGraphNode(graph.selectedEdge.from)">{{graph.selectedEdge.fromLabel}}</a>
+                    →
+                    <a href="" ng-click="selectGraphNode(graph.selectedEdge.to)">{{graph.selectedEdge.toLabel}}</a>
+                </div>
+                <h4 style="margin-top: 8px;" ng-repeat="methodEdge in graph.selectedEdge.methods track by $index">
+                    {{methodEdge.method}}
+                    <small class="text-muted">→ {{methodEdge.callback}}</small>
+                </h4>
+            </div>
+            <div ng-show="graph.selected">
+                <h4 style="margin-top: 0;">
+                    <img ng-if="graph.selected.type" ng-src="/{{graph.selected.type + '.png'}}" width="16" alt="">
+                    <a href="" ng-click="openGraphService(graph.selected.id)">{{graph.selected.label}}</a>
+                </h4>
+                <div class="text-muted">{{graph.selected.type}} {{graph.selected.id}}</div>
+                <b>sends ({{graph.selected.out.length}})</b>
+                <ul>
+                    <li ng-repeat="edge in graph.selected.out track by $index">
+                        {{edge.method}}
+                        →
+                        <a href="" ng-click="selectGraphNode(edge.to)">{{edge.toLabel}}</a>.{{edge.callback}}
+                    </li>
+                </ul>
+                <div ng-show="graph.selected.out.length === 0" class="text-muted">nothing subscribed to this service</div>
+                <b>receives ({{graph.selected.inn.length}})</b>
+                <ul>
+                    <li ng-repeat="edge in graph.selected.inn track by $index">
+                        <a href="" ng-click="selectGraphNode(edge.from)">{{edge.fromLabel}}</a>.{{edge.method}}
+                        →
+                        {{edge.callback}}
+                    </li>
+                </ul>
+                <div ng-show="graph.selected.inn.length === 0" class="text-muted">this service subscribes to nothing shown here</div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- {{locale}} -->
 <label>Language</label>
 <table>
