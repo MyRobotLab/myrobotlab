@@ -385,6 +385,9 @@ public class InMoov2Config extends ServiceConfig {
     simulator.chestCameraX = 0f;
     simulator.chestCameraY = 0f;
     simulator.chestCameraZ = 0.06f;
+    simulator.chestCameraPitchDeg = 0f;
+    simulator.chestCameraYawDeg = 0f;
+    simulator.chestCameraRollDeg = 0f;
     simulator.depthCloudScale = 1f;
     simulator.depthCloudMatchWorldMeters = true;
     simulator.depthCloudVoxelM = 0.03f;

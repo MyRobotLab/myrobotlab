@@ -3,9 +3,11 @@ package org.myrobotlab.math.geometry;
 /**
  * Camera-frame meters → JMonkeyEngine local meters for the chest depth overlay.
  * <p>
- * Camera: X right, Y down, Z forward. JME: X right, Y up, Z forward.
- * If the chest node has a non-unit world scale (common on imported rigs),
- * divide by that scale so 1 m of depth stays 1 m in the scene.
+ * Camera (OpenCV): X right, Y down, Z forward. Overlay: Y up, Z forward, and X
+ * negated. Flipping only Y is a left-handed frame, so the RGB mesh renders
+ * mirrored. VinMoov faces +Z with the left arm at +X, which is camera-left,
+ * so {@code overlayX = -camX}. If the chest node has a non-unit world scale
+ * (common on imported rigs), divide by that scale so 1 m of depth stays 1 m.
  */
 public final class DepthCloudJme {
 
@@ -50,10 +52,40 @@ public final class DepthCloudJme {
    * @param out24
    *          length ≥ 24: eight JME-local cube corners (x,y,z)
    */
+  /** Camera optical X (image right) → overlay X (VinMoov left is +X). */
+  public static float overlayX(float camX, float scale) {
+    return -camX * scale;
+  }
+
+  /** Camera Y down → overlay Y up. */
+  public static float overlayY(float camY, float scale) {
+    return -camY * scale;
+  }
+
+  /** Camera Z forward → overlay Z forward. */
+  public static float overlayZ(float camZ, float scale) {
+    return camZ * scale;
+  }
+
+  /** Inverse of {@link #overlayX}. */
+  public static float cameraX(float overlayX, float scale) {
+    return -overlayX / scale;
+  }
+
+  /** Inverse of {@link #overlayY}. */
+  public static float cameraY(float overlayY, float scale) {
+    return -overlayY / scale;
+  }
+
+  /** Inverse of {@link #overlayZ}. */
+  public static float cameraZ(float overlayZ, float scale) {
+    return overlayZ / scale;
+  }
+
   public static void voxelCorners(float camX, float camY, float camZ, float scale, float halfExtent, float[] out24) {
-    float x = camX * scale;
-    float y = -camY * scale;
-    float z = camZ * scale;
+    float x = overlayX(camX, scale);
+    float y = overlayY(camY, scale);
+    float z = overlayZ(camZ, scale);
     for (int c = 0; c < 8; c++) {
       out24[c * 3] = x + CUBE_CORNER[c * 3] * halfExtent;
       out24[c * 3 + 1] = y + CUBE_CORNER[c * 3 + 1] * halfExtent;

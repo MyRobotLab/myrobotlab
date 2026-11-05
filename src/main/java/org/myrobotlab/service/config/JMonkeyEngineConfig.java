@@ -58,8 +58,14 @@ public class JMonkeyEngineConfig extends ServiceConfig {
   public float chestCameraY = 0f;
   public float chestCameraZ = 0.06f;
 
-  /** Local rotation of the chest camera, degrees (pitch, yaw, roll). */
-  public float chestCameraPitchDeg = -8f;
+  /**
+   * Extra rotation relative to the chest plate, degrees (pitch about X, yaw
+   * about Y, roll about Z). Zero keeps the depth cone level with the plate.
+   * The VinMoov {@code topStom} joint is pitched nose-up and the torso mesh
+   * cancels that; the mount copies the mesh, so this pitch is not added on
+   * top of the joint axis.
+   */
+  public float chestCameraPitchDeg = 0f;
   public float chestCameraYawDeg = 0f;
   public float chestCameraRollDeg = 0f;
 

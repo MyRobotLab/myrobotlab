@@ -14,9 +14,10 @@ import javax.imageio.ImageIO;
  * {@code x = (u - cx) * z / fx}, {@code y = (v - cy) * z / fy}, {@code z} in
  * meters after converting mm.
  * <p>
- * <b>JMonkeyEngine:</b> X right, Y up, Z forward, meters. Convert camera
- * points with {@code (x, y, z)_jme = (x, -y, z)_cam}. The overlay node copies
- * the chest camera world pose at scale 1 so 1 m of depth is 1 m for IK.
+ * <b>JMonkeyEngine overlay:</b> Y up, Z forward, X negated, meters. Convert
+ * with {@code (x, y, z)_jme = (-x, -y, z)_cam} ({@link org.myrobotlab.math.geometry.DepthCloudJme}).
+ * Negating only Y mirrors left and right. The overlay node copies the chest
+ * camera world pose at scale 1 so 1 m of depth is 1 m for IK.
  */
 public class DepthFrame implements Serializable {
 

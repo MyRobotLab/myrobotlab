@@ -17,12 +17,16 @@ public class DepthCloudJmeTest {
   }
 
   @Test
-  public void cameraYFlipsToJmeUp() {
+  public void cameraMapsToRightHandedOverlay() {
     float[] corners = new float[24];
     DepthCloudJme.voxelCorners(0.1f, 0.2f, 1.5f, 1f, 0f, corners);
-    assertEquals(0.1f, corners[0], 1e-5f);
+    // Image-right (+X camera) lands on overlay -X so the mesh is not mirrored.
+    assertEquals(-0.1f, corners[0], 1e-5f);
     assertEquals(-0.2f, corners[1], 1e-5f);
     assertEquals(1.5f, corners[2], 1e-5f);
+    assertEquals(0.1f, DepthCloudJme.cameraX(corners[0], 1f), 1e-5f);
+    assertEquals(0.2f, DepthCloudJme.cameraY(corners[1], 1f), 1e-5f);
+    assertEquals(1.5f, DepthCloudJme.cameraZ(corners[2], 1f), 1e-5f);
   }
 
   @Test

@@ -25,6 +25,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.DepthCloudJme;
 import org.myrobotlab.math.geometry.DepthColorMap;
 import org.myrobotlab.math.geometry.DepthImageClick;
 import org.myrobotlab.math.geometry.DepthToPointCloud;
@@ -717,7 +718,8 @@ public class OakD extends Service<OakDConfig> implements PointCloudPublisher, De
       return null;
     }
     float scale = depthCloudScale > 0f ? depthCloudScale : 1f;
-    Point point = new Point(sample.camX * scale, -sample.camY * scale, sample.camZ * scale);
+    Point point = new Point(DepthCloudJme.overlayX(sample.camX, scale), DepthCloudJme.overlayY(sample.camY, scale),
+        DepthCloudJme.overlayZ(sample.camZ, scale));
     DepthClick click = depthClick(sample, point, Math.abs(sample.camZ * scale));
     log.info("OAK-D image click {} — no simulator, arm not moved", point);
     onDepthClick(click);

@@ -41,6 +41,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.AnalogHandler;
+import org.myrobotlab.jme3.ChestDepthMount;
 import org.myrobotlab.jme3.DepthPick;
 import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Interpolator;
@@ -773,8 +774,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   /**
    * WebGui click on the aligned RGB or depth image. {@code sample} is camera
    * meters (X right, Y down, Z forward). Placed on the chest overlay with the
-   * same scale and Y flip as the mesh, then published like a simulator click
-   * so FABRIK moves the arm.
+   * same {@code (-x, -y, z)} mapping as the mesh, then published like a
+   * simulator click so FABRIK moves the arm.
    */
   public void clickFromCamera(DepthImageClick sample) {
     if (sample == null) {
@@ -792,7 +793,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   private void emitCameraClick(DepthImageClick sample) {
     float scale = depthVertexScale();
-    Vector3f local = new Vector3f(sample.camX * scale, -sample.camY * scale, sample.camZ * scale);
+    Vector3f local = new Vector3f(DepthCloudJme.overlayX(sample.camX, scale), DepthCloudJme.overlayY(sample.camY, scale),
+        DepthCloudJme.overlayZ(sample.camZ, scale));
     Vector3f world = local;
     boolean posed = depthOverlayNode != null && depthOverlayNode.getParent() != null;
     if (posed) {
@@ -828,9 +830,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     if (Math.abs(scale) < 1e-6f) {
       scale = 1f;
     }
-    float camX = local.x / scale;
-    float camY = -local.y / scale;
-    float camZ = local.z / scale;
+    float camX = DepthCloudJme.cameraX(local.x, scale);
+    float camY = DepthCloudJme.cameraY(local.y, scale);
+    float camZ = DepthCloudJme.cameraZ(local.z, scale);
     float[] norm = DepthImageClick.normalize(frame, camX, camY, camZ);
     if (norm == null) {
       return null;
@@ -1660,8 +1662,8 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
   }
 
   /**
-   * Camera frame (X right, Y down, Z forward) → JME local (X right, Y up, Z
-   * forward). Each sample is a cube on {@link #depthOverlayNode} (not under
+   * Camera frame (X right, Y down, Z forward) → overlay local
+   * {@code (-x, -y, z)} so left and right are not mirrored. Each sample is a cube on {@link #depthOverlayNode} (not under
    * VinMoov) so torso motion is copied via {@link #syncDepthOverlayPose()}.
    */
   private void writePointCloudBuffers(PointCloud pc) {
@@ -1714,7 +1716,7 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
 
   /**
    * Organized depth grid → RGB-textured triangles on {@link #depthOverlayNode}.
-   * Camera Y is flipped to JME Y-up, same as voxels.
+   * Same {@code (-x, -y, z)} camera mapping as the voxels.
    */
   protected void initDepthRgbMesh(DepthToRgbMesh.Result mesh, byte[] rgb, int texW, int texH) {
     int n = Math.max(1, mesh.vertexCount);
@@ -1761,9 +1763,9 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
     float[] p = mesh.positions;
     for (int i = 0; i < n; i++) {
       int o = i * 3;
-      depthMeshPosBuffer.put(p[o] * scale);
-      depthMeshPosBuffer.put(-p[o + 1] * scale);
-      depthMeshPosBuffer.put(p[o + 2] * scale);
+      depthMeshPosBuffer.put(DepthCloudJme.overlayX(p[o], scale));
+      depthMeshPosBuffer.put(DepthCloudJme.overlayY(p[o + 1], scale));
+      depthMeshPosBuffer.put(DepthCloudJme.overlayZ(p[o + 2], scale));
     }
     if (n == 0) {
       depthMeshPosBuffer.put(0f).put(0f).put(0f);
@@ -2620,8 +2622,10 @@ public class JMonkeyEngine extends Service<JMonkeyEngineConfig> implements Gatew
       }
     }
     camNode.setLocalTranslation(local);
-    camNode.setLocalRotation(new Quaternion().fromAngles(cfg.chestCameraPitchDeg * FastMath.DEG_TO_RAD,
-        cfg.chestCameraYawDeg * FastMath.DEG_TO_RAD, cfg.chestCameraRollDeg * FastMath.DEG_TO_RAD));
+    // topStom's bind pose looks slightly up; the chest plate child cancels it.
+    // Copy that plate so the cone and depth mesh sit on the horizon.
+    camNode.setLocalRotation(ChestDepthMount.localRotation(parent, camNode, cfg.chestCameraPitchDeg, cfg.chestCameraYawDeg,
+        cfg.chestCameraRollDeg));
     chestDepthCameraNode = camNode;
     syncDepthOverlayPose();
     String parentName = parent.getName();
